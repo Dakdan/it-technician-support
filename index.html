@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Maintenance And Service - รพ.อุดรธานี</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         :root {
             --pink-soft: #fff5f7;
             --pink-primary: #ff85a2;
             --pink-dark: #d63384;
             --white: #ffffff;
+            --gray-text: #666666;
         }
 
         body {
@@ -23,7 +29,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* ลายน้ำ IT UDON HOSP */
@@ -44,22 +50,23 @@
             border-radius: 30px;
             box-shadow: 0 20px 40px rgba(255, 133, 162, 0.12);
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             border: 1px solid rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(15px);
             padding: 3rem 2rem;
             text-align: center;
+            transition: all 0.3s ease-in-out;
         }
 
         /* ส่วนหัวและโลโก้วงกลม */
         .header-box {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .logo-wrapper {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 1.5rem;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 1.25rem;
             background: white;
             border-radius: 50%;
             padding: 5px;
@@ -74,20 +81,20 @@
         .logo-img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* ป้องกันรูปบิดเบี้ยว */
+            object-fit: contain;
             border-radius: 50%;
         }
 
         .title-main {
             color: var(--pink-dark);
             font-weight: 600;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             margin-bottom: 0.3rem;
         }
 
         .title-sub {
-            color: #666;
-            font-size: 0.95rem;
+            color: var(--gray-text);
+            font-size: 0.9rem;
             line-height: 1.4;
         }
 
@@ -95,44 +102,66 @@
         .form-label {
             display: block;
             text-align: left;
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #444;
+            margin-bottom: 6px;
             margin-left: 5px;
+            font-weight: 500;
         }
 
         .form-control {
-            border-radius: 15px;
-            padding: 12px 20px;
+            border-radius: 12px;
+            padding: 10px 18px;
             border: 1.5px solid #ffeef2;
             background: #fff;
             transition: all 0.3s ease;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .form-control:focus {
             border-color: var(--pink-primary);
             box-shadow: 0 0 0 4px rgba(255, 133, 162, 0.15);
+            outline: none;
         }
 
         .btn-submit {
             background: linear-gradient(45deg, #ff85a2, #d63384);
             color: white;
             border: none;
-            border-radius: 15px;
-            padding: 14px;
+            border-radius: 12px;
+            padding: 12px;
             width: 100%;
             font-weight: 500;
-            font-size: 1.1rem;
-            margin-top: 1.5rem;
-            transition: 0.3s;
-            box-shadow: 0 8px 20px rgba(214, 51, 132, 0.25);
+            font-size: 1.05rem;
+            margin-top: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 6px 15px rgba(214, 51, 132, 0.2);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(214, 51, 132, 0.35);
+            box-shadow: 0 10px 20px rgba(214, 51, 132, 0.3);
             color: white;
+        }
+
+        .btn-link-action {
+            color: var(--pink-dark);
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-link-action:hover {
+            color: #b8226b;
+            text-decoration: underline;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #ffeef2;
+            margin: 1.5rem 0;
         }
 
         /* Loading */
@@ -147,103 +176,374 @@
             z-index: 9999;
         }
 
+        .form-transition {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 480px) {
-            .login-card { padding: 2rem 1.5rem; margin: 15px; }
-            .logo-wrapper { width: 120px; height: 120px; }
+            .login-card { padding: 2rem 1.25rem; margin: 15px; }
+            .logo-wrapper { width: 110px; height: 110px; }
         }
     </style>
 </head>
 <body>
 
+<!-- ส่วนแสดงผลสถานะการโหลด -->
 <div id="loadingOverlay">
     <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
-    <div class="mt-3 text-pink-dark">กำลังตรวจสอบข้อมูล...</div>
+    <div class="mt-3 text-pink-dark fw-bold" id="loadingText">กำลังดำเนินการ...</div>
 </div>
 
 <div class="login-card">
+    <!-- โลโก้และชื่อระบบหลัก -->
     <div class="header-box">
         <div class="logo-wrapper">
             <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="UDH Logo" class="logo-img">
         </div>
-        
-        <div class="title-main">IT Mainternance And Service</div>
-        <div class="title-sub">โรงพยาบาลอุดรธานี</div>
-        <div class="title-sub" style="font-size: 0.8rem; color: #888;">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
+        <div class="title-main">IT Maintenance And Service</div>
+        <div class="title-sub fw-medium">โรงพยาบาลอุดรธานี</div>
+        <div class="title-sub" style="font-size: 0.75rem; color: #999;">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
     </div>
 
-    <form id="loginForm">
-        <div class="mb-3">
-            <label class="form-label">ชื่อผู้ใช้งาน (User Login)</label>
-            <input type="text" id="userpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required>
+    <!-- ==================== STATE 1: ฟอร์ม LOGIN ==================== -->
+    <div id="loginState" class="form-transition">
+        <form id="loginForm">
+            <div class="mb-3 text-start">
+                <label class="form-label" for="userpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (User Login)</label>
+                <input type="text" id="userpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required autocomplete="username">
+            </div>
+            <div class="mb-3 text-start">
+                <label class="form-label" for="userpw"><i class="fa-solid fa-lock me-1 text-secondary"></i> รหัสผ่าน (Password)</label>
+                <input type="password" id="userpw" class="form-control" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-submit"><i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ</button>
+        </form>
+        <div class="divider"></div>
+        <div class="d-flex justify-content-between px-1">
+            <span class="btn-link-action" onclick="switchState('requestState')"><i class="fa-solid fa-unlock-keyhole me-1"></i>ลืมรหัสผ่าน / ขอรหัสชั่วคราว</span>
+            <span class="btn-link-action" onclick="switchState('changeState')"><i class="fa-solid fa-key me-1"></i>เปลี่ยนรหัสผ่าน</span>
         </div>
-        <div class="mb-4">
-            <label class="form-label">รหัสผ่าน (Password)</label>
-            <input type="password" id="userpw" class="form-control" placeholder="กรอกรหัสผ่าน" required>
-        </div>
-        <button type="submit" class="btn btn-submit">ตกลง</button>
-    </form>
+    </div>
+
+    <!-- ==================== STATE 2: ฟอร์มขอรหัสผ่านใหม่ (REQUEST PASSWORD) ==================== -->
+    <div id="requestState" class="form-transition d-none">
+        <h5 class="fw-semibold text-pink-dark mb-3"><i class="fa-solid fa-unlock-keyhole me-2"></i>ขอรหัสผ่านชั่วคราว</h5>
+        <p class="text-muted small mb-4">กรอกข้อมูลส่วนบุคคลที่ตรงกับฐานข้อมูลของโรงพยาบาล เพื่อส่งรหัสผ่านชั่วคราวไปยังอีเมลของคุณ</p>
+        
+        <form id="requestForm">
+            <div class="mb-3 text-start">
+                <label class="form-label" for="reqUserpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (UserPN)</label>
+                <input type="text" id="reqUserpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งานระบบ" required>
+            </div>
+            <div class="mb-3 text-start">
+                <label class="form-label" for="reqEmail"><i class="fa-solid fa-envelope me-1 text-secondary"></i> อีเมลที่ลงทะเบียน (UserMail)</label>
+                <input type="email" id="reqEmail" class="form-control" placeholder="example@udh.go.th" required>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6 text-start">
+                    <label class="form-label" for="reqName">ชื่อจริง (ไม่ต้องระบุคำนำหน้า)</label>
+                    <input type="text" id="reqName" class="form-control" placeholder="ภาษาไทย" required>
+                </div>
+                <div class="col-6 text-start">
+                    <label class="form-label" for="reqSurname">นามสกุล</label>
+                    <input type="text" id="reqSurname" class="form-control" placeholder="ภาษาไทย" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-submit"><i class="fa-solid fa-paper-plane me-2"></i>ส่งคำขอรหัสผ่าน</button>
+        </form>
+        <div class="divider"></div>
+        <span class="btn-link-action" onclick="switchState('loginState')"><i class="fa-solid fa-circle-arrow-left me-1"></i>กลับไปหน้าเข้าสู่ระบบ</span>
+    </div>
+
+    <!-- ==================== STATE 3: ฟอร์มเปลี่ยนรหัสผ่าน (CHANGE PASSWORD) ==================== -->
+    <div id="changeState" class="form-transition d-none">
+        <h5 class="fw-semibold text-pink-dark mb-3"><i class="fa-solid fa-key me-2"></i>เปลี่ยนรหัสผ่านใหม่</h5>
+        <p class="text-muted small mb-4" id="changePassDesc">กรอกชื่อผู้ใช้งาน และกำหนดรหัสผ่านใหม่ที่ต้องการใช้งาน</p>
+        
+        <form id="changeForm">
+            <div class="mb-3 text-start">
+                <label class="form-label" for="changeUserpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (UserPN)</label>
+                <input type="text" id="changeUserpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required>
+            </div>
+            <div class="mb-3 text-start">
+                <label class="form-label" for="newPassword"><i class="fa-solid fa-lock me-1 text-secondary"></i> รหัสผ่านใหม่ (New Password)</label>
+                <input type="password" id="newPassword" class="form-control" placeholder="รหัสผ่านใหม่" required minlength="4">
+            </div>
+            <div class="mb-3 text-start">
+                <label class="form-label" for="confirmPassword"><i class="fa-solid fa-shield-halved me-1 text-secondary"></i> ยืนยันรหัสผ่านใหม่ (Confirm Password)</label>
+                <input type="password" id="confirmPassword" class="form-control" placeholder="ยืนยันรหัสผ่านใหม่อีกครั้ง" required minlength="4">
+            </div>
+            <button type="submit" class="btn btn-submit"><i class="fa-solid fa-floppy-disk me-2"></i>บันทึกรหัสผ่านใหม่</button>
+        </form>
+        <div class="divider" id="changeDivider"></div>
+        <span class="btn-link-action" id="btnBackToLogin" onclick="switchState('loginState')"><i class="fa-solid fa-circle-arrow-left me-1"></i>กลับไปหน้าเข้าสู่ระบบ</span>
+    </div>
 </div>
 
-<div class="modal fade" id="alertModal" tabindex="-1">
+<!-- ==================== POPUP MODAL (การแจ้งเตือนสไตล์พาสเทลเดิม) ==================== -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4">
             <div class="modal-body text-center p-5">
-                <div id="alertIcon" style="font-size: 4rem;" class="mb-3"></div>
-                <h4 id="alertTitle" class="mb-2"></h4>
+                <div id="alertIcon" style="font-size: 4.5rem;" class="mb-3"></div>
+                <h4 id="alertTitle" class="mb-2 fw-semibold"></h4>
                 <p id="alertMsg" class="text-muted mb-4"></p>
-                <button type="button" class="btn btn-submit w-100" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+                <button type="button" id="btnModalClose" class="btn btn-submit w-100" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Bootstrap 5 Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+    // ดึง URL ของ Google Apps Script Web App
     const API_URL = "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec";
 
+    // จัดการ DOM Elements
     const loginForm = document.getElementById('loginForm');
+    const requestForm = document.getElementById('requestForm');
+    const changeForm = document.getElementById('changeForm');
     const loading = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
 
-    loginForm.addEventListener('submit', function(e) {
+    // ตัวแปรเก็บประวัติผู้ใช้กรณีต้องบังคับเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบสำเร็จ
+    let forceResetUser = null;
+
+    // ฟังก์ชันเปิด/ปิด สเตทหน้าจอย่อยแบบสมูท
+    function switchState(stateId) {
+        document.getElementById('loginState').classList.add('d-none');
+        document.getElementById('requestState').classList.add('d-none');
+        document.getElementById('changeState').classList.add('d-none');
+        
+        document.getElementById(stateId).classList.remove('d-none');
+
+        // เคลียร์ค่าหากสลับหน้าไปมา
+        if (stateId === 'loginState') {
+            forceResetUser = null;
+            document.getElementById('changeUserpn').readOnly = false;
+            document.getElementById('changePassDesc').innerText = "กรอกชื่อผู้ใช้งาน และกำหนดรหัสผ่านใหม่ที่ต้องการใช้งาน";
+            document.getElementById('btnBackToLogin').classList.remove('d-none');
+            document.getElementById('changeDivider').classList.remove('d-none');
+        }
+    }
+
+    // จัดการ Loading Spinner
+    function showLoading(text) {
+        loadingText.innerText = text;
+        loading.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loading.style.display = 'none';
+    }
+
+    // ฟังก์ชันจัดการ Redirect เพื่อให้ทดสอบในหน้าต่าง Preview (Canvas) ได้โดยไม่เกิด Error
+    function safeRedirect(url) {
+        try {
+            window.location.href = url;
+        } catch (e) {
+            console.warn("จำลองการเปลี่ยนหน้าต่างไปที่: " + url);
+            showAlert('จำลองเปลี่ยนหน้า (Preview)', `เมื่ออัปโหลดขึ้นเซิร์ฟเวอร์จริง ระบบจะพาคุณไปยังหน้า: ${url}`, 'success');
+        }
+    }
+
+    // ==================== FLOW 1: LOGIN PROCESS ====================
+    loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        const username =
+            document.getElementById('userpn').value.trim();
+
+        const password =
+            document.getElementById('userpw').value;
+
         loading.style.display = 'flex';
 
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'login',
+                    username: username,
+                    password: password
+                }),
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                }
+            });
+
+            const result = await response.json();
+
+            loading.style.display = 'none';
+
+            if (!result.success) {
+                showAlert(
+                    'เข้าสู่ระบบไม่สำเร็จ',
+                    result.message,
+                    'error'
+                );
+
+                return;
+            }
+
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify(result.data)
+            );
+
+            if (result.resetRequired === true) {
+                safeRedirect('change-password.html');
+                return;
+            }
+
+            safeRedirect('main.html');
+
+        } catch (err) {
+            loading.style.display = 'none';
+
+            console.error(err);
+
+            showAlert(
+                'ระบบขัดข้อง',
+                'ไม่สามารถเชื่อมต่อ Server ได้',
+                'error'
+            );
+        }
+    });
+
+    function logout() {
+        localStorage.removeItem('currentUser');
+        safeRedirect('index.html');
+    }
+
+    function getCurrentUser() {
+        return JSON.parse(
+            localStorage.getItem('currentUser')
+        );
+    }
+
+    // ==================== FLOW 2: REQUEST NEW PASSWORD PROCESS ====================
+    requestForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        showLoading('กำลังค้นหาบัญชีและจัดส่งรหัสผ่านชั่วคราว...');
+
         const payload = {
-            action: 'login',
-            username: document.getElementById('userpn').value,
-            password: document.getElementById('userpw').value
+            action: 'requestPassword',
+            userpn: document.getElementById('reqUserpn').value.trim(),
+            email: document.getElementById('reqEmail').value.trim(),
+            name: document.getElementById('reqName').value.trim(),
+            surname: document.getElementById('reqSurname').value.trim()
         };
 
         fetch(API_URL, {
             method: 'POST',
-            mode: 'cors', // เพิ่มโหมด cors
+            mode: 'cors',
             body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' } // ส่งเป็น Text เพื่อเลี่ยง Preflight
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         })
         .then(res => res.json())
         .then(res => {
-            loading.style.display = 'none';
+            hideLoading();
             if(res.success) {
-                localStorage.setItem('currentUser', JSON.stringify(res.data));
-                showAlert('สำเร็จ!', 'ยินดีต้อนรับคุณ ' + res.data.UserName, 'success');
-                // หากต้องการให้เด้งไปหน้าอื่นหลัง Login สำเร็จ ให้ใส่ URL ตรงนี้
-                // setTimeout(() => { window.location.href = 'https://system-a.github.io'; }, 2000);
+                showAlert('สำเร็จ!', res.message || 'ส่งรหัสผ่านชั่วคราวไปยัง Email ของคุณเรียบร้อยแล้ว', 'success');
+                requestForm.reset();
+                setTimeout(() => {
+                    const alertModalEl = document.getElementById('alertModal');
+                    const modal = bootstrap.Modal.getInstance(alertModalEl);
+                    if (modal) modal.hide();
+                    switchState('loginState');
+                }, 2500);
             } else {
-                showAlert('ขออภัย', res.message, 'error');
+                showAlert('ขออภัย', res.message || 'ข้อมูลผู้ใช้งานไม่ถูกต้อง', 'error');
             }
         })
         .catch(err => {
-            loading.style.display = 'none';
-            console.error("Error:", err);
-            showAlert('ผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (โปรดตรวจสอบการ Deploy)', 'error');
+            hideLoading();
+            console.error("Error Request Password:", err);
+            showAlert('ผิดพลาด', 'เกิดปัญหาขณะพยายามส่งอีเมล กรุณาติดต่อเบอร์ภายในกลุ่มงานคอมพิวเตอร์ UDH', 'error');
         });
     });
 
+    // ==================== FLOW 3: CHANGE PASSWORD PROCESS ====================
+    changeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const userpn = document.getElementById('changeUserpn').value.trim();
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // ตรวจสอบรหัสผ่านตรงกันบนเบราว์เซอร์
+        if (newPassword !== confirmPassword) {
+            showAlert('คำเตือน', 'รหัสผ่านใหม่ และ รหัสผ่านยืนยัน ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง', 'error');
+            return;
+        }
+
+        showLoading('กำลังอัปเดตรหัสผ่านใหม่ลงในระบบคอมพิวเตอร์...');
+
+        const payload = {
+            action: 'changePassword',
+            userpn: userpn,
+            newPassword: newPassword
+        };
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        })
+        .then(res => res.json())
+        .then(res => {
+            hideLoading();
+            if(res.success) {
+                showAlert('เรียบร้อย!', 'ปรับเปลี่ยนรหัสผ่านเป็นเวอร์ชันใหม่เรียบร้อยแล้ว', 'success');
+                changeForm.reset();
+
+                setTimeout(() => {
+                    const alertModalEl = document.getElementById('alertModal');
+                    const modal = bootstrap.Modal.getInstance(alertModalEl);
+                    if (modal) modal.hide();
+
+                    if (forceResetUser) {
+                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
+                        safeRedirect('main.html');
+                    } else {
+                        // สลับสเตทกลับหน้าปกติ
+                        switchState('loginState');
+                    }
+                }, 2000);
+            } else {
+                showAlert('ขออภัย', res.message || 'ไม่สามารถทำการเปลี่ยนรหัสผ่านได้', 'error');
+            }
+        })
+        .catch(err => {
+            hideLoading();
+            console.error("Error Change Password:", err);
+            showAlert('ข้อผิดพลาด', 'ระบบปลายทางปฏิเสธการเซ็ตติ้งรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
+        });
+    });
+
+    // แสดงแจ้งเตือนผ่าน Bootstrap Modal (สไตล์ดีไซน์เดิม)
     function showAlert(title, msg, type) {
         const modal = new bootstrap.Modal(document.getElementById('alertModal'));
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMsg').innerText = msg;
-        document.getElementById('alertIcon').innerHTML = (type === 'success') ? '🌸' : '❌';
+        
+        // กำหนด Emoji สื่ออารมณ์ประเภทต่างๆ
+        let icon = '🌸';
+        if (type === 'error') {
+            icon = '❌';
+        } else if (type === 'warning') {
+            icon = '⚠️';
+        }
+        document.getElementById('alertIcon').innerHTML = icon;
         modal.show();
     }
 </script>
