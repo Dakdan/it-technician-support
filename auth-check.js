@@ -2,6 +2,7 @@
  * auth-check.js
  * ใช้วางบนทุกหน้าที่ต้อง Login ก่อนเข้าใช้งาน
  */
+
 (function () {
     try {
         const userData = localStorage.getItem('currentUser');
