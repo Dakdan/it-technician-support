@@ -10,10 +10,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal -->
+    <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal Overlay -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ตรวจสอบสิทธิ์ (Auth Check) ทันทีที่โหลด -->
+    <!-- ตรวจสอบสิทธิ์ (Auth Check) ตามไฟล์เดิม ทันทีที่โหลด -->
     <script src="auth-check.js"></script>
     
     <style>
@@ -22,9 +22,10 @@
             --pink-light: #ffb6c1;
             --pink-primary: #ff85a2;
             --pink-dark: #d63384;
+            --pink-neon: #ff1493; /* สีชมพูสว่างสะท้อนแสง (Deep Pink / Neon) */
             --white: #ffffff;
             --gray-light: #f8f9fa;
-            --gray-text: #555555;
+            --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
             --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
             --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
@@ -34,9 +35,11 @@
             background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
             min-height: 100vh;
             color: var(--gray-text);
-            padding-bottom: 80px; 
+            padding-bottom: 90px; 
             position: relative;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* ลายน้ำ (Watermark) */
@@ -48,62 +51,222 @@
             transform: translate(-50%, -50%) rotate(-30deg);
             font-size: 8vw;
             color: rgba(214, 51, 132, 0.025);
-            font-weight: 800; white-space: nowrap; z-index: -1; pointer-events: none;
+            font-weight: 800;
+            white-space: nowrap;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        /* Header */
+        /* Header - ปรับปรุงการไล่ระดับสี ชมพูสว่างสะท้อนแสง-ขาว บนลงล่าง พร้อมจัดเส้นขอบล่างให้เด่นชัดเจน */
         .app-header {
-            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
             backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            border-bottom: 1px solid rgba(255, 133, 162, 0.2);
-            position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm);
+            padding: 14px 16px;
+            border-bottom: 6px solid var(--pink-dark); /* ขยายเส้นขอบล่างให้เด่นชัดสีชมพูเข้ม */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
         }
-        .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--pink-primary); padding: 2px; }
-        .org-title { color: var(--pink-dark); font-weight: 700; font-size: 1.1rem; line-height: 1.2; }
-        .org-subtitle { font-size: 0.75rem; color: #888; }
-        .user-name { font-weight: 600; color: var(--pink-dark); font-size: 0.9rem; }
+        .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white); }
+        
+        /* ปรับระดับสีและขนาดอักษรใน Header แบบละเอียดรองรับ Responsive */
+        .org-title { 
+            color: #ffffff; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4); 
+            font-weight: 700; 
+            line-height: 1.2; 
+        }
+        .org-subtitle { 
+            color: #f8f9fa; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
+            font-weight: 400;
+            line-height: 1.2;
+        }
+        .user-name { 
+            font-weight: 700; 
+            color: var(--pink-dark); 
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.9); 
+        }
 
-        /* Cards UI */
-        .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-left: 4px solid var(--pink-primary); padding-left: 10px; }
-        .menu-card {
-            background: var(--white); border-radius: 16px; border: 1px solid rgba(255, 133, 162, 0.15);
-            box-shadow: var(--shadow-sm); padding: 20px 10px; text-align: center; height: 100%; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
+        /* Section Titles */
+        .section-title { 
+            font-weight: 600; 
+            color: var(--pink-dark); 
+            margin-bottom: 15px; 
+            border-left: 5px solid var(--pink-primary); 
+            padding-left: 12px; 
+            line-height: 1.4;
         }
-        .menu-card:hover, .menu-card:active { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--pink-primary); }
-        .menu-icon { font-size: 2.2rem; color: var(--pink-primary); margin-bottom: 12px; transition: transform 0.3s; }
-        .menu-card:hover .menu-icon { transform: scale(1.1); }
-        .menu-title { font-size: 0.9rem; font-weight: 500; color: #444; line-height: 1.3; }
-        .menu-desc { font-size: 0.7rem; color: #999; margin-top: 5px; }
+        
+        /* Cards UI */
+        .menu-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 133, 162, 0.15);
+            box-shadow: var(--shadow-sm);
+            padding: 22px 12px;
+            text-align: center;
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu-card:hover, .menu-card:active {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--pink-primary);
+        }
+        .menu-icon { 
+            font-size: 2.25rem; 
+            margin-bottom: 12px; 
+            transition: transform 0.3s; 
+        }
+        .menu-card:hover .menu-icon { transform: scale(1.12); }
+        
+        .menu-title { 
+            font-weight: 500; 
+            color: #2c2c2c; 
+            line-height: 1.4; 
+            word-wrap: break-word;
+        }
+        .menu-desc { 
+            color: #777777; 
+            margin-top: 6px; 
+            line-height: 1.3;
+        }
+
+        /* สีพิเศษสำหรับ Icon แต่ละประเภท */
+        .icon-default { color: var(--pink-primary); }
+        .icon-blue { color: #0066ff; }
+        .icon-orange { color: #ff6600; }
+        .icon-brown { color: #8d5b4c; }
+        .icon-purple { color: #7d3cff; }
+        .icon-red { color: #e11d48; }
+        .icon-yellow { color: #eab308; }
+        .icon-green { color: #16a34a; }
 
         /* Alerts */
         .alert-banner {
             background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            border-radius: 12px; padding: 12px 15px; color: #d63384; font-weight: 500; box-shadow: var(--shadow-sm); border-left: 5px solid #d63384; display: flex; align-items: center; margin-bottom: 10px;
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: #d63384;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            border-left: 5px solid #d63384;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         /* Bottom Navigation */
         .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--white); box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08); display: flex; justify-content: space-around; align-items: center; padding: 10px 0 5px; z-index: 1000; border-top-left-radius: 20px; border-top-right-radius: 20px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--white);
+            box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 5px;
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
-        .nav-item { text-align: center; color: #aaa; font-size: 0.75rem; flex: 1; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+        .nav-item {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.75rem;
+            flex: 1;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
         .nav-item.active, .nav-item:hover { color: var(--pink-dark); }
         .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
         
         /* Floating QR Code Button */
-        .nav-fab-container { position: relative; flex: 1; display: flex; justify-content: center; }
+        .nav-fab-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
         .fab-qr {
-            position: absolute; top: -35px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35); border: 4px solid var(--white); cursor: pointer; transition: transform 0.2s;
+            position: absolute;
+            top: -35px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35);
+            border: 4px solid var(--white);
+            cursor: pointer;
+            transition: transform 0.2s;
         }
         .fab-qr:active { transform: scale(0.95); }
         .fab-text { margin-top: 35px; font-size: 0.75rem; color: var(--pink-dark); font-weight: 500;}
 
         /* Overlay */
         #loadingOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+
+        /* ---------------- Responsive Typography (PC & Mobile) ---------------- */
+        @media (max-width: 576px) {
+            .app-header { padding: 12px 14px; }
+            .header-logo { width: 38px; height: 38px; }
+            .org-title { font-size: 0.95rem; }
+            .org-subtitle { font-size: 0.65rem; }
+            .user-name { font-size: 0.82rem; }
+            .section-title { font-size: 1.05rem; margin-bottom: 12px; }
+            .menu-card { padding: 16px 8px; border-radius: 12px; }
+            .menu-icon { font-size: 1.9rem; margin-bottom: 8px; }
+            .menu-title { font-size: 0.85rem; }
+            .menu-desc { font-size: 0.65rem; margin-top: 4px; }
+            .nav-item { font-size: 0.7rem; }
+            .nav-item i { font-size: 1.15rem; }
+            .fab-qr { width: 54px; height: 54px; top: -30px; font-size: 1.6rem; }
+            .fab-text { margin-top: 30px; font-size: 0.7rem; }
+        }
+
+        @media (min-width: 577px) and (max-width: 992px) {
+            .org-title { font-size: 1.1rem; }
+            .org-subtitle { font-size: 0.72rem; }
+            .user-name { font-size: 0.9rem; }
+            .section-title { font-size: 1.15rem; }
+            .menu-title { font-size: 0.9rem; }
+            .menu-desc { font-size: 0.7rem; }
+        }
+
+        @media (min-width: 993px) {
+            .org-title { font-size: 1.25rem; }
+            .org-subtitle { font-size: 0.78rem; }
+            .user-name { font-size: 0.95rem; }
+            .section-title { font-size: 1.25rem; }
+            .menu-title { font-size: 0.95rem; }
+            .menu-desc { font-size: 0.72rem; }
         }
         
-        @media print { .app-header, .bottom-nav, .fab-qr { display: none !important; } body { background: white; padding: 0; } }
+        @media print {
+            .app-header, .bottom-nav, .fab-qr { display: none !important; }
+            body { background: white; padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -117,7 +280,7 @@
     <!-- HEADER -->
     <header class="app-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-            <img src="https://chatgpt.com/s/m_6a448ab8a82c8191aa906d00b2954418" alt="Logo" class="header-logo me-2">
+            <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
             <div>
                 <div class="org-title">โรงพยาบาลอุดรธานี</div>
                 <div class="org-subtitle">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
@@ -130,27 +293,51 @@
 
     <!-- MAIN CONTENT -->
     <div class="container mt-4">
+        
+        <!-- ส่วนแสดง Alert -->
         <div id="alertsContainer" class="mb-4"></div>
+
+        <!-- หน้าทางลัด (Shortcuts & Fast Menus) -->
         <div id="shortcutSection" class="mb-4 d-none">
             <h5 class="section-title"><i class="fa-solid fa-bolt text-warning me-2"></i>เมนูทางลัด / งานด่วน</h5>
             <div class="row g-3" id="shortcutGrid"></div>
         </div>
+
+        <!-- แกนหลัก: กลุ่มเมนูต่างๆ -->
         <div id="mainMenuContainer"></div>
+
     </div>
 
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')"><i class="fa-solid fa-house"></i>หน้าแรก</a>
-        <a href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')"><i class="fa-solid fa-clipboard-list"></i>งานของฉัน</a>
+        <a href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')">
+            <i class="fa-solid fa-house"></i>
+            หน้าแรก
+        </a>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
+            <i class="fa-solid fa-clipboard-list"></i>
+            งานของฉัน
+        </a>
+        
+        <!-- Floating QR Button -->
         <div class="nav-fab-container">
-            <div class="fab-qr" onclick="openScanner()"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="fab-qr" onclick="openScanner()">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
             <span class="fab-text">สแกน QR</span>
         </div>
-        <a href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')"><i class="fa-solid fa-bell"></i>แจ้งเตือน</a>
-        <a href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')"><i class="fa-solid fa-gear"></i>ตั้งค่า</a>
+
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')">
+            <i class="fa-solid fa-bell"></i>
+            แจ้งเตือน
+        </a>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')">
+            <i class="fa-solid fa-gear"></i>
+            ตั้งค่า
+        </a>
     </nav>
 
-    <!-- Modal แจ้งเตือนบังคับล็อกอินโทนชมพู-ขาว -->
+    <!-- 1. Bootstrap Modal สำหรับแจ้งเตือนสิทธิ์การล็อกอิน (ชมพู-ขาว) -->
     <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
@@ -171,34 +358,61 @@
         </div>
     </div>
 
+    <!-- 2. Bootstrap Modal สำหรับแสดงข้อความแจ้งเตือนระบบทั่วไปกลางหน้าจอ Overlay -->
+    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
+                <div class="modal-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #fff0f5; border-radius: 50%;">
+                        <i id="systemAlertIcon" class="fa-solid fa-circle-info text-pink-dark" style="font-size: 2.2rem; color: var(--pink-primary) !important;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3 text-dark" id="systemAlertTitle">แจ้งเตือนระบบ</h5>
+                    <p class="text-muted small mb-4" id="systemAlertMessage"></p>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-dismiss="modal" style="background-color: var(--pink-dark); border: none;">ตกลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script ควบคุมระบบ -->
     <script>
-        // ⚠️ พี่ช่าง IT ครับ เปลี่ยนตรงนี้ให้เป็น URL จริงของพี่ที่ได้จากการ Deploy ครับ ⚠️
+        // ใช้ URL API เว็บแอปของเดิม
         const API_URL = "https://script.google.com/macros/s/AKfycbwBBEOsw0LV49luy5XBA-D46XldxIj8m91ICNOg2ulwclJUBuUCQw8Qmq9-dKAyF5rA/exec"; 
         
         let loginModal;
+        let systemAlertModal;
 
         document.addEventListener('DOMContentLoaded', () => {
             loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+            systemAlertModal = new bootstrap.Modal(document.getElementById('systemAlertModal'));
             renderAuthHeader();
             fetchDashboardData();
         });
 
+        // ฟังก์ชันเรียกแสดง Modal กลางหน้าจอ Overlay
+        function showSystemModal(title, message, iconClass = 'fa-solid fa-circle-info') {
+            document.getElementById('systemAlertTitle').innerText = title;
+            document.getElementById('systemAlertMessage').innerText = message;
+            document.getElementById('systemAlertIcon').className = iconClass;
+            systemAlertModal.show();
+        }
+
+        // จัดการแสดงปุ่มตรง Header อิงตามผลการตรวจสอบสิทธิ์
         function renderAuthHeader() {
             const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
             const authZone = document.getElementById('authZone');
             
             if (activeUser) {
                 authZone.innerHTML = `
-                    <div class="user-name"><i class="fa-solid fa-circle-user me-1"></i> ${getDisplayName()}</div>
-                    <button onclick="logout()" class="btn btn-sm btn-outline-danger rounded-pill mt-1" style="font-size: 0.7rem;">
+                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ${getDisplayName()}</div>
+                    <button onclick="logout()" class="btn btn-sm btn-outline-light rounded-pill mt-1" style="font-size: 0.7rem; font-weight: 500; border-color: rgba(255,255,255,0.7); color: #ffffff;">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
                     </button>
                 `;
             } else {
                 authZone.innerHTML = `
-                    <div class="user-name text-muted"><i class="fa-solid fa-circle-user me-1"></i> แขกรับเชิญ</div>
-                    <button onclick="goToLogin()" class="btn btn-sm btn-danger rounded-pill mt-1 px-3" style="font-size: 0.7rem; font-weight:500; background-color: var(--pink-dark); border-color: var(--pink-dark);">
+                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> แขกรับเชิญ</div>
+                    <button onclick="goToLogin()" class="btn btn-sm btn-danger rounded-pill mt-1 px-3" style="font-size: 0.7rem; font-weight:600; background-color: var(--pink-dark); border-color: var(--pink-dark);">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i> เข้าสู่ระบบ
                     </button>
                 `;
@@ -209,49 +423,60 @@
             try { window.location.href = "index.html"; } catch(e) { window.location.replace("index.html"); }
         }
 
+        // ตรวจสอบสิทธิ์เมื่อกดที่แถบนำทางด้านล่าง
         function handleNavClick(event, name) {
             event.preventDefault();
             const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!activeUser) { loginModal.show(); return; }
-            alert(`กำลังเปิดโมดูล: ${name}`);
+            if (!activeUser) {
+                loginModal.show();
+                return;
+            }
+            showSystemModal('แจ้งข้อมูลโมดูล', `กำลังเข้าสู่ส่วนงาน: ${name}`, 'fa-solid fa-folder-open');
         }
 
+        // ยิง POST ดึงข้อมูลและนำมา Mapping ใหม่ให้รับกับโครงสร้างที่ได้จาก code.gs
         async function fetchDashboardData() {
             try {
-                // เรียกดึงข้อมูลผ่านตรรกะ doGet แยก Action แบบเดิมของพี่ร้อยเปอร์เซ็นต์
-                const [menuResponse, alertsResponse] = await Promise.all([
-                    fetch(`${API_URL}?action=getMenu`, { method: 'GET' }),
-                    fetch(`${API_URL}?action=getAlerts`, { method: 'GET' })
-                ]);
-
-                if (!menuResponse.ok || !alertsResponse.ok) throw new Error('Network response was not ok');
-
-                const menusData = await menuResponse.json();
-                const alertsData = await alertsResponse.json();
-
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getDashboardData' }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const result = await response.json();
                 document.getElementById('loadingOverlay').style.display = 'none';
 
-                if (Array.isArray(menusData)) renderMenus(menusData);
-                if (Array.isArray(alertsData)) renderAlerts(alertsData);
-
+                if (result.success) {
+                    // result.alerts จะเป็น Array
+                    if (result.alerts) renderAlerts(result.alerts);
+                    
+                    // result.menus จะเป็น Object ที่จัดกลุ่มแล้วตาม MAIN_MENU จากฝั่ง backend
+                    if (result.menus) renderMenus(result.menus);
+                }
             } catch (err) {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                console.error("Fetch operations failed:", err);
+                console.error("Fetch error:", err);
+                showSystemModal('เครือข่ายผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูลเมนู กรุณาตรวจสอบสิทธิ์และการ Deploy เว็บแอป', 'fa-solid fa-wifi');
             }
         }
 
+        // วาดส่วนแจ้งเตือน
         function renderAlerts(alerts) {
             const container = document.getElementById('alertsContainer');
             if (!alerts || alerts.length === 0) return;
 
             let html = '';
             alerts.forEach(alertItem => {
+                const type = alertItem.ALERT_TYPE_ID || alertItem.type || 'แจ้งเตือนระบบ';
+                const text = alertItem.ALERT_TEXT || alertItem.text || '';
                 html += `
                     <div class="alert-banner mb-2">
                         <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
                         <div>
-                            <div class="fw-bold">${alertItem.type || 'แจ้งเตือนระบบ'}</div>
-                            <div class="small">${alertItem.text || ''}</div>
+                            <div class="fw-bold" style="font-size: 0.95rem;">${type}</div>
+                            <div class="small" style="font-size: 0.8rem;">${text}</div>
                         </div>
                     </div>
                 `;
@@ -259,31 +484,45 @@
             container.innerHTML = html;
         }
 
-        function renderMenus(menus) {
+        // วาดส่วนจัดกลุ่มเมนูหลัก (รองรับ Object ที่จัดกลุ่มมาแล้วจาก code.gs)
+        function renderMenus(menusObj) {
             const shortcutGrid = document.getElementById('shortcutGrid');
             const mainContainer = document.getElementById('mainMenuContainer');
-            if (!menus || menus.length === 0) return;
+            if (!menusObj || Object.keys(menusObj).length === 0) return;
 
-            const groupedMenus = {};
+            const finalGrouped = {};
             const shortcuts = [];
 
-            menus.forEach(m => {
-                if (m.menu_type === 'fast-menu' || m.menu_type === 'alert-menu') {
-                    shortcuts.push(m);
-                } else {
-                    const groupName = m.main_menu || 'เมนูหลักอื่นๆ';
-                    if (!groupedMenus[groupName]) groupedMenus[groupName] = [];
-                    groupedMenus[groupName].push(m);
-                }
-            });
+            // วนลูป Object ตามชื่อกลุ่ม (MAIN_MENU)
+            for (const [groupName, items] of Object.entries(menusObj)) {
+                items.forEach(m => {
+                    const menuType = String(m.MENU_TYPE || '').toLowerCase();
+                    
+                    // ดึงเมนูทางลัดออกมา
+                    if (menuType === 'fast-menu' || menuType === 'alert-menu') {
+                        shortcuts.push(m);
+                    } else {
+                        // ที่เหลือเก็บลงกลุ่มหลัก
+                        if (!finalGrouped[groupName]) {
+                            finalGrouped[groupName] = [];
+                        }
+                        finalGrouped[groupName].push(m);
+                    }
+                });
+            }
 
+            // แสดงผลเมนูทางลัด
             if (shortcuts.length > 0) {
                 document.getElementById('shortcutSection').classList.remove('d-none');
                 shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m)).join('');
+            } else {
+                document.getElementById('shortcutSection').classList.add('d-none');
             }
 
+            // แสดงผลเมนูหลักแยกตามกลุ่ม
             let mainHtml = '';
-            for (const [groupName, items] of Object.entries(groupedMenus)) {
+            for (const [groupName, items] of Object.entries(finalGrouped)) {
+                if (items.length === 0) continue; // ถ้ากลุ่มนี้โดนดึงไป shortcuts หมด ให้ข้ามไป
                 mainHtml += `
                     <div class="mb-4">
                         <h5 class="section-title">${groupName}</h5>
@@ -297,43 +536,85 @@
         }
 
         function createCardHTML(menu) {
-            let iconClass = menu.icon || 'fa-solid fa-layer-group';
-            if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
-            const link = menu.url || '#';
+            const icon = menu.ICON || 'fa-solid fa-layer-group';
+            const name = menu.MENU_NAME || '';
+            const desc = menu.DESC || '';
+            const url = menu.LINK_URL || '#';
+
+            let iconClass = icon;
+            if (!iconClass.startsWith('fa-')) {
+                iconClass = 'fa-solid fa-' + iconClass;
+            }
+            
+            // --- ระบบจัดการสีและไอคอนตามชื่อเมนู ---
+            let colorClass = 'icon-default';
+            const menuNameLower = name.toLowerCase();
+
+            if (menuNameLower.includes('network')) {
+                iconClass = 'fa-solid fa-network-wired';
+                colorClass = 'icon-blue';
+            } else if (menuNameLower.includes('ครุภัณฑ์')) {
+                iconClass = 'fa-solid fa-desktop';
+                colorClass = 'icon-orange';
+            } else if (menuNameLower.includes('คลัง') || menuNameLower.includes('อะไหล่')) {
+                iconClass = 'fa-solid fa-boxes-stacked';
+                colorClass = 'icon-brown';
+            } else if (menuNameLower.includes('จัดการข้อมูลระบบ')) {
+                iconClass = 'fa-solid fa-server';
+                colorClass = 'icon-purple';
+            } else if (menuNameLower.includes('งานด่วน')) {
+                iconClass = 'fa-solid fa-bolt';
+                colorClass = 'icon-red';
+            } else if (menuNameLower.includes('แจ้งเตือน')) {
+                iconClass = 'fa-solid fa-bell';
+                colorClass = 'icon-yellow';
+            } else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) {
+                iconClass = 'fa-solid fa-briefcase';
+                colorClass = 'icon-green';
+            }
             
             return `
                 <div class="col-6 col-md-4 col-lg-3">
-                    <div class="menu-card" onclick="openMenu('${link}')">
-                        <i class="${iconClass} menu-icon"></i>
-                        <div class="menu-title">${menu.menu_name}</div>
-                        ${menu.desc ? `<div class="menu-desc">${menu.desc}</div>` : ''}
+                    <div class="menu-card" onclick="openMenu('${url}')">
+                        <i class="${iconClass} menu-icon ${colorClass}"></i>
+                        <div class="menu-title">${name}</div>
+                        ${desc ? `<div class="menu-desc">${desc}</div>` : ''}
                     </div>
                 </div>
             `;
         }
 
+        // ดักจับสิทธิ์ผู้ใช้งานเมื่อคลิกเข้าสู่โมดูลย่อยผ่านตัวการ์ดเมนู
         function openMenu(url) {
             const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!activeUser) { loginModal.show(); return; }
+            
+            if (!activeUser) {
+                loginModal.show();
+                return;
+            }
 
-            if(url !== '#' && url.trim() !== '') {
+            if (url !== '#' && url.trim() !== '') {
                 document.getElementById('loadingOverlay').style.display = 'flex';
                 document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเข้าสู่ระบบโมดูล...";
                 window.location.href = url;
             } else {
-                alert('อยู่ระหว่างการพัฒนาระบบส่วนนี้ครับ');
+                showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน อยู่ระหว่างขั้นตอนการพัฒนาครับ', 'fa-solid fa-code');
             }
         }
 
+        // ฟังก์ชันปุ่มเปิดโมดูลสแกนเนอร์อ่าน QR Code
         function openScanner() {
             const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!activeUser) { loginModal.show(); return; }
+            if (!activeUser) {
+                loginModal.show();
+                return;
+            }
 
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเปิดกล้องสแกน QR...";
             setTimeout(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert('เปิดโมดูล Scanner สำหรับการอ่าน QR Code (ระบบอยู่ระหว่างพัฒนา)');
+                showSystemModal('QR Scanner', 'โมดูลสำหรับการอ่านบาร์โค้ด/คิวอาร์โค้ดสำเร็จรูป (กำลังดำเนินการเชื่อมต่อกล้องฮาร์ดแวร์)', 'fa-solid fa-camera');
             }, 800);
         }
     </script>
