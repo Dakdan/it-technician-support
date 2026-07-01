@@ -13,8 +13,64 @@
     <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal Overlay -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ตรวจสอบสิทธิ์ (Auth Check) ตามไฟล์เดิม ทันทีที่โหลด -->
-    <script src="auth-check.js"></script>
+    <!-- ============================================================================ -->
+    <!-- นำโค้ด auth-check.js ของคุณมาฝังเพื่อป้องกันปัญหาโหลดไฟล์ไม่พบ (404 Error) -->
+    <!-- ============================================================================ -->
+    <script>
+        (function () {
+            try {
+                // ดึงข้อมูลจาก LocalStorage ด้วย Key: 'currentUser'
+                const userData = localStorage.getItem('currentUser');
+                
+                // เงื่อนไข 1: หากไม่มีข้อมูลในระบบ
+                if (!userData) {
+                    window.user = null; // ปรับไม่ให้เด้งหนี เพื่อส่งค่าไปเปลี่ยนสลับปุ่มล็อกอินที่หน้าหลักแทน
+                    return;
+                }
+
+                const user = JSON.parse(userData);
+                
+                // เงื่อนไข 2: หากมีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
+                if (!user || !user.UserPN) {
+                    localStorage.removeItem('currentUser'); // ล้างข้อมูลขยะทิ้ง
+                    window.user = null;
+                    return;
+                }
+
+                // เงื่อนไข 3: ข้อมูลถูกต้อง
+                // ผูก Object ผู้ใช้งานเข้ากับ Global Window สำหรับการดึงใช้งานในหน้าเพจได้อย่างอิสระ
+                window.user = user;
+            } catch (err) {
+                console.error("Auth-Check error: ", err);
+                localStorage.removeItem('currentUser');
+                window.user = null;
+            }
+        })();
+
+        function getCurrentUser() {
+            return window.user || null;
+        }
+
+        function hasRole(role) {
+            if (!window.user) return false;
+            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
+        }
+
+        function getDisplayName() {
+            if (!window.user) return "ผู้ใช้งานทั่วไป";
+            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.clear();
+            try {
+                window.location.replace("index.html"); // ใช้ replace เพื่อไม่ให้กด Back กลับมาได้
+            } catch(e) {
+                window.location.href = "index.html"; // Fallback กรณี Browser ไม่รองรับ replace
+            }
+        }
+    </script>
     
     <style>
         :root {
@@ -28,6 +84,12 @@
             --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
             --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
             --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
+        }
+
+        /* ป้องกัน Pull-to-refresh และอาการหน้าจอเด้ง (Bounce) บน Mobile */
+        html, body {
+            overscroll-behavior-y: none; 
+            overscroll-behavior-x: none;
         }
 
         body {
@@ -282,8 +344,8 @@
         <div class="d-flex align-items-center">
             <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
             <div>
-                <div class="org-title">โรงพยาบาลอุดรธานี</div>
-                <div class="org-subtitle">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
+                <div class="org-title">IT UDONHOSP MAINTERNANCE & SERVIC App</div>
+                <div class="org-subtitle">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
             </div>
         </div>
         <div class="text-end" id="authZone">
@@ -399,12 +461,14 @@
 
         // จัดการแสดงปุ่มตรง Header อิงตามผลการตรวจสอบสิทธิ์
         function renderAuthHeader() {
-            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            // ใช้ typeof เช็คเสมอเพื่อป้องกัน ReferenceError แครชหน้าเพจ
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             const authZone = document.getElementById('authZone');
             
             if (activeUser) {
+                const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้งาน");
                 authZone.innerHTML = `
-                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ${getDisplayName()}</div>
+                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ${displayName}</div>
                     <button onclick="logout()" class="btn btn-sm btn-outline-light rounded-pill mt-1" style="font-size: 0.7rem; font-weight: 500; border-color: rgba(255,255,255,0.7); color: #ffffff;">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
                     </button>
@@ -426,7 +490,7 @@
         // ตรวจสอบสิทธิ์เมื่อกดที่แถบนำทางด้านล่าง
         function handleNavClick(event, name) {
             event.preventDefault();
-            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             if (!activeUser) {
                 loginModal.show();
                 return;
@@ -449,10 +513,7 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
 
                 if (result.success) {
-                    // result.alerts จะเป็น Array
                     if (result.alerts) renderAlerts(result.alerts);
-                    
-                    // result.menus จะเป็น Object ที่จัดกลุ่มแล้วตาม MAIN_MENU จากฝั่ง backend
                     if (result.menus) renderMenus(result.menus);
                 }
             } catch (err) {
@@ -586,7 +647,7 @@
 
         // ดักจับสิทธิ์ผู้ใช้งานเมื่อคลิกเข้าสู่โมดูลย่อยผ่านตัวการ์ดเมนู
         function openMenu(url) {
-            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             
             if (!activeUser) {
                 loginModal.show();
@@ -604,7 +665,7 @@
 
         // ฟังก์ชันปุ่มเปิดโมดูลสแกนเนอร์อ่าน QR Code
         function openScanner() {
-            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             if (!activeUser) {
                 loginModal.show();
                 return;
