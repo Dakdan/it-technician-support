@@ -1,3 +1,8 @@
+/**
+ * login-script.js
+ * ใช้วางบนทุกหน้าที่ต้อง Login ก่อนเข้าใช้งาน
+ */
+
 const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
 const loginForm = document.getElementById('loginForm');
