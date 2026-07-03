@@ -63,7 +63,7 @@ try {
         return;
     }
 
-    window.location.href = 'index.html';
+    window.location.href = 'main_menu.html';
 
 } catch (err) {
 
