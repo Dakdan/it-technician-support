@@ -255,29 +255,6 @@
         .nav-item.active, .nav-item:hover { color: var(--pink-dark); }
         .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
         
-        /* สไตล์สำหรับ Badge ตัวเลขแจ้งเตือน (เพิ่มใหม่) */
-        .icon-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .badge-counter {
-            position: absolute;
-            top: -6px;
-            right: -10px;
-            background: linear-gradient(135deg, #ff1493, #d63384);
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(214, 51, 132, 0.3);
-            z-index: 10;
-            min-width: 18px;
-            text-align: center;
-            line-height: 1;
-        }
-
         /* Floating QR Code Button */
         .nav-fab-container {
             position: relative;
@@ -396,11 +373,11 @@
 
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
-        <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')">
+        <a href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')">
             <i class="fa-solid fa-house"></i>
             หน้าแรก
         </a>
-        <a id="nav-myjobs" href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
             <i class="fa-solid fa-clipboard-list"></i>
             งานของฉัน
         </a>
@@ -413,15 +390,11 @@
             <span class="fab-text">สแกน QR</span>
         </div>
 
-        <a id="nav-alerts" href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')">
-            <!-- หุ้ม icon ด้วย icon-wrapper เพื่อให้ Badge ลอยอยู่มุมขวาบน -->
-            <div class="icon-wrapper">
-                <i class="fa-solid fa-bell"></i>
-                <span id="bottomNavAlertBadge" class="badge-counter d-none">0</span>
-            </div>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')">
+            <i class="fa-solid fa-bell"></i>
             แจ้งเตือน
         </a>
-        <a id="nav-settings" href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')">
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')">
             <i class="fa-solid fa-gear"></i>
             ตั้งค่า
         </a>
@@ -464,70 +437,6 @@
         </div>
     </div>
 
-    <!-- 3. Bootstrap Modal สำหรับหน้าตั้งค่าและการแจ้งเตือนบนมือถือ (เพิ่มเข้ามาใหม่) -->
-    <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
-                <div class="modal-header border-0 pb-0 justify-content-between">
-                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-sliders text-pink-dark me-2"></i>ตั้งค่าและการแจ้งเตือน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- ข้อมูลผู้ใช้ในหน้าตั้งค่า -->
-                    <div class="d-flex align-items-center bg-light p-3 rounded-4 mb-4">
-                        <div class="bg-pink-soft rounded-circle p-3 text-pink-dark me-3">
-                            <i class="fa-solid fa-user-gear fs-3" style="color: var(--pink-dark);"></i>
-                        </div>
-                        <div>
-                            <div class="fw-bold" id="settingsUserTitle">ผู้ใช้งานระบบ</div>
-                            <div class="small text-muted" id="settingsUserRole">สิทธิ์เข้าถึง: เจ้าหน้าที่ IT</div>
-                        </div>
-                    </div>
-
-                    <!-- ส่วนคอนโทรลระบบสิทธิ์แจ้งเตือนบนโทรศัพท์มือถือ -->
-                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>ระบบแจ้งเตือนผ่านบราวเซอร์มือถือ</h6>
-                    
-                    <div class="bg-light p-3 rounded-4 mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <div class="fw-bold small">สถานะการอนุญาตแจ้งเตือน</div>
-                                <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
-                            </div>
-                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">
-                                เปิดรับแจ้งเตือน
-                            </button>
-                        </div>
-                        
-                        <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">
-                            * <strong>สำหรับ Android:</strong> จะมีหน้าต่างเด้งขึ้นมาถามเพื่อขออนุญาตส่งข้อความเตือนบนมือถือเมื่อมีงานแจ้งซ่อมใหม่
-                        </p>
-                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">
-                            * <strong>สำหรับ iOS (iPhone):</strong> ต้องกดแชร์หน้าเว็บนี้และกด "Add to Home Screen (เพิ่มไปยังหน้าจอโฮม)" ก่อนจึงจะยอมรับ Notification ได้ตามมาตรฐานของ Apple ครับ
-                        </p>
-                    </div>
-
-                    <!-- การทดสอบการส่งระบบสั่นและ Push Notification -->
-                    <div class="d-grid gap-2 mb-4">
-                        <button onclick="testMobileNotification()" class="btn btn-outline-danger rounded-pill fw-bold" style="border-color: var(--pink-primary); color: var(--pink-dark);">
-                            <i class="fa-solid fa-circle-play me-2"></i>ทดสอบส่งแจ้งเตือนเข้ามือถือทันที
-                        </button>
-                    </div>
-
-                    <!-- แนะนำระบบแจ้งเตือน LINE สำหรับการพัฒนาขั้นต่อไป -->
-                    <div class="p-3 rounded-4" style="background-color: #f1fcf4; border: 1px solid #c2ffd2;">
-                        <h6 class="fw-bold text-success" style="font-size: 0.85rem;"><i class="fa-brands fa-line me-2"></i>แนะนำ: เชื่อมต่อ LINE Notify สำหรับบอร์ดงานด่วน</h6>
-                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">
-                            สำหรับระบบโรงพยาบาล สามารถผูกข้อความเตือนของ IT เข้ากับ API ของกลุ่ม LINE หรือส่งข้อความรายคนได้โดยตรง ซึ่งมีความเสถียรสูงสุดแม้ขณะปิดแอปพลิเคชัน
-                        </p>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Script ควบคุมระบบ -->
     <script>
         // ใช้ URL API เว็บแอปของเดิม
@@ -535,26 +444,15 @@
         
         let loginModal;
         let systemAlertModal;
-        let settingsControlModal;
-        
-        // ตัวแปรเก็บประวัติแจ้งเตือนที่เคยยิงไปแล้วบนมือถือเพื่อป้องกันไม่ให้ข้อความสแปมซ้ำ
-        let sentNotificationsSet = new Set();
 
         document.addEventListener('DOMContentLoaded', () => {
             loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
             systemAlertModal = new bootstrap.Modal(document.getElementById('systemAlertModal'));
-            settingsControlModal = new bootstrap.Modal(document.getElementById('settingsControlModal'));
-            
             renderAuthHeader();
             fetchDashboardData();
-            updateNotificationStatusUI();
-            
-            // ตั้งเวลาดึงข้อมูลใหม่ทุกๆ 15 วินาที เพื่อเช็คงานด่วนแบบ Real-time
-            setInterval(fetchDashboardData, 15000);
         });
 
         // ฟังก์ชันเรียกแสดง Modal กลางหน้าจอ Overlay
-        // นำมาใช้งานแทน alert() ตามข้อกำหนดความเป็นมิตรต่อ UI
         function showSystemModal(title, message, iconClass = 'fa-solid fa-circle-info') {
             document.getElementById('systemAlertTitle').innerText = title;
             document.getElementById('systemAlertMessage').innerText = message;
@@ -564,6 +462,7 @@
 
         // จัดการแสดงปุ่มตรง Header อิงตามผลการตรวจสอบสิทธิ์
         function renderAuthHeader() {
+            // ใช้ typeof เช็คเสมอเพื่อป้องกัน ReferenceError แครชหน้าเพจ
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             const authZone = document.getElementById('authZone');
             
@@ -592,153 +491,12 @@
         // ตรวจสอบสิทธิ์เมื่อกดที่แถบนำทางด้านล่าง
         function handleNavClick(event, name) {
             event.preventDefault();
-            
-            // อัปเดตสถานะ Active บนแถบนำทาง
-            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-            
-            // จัดหน้า Navigation แฟนซีขึ้น
-            if (name === 'หน้าแรก') {
-                document.getElementById('nav-home').classList.add('active');
-                return;
-            }
-
             if (!activeUser) {
                 loginModal.show();
                 return;
             }
-
-            if (name === 'งานของฉัน') {
-                document.getElementById('nav-myjobs').classList.add('active');
-                showSystemModal('งานของฉัน', 'กำลังเตรียมโหลดรายการงานของคุณ...', 'fa-solid fa-briefcase');
-            } else if (name === 'แจ้งเตือน') {
-                document.getElementById('nav-alerts').classList.add('active');
-                showSystemModal('โมดูลแจ้งเตือน', 'คุณไม่มีข้อความแจ้งเตือนใหม่ในระบบหลัก', 'fa-solid fa-bell');
-            } else if (name === 'ตั้งค่า') {
-                document.getElementById('nav-settings').classList.add('active');
-                openSettingsPanel();
-            }
-        }
-
-        // อัปเดต UI ของแถบควบคุมการขออนุญาต Notifications
-        function updateNotificationStatusUI() {
-            const badge = document.getElementById('notificationStatusBadge');
-            const btn = document.getElementById('btnRequestPermission');
-            
-            if (!("Notification" in window)) {
-                badge.innerText = "บราวเซอร์ไม่รองรับ API";
-                badge.className = "badge bg-danger mt-1";
-                if(btn) btn.disabled = true;
-                return;
-            }
-
-            if (Notification.permission === "granted") {
-                badge.innerText = "เปิดรับแจ้งเตือนแล้ว";
-                badge.className = "badge bg-success mt-1";
-                if(btn) {
-                    btn.innerText = "รับสิทธิ์สำเร็จ";
-                    btn.disabled = true;
-                    btn.className = "btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-white";
-                }
-            } else if (Notification.permission === "denied") {
-                badge.innerText = "บล็อกสิทธิ์การแจ้งเตือน";
-                badge.className = "badge bg-danger mt-1";
-                if(btn) {
-                    btn.innerText = "สิทธิ์ถูกปฏิเสธ";
-                    btn.className = "btn btn-sm btn-secondary rounded-pill px-3 py-1 fw-bold text-white";
-                }
-            } else {
-                badge.innerText = "พร้อมขอสิทธิ์";
-                badge.className = "badge bg-warning text-dark mt-1";
-                if(btn) {
-                    btn.innerText = "เปิดรับแจ้งเตือน";
-                    btn.disabled = false;
-                    btn.className = "btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white";
-                }
-            }
-        }
-
-        // ขอสิทธิ์การสั่นและการส่ง Push Notification ระดับระบบบราวเซอร์มือถือ
-        function requestNotificationPermission() {
-            if (!("Notification" in window)) {
-                showSystemModal('ไม่สนับสนุนระบบการแจ้งเตือน', 'บราวเซอร์ที่คุณใช้บนมือถือยังไม่เปิดใช้งานฟังก์ชัน Notification API ครับ', 'fa-solid fa-bell-slash');
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                updateNotificationStatusUI();
-                if (permission === "granted") {
-                    // ลั่นแจ้งเตือนทดสอบครั้งแรก
-                    triggerDeviceVibration();
-                    sendMobileSystemAlert("สิทธิ์สำเร็จ! 🎉", "แอปไอทีโรงพยาบาลอุดรธานี ได้เชื่อมเข้าแจ้งเตือนบนมือถือแล้ว");
-                } else {
-                    showSystemModal('ตั้งค่าไม่สำเร็จ', 'คุณปฏิเสธรับสิทธิ์ หรือถูกจำกัดการเข้าถึง ระบบจึงไม่สามารถส่งเสียงเตือนนอกแอปได้', 'fa-solid fa-circle-exclamation');
-                }
-            });
-        }
-
-        // สั่นเครื่องโทรศัพท์สำหรับฝั่ง Android เพื่อเรียกความสนใจ (Vibration API)
-        function triggerDeviceVibration() {
-            if ("vibrate" in navigator) {
-                // สั่น 2 จังหวะสั้นๆ
-                navigator.vibrate([150, 100, 150]);
-            }
-        }
-
-        // ยิงแจ้งเตือนผ่านบราวเซอร์ระดับระบบปฏิบัติการ
-        function sendMobileSystemAlert(title, message) {
-            if (!("Notification" in window)) return;
-
-            if (Notification.permission === "granted") {
-                try {
-                    const notificationOptions = {
-                        body: message,
-                        icon: './logo02.png', // คาดหวังการโหลดรูปไอคอนที่เก็บภายในโฟลเดอร์โครงการ
-                        badge: './logo02.png',
-                        vibrate: [200, 100, 200],
-                        requireInteraction: false // จะปิดข้อความอัตโนมัติบนระบบปฏิบัติการตามช่วงเวลาที่กำหนด
-                    };
-                    
-                    new Notification(title, notificationOptions);
-                } catch (e) {
-                    // สำหรับ Android บางบราวเซอร์ ที่ต้องยิง Notification ผ่านทาง Service Worker (fallback สำหรับเคสพรีวิวเดี่ยว)
-                    console.log("Standard push failed, try background fallback...", e);
-                }
-            }
-        }
-
-        // ทดสอบยิงข้อความเด่นออกจากระบบผ่านหน้าการตั้งค่า
-        function testMobileNotification() {
-            if (!("Notification" in window) || Notification.permission !== "granted") {
-                // สั่นแอปและแจ้งกล่องโมดัลหน้าจอเพื่อทดสอบระบบ
-                triggerDeviceVibration();
-                showSystemModal('จำเป็นต้องกดยอมรับสิทธิ์', 'กรุณากดปุ่มสีชมพู "เปิดรับแจ้งเตือน" ที่อยู่ด้านบนของกล่องโต้ตอบนี้ก่อน แล้วทำการยอมรับสิทธิ์ในมือถือของท่านครับ', 'fa-solid fa-shield-halved');
-                return;
-            }
-
-            triggerDeviceVibration();
-            sendMobileSystemAlert("ทดสอบแจ้งงานด่วน IT Udon Hosp", "แจ้งซ่อม: คอมพิวเตอร์ห้องตรวจอายุรกรรมมีอาการจอฟ้าด่วนที่สุด!");
-        }
-
-        // เปิด Modal ตั้งค่าระบบ
-        function openSettingsPanel() {
-            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-            if (activeUser) {
-                const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้ระบบ");
-                document.getElementById('settingsUserTitle').innerText = displayName;
-                
-                // ถอดสิทธิ์เพื่อแสดงผลให้สอดคล้องกัน
-                let roleThai = "เจ้าหน้าที่กลุ่มงานไอที";
-                if(activeUser.UserTypeID) {
-                    roleThai = "รหัสกลุ่มงานสิทธิ์: " + activeUser.UserTypeID;
-                }
-                document.getElementById('settingsUserRole').innerText = roleThai;
-            }
-            updateNotificationStatusUI();
-            settingsControlModal.show();
+            showSystemModal('แจ้งข้อมูลโมดูล', `กำลังเข้าสู่ส่วนงาน: ${name}`, 'fa-solid fa-folder-open');
         }
 
         // ยิง POST ดึงข้อมูลและนำมา Mapping ใหม่ให้รับกับโครงสร้างที่ได้จาก code.gs
@@ -756,34 +514,8 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
 
                 if (result.success) {
-                    let myAlertCount = 0;
-                    let filteredAlerts = [];
-                    const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-
-                    if (result.alerts) {
-                        // กรองข้อมูลแจ้งเตือน ให้แสดงเฉพาะกรณีที่เป็น Global หรือ USER_ID ตรงกับที่ล็อกอิน
-                        filteredAlerts = result.alerts.filter(alertItem => {
-                            const targetUserId = alertItem.USER_ID || alertItem.TARGET_USER_ID;
-                            // ถ้า API ไม่ได้ส่ง USER_ID มา ถือว่าเป็นแจ้งเตือนสาธารณะ หรือถ้าส่งมาต้องตรงกับ UserPN
-                            return !targetUserId || (activeUser && String(targetUserId) === String(activeUser.UserPN));
-                        });
-                        
-                        myAlertCount = filteredAlerts.length;
-                        renderAlerts(filteredAlerts);
-                    }
-
-                    // อัปเดตตัวเลขแจ้งเตือนที่ Bottom Nav
-                    const navBadge = document.getElementById('bottomNavAlertBadge');
-                    if (navBadge) {
-                        if (myAlertCount > 0) {
-                            navBadge.innerText = myAlertCount > 99 ? '99+' : myAlertCount;
-                            navBadge.classList.remove('d-none');
-                        } else {
-                            navBadge.classList.add('d-none');
-                        }
-                    }
-
-                    if (result.menus) renderMenus(result.menus, myAlertCount); // ส่งตัวเลขเข้าไปวาดในการ์ดเมนูด้วย
+                    if (result.alerts) renderAlerts(result.alerts);
+                    if (result.menus) renderMenus(result.menus);
                 }
             } catch (err) {
                 document.getElementById('loadingOverlay').style.display = 'none';
@@ -792,7 +524,7 @@
             }
         }
 
-        // วาดส่วนแจ้งเตือน และยิง Notification บนจอมือถืออัตโนมัติหากมีข้อความเข้ามาใหม่
+        // วาดส่วนแจ้งเตือน
         function renderAlerts(alerts) {
             const container = document.getElementById('alertsContainer');
             if (!alerts || alerts.length === 0) return;
@@ -801,7 +533,6 @@
             alerts.forEach(alertItem => {
                 const type = alertItem.ALERT_TYPE_ID || alertItem.type || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || alertItem.text || '';
-                
                 html += `
                     <div class="alert-banner mb-2">
                         <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
@@ -811,22 +542,12 @@
                         </div>
                     </div>
                 `;
-
-                // คีย์เฉพาะในการบล็อกการส่งซ้ำเพื่อป้องกันส่ง Push แจ้งเตือนสแปมเข้าหน้าจอลูกค้าถ้าระบบวนลูปดึงข้อมูลมาอีกรอบ
-                const alertKey = type + "_" + text;
-                if (!sentNotificationsSet.has(alertKey)) {
-                    sentNotificationsSet.add(alertKey);
-                    
-                    // ยิงแจ้งเตือนเด้งเข้ามือถือ พร้อมสั่นสั้นๆ เรียกร้องสายตาเจ้าหน้าที่
-                    triggerDeviceVibration();
-                    sendMobileSystemAlert(type, text);
-                }
             });
             container.innerHTML = html;
         }
 
         // วาดส่วนจัดกลุ่มเมนูหลัก (รองรับ Object ที่จัดกลุ่มมาแล้วจาก code.gs)
-        function renderMenus(menusObj, alertCount = 0) {
+        function renderMenus(menusObj) {
             const shortcutGrid = document.getElementById('shortcutGrid');
             const mainContainer = document.getElementById('mainMenuContainer');
             if (!menusObj || Object.keys(menusObj).length === 0) return;
@@ -855,7 +576,7 @@
             // แสดงผลเมนูทางลัด
             if (shortcuts.length > 0) {
                 document.getElementById('shortcutSection').classList.remove('d-none');
-                shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m, alertCount)).join('');
+                shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m)).join('');
             } else {
                 document.getElementById('shortcutSection').classList.add('d-none');
             }
@@ -868,7 +589,7 @@
                     <div class="mb-4">
                         <h5 class="section-title">${groupName}</h5>
                         <div class="row g-3">
-                            ${items.map(m => createCardHTML(m, alertCount)).join('')}
+                            ${items.map(m => createCardHTML(m)).join('')}
                         </div>
                     </div>
                 `;
@@ -876,7 +597,7 @@
             mainContainer.innerHTML = mainHtml;
         }
 
-        function createCardHTML(menu, alertCount = 0) {
+        function createCardHTML(menu) {
             const icon = menu.ICON || 'fa-solid fa-layer-group';
             const name = menu.MENU_NAME || '';
             const desc = menu.DESC || '';
@@ -914,20 +635,10 @@
                 colorClass = 'icon-green';
             }
             
-            // สร้าง Badge สำหรับการ์ดเมนูแจ้งเตือน
-            let cardBadgeHtml = '';
-            if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
-                const displayCount = alertCount > 99 ? '99+' : alertCount;
-                cardBadgeHtml = `<span class="badge-counter" style="top: -8px; right: -15px; font-size: 0.75rem; padding: 3px 8px;">${displayCount}</span>`;
-            }
-
             return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="menu-card" onclick="openMenu('${url}')">
-                        <div class="icon-wrapper">
-                            <i class="${iconClass} menu-icon ${colorClass}"></i>
-                            ${cardBadgeHtml}
-                        </div>
+                        <i class="${iconClass} menu-icon ${colorClass}"></i>
                         <div class="menu-title">${name}</div>
                         ${desc ? `<div class="menu-desc">${desc}</div>` : ''}
                     </div>
