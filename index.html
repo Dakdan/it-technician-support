@@ -393,7 +393,7 @@
         }
     }
 
-    // ==================== FLOW 1: LOGIN PROCESS ====================
+   // ==================== FLOW 1: LOGIN PROCESS ====================
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -437,8 +437,26 @@
                 JSON.stringify(result.data)
             );
 
+            // ตรวจสอบเงื่อนไขบังคับเปลี่ยนรหัสผ่าน (resetRequired)
             if (result.resetRequired === true) {
-                safeRedirect('change-password.html');
+                // 1. บันทึกโปรไฟล์ผู้ใช้ลงตัวแปรที่เตรียมไว้
+                forceResetUser = result.data;
+
+                // 2. สลับหน้าไปยังฟอร์มเปลี่ยนรหัสผ่านภายในหน้าเดียวกัน
+                switchState('changeState');
+
+                // 3. นำชื่อผู้ใช้งานไปใส่ในฟอร์มเปลี่ยนรหัสผ่าน และล็อกให้เป็น ReadOnly ป้องกันการแก้ไข
+                const changeUserpn = document.getElementById('changeUserpn');
+                if (changeUserpn) {
+                    changeUserpn.value = username;
+                    changeUserpn.readOnly = true; 
+                }
+
+                // 4. ปรับเปลี่ยนคำอธิบาย และซ่อนปุ่ม "กลับไปหน้าเข้าสู่ระบบ" เพื่อบังคับให้เปลี่ยนรหัสผ่านให้เสร็จ
+                document.getElementById('changePassDesc').innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>เนื่องจากคุณใช้รหัสผ่านชั่วคราว หรือระบบบังคับให้เปลี่ยนรหัสผ่าน</span><br>กรุณากำหนดรหัสผ่านใหม่เพื่อความปลอดภัยของบัญชี`;
+                document.getElementById('btnBackToLogin').classList.add('d-none');
+                document.getElementById('changeDivider').classList.add('d-none');
+                
                 return;
             }
 
