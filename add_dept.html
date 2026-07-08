@@ -323,36 +323,43 @@
             }, {});
 
             // 3. Render HTML
-            container.innerHTML = '';
+        container.innerHTML = '';
+        
+        if (Object.keys(grouped).length === 0) {
+            container.innerHTML = '<div class="text-center py-10 text-gray-500 bg-white rounded-xl border border-gray-100">ไม่พบข้อมูลที่ค้นหา</div>';
+            return;
+        }
+
+        for (const loc in grouped) {
+            const locCard = document.createElement('div');
+            locCard.className = 'bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden';
             
-            if (Object.keys(grouped).length === 0) {
-                container.innerHTML = '<div class="text-center py-10 text-gray-500 bg-white rounded-xl border border-gray-100">ไม่พบข้อมูลที่ค้นหา</div>';
-                return;
-            }
+            // Location Header
+            let html = `
+                <div class="bg-gradient-to-r from-pink-100 to-pink-50 px-4 py-3 border-b border-pink-100 font-semibold text-pink-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    ${loc}
+                </div>
+                <div class="p-4 space-y-4">
+            `;
 
-            for (const loc in grouped) {
-                const locCard = document.createElement('div');
-                locCard.className = 'bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden';
-                
-                // Location Header
-                let html = `
-                    <div class="bg-gradient-to-r from-pink-100 to-pink-50 px-4 py-3 border-b border-pink-100 font-semibold text-pink-700 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                        ${loc}
-                    </div>
-                    <div class="p-4 space-y-4">
+            // จัดเรียงชั้นจากน้อยไปมาก (Sort Floors)
+            const sortedFloors = Object.keys(grouped[loc]).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 999;
+                const numB = parseInt(b.replace(/\D/g, '')) || 999;
+                return numA - numB;
+            });
+
+            // Floors within Location
+            for (const fl of sortedFloors) {
+                html += `
+                    <div>
+                        <h6 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-pink-400 pl-2 ml-1">${fl}</h6>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 `;
-
-                // Floors within Location
-                for (const fl in grouped[loc]) {
-                    html += `
-                        <div>
-                            <h6 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-pink-400 pl-2 ml-1">${fl}</h6>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    `;
-                    
-                    // Departments within Floor
-                    grouped[loc][fl].forEach(dep => {
+                
+                // Departments within Floor
+                grouped[loc][fl].forEach(dep => {
                         // กำหนดสถานะ ACTIVE ให้แสดง True / False
                         const isActive = String(dep.ACTIVE).toLowerCase() !== 'false';
                         const statusBadge = isActive 
