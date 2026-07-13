@@ -560,9 +560,9 @@
                     const currentStatus = String(alertItem.STATUS || '').toUpperCase();
                     
                     // หากสถานะยังไม่อ่าน ให้ปรับเปลี่ยนตามเงื่อนไข
-                    if (currentStatus !==  'ON') {
+                    if (currentStatus !== 'CLOSED' && currentStatus !== 'ON') {
                         // อัปเดตสถานะในตัวแปร Local (On หมายถึงรับทราบการอ่านแล้วตามเงื่อนไข)
-                        alertItem.STATUS = "CLOSED"; 
+                        alertItem.STATUS = "On"; 
                         
                         // อัปเดต UI รายการแจ้งเตือนและ Badge ทันทีเพื่อความลื่นไหล (Optimistic Update)
                         renderNotificationsListBody();
@@ -573,7 +573,7 @@
                             method: 'POST',
                             body: JSON.stringify({
                                 action: 'updateAlertStatus',
-                                status: 'CLOSED',
+                                status: 'On',
                                 alertData: alertItem
                             }),
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' }
@@ -753,7 +753,7 @@
             return myCurrentAlerts.filter(a => {
                 const s = String(a.STATUS || '').toUpperCase();
                 // ข้ามรายการที่ถูกมาร์คว่า CLOSED หรือ ON (อ่านแล้ว)
-                return s !== 'CLOSED';
+                return s !== 'CLOSED' && s !== 'ON';
             }).length;
         }
 
