@@ -11,46 +11,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- โหลด Bootstrap JS -->
+    <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal Overlay -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        (function () {
-            try {
-                const userData = localStorage.getItem('currentUser');
-                if (!userData) {
-                    window.user = null;
-                    return;
-                }
-                const user = JSON.parse(userData);
-                if (!user || !user.UserPN) {
-                    localStorage.removeItem('currentUser');
-                    window.user = null;
-                    return;
-                }
-                window.user = user;
-            } catch (err) {
-                console.error("Auth-Check error: ", err);
-                localStorage.removeItem('currentUser');
-                window.user = null;
-            }
-        })();
-
-        function getCurrentUser() { return window.user || null; }
-        function hasRole(role) {
-            if (!window.user) return false;
-            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
-        }
-        function getDisplayName() {
-            if (!window.user) return "ไม่ได้ Login";
-            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
-        }
-        function logout() {
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
-            try { window.location.replace("index.html"); } catch(e) { window.location.href = "index.html"; }
-        }
-    </script>
+    <!-- ตรวจสอบสิทธิ์ (Auth Check) -->
+    <script src="auth-check.js"></script>
     
     <style>
         :root {
@@ -58,14 +23,15 @@
             --pink-light: #ffb6c1;
             --pink-primary: #ff85a2;
             --pink-dark: #d63384;
-            --pink-neon: #ff1493;
+            --pink-neon: #ff1493; /* สีชมพูสว่างสะท้อนแสง (Deep Pink / Neon) */
             --white: #ffffff;
             --gray-light: #f8f9fa;
-            --gray-text: #444444;
+            --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
             --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
             --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
 
+        /* ป้องกัน Pull-to-refresh และอาการหน้าจอเด้ง (Bounce) บน Mobile */
         html, body {
             overscroll-behavior-y: none; 
             overscroll-behavior-x: none;
@@ -80,10 +46,12 @@
             position: relative;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* ลายน้ำ (Watermark) */
         body::before {
-            content: "IT UDON HOSP";
+            content: "ทีมช่าง IT UDH";
             position: fixed;
             top: 50%;
             left: 50%;
@@ -96,6 +64,7 @@
             pointer-events: none;
         }
 
+        /* Header */
         .app-header {
             background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
             backdrop-filter: blur(10px);
@@ -112,13 +81,26 @@
         .org-subtitle { color: #f8f9fa; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: 400; line-height: 1.2; }
         .user-name { font-weight: 700; color: var(--pink-dark); text-shadow: 1px 1px 1px rgba(255,255,255,0.9); }
 
+        /* Section Titles */
         .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-left: 5px solid var(--pink-primary); padding-left: 12px; line-height: 1.4; }
         
+        /* Cards UI */
         .menu-card {
-            background: var(--white); border-radius: 16px; border: 1px solid rgba(255, 133, 162, 0.15);
-            box-shadow: var(--shadow-sm); padding: 22px 12px; text-align: center; height: 100%;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 133, 162, 0.15);
+            box-shadow: var(--shadow-sm);
+            padding: 22px 12px;
+            text-align: center;
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         .menu-card:hover, .menu-card:active { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--pink-primary); }
         .menu-icon { font-size: 2.25rem; margin-bottom: 12px; transition: transform 0.3s; }
@@ -126,6 +108,7 @@
         .menu-title { font-weight: 500; color: #2c2c2c; line-height: 1.4; word-wrap: break-word; }
         .menu-desc { color: #777777; margin-top: 6px; line-height: 1.3; }
 
+        /* สีพิเศษสำหรับ Icon แต่ละประเภท */
         .icon-default { color: var(--pink-primary); }
         .icon-blue { color: #0066ff; }
         .icon-orange { color: #ff6600; }
@@ -135,60 +118,210 @@
         .icon-yellow { color: #eab308; }
         .icon-green { color: #16a34a; }
 
-        .alert-banner {
-            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            border-radius: 12px; padding: 12px 15px; color: #d63384; font-weight: 500;
-            box-shadow: var(--shadow-sm); border-left: 5px solid #d63384; display: flex; align-items: center; margin-bottom: 10px;
+        /* Alerts Section Enhancements */
+        .alerts-section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--pink-dark);
+            font-weight: 700;
+            font-size: 1.15rem;
+            padding-left: 4px;
+        }
+        .alerts-section-header i {
+            margin-right: 10px;
+            color: var(--pink-neon);
+            font-size: 1.3rem;
+            animation: pulse-ring 2s infinite;
         }
 
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--white);
-            box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08); display: flex; justify-content: space-around;
-            align-items: center; padding: 10px 0 5px; z-index: 1000; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); text-shadow: 0 0 0 rgba(255, 20, 147, 0.7); }
+            50% { transform: scale(1.1); text-shadow: 0 0 12px rgba(255, 20, 147, 0.5); }
+            100% { transform: scale(0.9); text-shadow: 0 0 0 rgba(255, 20, 147, 0); }
         }
-        .nav-item { text-align: center; color: #aaa; font-size: 0.75rem; flex: 1; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+
+        .alert-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 133, 162, 0.2);
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.08);
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.15);
+        }
+
+        /* Shine effect */
+        .alert-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shine 5s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 200%; }
+            100% { left: 200%; }
+        }
+
+        .alert-icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 14px;
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), 0 3px 8px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+
+        .alert-content {
+            flex-grow: 1;
+            z-index: 1;
+        }
+
+        .alert-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .alert-type {
+            font-weight: 700;
+            color: #2c2c2c;
+            font-size: 0.95rem;
+        }
+
+        .alert-time {
+            font-size: 0.7rem;
+            color: #888;
+            background: #f1f3f5;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid #e9ecef;
+        }
+
+        .alert-message {
+            font-size: 0.85rem;
+            color: var(--gray-text);
+            line-height: 1.5;
+        }
+        
+        .alert-badge-public {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(79, 172, 254, 0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .alert-badge-private {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(255, 8, 68, 0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--white);
+            box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 5px;
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .nav-item {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.75rem;
+            flex: 1;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
         .nav-item.active, .nav-item:hover { color: var(--pink-dark); }
         .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
         
+        /* สไตล์สำหรับ Badge ตัวเลขแจ้งเตือน */
         .icon-wrapper { position: relative; display: inline-block; }
         .badge-counter {
-            position: absolute; top: -6px; right: -10px; background: linear-gradient(135deg, #ff1493, #d63384);
-            color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.65rem; font-weight: 700;
-            border: 2px solid white; box-shadow: 0 2px 5px rgba(214, 51, 132, 0.3); z-index: 10; min-width: 18px; text-align: center; line-height: 1;
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background: linear-gradient(135deg, #ff1493, #d63384);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(214, 51, 132, 0.3);
+            z-index: 10;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1;
         }
 
+        /* Floating QR Code Button */
         .nav-fab-container { position: relative; flex: 1; display: flex; justify-content: center; }
         .fab-qr {
-            position: absolute; top: -35px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;
-            font-size: 1.8rem; box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35); border: 4px solid var(--white); cursor: pointer; transition: transform 0.2s;
+            position: absolute; top: -35px; width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.8rem; box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35);
+            border: 4px solid var(--white); cursor: pointer; transition: transform 0.2s;
         }
         .fab-qr:active { transform: scale(0.95); }
         .fab-text { margin-top: 35px; font-size: 0.75rem; color: var(--pink-dark); font-weight: 500;}
 
+        /* Overlay */
         #loadingOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
         }
 
-        .toast-container-custom {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1050; width: 90%; max-width: 400px;
-            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-        }
-        .custom-toast {
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border-radius: 12px; border-left: 5px solid var(--pink-neon);
-            box-shadow: 0 10px 25px rgba(214, 51, 132, 0.2); padding: 15px;
-            display: flex; align-items: flex-start; gap: 15px;
-            animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            pointer-events: auto; cursor: pointer;
-        }
-        .custom-toast.hide { animation: slideUp 0.4s ease-in forwards; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-50px); } }
-
+        /* Responsive Typography */
         @media (max-width: 576px) {
             .app-header { padding: 12px 14px; }
             .header-logo { width: 38px; height: 38px; }
@@ -205,53 +338,73 @@
             .fab-qr { width: 54px; height: 54px; top: -30px; font-size: 1.6rem; }
             .fab-text { margin-top: 30px; font-size: 0.7rem; }
         }
+        @media (min-width: 577px) and (max-width: 992px) {
+            .org-title { font-size: 1.1rem; } .org-subtitle { font-size: 0.72rem; }
+            .section-title { font-size: 1.15rem; } .menu-title { font-size: 0.9rem; }
+        }
+        @media (min-width: 993px) {
+            .org-title { font-size: 1.25rem; } .org-subtitle { font-size: 0.78rem; }
+            .section-title { font-size: 1.25rem; } .menu-title { font-size: 0.95rem; }
+        }
         @media print { .app-header, .bottom-nav, .fab-qr { display: none !important; } body { background: white; padding: 0; } }
     </style>
 </head>
 <body>
 
+    <!-- Overlay กำลังโหลด -->
     <div id="loadingOverlay">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
         <div class="mt-3 text-pink-dark fw-bold">กำลังซิงค์ข้อมูลเมนู...</div>
     </div>
 
-    <!-- ภาชนะบรรจุ Toast การแจ้งเตือน In-App -->
-    <div id="toastContainer" class="toast-container-custom"></div>
-
+    <!-- HEADER -->
     <header class="app-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-            <img src="./logo02.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://placehold.co/45x45/ffffff/d63384?text=IT'">
+            <img src="./logo02.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
             <div>
-                <div class="org-title">IT UDONHOSP MAINTENANCE & SERVICE App</div>
-                <div class="org-subtitle">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
+                <div class="org-title">IT UDH MAINTENANCE & SERVICE SYSTEMS</div>
+                <div class="org-subtitle">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
             </div>
         </div>
         <div class="text-end" id="authZone"></div>
     </header>
 
+    <!-- MAIN CONTENT -->
     <div class="container mt-4">
+        <!-- ส่วนแสดง Alert ทั้งหมดในหน้าหลัก -->
         <div id="alertsContainer" class="mb-4"></div>
+
+        <!-- หน้าทางลัด (Shortcuts & Fast Menus) -->
         <div id="shortcutSection" class="mb-4 d-none">
             <h5 class="section-title"><i class="fa-solid fa-bolt text-warning me-2"></i>เมนูทางลัด / งานด่วน</h5>
             <div class="row g-3" id="shortcutGrid"></div>
         </div>
+
+        <!-- แกนหลัก: กลุ่มเมนูต่างๆ -->
         <div id="mainMenuContainer"></div>
     </div>
 
+    <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
-        <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')">
-            <i class="fa-solid fa-house"></i> หน้าแรก
+        <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าหลัก')">
+            <i class="fa-solid fa-house"></i>
+            หน้าแรก
         </a>
         <a id="nav-myjobs" href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
-            <i class="fa-solid fa-clipboard-list"></i> งานของฉัน
+            <i class="fa-solid fa-clipboard-list"></i>
+            งานของฉัน
         </a>
+        
+        <!-- Floating QR Button -->
         <div class="nav-fab-container">
             <div class="fab-qr" onclick="openScanner()">
                 <i class="fa-solid fa-qrcode"></i>
             </div>
             <span class="fab-text">สแกน QR</span>
         </div>
+
         <a id="nav-alerts" href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')">
+            <!-- หุ้ม icon ด้วย icon-wrapper เพื่อให้ Badge ลอยอยู่มุมขวาบน -->
             <div class="icon-wrapper">
                 <i class="fa-solid fa-bell"></i>
                 <span id="bottomNavAlertBadge" class="badge-counter d-none">0</span>
@@ -259,14 +412,16 @@
             แจ้งเตือน
         </a>
         <a id="nav-settings" href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')">
-            <i class="fa-solid fa-gear"></i> ตั้งค่า
+            <i class="fa-solid fa-gear"></i>
+            ตั้งค่า
         </a>
     </nav>
 
-    <!-- 1. Modal: Login -->
+    <!-- Modal ต่างๆ -->
+    <!-- 1. Bootstrap Modal สำหรับแจ้งเตือนสิทธิ์การล็อกอิน (ชมพู-ขาว) -->
     <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3);">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
                 <div class="modal-body">
                     <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: #fff0f5; border-radius: 50%;">
                         <i class="fa-solid fa-lock text-danger" style="font-size: 2.5rem;"></i>
@@ -274,7 +429,9 @@
                     <h5 class="fw-bold mb-2 text-dark">กรุณาเข้าสู่ระบบก่อนใช้งาน</h5>
                     <p class="text-muted small mb-4">สิทธิ์การเข้าถึงฟังก์ชันนี้ ถูกจำกัดไว้เฉพาะเจ้าหน้าที่กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี เท่านั้น</p>
                     <div class="d-grid gap-2">
-                        <button type="button" onclick="goToLogin()" class="btn btn-danger rounded-pill py-2 fw-bold" style="background: linear-gradient(135deg, #ff85a2, #d63384); border: none;">เข้าสู่ระบบตอนนี้</button>
+                        <button type="button" onclick="goToLogin()" class="btn btn-danger rounded-pill py-2 fw-bold" style="background: linear-gradient(135deg, #ff85a2, #d63384); border: none;">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>เข้าสู่ระบบตอนนี้
+                        </button>
                         <button type="button" class="btn btn-light rounded-pill py-2 text-muted small" data-bs-dismiss="modal">กลับไปหน้าหลัก</button>
                     </div>
                 </div>
@@ -282,13 +439,13 @@
         </div>
     </div>
 
-    <!-- 2. Modal: System Alert -->
+    <!-- 2. Bootstrap Modal สำหรับแสดงข้อความแจ้งเตือนระบบทั่วไปกลางหน้าจอ Overlay -->
     <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2);">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
                 <div class="modal-body">
                     <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #fff0f5; border-radius: 50%;">
-                        <i id="systemAlertIcon" class="fa-solid fa-circle-info text-pink-dark" style="font-size: 2.2rem; color: var(--pink-primary) !important;"></i>
+                        <i id="systemAlertIcon" class="fa-solid fa-circle-info text-pink-dark" style="font-size: 2.2rem;"></i>
                     </div>
                     <h5 class="fw-bold mb-3 text-dark" id="systemAlertTitle">แจ้งเตือนระบบ</h5>
                     <p class="text-muted small mb-4" id="systemAlertMessage"></p>
@@ -298,10 +455,45 @@
         </div>
     </div>
 
-    <!-- 3. Modal: Settings -->
+    <!-- 3. Bootstrap Modal สำหรับแสดงรายการแจ้งเตือนส่วนตัว (เปิดจาก Nav Bar) -->
+    <div class="modal fade" id="notificationsListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
+                <div class="modal-header border-0 pb-1 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-bell text-warning me-2"></i>การแจ้งเตือนของฉัน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-2" id="notificationsModalBody">
+                    <!-- รายการจะถูกแทรกที่นี่ด้วย JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3.1 Bootstrap Modal สำหรับแสดงรายละเอียดแจ้งเตือน (Detail Modal) -->
+    <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
+                <div class="modal-header border-0 pb-1 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0" id="detailAlertTitle"><i class="fa-solid fa-bell text-warning me-2"></i>รายละเอียด</h5>
+                    <button type="button" class="btn-close" onclick="closeAlertDetailHandler()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <div class="text-muted small mb-3" id="detailAlertTime"><i class="fa-regular fa-clock me-1"></i></div>
+                    <div class="p-3 rounded-4" style="background-color: #f8f9fa; font-size: 0.9rem; line-height: 1.6; color: var(--gray-text); border: 1px solid #e9ecef;" id="detailAlertMessage">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-pink-dark rounded-pill px-5 py-2 fw-bold text-white" style="background-color: var(--pink-dark); border: none;" onclick="closeAlertDetailHandler()">รับทราบ / ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Bootstrap Modal สำหรับหน้าตั้งค่า -->
     <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2);">
+            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
                 <div class="modal-header border-0 pb-0 justify-content-between">
                     <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-sliders text-pink-dark me-2"></i>ตั้งค่าและการแจ้งเตือน</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -316,6 +508,7 @@
                             <div class="small text-muted" id="settingsUserRole">สิทธิ์เข้าถึง: เจ้าหน้าที่ IT</div>
                         </div>
                     </div>
+                    <!-- ส่วนคอนโทรลระบบสิทธิ์แจ้งเตือนบนโทรศัพท์มือถือ -->
                     <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>ระบบแจ้งเตือนผ่านบราวเซอร์มือถือ</h6>
                     <div class="bg-light p-3 rounded-4 mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -323,8 +516,12 @@
                                 <div class="fw-bold small">สถานะการอนุญาตแจ้งเตือน</div>
                                 <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
                             </div>
-                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">เปิดรับแจ้งเตือน</button>
+                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">
+                                เปิดรับแจ้งเตือน
+                            </button>
                         </div>
+                        <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ Android:</strong> จะมีหน้าต่างเด้งขึ้นมาถามเพื่อขออนุญาตส่งข้อความเตือน</p>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ iOS:</strong> ต้องกดแชร์หน้าเว็บนี้และกด "Add to Home Screen" ก่อนครับ</p>
                     </div>
                     <div class="d-grid gap-2 mb-4">
                         <button onclick="testMobileNotification()" class="btn btn-outline-danger rounded-pill fw-bold" style="border-color: var(--pink-primary); color: var(--pink-dark);">
@@ -332,107 +529,65 @@
                         </button>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- 4. Modal: รายการแจ้งเตือนของฉัน (List) จัดกลุ่มตามวันที่ -->
-    <div class="modal fade" id="notificationsListModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
-                <div class="modal-header border-0 pb-1 pt-4 px-4 bg-light" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
-                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-bell text-warning me-2"></i>การแจ้งเตือนของฉัน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 pt-2 bg-light" id="notificationsModalBody">
-                    <!-- รายการจัดกลุ่มตามวันที่จะถูกแทรกที่นี่ -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. Modal: อ่านรายละเอียดแจ้งเตือน (Detail) -->
-    <div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
-                <div class="modal-header border-0 pb-1 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-envelope-open-text text-pink-dark me-2"></i>รายละเอียดแจ้งเตือน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 pt-3">
-                    <div class="mb-3 border-bottom pb-3">
-                        <span id="detailAlertType" class="badge bg-pink-soft text-pink-dark border border-pink-light mb-2 px-3 py-1" style="font-size: 0.85rem;">ประเภท</span>
-                        <h6 id="detailAlertTime" class="text-muted small mb-0 mt-2"><i class="fa-regular fa-clock me-1"></i>เวลา</h6>
-                    </div>
-                    <div id="detailAlertText" class="text-dark" style="line-height: 1.6; font-size: 0.95rem;">
-                        <!-- ข้อความจะมาแทรกที่นี่ -->
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
-                    <button type="button" class="btn btn-pink-dark rounded-pill px-5 text-white fw-bold" style="background: var(--pink-dark);" data-bs-dismiss="modal">รับทราบ / ปิด</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Script ควบคุมระบบ -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwBBEOsw0LV49luy5XBA-D46XldxIj8m91ICNOg2ulwclJUBuUCQw8Qmq9-dKAyF5rA/exec"; 
         
-        let loginModal, systemAlertModal, settingsControlModal;
-        let notificationsListModal, notificationDetailModal; 
+        let loginModal;
+        let systemAlertModal;
+        let settingsControlModal;
+        let notificationsListModal;
+        let alertDetailModalInstance;
         
-        let myCurrentAlerts = []; 
-        let currentViewingAlertIndex = -1; 
-        let sentNotificationsSet = new Set(); 
+        let myCurrentAlerts = []; // เก็บแจ้งเตือนเฉพาะของ user คนนั้น สำหรับแสดงใน Modal
+        let currentDetailAlertIndex = -1; // เก็บ index แถวของแจ้งเตือนที่เปิดดูอยู่
 
         document.addEventListener('DOMContentLoaded', () => {
             loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
             systemAlertModal = new bootstrap.Modal(document.getElementById('systemAlertModal'));
             settingsControlModal = new bootstrap.Modal(document.getElementById('settingsControlModal'));
+            notificationsListModal = new bootstrap.Modal(document.getElementById('notificationsListModal'));
+            alertDetailModalInstance = new bootstrap.Modal(document.getElementById('alertDetailModal'));
             
-            const notifModalEl = document.getElementById('notificationsListModal');
-            if(notifModalEl) notificationsListModal = new bootstrap.Modal(notifModalEl);
-            notificationDetailModal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
-
-            // ทริกเกอร์: เมื่อปิดหน้าต่าง Detail -> ให้อัปเดตสถานะเป็น "On" (อ่านแล้ว)
-            document.getElementById('notificationDetailModal').addEventListener('hidden.bs.modal', function () {
-                if(currentViewingAlertIndex !== -1 && myCurrentAlerts[currentViewingAlertIndex]) {
-                    const alertItem = myCurrentAlerts[currentViewingAlertIndex];
-                    const currentStatus = String(alertItem.STATUS || '').trim();
+            // เมื่อปิดหน้าต่าง Detail ให้ทำการอัปเดตสถานะเป็นอ่านแล้ว (STATUS = "On")
+            document.getElementById('alertDetailModal').addEventListener('hide.bs.modal', function () {
+                if (currentDetailAlertIndex >= 0) {
+                    const alertItem = myCurrentAlerts[currentDetailAlertIndex];
+                    const currentStatus = String(alertItem.STATUS || '').toUpperCase();
                     
-                    if (currentStatus.toUpperCase() !== 'CLOSED' ) {
-                        // 1. อัปเดตฝั่ง UI ทันที
-                        myCurrentAlerts[currentViewingAlertIndex].STATUS = "CLOSED";
-                        updateNavAlertBadgeCount(); 
+                    // หากสถานะยังไม่อ่าน ให้ปรับเปลี่ยนตามเงื่อนไข
+                    if (currentStatus !==  'ON') {
+                        // อัปเดตสถานะในตัวแปร Local (On หมายถึงรับทราบการอ่านแล้วตามเงื่อนไข)
+                        alertItem.STATUS = "CLOSED"; 
                         
-                        // 2. ยิง API สั่งอัปเดตหลังบ้าน
+                        // อัปเดต UI รายการแจ้งเตือนและ Badge ทันทีเพื่อความลื่นไหล (Optimistic Update)
+                        renderNotificationsListBody();
+                        updateUnreadCounts();
+                        
+                        // ส่งคำขอไปอัปเดตที่ Backend (ไม่ต้องรอ response)
                         fetch(API_URL, {
                             method: 'POST',
-                            body: JSON.stringify({ 
-                                action: 'updateAlertStatus', 
-                                alertText: alertItem.ALERT_TEXT, 
-                                alertTime: alertItem.ALERT_TIME_START,
-                                userId: alertItem.USER_ID,
-                                status: 'On' 
+                            body: JSON.stringify({
+                                action: 'updateAlertStatus',
+                                status: 'CLOSED',
+                                alertData: alertItem
                             }),
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                        }).catch(e => console.log("Update status error:", e));
+                        }).catch(e => console.error("Update status failed:", e));
                     }
-                    currentViewingAlertIndex = -1;
-                    // หากหน้าต่าง List ยังเปิดอยู่ ให้รีเฟรชการแสดงผลจุดสีแดง
-                    if(document.getElementById('notificationsListModal').classList.contains('show')){
-                        openNotificationsModal();
-                    }
+                    currentDetailAlertIndex = -1;
                 }
             });
 
             renderAuthHeader();
             fetchDashboardData();
             updateNotificationStatusUI();
-            setInterval(fetchDashboardData, 15000); // ดึงข้อมูลทุก 15 วิ
+            
+            setInterval(fetchDashboardData, 15000);
         });
 
         function showSystemModal(title, message, iconClass = 'fa-solid fa-circle-info') {
@@ -440,24 +595,6 @@
             document.getElementById('systemAlertMessage').innerText = message;
             document.getElementById('systemAlertIcon').className = iconClass;
             systemAlertModal.show();
-        }
-
-        function showInAppToast(title, message) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'custom-toast';
-            toast.innerHTML = `
-                <div class="fs-2 text-pink-dark"><i class="fa-solid fa-bell-ringing"></i></div>
-                <div>
-                    <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">${title}</h6>
-                    <p class="mb-0 text-muted" style="font-size: 0.8rem; line-height: 1.4;">${message}</p>
-                </div>
-            `;
-            toast.onclick = () => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); openNotificationsModal(); };
-            container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentElement) { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }
-            }, 6000);
         }
 
         function renderAuthHeader() {
@@ -488,11 +625,16 @@
 
         function handleNavClick(event, name) {
             event.preventDefault();
-            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             
             if (name === 'หน้าแรก') {
                 document.getElementById('nav-home').classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
 
@@ -506,49 +648,60 @@
                 showSystemModal('งานของฉัน', 'กำลังเตรียมโหลดรายการงานของคุณ...', 'fa-solid fa-briefcase');
             } else if (name === 'แจ้งเตือน') {
                 document.getElementById('nav-alerts').classList.add('active');
-                openNotificationsModal(); 
+                // เปิด Modal รายการแจ้งเตือน
+                openNotificationsModal();
             } else if (name === 'ตั้งค่า') {
                 document.getElementById('nav-settings').classList.add('active');
                 openSettingsPanel();
             }
         }
 
+        // ขอสิทธิ์และการตั้งค่าต่างๆ (คงเดิม)
         function updateNotificationStatusUI() {
             const badge = document.getElementById('notificationStatusBadge');
             const btn = document.getElementById('btnRequestPermission');
-            if (!("Notification" in window)) {
-                badge.innerText = "บราวเซอร์ไม่รองรับ"; badge.className = "badge bg-danger mt-1";
-                if(btn) btn.disabled = true; return;
-            }
-            if (Notification.permission === "granted") {
-                badge.innerText = "เปิดรับแจ้งเตือนแล้ว"; badge.className = "badge bg-success mt-1";
-                if(btn) { btn.innerText = "รับสิทธิ์สำเร็จ"; btn.disabled = true; btn.className = "btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-white"; }
-            } else if (Notification.permission === "denied") {
-                badge.innerText = "บล็อกสิทธิ์"; badge.className = "badge bg-danger mt-1";
-                if(btn) { btn.innerText = "สิทธิ์ถูกปฏิเสธ"; btn.className = "btn btn-sm btn-secondary rounded-pill px-3 py-1 fw-bold text-white"; }
-            } else {
-                badge.innerText = "พร้อมขอสิทธิ์"; badge.className = "badge bg-warning text-dark mt-1";
-                if(btn) { btn.innerText = "เปิดรับแจ้งเตือน"; btn.disabled = false; btn.className = "btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white"; }
-            }
+            if (!("Notification" in window)) { badge.innerText = "บราวเซอร์ไม่รองรับ API"; badge.className = "badge bg-danger mt-1"; if(btn) btn.disabled = true; return; }
+            if (Notification.permission === "granted") { badge.innerText = "เปิดรับแจ้งเตือนแล้ว"; badge.className = "badge bg-success mt-1"; if(btn) { btn.innerText = "รับสิทธิ์สำเร็จ"; btn.disabled = true; btn.className = "btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-white"; } }
+            else if (Notification.permission === "denied") { badge.innerText = "บล็อกสิทธิ์การแจ้งเตือน"; badge.className = "badge bg-danger mt-1"; if(btn) { btn.innerText = "สิทธิ์ถูกปฏิเสธ"; btn.className = "btn btn-sm btn-secondary rounded-pill px-3 py-1 fw-bold text-white"; } }
+            else { badge.innerText = "พร้อมขอสิทธิ์"; badge.className = "badge bg-warning text-dark mt-1"; if(btn) { btn.innerText = "เปิดรับแจ้งเตือน"; btn.disabled = false; btn.className = "btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white"; } }
         }
 
         function requestNotificationPermission() {
-            if (!("Notification" in window)) return;
+            if (!("Notification" in window)) { showSystemModal('ไม่สนับสนุนระบบการแจ้งเตือน', 'บราวเซอร์ที่คุณใช้บนมือถือยังไม่เปิดใช้งานฟังก์ชัน Notification API ครับ', 'fa-solid fa-bell-slash'); return; }
             Notification.requestPermission().then(permission => {
                 updateNotificationStatusUI();
-                if (permission === "granted") triggerDeviceVibration();
+                if (permission === "granted") {
+                    if ("vibrate" in navigator) navigator.vibrate([150, 100, 150]);
+                    showSystemModal("สิทธิ์สำเร็จ! 🎉", "แอปไอทีโรงพยาบาลอุดรธานี ได้เชื่อมเข้าแจ้งเตือนบนมือถือแล้ว", "fa-solid fa-check-circle text-success");
+                } else {
+                    showSystemModal('ตั้งค่าไม่สำเร็จ', 'คุณปฏิเสธรับสิทธิ์ หรือถูกจำกัดการเข้าถึง ระบบจึงไม่สามารถส่งเสียงเตือนนอกแอปได้', 'fa-solid fa-circle-exclamation');
+                }
             });
         }
-        
-        function triggerDeviceVibration() { if ("vibrate" in navigator) navigator.vibrate([150, 100, 150]); }
-        
-        function testMobileNotification() { 
-            triggerDeviceVibration(); 
-            showInAppToast("ทดสอบแจ้งเตือน", "ระบบแจ้งเตือนเด้งหน้าจอของคุณพร้อมใช้งานแล้ว!");
-        }
-        
-        function openSettingsPanel() { settingsControlModal.show(); }
 
+        function testMobileNotification() {
+            if (!("Notification" in window) || Notification.permission !== "granted") {
+                if ("vibrate" in navigator) navigator.vibrate([150]);
+                showSystemModal('จำเป็นต้องกดยอมรับสิทธิ์', 'กรุณากดปุ่มสีชมพู "เปิดรับแจ้งเตือน" ที่อยู่ด้านบนก่อนครับ', 'fa-solid fa-shield-halved');
+                return;
+            }
+            if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+            try { new Notification("ทดสอบแจ้งงานด่วน IT Udon Hosp", { body: "แจ้งซ่อม: คอมพิวเตอร์ห้องตรวจมีอาการจอฟ้าด่วนที่สุด!", icon: './logo02.png', vibrate: [200, 100, 200] }); } catch(e) {}
+        }
+
+        function openSettingsPanel() {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (activeUser) {
+                const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้ระบบ");
+                document.getElementById('settingsUserTitle').innerText = displayName;
+                let roleThai = activeUser.UserTypeID ? "รหัสกลุ่มงานสิทธิ์: " + activeUser.UserTypeID : "เจ้าหน้าที่กลุ่มงานไอที";
+                document.getElementById('settingsUserRole').innerText = roleThai;
+            }
+            updateNotificationStatusUI();
+            settingsControlModal.show();
+        }
+
+        // ยิง POST ดึงข้อมูลและนำมา Mapping ใหม่
         async function fetchDashboardData() {
             try {
                 const response = await fetch(API_URL, {
@@ -558,77 +711,93 @@
                 });
                 
                 if (!response.ok) throw new Error('Network response was not ok');
+                
                 const result = await response.json();
-                processDashboardResult(result);
-            } catch (err) {
-                console.warn("Fetch error (CORS Block in Preview):", err);
-                // ระบบ Fallback: ใส่ข้อมูลจำลองให้กดดูหน้าจอ Preview ได้ หาก API ถูกบล็อก
-                const mockResult = {
-                    success: true,
-                    alerts: [
-                        { ALERT_TYPE_ID: 'แจ้งซ่อมด่วน', ALERT_TEXT: 'คอมพิวเตอร์ห้องตรวจ 1 เปิดไม่ติด', USER_ID: '', ALERT_TIME_START: new Date().toISOString(), STATUS: 'OPEN' },
-                        { ALERT_TYPE_ID: 'ระบบเครือข่าย', ALERT_TEXT: 'สัญญาณอินเทอร์เน็ตตึกอำนวยการขัดข้อง', USER_ID: '', ALERT_TIME_START: new Date(Date.now() - 3600000).toISOString(), STATUS: 'OPEN' },
-                        { ALERT_TYPE_ID: 'ประกาศ', ALERT_TEXT: 'ปิดปรับปรุงระบบเครือข่าย 18:00 น.', USER_ID: '', ALERT_TIME_START: new Date(Date.now() - 86400000).toISOString(), STATUS: 'On' }
-                    ],
-                    menus: {
-                        'ระบบงานหลัก': [
-                            { MENU_NAME: 'แจ้งซ่อม IT', DESC: 'แจ้งปัญหาอุปกรณ์คอมพิวเตอร์', ICON: 'fa-desktop', LINK_URL: '#', MENU_TYPE: 'main' },
-                            { MENU_NAME: 'ระบบเครือข่าย', DESC: 'ตรวจสอบสถานะ Network', ICON: 'fa-network-wired', LINK_URL: '#', MENU_TYPE: 'main' }
-                        ],
-                        'งานด่วน': [
-                            { MENU_NAME: 'งานของฉัน', DESC: 'ติดตามสถานะ', ICON: 'fa-bolt', LINK_URL: '#', MENU_TYPE: 'fast-menu' }
-                        ]
-                    }
-                };
-                processDashboardResult(mockResult);
-            }
-        }
+                document.getElementById('loadingOverlay').style.display = 'none';
 
-        function processDashboardResult(result) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            if (result.success) {
-                const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-
-                if (result.alerts) {
-                    myCurrentAlerts = result.alerts.filter(alertItem => {
-                        const targetUserId = alertItem.USER_ID || alertItem.TARGET_USER_ID;
-                        return !targetUserId || (activeUser && String(targetUserId) === String(activeUser.UserPN));
-                    });
+                if (result.success) {
+                    const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                    const allAlerts = result.alerts || [];
                     
-                    updateNavAlertBadgeCount(); 
-                    renderAlertBannerTop(myCurrentAlerts); 
-                }
+                    // 1. วาดหน้าเมนูหลัก: "แสดงการแจ้งเตือนทั้งหมด"
+                    renderAllAlertsOnMainPage(allAlerts);
 
-                if (result.menus) {
-                    const unreadCount = myCurrentAlerts.filter(a => {
-                        const st = String(a.STATUS || '').trim();
-                        return st.toUpperCase() !== 'CLOSED' && st.toLowerCase() !== 'on';
-                    }).length;
-                    renderMenus(result.menus, unreadCount); 
+                    // 2. กรองข้อมูลแจ้งเตือนเฉพาะของ User นี้ สำหรับ Badge และ Modal 
+                    myCurrentAlerts = [];
+                    if (activeUser && allAlerts.length > 0) {
+                        const myUid = String(activeUser.USERID || '').trim();
+                        myCurrentAlerts = allAlerts.filter(alertItem => {
+                            const targetUid = String(alertItem.USER_ID || '').trim();
+                            // เงื่อนไข: ถ้าว่างคือสาธารณะ หรือถ้าตรงกับ USERID คือของตัวเอง
+                            return targetUid === "" || targetUid === myUid;
+                        });
+                    }
+
+                    // 3. อัปเดตตัวเลขแจ้งเตือนบนแถบ Navigator Bar (นับเฉพาะที่ยังไม่อ่าน)
+                    updateUnreadCounts();
+
+                    // 4. วาดเมนู
+                    if (result.menus) {
+                        const unreadCount = getUnreadAlertCount();
+                        renderMenus(result.menus, unreadCount);
+                    }
                 }
+            } catch (err) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                console.error("Fetch error:", err);
             }
         }
 
-        function updateNavAlertBadgeCount() {
-            const unreadCount = myCurrentAlerts.filter(a => {
-                const st = String(a.STATUS || '').trim();
-                return st.toUpperCase() !== 'CLOSED' && st.toLowerCase() !== 'on';
+        // ฟังก์ชันช่วยนับจำนวนแจ้งเตือนที่ยังไม่อ่าน
+        function getUnreadAlertCount() {
+            return myCurrentAlerts.filter(a => {
+                const s = String(a.STATUS || '').toUpperCase();
+                // ข้ามรายการที่ถูกมาร์คว่า CLOSED หรือ ON (อ่านแล้ว)
+                return s !== 'CLOSED';
             }).length;
-            
-            const navBadge = document.getElementById('bottomNavAlertBadge');
-            if (navBadge) {
-                if (unreadCount > 0) {
-                    navBadge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                    navBadge.classList.remove('d-none');
-                } else {
-                    navBadge.classList.add('d-none');
-                }
+        }
+
+        // ฟังก์ชันคำนวณและอัปเดต Badge บนแถบ Nav
+        function updateUnreadCounts() {
+            const unreadCount = getUnreadAlertCount();
+            updateNavAlertBadge(unreadCount);
+        }
+
+        // ฟังก์ชันอัปเดตตัวเลขบน Navigator Bar
+        function updateNavAlertBadge(count) {
+            const badge = document.getElementById('bottomNavAlertBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.innerText = count > 99 ? '99+' : count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
             }
         }
 
+        // เปิด Modal นำรายการแจ้งเตือน (เฉพาะของ User) มาแสดง
         function openNotificationsModal() {
+            renderNotificationsListBody();
+            notificationsListModal.show();
+        }
+
+        // ฟังก์ชันช่วยจัดรูปแบบกลุ่มวันที่
+        function getDateGroupLabel(dateString) {
+            if (!dateString) return "รายการอื่นๆ";
+            const d = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            if (d.toDateString() === today.toDateString()) return "วันนี้";
+            if (d.toDateString() === yesterday.toDateString()) return "เมื่อวาน";
+
+            return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // วาดรายการแจ้งเตือนลง Modal Body แบบจัดกลุ่ม
+        function renderNotificationsListBody() {
             const body = document.getElementById('notificationsModalBody');
-            if(!body) return; 
             body.innerHTML = '';
 
             if (myCurrentAlerts.length === 0) {
@@ -636,116 +805,159 @@
                     <div class="text-center p-5 text-muted">
                         <i class="fa-solid fa-bell-slash mb-3" style="font-size: 3rem; color: #e0e0e0;"></i>
                         <h6 class="fw-bold mb-1">ไม่มีรายการแจ้งเตือน</h6>
-                        <p class="small mb-0">คุณยังไม่มีข้อความแจ้งเตือนใดๆ ในระบบ</p>
-                    </div>`;
-            } else {
-                const sortedAlerts = [...myCurrentAlerts].sort((a, b) => {
-                    return new Date(b.ALERT_TIME_START || 0) - new Date(a.ALERT_TIME_START || 0);
-                });
-
-                const groupedAlerts = {};
-                sortedAlerts.forEach((alert) => {
-                    const dateObj = alert.ALERT_TIME_START ? new Date(alert.ALERT_TIME_START) : new Date();
-                    const dateStr = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-                    
-                    if (!groupedAlerts[dateStr]) groupedAlerts[dateStr] = [];
-                    const realIndex = myCurrentAlerts.findIndex(a => a === alert);
-                    groupedAlerts[dateStr].push({ alert, realIndex });
-                });
-
-                let html = '';
-                for (const [date, items] of Object.entries(groupedAlerts)) {
-                    html += `<h6 class="fw-bold text-muted mt-3 mb-2 ps-1" style="font-size: 0.85rem;"><i class="fa-regular fa-calendar-days me-2"></i>${date}</h6>`;
-                    html += '<div class="list-group list-group-flush mb-3 shadow-sm rounded-4 border">';
-                    
-                    items.forEach(item => {
-                        const alertItem = item.alert;
-                        const rIndex = item.realIndex;
-                        const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือน';
-                        const text = alertItem.ALERT_TEXT || '';
-                        const time = alertItem.ALERT_TIME_START;
-                        
-                        const status = String(alertItem.STATUS || '').trim();
-                        const isRead = (status.toUpperCase() === 'CLOSED' || status.toLowerCase() === 'on');
-
-                        const bgStyle = isRead ? 'background-color: #f8f9fa;' : 'background-color: #ffffff;';
-                        const textStyle = isRead ? 'color: #888888;' : 'color: #2c2c2c; font-weight: 600;';
-                        const borderStyle = isRead ? 'border-left: 4px solid #dee2e6;' : 'border-left: 4px solid var(--pink-neon);';
-                        const dotIndicator = isRead ? '' : `<span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" style="margin-left: -2px;"></span>`;
-
-                        html += `
-                            <div class="list-group-item list-group-item-action p-3 position-relative" style="${bgStyle} ${borderStyle} cursor: pointer;" onclick="showNotificationDetail(${rIndex})">
-                                ${dotIndicator}
-                                <div class="d-flex w-100 justify-content-between align-items-center mb-1 ps-2">
-                                    <h6 class="mb-0 text-truncate pe-2" style="font-size: 0.9rem; ${textStyle}">${type}</h6>
-                                    <small class="text-muted flex-shrink-0" style="font-size: 0.7rem;">${time ? new Date(time).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : ''}</small>
-                                </div>
-                                <p class="mb-0 text-truncate ps-2" style="font-size: 0.8rem; color: #6c757d; max-width: 90%;">${text}</p>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                }
-                body.innerHTML = html;
+                        <p class="small mb-0">คุณยังไม่มีข้อความแจ้งเตือนใหม่ในขณะนี้</p>
+                    </div>
+                `;
+                return;
             }
-            if(notificationsListModal) notificationsListModal.show();
-        }
 
-        function showNotificationDetail(index) {
-            if(index < 0 || index >= myCurrentAlerts.length) return;
-            
-            const alertItem = myCurrentAlerts[index];
-            currentViewingAlertIndex = index; 
-            
-            document.getElementById('detailAlertType').innerText = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
-            document.getElementById('detailAlertTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i>${alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleString('th-TH') : 'ไม่ระบุเวลา'}`;
-            document.getElementById('detailAlertText').innerText = alertItem.ALERT_TEXT || '';
-            
-            if(notificationsListModal) notificationsListModal.hide();
-            setTimeout(() => { if(notificationDetailModal) notificationDetailModal.show(); }, 400); 
-        }
+            // 1. เรียงลำดับจากใหม่ไปเก่า
+            const sortedAlerts = [...myCurrentAlerts].sort((a, b) => {
+                const dateA = a.ALERT_TIME_START ? new Date(a.ALERT_TIME_START) : new Date(0);
+                const dateB = b.ALERT_TIME_START ? new Date(b.ALERT_TIME_START) : new Date(0);
+                return dateB - dateA;
+            });
 
-        function renderAlertBannerTop(alerts) {
-            const container = document.getElementById('alertsContainer');
-            if (!alerts || alerts.length === 0) return;
-            
-            const unreadAlerts = alerts.filter(a => {
-                const st = String(a.STATUS || '').trim();
-                return st.toUpperCase() !== 'CLOSED' && st.toLowerCase() !== 'on';
+            // 2. จัดกลุ่มตามวันที่
+            const groupedAlerts = {};
+            sortedAlerts.forEach((alertItem) => {
+                // หา index เดิมใน myCurrentAlerts เพื่อใช้อ้างอิงเวลาแสดง Detail
+                const originalIndex = myCurrentAlerts.indexOf(alertItem); 
+                const groupLabel = getDateGroupLabel(alertItem.ALERT_TIME_START);
+                if (!groupedAlerts[groupLabel]) groupedAlerts[groupLabel] = [];
+                groupedAlerts[groupLabel].push({ alertItem, originalIndex });
             });
 
             let html = '';
-            unreadAlerts.forEach(alertItem => {
-                const type = alertItem.ALERT_TYPE_ID || '';
+            for (const [groupLabel, items] of Object.entries(groupedAlerts)) {
+                html += `<div class="fw-bold text-pink-dark mt-3 mb-2 ps-2 border-start border-3 border-pink" style="font-size: 0.85rem; border-color: var(--pink-primary) !important;">${groupLabel}</div>`;
+                html += '<div class="list-group list-group-flush mb-2">';
+                
+                items.forEach(({ alertItem, originalIndex }) => {
+                    const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
+                    const text = alertItem.ALERT_TEXT || '';
+                    const time = alertItem.ALERT_TIME_START;
+                    const isPublic = String(alertItem.USER_ID || '').trim() === "";
+                    
+                    const status = String(alertItem.STATUS || '').toUpperCase();
+                    const isRead = (status === 'CLOSED' );
+
+                    const labelBadge = isPublic ? `<span class="badge bg-light text-secondary border ms-2" style="font-size: 0.6rem;">สาธารณะ</span>` : `<span class="badge bg-pink-soft text-pink-dark border border-pink-light ms-2" style="font-size: 0.6rem;">ส่วนตัว</span>`;
+
+                    const unreadDot = isRead ? '' : `<span class="position-absolute top-0 start-0 p-1 bg-danger border border-light rounded-circle" style="margin-top: 18px; margin-left: 12px; width: 10px; height: 10px; box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);"></span>`;
+                    const bgClass = isRead ? 'bg-white' : 'bg-pink-soft';
+                    const textClass = isRead ? 'text-secondary' : 'text-dark';
+                    const iconColor = isRead ? 'text-secondary' : 'text-warning';
+
+                    html += `
+                        <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border position-relative ${bgClass}" style="cursor: pointer; transition: all 0.2s;" onclick="openAlertDetail(${originalIndex})">
+                            ${unreadDot}
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-1 ps-3">
+                                <h6 class="mb-0 ${isRead ? 'fw-normal' : 'fw-bold'} ${textClass}" style="font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation ${iconColor} me-2"></i>${type} ${labelBadge}</h6>
+                                <small class="${isRead ? 'text-muted' : 'text-danger fw-bold'}" style="font-size: 0.7rem;">${time ? new Date(time).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : ''}</small>
+                            </div>
+                            <p class="mb-0 ps-3 text-truncate ${isRead ? 'text-muted' : 'text-secondary'}" style="font-size: 0.8rem; line-height: 1.4; max-width: 95%;">${text}</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            body.innerHTML = html;
+        }
+
+        // เปิดหน้าต่างรายละเอียดการแจ้งเตือน
+        function openAlertDetail(index) {
+            currentDetailAlertIndex = index;
+            const alertItem = myCurrentAlerts[index];
+            
+            let iconClass = 'fa-solid fa-circle-info text-primary';
+            if (String(alertItem.USER_ID || '').trim() === "") iconClass = 'fa-solid fa-bullhorn text-info';
+            
+            document.getElementById('detailAlertTitle').innerHTML = `<i class="${iconClass} me-2"></i>${alertItem.ALERT_TYPE_ID || 'รายละเอียดแจ้งเตือน'}`;
+            document.getElementById('detailAlertTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i> ${alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleString('th-TH', {year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'ไม่ระบุเวลา'}`;
+            document.getElementById('detailAlertMessage').innerText = alertItem.ALERT_TEXT || '';
+            
+            alertDetailModalInstance.show();
+        }
+
+        // ปิดหน้าต่างรายละเอียด (จะไปเชื่อมกับการเรียก Event hide.bs.modal อัตโนมัติ)
+        function closeAlertDetailHandler() {
+            alertDetailModalInstance.hide();
+        }
+
+        // วาดส่วนแจ้งเตือน "ทั้งหมด" ลงบนหน้าจอหลัก
+        function renderAllAlertsOnMainPage(alerts) {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = '';
+            if (!alerts || alerts.length === 0) return;
+
+            let html = `
+                <div class="alerts-section-header">
+                    <i class="fa-solid fa-satellite-dish"></i> กระดานข่าวสารและแจ้งเตือน
+                </div>
+            `;
+            
+            alerts.forEach(alertItem => {
+                const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || '';
+                const timeStr = alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : 'อัปเดตล่าสุด';
+                const uid = String(alertItem.USER_ID || '').trim();
+                
+                let targetLabel = '';
+                let iconClass = 'fa-solid fa-bell';
+                let borderClass = 'border-left: 6px solid var(--pink-neon);';
+                let iconBoxBg = 'background: linear-gradient(135deg, #fff0f5, #ffe4e1); color: var(--pink-neon);';
+
+                if(uid === "") {
+                    // ประกาศส่วนรวม
+                    targetLabel = '<span class="alert-badge-public">ส่วนรวม</span>';
+                    iconClass = 'fa-solid fa-bullhorn';
+                    borderClass = 'border-left: 5px solid #4facfe;'; 
+                    iconBoxBg = 'background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;';
+                } else {
+                    // แจ้งเตือนของบุคคล (รวมถึงของเราและคนอื่นที่หน้าหลักดึงมา)
+                    targetLabel = '<span class="alert-badge-private">รายบุคคล</span>';
+                    iconClass = 'fa-solid fa-envelope-open-text';
+                    borderClass = 'border-left: 5px solid #ff0844;';
+                    iconBoxBg = 'background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #e11d48;';
+                }
+
                 html += `
-                    <div class="alert-banner mb-2">
-                        <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
-                        <div><div class="fw-bold" style="font-size: 0.95rem;">${type}</div><div class="small" style="font-size: 0.8rem;">${text}</div></div>
+                    <div class="alert-card" style="${borderClass}">
+                        <div class="alert-icon-box" style="${iconBoxBg}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title-row">
+                                <div class="d-flex align-items-center">
+                                    <span class="alert-type">${type}</span>
+                                    ${targetLabel}
+                                </div>
+                                <span class="alert-time"><i class="fa-regular fa-clock me-1"></i>${timeStr}</span>
+                            </div>
+                            <div class="alert-message">${text}</div>
+                        </div>
                     </div>
                 `;
-
-                const alertKey = type + "_" + text;
-                if (!sentNotificationsSet.has(alertKey)) {
-                    sentNotificationsSet.add(alertKey);
-                    triggerDeviceVibration();
-                    showInAppToast(type, text);
-                }
             });
             container.innerHTML = html;
         }
 
+        // วาดส่วนจัดกลุ่มเมนูหลัก
         function renderMenus(menusObj, alertCount = 0) {
             const shortcutGrid = document.getElementById('shortcutGrid');
             const mainContainer = document.getElementById('mainMenuContainer');
             if (!menusObj || Object.keys(menusObj).length === 0) return;
 
-            const finalGrouped = {}; const shortcuts = [];
+            const finalGrouped = {};
+            const shortcuts = [];
+
             for (const [groupName, items] of Object.entries(menusObj)) {
                 items.forEach(m => {
                     const menuType = String(m.MENU_TYPE || '').toLowerCase();
-                    if (menuType === 'fast-menu' || menuType === 'alert-menu') shortcuts.push(m);
-                    else {
+                    if (menuType === 'fast-menu' || menuType === 'alert-menu') {
+                        shortcuts.push(m);
+                    } else {
                         if (!finalGrouped[groupName]) finalGrouped[groupName] = [];
                         finalGrouped[groupName].push(m);
                     }
@@ -755,15 +967,19 @@
             if (shortcuts.length > 0) {
                 document.getElementById('shortcutSection').classList.remove('d-none');
                 shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m, alertCount)).join('');
+            } else {
+                document.getElementById('shortcutSection').classList.add('d-none');
             }
 
             let mainHtml = '';
             for (const [groupName, items] of Object.entries(finalGrouped)) {
-                if (items.length === 0) continue;
+                if (items.length === 0) continue; 
                 mainHtml += `
                     <div class="mb-4">
                         <h5 class="section-title">${groupName}</h5>
-                        <div class="row g-3">${items.map(m => createCardHTML(m, alertCount)).join('')}</div>
+                        <div class="row g-3">
+                            ${items.map(m => createCardHTML(m, alertCount)).join('')}
+                        </div>
                     </div>
                 `;
             }
@@ -771,22 +987,24 @@
         }
 
         function createCardHTML(menu, alertCount = 0) {
-            let icon = menu.ICON || 'fa-solid fa-layer-group';
+            const icon = menu.ICON || 'fa-solid fa-layer-group';
             const name = menu.MENU_NAME || '';
             const desc = menu.DESC || '';
             const url = menu.LINK_URL || '#';
 
-            let iconClass = icon.startsWith('fa-') ? icon : 'fa-solid fa-' + icon;
+            let iconClass = icon;
+            if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
+            
             let colorClass = 'icon-default';
             const menuNameLower = name.toLowerCase();
 
-            if (menuNameLower.includes('network') || menuNameLower.includes('เครือข่าย')) colorClass = 'icon-blue';
-            else if (menuNameLower.includes('ครุภัณฑ์')) colorClass = 'icon-orange';
-            else if (menuNameLower.includes('คลัง') || menuNameLower.includes('อะไหล่')) colorClass = 'icon-brown';
-            else if (menuNameLower.includes('จัดการข้อมูล')) colorClass = 'icon-purple';
-            else if (menuNameLower.includes('งานด่วน')) colorClass = 'icon-red';
-            else if (menuNameLower.includes('แจ้งเตือน')) colorClass = 'icon-yellow';
-            else if (menuNameLower.includes('my job')) colorClass = 'icon-green';
+            if (menuNameLower.includes('network')) { iconClass = 'fa-solid fa-network-wired'; colorClass = 'icon-blue'; }
+            else if (menuNameLower.includes('ครุภัณฑ์')) { iconClass = 'fa-solid fa-desktop'; colorClass = 'icon-orange'; }
+            else if (menuNameLower.includes('คลัง') || menuNameLower.includes('อะไหล่')) { iconClass = 'fa-solid fa-boxes-stacked'; colorClass = 'icon-brown'; }
+            else if (menuNameLower.includes('จัดการข้อมูลระบบ')) { iconClass = 'fa-solid fa-server'; colorClass = 'icon-purple'; }
+            else if (menuNameLower.includes('งานด่วน')) { iconClass = 'fa-solid fa-bolt'; colorClass = 'icon-red'; }
+            else if (menuNameLower.includes('แจ้งเตือน')) { iconClass = 'fa-solid fa-bell'; colorClass = 'icon-yellow'; }
+            else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) { iconClass = 'fa-solid fa-briefcase'; colorClass = 'icon-green'; }
             
             let cardBadgeHtml = '';
             if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
@@ -797,7 +1015,10 @@
             return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="menu-card" onclick="openMenu('${url}')">
-                        <div class="icon-wrapper"><i class="${iconClass} menu-icon ${colorClass}"></i>${cardBadgeHtml}</div>
+                        <div class="icon-wrapper">
+                            <i class="${iconClass} menu-icon ${colorClass}"></i>
+                            ${cardBadgeHtml}
+                        </div>
                         <div class="menu-title">${name}</div>
                         ${desc ? `<div class="menu-desc">${desc}</div>` : ''}
                     </div>
@@ -808,14 +1029,27 @@
         function openMenu(url) {
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             if (!activeUser) { loginModal.show(); return; }
+
             if (url !== '#' && url.trim() !== '') {
                 document.getElementById('loadingOverlay').style.display = 'flex';
+                document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเข้าสู่ระบบโมดูล...";
                 window.location.href = url;
             } else {
-                showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน', 'fa-solid fa-code');
+                showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน อยู่ระหว่างขั้นตอนการพัฒนาครับ', 'fa-solid fa-code');
             }
         }
-        function openScanner() { openMenu('#'); }
+
+        function openScanner() {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเปิดกล้องสแกน QR...";
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showSystemModal('QR Scanner', 'โมดูลสำหรับการอ่านบาร์โค้ด/คิวอาร์โค้ดสำเร็จรูป (กำลังดำเนินการเชื่อมต่อกล้องฮาร์ดแวร์)', 'fa-solid fa-camera');
+            }, 800);
+        }
     </script>
 </body>
 </html>
