@@ -144,10 +144,10 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- แผงหน้าปัดข้อมูลหลัก (Main Dashboard Container) -->
-    <div id="mainDashboard" class="hidden max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8">
+    <div id="mainDashboard" class="hidden max-w-[1440px] mx-auto px-4 pb-4 md:px-6 md:pb-6 lg:px-8 lg:pb-8 pt-0">
         
         <!-- HEADER (Top Navigation Bar Style) -->
-        <header class="sticky top-0 z-50 w-full bg-white rounded-b-2xl shadow-soft p-5 md:p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-brand-600">
+        <header class="sticky top-0 z-50 w-full bg-gradient-to-br from-[#ffcbd9] to-white rounded-b-2xl shadow-soft p-5 md:p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-brand-600">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center border border-brand-100 shadow-sm p-1">
                     <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="w-full h-full object-contain rounded-full">
@@ -182,7 +182,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
             
             <!-- กรอบรูปภาพและ QR Code -->
-            <div class="lg:col-span-3 bg-white rounded-2xl shadow-soft p-5 flex flex-col items-center justify-center gap-6 relative overflow-hidden">
+            <div class="lg:col-span-3 bg-white rounded-2xl shadow-soft p-5 flex flex-col items-center justify-center gap-6 relative overflow-hidden border-t-4 border-brand-600">
                 <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-brand-50 to-white"></div>
                 
                 <div id="photoFrame" class="w-40 h-40 md:w-48 md:h-48 rounded-2xl border-4 border-white shadow-floating overflow-hidden z-10 bg-slate-100 flex items-center justify-center">
@@ -198,7 +198,7 @@
             </div>
 
             <!-- ข้อมูลระบุตัวตนครุภัณฑ์ (Asset Identity) -->
-            <div class="lg:col-span-9 bg-white rounded-2xl shadow-soft p-6 md:p-8 flex flex-col justify-center border-t-4 border-brand-500">
+            <div class="lg:col-span-9 bg-white rounded-2xl shadow-soft p-6 md:p-8 flex flex-col justify-center border-t-4 border-brand-600">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
                     <div>
                         <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-lg font-semibold text-sm mb-3">
@@ -208,10 +208,10 @@
                         <p id="valAssetName" class="text-slate-500 font-medium text-lg">-</p>
                     </div>
                     
-                    <!-- โชว์รหัสตัวใหญ่ (Highlight Code) -->
-                    <div class="bg-slate-800 text-white rounded-xl p-4 md:min-w-[250px] shadow-lg border border-slate-700 text-center md:text-right">
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)</p>
-                        <p id="valCode" class="text-xl md:text-2xl font-bold text-accent-500">-</p>
+                    <!-- โชว์รหัสตัวใหญ่ (Highlight Code) ปรับปรุงให้แสดงเต็มแถวเสมอและไม่โดนบีบย่อ -->
+                    <div class="bg-slate-800 text-white rounded-xl p-4 md:min-w-[250px] shadow-lg border border-slate-700 text-center md:text-right shrink-0 w-full md:w-auto">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 whitespace-nowrap"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)</p>
+                        <p id="valCode" class="text-xl md:text-2xl font-bold text-accent-500 whitespace-nowrap">-</p>
                     </div>
                 </div>
 
@@ -277,7 +277,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             
             <!-- ข้อมูลสถานที่ตั้ง & พื้นฐาน -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 border-t-4 border-t-brand-600 overflow-hidden flex flex-col">
                 <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div>
                     <h3 class="font-bold text-slate-800">Location & Basic Info</h3>
@@ -309,7 +309,7 @@
             </div>
 
             <!-- ข้อมูลด้านสเปกและเทคนิค (Technical Information) -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 border-t-4 border-t-brand-600 overflow-hidden flex flex-col">
                 <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-laptop-code"></i></div>
                     <h3 class="font-bold text-slate-800">Technical Specifications</h3>
@@ -341,7 +341,7 @@
             </div>
 
             <!-- ข้อมูลการจัดซื้อ (Financial Information) -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 border-t-4 border-t-brand-600 overflow-hidden flex flex-col">
                 <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                     <h3 class="font-bold text-slate-800">Financial & Contract</h3>
@@ -383,7 +383,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             
             <!-- History Section -->
-            <div class="bg-white rounded-2xl shadow-soft p-5 md:p-6 border border-slate-100">
+            <div class="bg-white rounded-2xl shadow-soft p-5 md:p-6 border border-slate-100 border-t-4 border-t-brand-600">
                 <div class="flex items-center gap-3 mb-6">
                     <i class="fa-solid fa-clock-rotate-left text-xl text-brand-600"></i>
                     <h3 class="text-lg font-bold text-slate-800">Movement & Maintenance History</h3>
@@ -411,7 +411,7 @@
             <div class="flex flex-col gap-6">
                 
                 <!-- Notes -->
-                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100">
+                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 border-t-4 border-t-brand-600">
                     <div class="flex items-center gap-3 mb-4">
                         <i class="fa-solid fa-paperclip text-lg text-brand-600"></i>
                         <h3 class="text-lg font-bold text-slate-800">Notes & Attachments</h3>
@@ -429,7 +429,7 @@
                 </div>
 
                 <!-- Gallery -->
-                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 flex-1">
+                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 border-t-4 border-t-brand-600 flex-1">
                     <div class="flex items-center gap-3 mb-4">
                         <i class="fa-solid fa-images text-lg text-brand-600"></i>
                         <h3 class="text-lg font-bold text-slate-800">Image Logs Gallery</h3>
