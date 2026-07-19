@@ -2,8 +2,7 @@
 <html lang="th">
 <head>
     <link rel="icon" type="image/png" href="logo02.png">
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="https://placehold.co/100x100/ff85a2/ffffff?text=IT">
+    <meta charset="UTF-8">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ค้นหาครุภัณฑ์ - IT UDON HOSP</title>
     
@@ -222,27 +221,27 @@
             border-radius: 3px;
         }
 
-        /* Floating Scanner Button */
-        .fab-scanner {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 65px;
-            height: 65px;
+        /* ปุ่มสแกน QR/Barcode ข้างช่องกรอกข้อมูล */
+        .btn-scan-bar {
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, var(--pink-primary), var(--pink-neon));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.8rem;
-            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.4);
-            border: 3px solid var(--white);
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(214, 51, 132, 0.2);
+            border: 2px solid var(--white);
             cursor: pointer;
-            z-index: 1000;
             transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
         }
-        .fab-scanner:active { transform: scale(0.9); box-shadow: 0 4px 15px rgba(214, 51, 132, 0.3); }
+        .btn-scan-bar:active { 
+            transform: scale(0.9); 
+            box-shadow: 0 2px 6px rgba(214, 51, 132, 0.15); 
+        }
 
         /* Scanner Modal */
         #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--pink-light); }
@@ -308,13 +307,19 @@
         </div>
     </header>
 
-    <!-- SEARCH BAR -->
+    <!-- SEARCH BAR WITH SCANNER BUTTON -->
     <div class="search-container">
-        <div class="search-input-wrapper app-layout-wrapper">
-            <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์ Asset ID หรือ Serial เพื่อค้นหา..." autocomplete="off" disabled>
-            <button type="button" id="clearBtn" class="search-clear-btn">
-                <i class="fa-solid fa-circle-xmark"></i>
+        <div class="search-input-wrapper app-layout-wrapper d-flex align-items-center gap-2">
+            <div class="position-relative flex-grow-1">
+                <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์ Asset ID หรือ Serial เพื่อค้นหา..." autocomplete="off" disabled>
+                <button type="button" id="clearBtn" class="search-clear-btn">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+            <!-- ปุ่มสแกน QR ถูกย้ายมาอยู่ตรงนี้ข้างๆ ช่องกรอกข้อมูล -->
+            <button type="button" class="btn-scan-bar" onclick="openScannerModal()" title="สแกน QR / Barcode">
+                <i class="fa-solid fa-qrcode"></i>
             </button>
         </div>
     </div>
@@ -338,11 +343,6 @@
             <h5 class="mt-3 text-muted fw-bold" id="emptyStateTitle">ไม่พบข้อมูล</h5>
             <p class="small text-muted mb-0" id="emptyStateMsg">ลองค้นหาด้วยรหัสครุภัณฑ์หรือสแกนใหม่อีกครั้ง</p>
         </div>
-    </div>
-
-    <!-- FLOATING SCANNER BUTTON -->
-    <div class="fab-scanner" onclick="openScannerModal()" title="สแกน QR / Barcode">
-        <i class="fa-solid fa-qrcode"></i>
     </div>
 
     <!-- Modal: QR Scanner -->
