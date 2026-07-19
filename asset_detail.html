@@ -144,304 +144,321 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- แผงหน้าปัดข้อมูลหลัก (Main Dashboard Container) -->
-    <div id="mainDashboard" class="hidden max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8">
+    <!-- นำ Padding ออกจากกล่องนอกสุดเพื่อให้ Header ชิดขอบจอ 100% -->
+    <div id="mainDashboard" class="hidden w-full">
         
-        <!-- HEADER (Top Navigation Bar Style) -->
-        <header class="sticky top-0 z-50 w-full bg-white rounded-b-2xl shadow-soft p-5 md:p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-brand-600">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center border border-brand-100 shadow-sm p-1">
-                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="w-full h-full object-contain rounded-full">
+        <!-- HEADER (Top Navigation Bar Style) ติดขอบบนสุดตามคำสั่ง -->
+        <header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-sm p-4 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-teal-500">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="w-14 h-14 md:w-16 md:h-16 bg-brand-50 rounded-2xl flex items-center justify-center border border-brand-100 shadow-sm p-1 overflow-hidden shrink-0">
+                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-slate-800 leading-tight">โรงพยาบาลอุดรธานี</h1>
-                    <p class="text-brand-600 font-medium text-sm md:text-base">รายละเอียดครุภัณฑ์คอมพิวเตอร์</p>
+                    <h1 class="text-lg md:text-2xl font-extrabold text-slate-800 leading-tight tracking-tight">โรงพยาบาลอุดรธานี</h1>
+                    <p class="text-teal-600 font-bold text-xs md:text-sm tracking-wide">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
                     <p id="valAssetID" class="text-sm md:text-xl font-medium text-accent-500">-</p>
                 </div>
             </div>
             
-            <div class="flex flex-col items-end gap-3 w-full md:w-auto">
-                <p id="currentDateTime" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-lg"></p>
-                <div class="flex flex-wrap justify-end gap-2 w-full md:w-auto no-print">
-                    <button onclick= window.close();" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-brand-600 transition text-sm font-medium shadow-sm">
-                        <i class="fa-solid fa-house-circle-xmark"></i> Back
+            <div class="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
+                <p id="currentDateTime" class="text-xs md:text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-full md:w-auto text-center"></p>
+                <div class="flex flex-wrap justify-center md:justify-end gap-2 w-full md:w-auto no-print">
+                    <!-- แก้ไขปุ่มเป็น Back ตามคำสั่ง -->
+                    <button onclick="window.history.back()" class="flex-1 md:flex-none px-4 py-2 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-200 transition text-sm font-bold shadow-sm flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Back
                     </button>
-                    <button onclick="window.print()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-brand-600 transition text-sm font-medium shadow-sm">
+                    <button onclick="window.print()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-brand-600 transition text-sm font-bold shadow-sm">
                         <i class="fa-solid fa-print"></i> พิมพ์
                     </button>
-                    <button onclick="location.reload()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-brand-600 transition text-sm font-medium shadow-sm">
+                    <button onclick="location.reload()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-brand-600 transition text-sm font-bold shadow-sm">
                         <i class="fa-solid fa-rotate-right"></i> รีเฟรช
                     </button>
-                    <button onclick="copyAssetLink()" class="flex-1 md:flex-none px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition text-sm font-medium shadow-sm">
-                        <i class="fa-solid fa-link"></i> คัดลอกลิงก์
+                    <button onclick="copyAssetLink()" class="flex-1 md:flex-none px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition text-sm font-bold shadow-sm">
+                        <i class="fa-solid fa-link"></i> ลิงก์
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- ส่วนข้อมูลหลัก (Hero Profile Section) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <!-- สร้าง Container ย่อยเพื่อรับ Padding เฉพาะเนื้อหาด้านล่าง -->
+        <div class="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 w-full overflow-x-hidden">
             
-            <!-- กรอบรูปภาพและ QR Code -->
-            <div class="lg:col-span-3 bg-white rounded-2xl shadow-soft p-5 flex flex-col items-center justify-center gap-6 relative overflow-hidden">
-                <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-brand-50 to-white"></div>
+            <!-- ส่วนข้อมูลหลัก (Hero Profile Section) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
                 
-                <div id="photoFrame" class="w-40 h-40 md:w-48 md:h-48 rounded-2xl border-4 border-white shadow-floating overflow-hidden z-10 bg-slate-100 flex items-center justify-center">
-                    <i class="fa-solid fa-image text-4xl text-slate-300"></i>
-                </div>
-                
-                <div class="w-full flex flex-col items-center bg-slate-50 rounded-xl p-4 z-10 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Scan to View</p>
-                    <div id="qrFrame" class="w-24 h-24 bg-white p-1 rounded-lg shadow-sm flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" title="คลิกเพื่อขยาย QR Code">
-                        <i class="fa-solid fa-qrcode text-3xl text-slate-300"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ข้อมูลระบุตัวตนครุภัณฑ์ (Asset Identity) -->
-            <div class="lg:col-span-9 bg-white rounded-2xl shadow-soft p-6 md:p-8 flex flex-col justify-center border-t-4 border-brand-500">
-                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-lg font-semibold text-sm mb-3">
-                            <i class="fa-solid fa-microchip"></i> <span id="valCategory">กำลังโหลด...</span>
-                        </div>
-                        <h2 id="valAssetNameGroup" class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 leading-tight">กำลังโหลดข้อมูล...</h2>
-                        <p id="valAssetName" class="text-slate-500 font-medium text-lg">-</p>
+                <!-- กรอบรูปภาพและ QR Code (เพิ่ม border-t-4) -->
+                <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-5 flex flex-col items-center justify-center gap-6 relative border border-slate-100 border-t-4 border-brand-500 overflow-hidden">
+                    <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-brand-50 to-white opacity-50 z-0"></div>
+                    
+                    <div id="photoFrame" class="w-40 h-40 md:w-48 md:h-48 rounded-2xl border-4 border-white shadow-md overflow-hidden z-10 bg-slate-50 flex items-center justify-center hover:shadow-lg transition-shadow">
+                        <i class="fa-solid fa-image text-4xl text-slate-300"></i>
                     </div>
                     
-                    <!-- โชว์รหัสตัวใหญ่ (Highlight Code) -->
-                    <div class="bg-slate-800 text-white rounded-xl p-4 md:min-w-[250px] shadow-lg border border-slate-700 text-center md:text-right">
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)</p>
-                        <p id="valCode" class="text-xl md:text-2xl font-bold text-accent-500">-</p>
+                    <div class="w-full flex flex-col items-center bg-slate-50 rounded-xl p-4 z-10 border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Scan to View</p>
+                        <div id="qrFrame" class="w-24 h-24 bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform z-10" title="คลิกเพื่อขยาย QR Code">
+                            <i class="fa-solid fa-qrcode text-3xl text-slate-300"></i>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-auto border-t border-slate-100 pt-6">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-400 mb-1">Serial Number (S/N)</p>
-                        <p id="valSerial" class="text-slate-800 font-bold">-</p>
+                <!-- ข้อมูลระบุตัวตนครุภัณฑ์ (Asset Identity) (เพิ่ม border-t-4) -->
+                <div class="lg:col-span-9 bg-white rounded-2xl shadow-sm p-6 md:p-8 flex flex-col justify-center border border-slate-100 border-t-4 border-brand-500 relative overflow-hidden">
+                    
+                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 w-full">
+                        <div class="w-full md:flex-1 min-w-0">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-lg font-bold text-xs mb-3 border border-brand-100 shadow-sm">
+                                <i class="fa-solid fa-microchip"></i> <span id="valCategory">กำลังโหลด...</span>
+                            </div>
+                            <h2 id="valAssetNameGroup" class="text-xl md:text-3xl font-extrabold text-slate-800 mb-2 leading-tight tracking-tight">กำลังโหลดข้อมูล...</h2>
+                            <p id="valAssetName" class="text-slate-500 font-semibold text-sm md:text-lg">-</p>
+                        </div>
+                        
+                        <!-- โชว์รหัสตัวใหญ่ (Highlight Code) ปรับให้ข้อความยาวได้เต็มแถวแบบอัตโนมัติ -->
+                        <div class="bg-slate-800 text-white rounded-2xl p-4 md:px-6 shadow-lg border border-slate-700 flex flex-col justify-center text-center md:text-right w-full md:w-auto flex-shrink-0 mt-4 md:mt-0">
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)</p>
+                            <div class="w-full max-w-full overflow-x-auto" style="scrollbar-width: none; -ms-overflow-style: none;">
+                                <p id="valCode" class="text-xl md:text-2xl font-extrabold text-teal-400 whitespace-nowrap tracking-wide">-</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-400 mb-1">สถานะใช้งาน (MA Status)</p>
-                        <span id="valMaStatus" class="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg font-bold text-sm border border-emerald-200">-</span>
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-400 mb-1">สถานะครอบครอง (CO Status)</p>
-                        <span id="valCoStatus" class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm border border-blue-200">-</span>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- แถบประเมินประสิทธิภาพ (KPI Metrics) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 hover:border-brand-200 transition-colors">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase">Health Score</h3>
-                    <i class="fa-solid fa-heart-pulse text-emerald-500 bg-emerald-50 p-2 rounded-lg"></i>
-                </div>
-                <div id="kpiHealth" class="text-3xl font-bold text-slate-800">-</div>
-                <div class="gauge-bar-outer">
-                    <div id="kpiHealthBar" class="gauge-bar-inner"></div>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 hover:border-brand-200 transition-colors">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase">Risk Level</h3>
-                    <i class="fa-solid fa-shield-halved text-amber-500 bg-amber-50 p-2 rounded-lg"></i>
-                </div>
-                <div id="kpiRisk" class="text-3xl font-bold text-slate-800">-</div>
-                <div id="valRiskScore" class="text-xs font-medium text-slate-400 mt-2">คะแนนความเสี่ยง: 0</div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 hover:border-brand-200 transition-colors">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase">Asset Age</h3>
-                    <i class="fa-solid fa-clock-rotate-left text-brand-500 bg-brand-50 p-2 rounded-lg"></i>
-                </div>
-                <div id="kpiAge" class="text-3xl font-bold text-slate-800">-</div>
-                <div id="valRemainingLife" class="text-xs font-medium text-slate-400 mt-2">-</div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 hover:border-brand-200 transition-colors">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase">MA Count</h3>
-                    <i class="fa-solid fa-screwdriver-wrench text-purple-500 bg-purple-50 p-2 rounded-lg"></i>
-                </div>
-                <div id="kpiMA" class="text-3xl font-bold text-slate-800">-</div>
-                <div id="valTotalRepairCost" class="text-xs font-medium text-slate-400 mt-2">มูลค่าซ่อมสะสม: 0 ฿</div>
-            </div>
-        </div>
-
-        <!-- ข้อมูลรายละเอียดแบบ Grid 3 คอลัมน์ -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            
-            <!-- ข้อมูลสถานที่ตั้ง & พื้นฐาน -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
-                <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div>
-                    <h3 class="font-bold text-slate-800">Location & Basic Info</h3>
-                </div>
-                <div class="p-5 flex flex-col gap-4 flex-1">
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">สถานที่ติดตั้งปัจจุบัน</p>
-                        <p id="valCurrentLoc" class="font-semibold text-brand-600 bg-brand-50 p-2 rounded-lg">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">หน่วยงานรับผิดชอบดั้งเดิม</p>
-                        <p id="valInstallLoc" class="text-slate-700 font-medium">-</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-auto border-t border-slate-100 pt-6 w-full">
                         <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">NOUPID / NOID_2</p>
-                            <p id="valNoupid" class="text-slate-700 font-medium text-sm">-</p>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Serial Number (S/N)</p>
+                            <p id="valSerial" class="text-slate-800 font-extrabold text-sm md:text-base truncate" title="-">-</p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">Type ID</p>
-                            <p id="valTypeID" class="text-slate-700 font-medium text-sm">-</p>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะใช้งาน (MA Status)</p>
+                            <span id="valMaStatus" class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg font-bold text-xs border border-emerald-200 shadow-sm">-</span>
                         </div>
-                    </div>
-                    <div class="hidden">
-                        <span id="valInstallLocDesc"></span>
-                        <span id="valOldCode"></span>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะครอบครอง (CO Status)</p>
+                            <span id="valCoStatus" class="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-200 shadow-sm">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ข้อมูลด้านสเปกและเทคนิค (Technical Information) -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
-                <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-laptop-code"></i></div>
-                    <h3 class="font-bold text-slate-800">Technical Specifications</h3>
-                </div>
-                <div class="p-5 flex flex-col gap-4 flex-1">
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">ยี่ห้อ / รุ่น / รูปลักษณ์</p>
-                        <p id="valSpec" class="text-slate-700 font-medium text-sm line-clamp-3">-</p>
+            <!-- แถบประเมินประสิทธิภาพ (KPI Metrics) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+                <!-- เพิ่ม border-t-4 ให้ทุก Card -->
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-teal-500 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Health Score</h3>
+                        <i class="fa-solid fa-heart-pulse text-emerald-500 bg-emerald-50 p-2 rounded-xl"></i>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">IP Address</p>
-                            <p id="valTechIP" class="text-indigo-700 font-bold font-mono text-sm">-</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">MAC Address</p>
-                            <p id="valTechMAC" class="text-slate-600 font-mono text-sm">-</p>
-                        </div>
+                    <div id="kpiHealth" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
+                    <div class="gauge-bar-outer mt-auto">
+                        <div id="kpiHealthBar" class="gauge-bar-inner"></div>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">ระบบปฏิบัติการ (OS)</p>
-                        <p id="valTechOS" class="text-slate-700 font-medium text-sm">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">Hardware Specs</p>
-                        <p id="valTechSpecs" class="text-slate-700 font-medium text-sm">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ข้อมูลการจัดซื้อ (Financial Information) -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col">
-                <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                    <h3 class="font-bold text-slate-800">Financial & Contract</h3>
-                </div>
-                <div class="p-5 flex flex-col gap-4 flex-1">
-                    <div class="flex justify-between items-end border-b border-dashed border-slate-200 pb-3">
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">ราคาทุนครุภัณฑ์</p>
-                            <p id="valPrice" class="text-xl font-bold text-emerald-600">-</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">วันที่รับเข้าคลัง</p>
-                            <p id="valReceiveDate" class="text-slate-700 font-medium text-sm">-</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">แหล่งงบประมาณจัดซื้อ</p>
-                        <p id="valFund" class="text-slate-700 font-medium text-sm">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">ระยะเวลารับประกันสินค้า</p>
-                        <p id="valWarranty" class="text-slate-700 font-medium text-sm bg-amber-50 p-2 rounded-lg border border-amber-100">-</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-auto">
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">อายุทางบัญชี</p>
-                            <p id="valAssetAgeSheet" class="text-slate-700 font-medium text-sm">-</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">เกณฑ์มาตรฐาน</p>
-                            <p id="valAssetUnderStd" class="text-slate-700 font-medium text-sm">-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ประวัติการทำงานและบันทึกย่อ -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            
-            <!-- History Section -->
-            <div class="bg-white rounded-2xl shadow-soft p-5 md:p-6 border border-slate-100">
-                <div class="flex items-center gap-3 mb-6">
-                    <i class="fa-solid fa-clock-rotate-left text-xl text-brand-600"></i>
-                    <h3 class="text-lg font-bold text-slate-800">Movement & Maintenance History</h3>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Movement -->
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-truck-fast"></i> ประวัติเคลื่อนย้าย</h4>
-                        <div id="timelineMovement" class="timeline">
-                            <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-amber-500 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Risk Level</h3>
+                        <i class="fa-solid fa-shield-halved text-amber-500 bg-amber-50 p-2 rounded-xl"></i>
+                    </div>
+                    <div id="kpiRisk" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
+                    <div id="valRiskScore" class="text-xs font-bold text-slate-400 mt-auto pt-3">คะแนนความเสี่ยง: 0</div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-brand-500 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Asset Age</h3>
+                        <i class="fa-solid fa-clock-rotate-left text-brand-500 bg-brand-50 p-2 rounded-xl"></i>
+                    </div>
+                    <div id="kpiAge" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
+                    <div id="valRemainingLife" class="text-xs font-bold text-slate-400 mt-auto pt-3 truncate">-</div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-purple-500 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">MA Count</h3>
+                        <i class="fa-solid fa-screwdriver-wrench text-purple-500 bg-purple-50 p-2 rounded-xl"></i>
+                    </div>
+                    <div id="kpiMA" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
+                    <div id="valTotalRepairCost" class="text-xs font-bold text-slate-400 mt-auto pt-3">มูลค่าซ่อมสะสม: 0 ฿</div>
+                </div>
+            </div>
+
+            <!-- ข้อมูลรายละเอียดแบบ Grid 3 คอลัมน์ -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                
+                <!-- ข้อมูลสถานที่ตั้ง & พื้นฐาน (เพิ่ม border-t-4) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-brand-500 overflow-hidden flex flex-col">
+                    <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot"></i></div>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Location & Basic Info</h3>
+                    </div>
+                    <div class="p-4 md:p-5 flex flex-col gap-5 flex-1">
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">สถานที่ติดตั้งปัจจุบัน</p>
+                            <p id="valCurrentLoc" class="font-extrabold text-brand-600 bg-brand-50 p-2.5 rounded-xl border border-brand-100 text-sm md:text-base">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">หน่วยงานรับผิดชอบดั้งเดิม</p>
+                            <p id="valInstallLoc" class="text-slate-700 font-semibold text-sm md:text-base">-</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">NOUPID / NOID_2</p>
+                                <p id="valNoupid" class="text-slate-700 font-semibold text-sm">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">Type ID</p>
+                                <p id="valTypeID" class="text-slate-700 font-semibold text-sm">-</p>
+                            </div>
+                        </div>
+                        <div class="hidden">
+                            <span id="valInstallLocDesc"></span>
+                            <span id="valOldCode"></span>
                         </div>
                     </div>
-                    <!-- MA/PM -->
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-wrench"></i> ประวัติซ่อมบำรุง</h4>
-                        <div id="timelineMA" class="timeline">
-                            <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                </div>
+
+                <!-- ข้อมูลด้านสเปกและเทคนิค (Technical Information) (เพิ่ม border-t-4) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-indigo-500 overflow-hidden flex flex-col">
+                    <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-laptop-code"></i></div>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Technical Specifications</h3>
+                    </div>
+                    <div class="p-4 md:p-5 flex flex-col gap-5 flex-1">
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ยี่ห้อ / รุ่น / รูปลักษณ์</p>
+                            <p id="valSpec" class="text-slate-700 font-semibold text-sm line-clamp-3">-</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">IP Address</p>
+                                <p id="valTechIP" class="text-indigo-700 font-extrabold font-mono text-sm truncate">-</p>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">MAC Address</p>
+                                <p id="valTechMAC" class="text-slate-600 font-mono font-semibold text-sm truncate">-</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระบบปฏิบัติการ (OS)</p>
+                            <p id="valTechOS" class="text-slate-700 font-semibold text-sm">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">Hardware Specs</p>
+                            <p id="valTechSpecs" class="text-slate-700 font-semibold text-sm">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลการจัดซื้อ (Financial Information) (เพิ่ม border-t-4) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-emerald-500 overflow-hidden flex flex-col">
+                    <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Financial & Contract</h3>
+                    </div>
+                    <div class="p-4 md:p-5 flex flex-col gap-5 flex-1">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-end border-b border-dashed border-slate-200 pb-4 gap-2">
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">ราคาทุนครุภัณฑ์</p>
+                                <p id="valPrice" class="text-xl md:text-2xl font-extrabold text-emerald-600">-</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">วันที่รับเข้าคลัง</p>
+                                <p id="valReceiveDate" class="text-slate-700 font-semibold text-sm">-</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">แหล่งงบประมาณจัดซื้อ</p>
+                            <p id="valFund" class="text-slate-700 font-semibold text-sm">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระยะเวลารับประกันสินค้า</p>
+                            <p id="valWarranty" class="text-amber-800 font-bold text-sm bg-amber-50 p-2.5 rounded-xl border border-amber-200 shadow-sm">-</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-auto">
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">อายุทางบัญชี</p>
+                                <p id="valAssetAgeSheet" class="text-slate-700 font-semibold text-sm">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">เกณฑ์มาตรฐาน</p>
+                                <p id="valAssetUnderStd" class="text-slate-700 font-semibold text-sm">-</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Notes & Gallery Section -->
-            <div class="flex flex-col gap-6">
+            <!-- ประวัติการทำงานและบันทึกย่อ -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 
-                <!-- Notes -->
-                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100">
-                    <div class="flex items-center gap-3 mb-4">
-                        <i class="fa-solid fa-paperclip text-lg text-brand-600"></i>
-                        <h3 class="text-lg font-bold text-slate-800">Notes & Attachments</h3>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">พิกัดตำแหน่ง GPS</p>
-                            <div id="valNote2" class="text-sm">-</div>
+                <!-- History Section (เพิ่ม border-t-4) -->
+                <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-brand-500">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold mb-1 uppercase">บันทึกเพิ่มเติม</p>
-                            <div id="valNote3" class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">-</div>
+                        <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Movement & Maintenance</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Movement -->
+                        <div class="w-full overflow-hidden">
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-truck-fast"></i> ประวัติเคลื่อนย้าย</h4>
+                            <div id="timelineMovement" class="timeline">
+                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                            </div>
+                        </div>
+                        <!-- MA/PM -->
+                        <div class="w-full overflow-hidden">
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-wrench"></i> ประวัติซ่อมบำรุง</h4>
+                            <div id="timelineMA" class="timeline">
+                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gallery -->
-                <div class="bg-white rounded-2xl shadow-soft p-5 border border-slate-100 flex-1">
-                    <div class="flex items-center gap-3 mb-4">
-                        <i class="fa-solid fa-images text-lg text-brand-600"></i>
-                        <h3 class="text-lg font-bold text-slate-800">Image Logs Gallery</h3>
+                <!-- Notes & Gallery Section -->
+                <div class="flex flex-col gap-6 w-full overflow-hidden">
+                    
+                    <!-- Notes (เพิ่ม border-t-4) -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-slate-600">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-paperclip"></i>
+                            </div>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Notes & Attachments</h3>
+                        </div>
+                        <div class="space-y-5">
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">พิกัดตำแหน่ง GPS</p>
+                                <div id="valNote2" class="text-sm">-</div>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">บันทึกเพิ่มเติม</p>
+                                <div id="valNote3" class="text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-100 font-medium">-</div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="galleryContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        <p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม</p>
+
+                    <!-- Gallery (เพิ่ม border-t-4) -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-sky-500 flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-images"></i>
+                            </div>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Image Logs Gallery</h3>
+                        </div>
+                        <div id="galleryContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            <p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม</p>
+                        </div>
                     </div>
                 </div>
+                
             </div>
             
-        </div>
-    </div>
+        </div> <!-- ปิด Content Wrapper -->
+    </div> <!-- ปิด mainDashboard -->
 
     <!-- หน้าต่างแสดงผลรูปภาพ Lightbox -->
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
@@ -458,11 +475,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             startClock();
 
-            // 1. ดึงข้อมูล Parameter จากหน้า URL
-            const urlParams = new URLSearchParams(window.location.search);
-            let assetId = urlParams.get('AssetID') || urlParams.get('id') || urlParams.get('assetid');
+            // 1. รับค่าพารามิเตอร์ ID จากตัวแปรที่ Google Apps Script (code.gs) ส่งมาให้โดยตรง
+            let assetId = "<?= typeof urlId !== 'undefined' ? urlId : '' ?>";
+            
+            // กรณีรันบนโหมด Local หรือ Preview (แท็กยังไม่ถูกแปลผล) ให้ดึงจาก URL ปกติ
+            if (assetId.includes("?=") || !assetId) {
+                const urlParams = new URLSearchParams(window.location.search);
+                assetId = urlParams.get('AssetID') || urlParams.get('id') || urlParams.get('assetid');
+            }
 
-            // ค่าเริ่มต้นเมื่อไม่มี Parameter ส่งมา (เช่นการโหลดหน้าพรีวิว)
+            // ค่าเริ่มต้นเมื่อไม่มี Parameter ใดๆ ส่งมาเลย
             if (!assetId) {
                 assetId = "2-08-003-005-67-211"; 
             }
@@ -536,7 +558,10 @@
                     calculations: {
                         healthScore: 94,
                         riskScore: 10,
-                        riskLevel: "Low"
+                        riskLevel: "Low",
+                        totalMoves: 2,
+                        totalPM: 1,
+                        totalMA: 2
                     },
                     logs: {
                         move: [
@@ -709,8 +734,9 @@
                 return sum + (isNaN(costVal) ? 0 : costVal);
             }, 0);
 
-            // KPI ประวัติการซ่อมบำรุง
-            safeSetText('kpiMA', maRecords.length + ' ครั้ง');
+            // KPI ประวัติการซ่อมบำรุง (ดึงค่า calc.totalMA จาก Backend โดยตรง)
+            const maCount = calc.totalMA !== undefined ? calc.totalMA : maRecords.length;
+            safeSetText('kpiMA', maCount + ' ครั้ง');
             safeSetText('valTotalRepairCost', 'มูลค่าซ่อมสะสม: ' + totalRepairCost.toLocaleString() + ' ฿');
 
             // --- NOTES & GPS MAPPING ---
