@@ -50,6 +50,14 @@
             overscroll-behavior: none;
         }
 
+        /* คลาสสไตล์สีขอบชมพูบานเย็นโรงพยาบาลอุดรธานีแบบปลอดภัยสูง (ไม่พึ่งพา Tailwind Runtime) */
+        .border-t-udon {
+            border-top-color: #E6005C !important;
+        }
+        .border-b-udon {
+            border-bottom-color: #E6005C !important;
+        }
+
         /* ลายน้ำพื้นหลัง (Watermark) */
         .watermark-bg {
             position: fixed;
@@ -148,7 +156,7 @@
     <div id="mainDashboard" class="hidden w-full">
         
         <!-- HEADER (Top Navigation Bar Style) ติดขอบบนสุดตามคำสั่ง -->
-        <header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-sm p-4 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-[#E6005C]">
+        <header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-sm p-4 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-b-udon">
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <div class="w-14 h-14 md:w-16 md:h-16 bg-brand-50 rounded-2xl flex items-center justify-center border border-brand-100 shadow-sm p-1 overflow-hidden shrink-0">
                     <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="w-full h-full object-contain">
@@ -187,7 +195,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
                 
                 <!-- กรอบรูปภาพและ QR Code จัดเป็นแถวแนวนอนในมือถือ (flex-row) และเป็นแนวตั้งใน PC (lg:flex-col) -->
-                <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-4 sm:p-5 flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-6 relative border border-slate-100 border-t-4 border-[#E6005C] overflow-hidden">
+                <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-4 sm:p-5 flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-6 relative border border-slate-100 border-t-4 border-t-udon overflow-hidden">
                     <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-pink-50 to-white opacity-50 z-0"></div>
                     
                     <div id="photoFrame" class="w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-2xl border-4 border-white shadow-md overflow-hidden z-10 bg-slate-50 flex items-center justify-center hover:shadow-lg transition-shadow shrink-0">
@@ -203,7 +211,7 @@
                 </div>
 
                 <!-- ข้อมูลระบุตัวตนครุภัณฑ์ (Asset Identity) (เพิ่ม border-t-4) -->
-                <div class="lg:col-span-9 bg-white rounded-2xl shadow-sm p-6 md:p-8 flex flex-col justify-center border border-slate-100 border-t-4 border-[#E6005C] relative overflow-hidden">
+                <div class="lg:col-span-9 bg-white rounded-2xl shadow-sm p-6 md:p-8 flex flex-col justify-center border border-slate-100 border-t-4 border-t-udon relative overflow-hidden">
                     
                     <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 w-full">
                         <div class="w-full md:flex-1 min-w-0">
@@ -243,7 +251,7 @@
             <!-- แถบประเมินประสิทธิภาพ (KPI Metrics) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
                 <!-- เพิ่ม border-t-4 ให้ทุก Card เปลี่ยนสีเป็นชมพูบานเย็น -->
-                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-[#E6005C] flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Health Score</h3>
                         <i class="fa-solid fa-heart-pulse text-[#E6005C] bg-pink-50 p-2 rounded-xl"></i>
@@ -254,7 +262,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-[#E6005C] flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Risk Level</h3>
                         <i class="fa-solid fa-shield-halved text-amber-500 bg-amber-50 p-2 rounded-xl"></i>
@@ -263,7 +271,7 @@
                     <div id="valRiskScore" class="text-xs font-bold text-slate-400 mt-auto pt-3">คะแนนความเสี่ยง: 0</div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-[#E6005C] flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Asset Age</h3>
                         <i class="fa-solid fa-clock-rotate-left text-brand-500 bg-brand-50 p-2 rounded-xl"></i>
@@ -272,7 +280,7 @@
                     <div id="valRemainingLife" class="text-xs font-bold text-slate-400 mt-auto pt-3 truncate">-</div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-[#E6005C] flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">MA Count</h3>
                         <i class="fa-solid fa-screwdriver-wrench text-purple-500 bg-purple-50 p-2 rounded-xl"></i>
@@ -286,7 +294,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 
                 <!-- ข้อมูลสถานที่ตั้ง & พื้นฐาน -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-[#E6005C] overflow-hidden flex flex-col">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot"></i></div>
                         <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Location & Basic Info</h3>
@@ -318,7 +326,7 @@
                 </div>
 
                 <!-- ข้อมูลด้านสเปกและเทคนิค (Technical Information) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-[#E6005C] overflow-hidden flex flex-col">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-laptop-code"></i></div>
                         <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Technical Specifications</h3>
@@ -350,7 +358,7 @@
                 </div>
 
                 <!-- ข้อมูลการจัดซื้อ (Financial Information) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-[#E6005C] overflow-hidden flex flex-col">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                         <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Financial & Contract</h3>
@@ -362,7 +370,7 @@
                                 <p id="valPrice" class="text-xl md:text-2xl font-extrabold text-emerald-600">-</p>
                             </div>
                             <div class="sm:text-right">
-                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">วันที่รับเข้าคลัง</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">วันที่รับเข้า</p>
                                 <p id="valReceiveDate" class="text-slate-700 font-semibold text-sm">-</p>
                             </div>
                         </div>
@@ -392,7 +400,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 
                 <!-- History Section -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-[#E6005C]">
+                <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-t-udon">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                             <i class="fa-solid fa-clock-rotate-left"></i>
@@ -422,7 +430,7 @@
                 <div class="flex flex-col gap-6 w-full overflow-hidden">
                     
                     <!-- Notes -->
-                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-[#E6005C]">
+                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-t-udon">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-paperclip"></i>
@@ -442,7 +450,7 @@
                     </div>
 
                     <!-- Gallery -->
-                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-[#E6005C] flex-1">
+                    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-t-udon flex-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-images"></i>
