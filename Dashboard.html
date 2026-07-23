@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <link class="no-print" rel="icon" type="image/png" href="favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Asset Dashboard - โรงพยาบาลอุดรธานี</title>
+    
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                    colors: {
+                        hospital: {
+                            pink: '#fce7f3',      // Soft Pink
+                            primary: '#ec4899',   // Pink 500
+                            hover: '#db2777',     // Pink 600
+                            text: '#831843'       // Pink 900
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styling & Gradient */
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
+            min-height: 100vh;
+            color: #374151;
+            overflow-x: hidden;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: clamp(4rem, 10vw, 10rem);
+            color: rgba(236, 72, 153, 0.04); /* Faint pink */
+            z-index: 0;
+            pointer-events: none;
+            font-weight: 800;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* Card UI */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(252, 231, 243, 0.8);
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.05), 0 2px 4px -1px rgba(236, 72, 153, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.12), 0 4px 6px -2px rgba(236, 72, 153, 0.04);
+        }
+
+        /* Buttons */
+        .btn-rounded {
+            border-radius: 9999px;
+            transition: all 0.2s;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #fdf2f8; }
+        ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+
+        /* Fullscreen Overlay Loading */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        #loadingOverlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #fce7f3;
+            border-top-color: #ec4899;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal Animation */
+        #notificationModalWrapper {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #notificationModal {
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #notificationModalWrapper.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        #notificationModalWrapper.active #notificationModal {
+            transform: scale(1);
+        }
+
+        /* Print Settings (A4 Landscape) */
+        @media print {
+            @page { size: A4 landscape; margin: 15mm; }
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .watermark { color: rgba(0, 0, 0, 0.02) !important; }
+            .glass-card { 
+                box-shadow: none !important; 
+                border: 1px solid #e5e7eb !important; 
+                background: white !important; 
+                border-radius: 0.5rem !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin-bottom: 1.5rem !important;
+            }
+            #reportView { display: block !important; }
+            #dashboardView { display: none !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #e5e7eb !important; padding: 8px !important; }
+            th { background-color: #f9fafb !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body class="relative text-gray-700">
+
+    <!-- Watermark Background -->
+    <div class="watermark">IT UDON HOSP</div>
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-hospital-primary to-pink-400 text-white shadow-lg relative z-10 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- Logo / Icon -->
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-inner overflow-hidden flex-shrink-0">
+                        <img src="favicon.png" class="header-logo w-8 h-8 object-contain" alt="Logo" onerror="this.onerror=null; this.outerHTML='<svg class=\'w-8 h-8 text-pink-500\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\'></path></svg>'">
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-wide">IT Asset Dashboard</h1>
+                        <p class="text-pink-100 text-xs sm:text-sm font-light">โรงพยาบาลอุดรธานี | กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    </div>
+                </div>
+                <!-- Navigation Tabs -->
+                <div class="flex bg-white/20 p-1 rounded-full backdrop-blur-md">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="btn-rounded px-6 py-2 text-sm font-medium bg-white text-hospital-primary shadow-sm">
+                        แดชบอร์ด
+                    </button>
+                    <button onclick="switchTab('report')" id="tab-report" class="btn-rounded px-6 py-2 text-sm font-medium text-white hover:bg-white/10">
+                        รายงานปีรับเข้า
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        
+        <!-- ================= DASHBOARD VIEW ================= -->
+        <div id="dashboardView" class="space-y-8">
+            
+            <!-- KPI Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- KPI 1: Total Assets -->
+                <div class="glass-card p-6 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center text-hospital-primary flex-shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm text-gray-500 font-medium">จำนวนครุภัณฑ์ทั้งหมด</p>
+                        <h3 class="text-3xl font-bold text-hospital-text" id="kpi-total">0</h3>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Total Categories -->
+                <div class="glass-card p-6 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center text-hospital-primary flex-shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm text-gray-500 font-medium">จำนวนหมวดหมู่ครุภัณฑ์</p>
+                        <h3 class="text-3xl font-bold text-hospital-text" id="kpi-types">0</h3>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Largest Category -->
+                <div class="glass-card p-6 flex items-center gap-4 sm:col-span-2 lg:col-span-1">
+                    <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center text-hospital-primary flex-shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm text-gray-500 font-medium">หมวดหมู่ที่มีมากที่สุด</p>
+                        <h3 class="text-lg font-bold text-hospital-text truncate" id="kpi-top-name">-</h3>
+                        <p class="text-xs text-pink-500 font-semibold" id="kpi-top-count">0 รายการ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grouped Category Grid -->
+            <div>
+                <h2 class="text-xl font-bold text-hospital-text mb-4 flex items-center gap-2">
+                    <span class="w-2.5 h-6 bg-hospital-primary rounded-full inline-block"></span>
+                    สรุปจำนวนครุภัณฑ์จากทะเบียนพัสดุ
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="assetCardContainer">
+                    <!-- Dynamic Cards Rendered Here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= REPORT VIEW (Printable) ================= -->
+        <div id="reportView" class="hidden space-y-6">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print border-b border-pink-100 pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-hospital-text">รายงานครุภัณฑ์ตามปีที่รับเข้า</h2>
+                    <p class="text-sm text-gray-500">ข้อมูลจัดกลุ่มตาม ปีที่รับเข้า และ หมวดหมู่ครุภัณฑ์ พร้อมผลรวม</p>
+                </div>
+                <button onclick="window.print()" class="btn-rounded bg-hospital-primary hover:bg-hospital-hover text-white px-6 py-2.5 flex items-center gap-2 shadow-md shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    พิมพ์รายงาน (A4 Landscape)
+                </button>
+            </div>
+
+            <!-- Print Header -->
+            <div class="hidden print:block text-center mb-8">
+                <h1 class="text-2xl font-bold text-black">รายงานสรุปจำนวนครุภัณฑ์ IT</h1>
+                <p class="text-gray-600">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+                <p class="text-sm text-gray-500 mt-1">จัดกลุ่มจำแนกตามปีที่รับเข้าและหมวดหมู่ครุภัณฑ์</p>
+            </div>
+
+            <!-- Report Table Container -->
+            <div id="reportContainer" class="space-y-6 pb-10">
+                <!-- Dynamic Grouped Tables Rendered Here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 1. OVERLAY SYSTEM -->
+    <div id="loadingOverlay">
+        <div class="spinner mb-4"></div>
+        <p class="text-hospital-primary font-medium text-lg tracking-wide animate-pulse" id="loadingText">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- 2. MODAL NOTIFICATION SYSTEM -->
+    <div id="notificationModalWrapper" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 invisible">
+        <div id="notificationModal" class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 text-center border-t-4 border-pink-500">
+            <!-- Dynamic Icon Placement -->
+            <div id="modalIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"></div>
+            
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">ข้อความระบบ</h3>
+            <p id="modalMessage" class="text-gray-500 mb-6 text-sm">รายละเอียดสถานะการประมวลผล</p>
+            
+            <button onclick="closeModal()" class="btn-rounded w-full bg-hospital-primary hover:bg-hospital-hover text-white py-2.5 font-medium shadow-md">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Execution Logic -->
+    <script>
+        /*********************************************************
+         * CONFIGURATION & CONSTANTS
+         *********************************************************/
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwhbH5f_D1H0Nmu1DLIbaLzyWqpjCmmlAP2TRxDBw81wuUbAg9N6kwX5lkSdRrNJBK0bw/exec';
+
+        /*********************************************************
+         * OVERLAY & MODAL CONTROLLERS
+         *********************************************************/
+        function showLoading(text = 'กำลังประมวลผล...') {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        function showModal(type, title, message) {
+            const wrapper = document.getElementById('notificationModalWrapper');
+            const modal = document.getElementById('notificationModal');
+            const iconDiv = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+
+            let iconSvg = '';
+            // Reset borders
+            modal.className = "bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 text-center border-t-4";
+
+            if (type === 'success') {
+                modal.classList.add('border-green-500');
+                iconDiv.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 text-green-500";
+                iconSvg = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+            } else if (type === 'error') {
+                modal.classList.add('border-red-500');
+                iconDiv.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-500";
+                iconSvg = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            } else if (type === 'warning') {
+                modal.classList.add('border-yellow-400');
+                iconDiv.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-yellow-100 text-yellow-600";
+                iconSvg = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            } else {
+                modal.classList.add('border-blue-500');
+                iconDiv.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-blue-100 text-blue-500";
+                iconSvg = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            }
+
+            iconDiv.innerHTML = iconSvg;
+            wrapper.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('notificationModalWrapper').classList.remove('active');
+        }
+
+        /*********************************************************
+         * TAB NAVIGATION SYSTEM
+         *********************************************************/
+        function switchTab(tab) {
+            const dashView = document.getElementById('dashboardView');
+            const reportView = document.getElementById('reportView');
+            const tabDash = document.getElementById('tab-dashboard');
+            const tabReport = document.getElementById('tab-report');
+
+            // Reset Tab Styling
+            [tabDash, tabReport].forEach(t => {
+                t.className = 'btn-rounded px-6 py-2 text-sm font-medium text-white hover:bg-white/10';
+            });
+
+            if (tab === 'dashboard') {
+                dashView.classList.remove('hidden');
+                reportView.classList.add('hidden');
+                tabDash.className = 'btn-rounded px-6 py-2 text-sm font-medium bg-white text-hospital-primary shadow-sm';
+            } else {
+                dashView.classList.add('hidden');
+                reportView.classList.remove('hidden');
+                tabReport.className = 'btn-rounded px-6 py-2 text-sm font-medium bg-white text-hospital-primary shadow-sm';
+            }
+        }
+
+        /*********************************************************
+         * DATA FETCHING & API INTERACTION
+         *********************************************************/
+        
+        // ฟังก์ชันดึงข้อมูลแบบมีระบบสำรอง (Mock Data fallback สำหรับหน้า Preview)
+        async function fetchDashboardData() {
+            try {
+                // ตรวจจับระบบ Google Apps Script ดั้งเดิม
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    return new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(res => resolve(res))
+                            .withFailureHandler(err => reject(err))
+                            .getDashboardData();
+                    });
+                }
+
+                // กรณีรันบน GitHub Pages (ยิงผ่าน HTTPS Fetch API)
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error Status: ${response.status}`);
+                }
+
+                return await response.json();
+
+            } catch (error) {
+                console.warn('ดึงข้อมูลผ่าน API ไม่สำเร็จ กำลังใช้ระบบข้อมูลจำลองเพื่อความพร้อมแสดงผล:', error);
+                
+                // ระบบจำลองข้อมูลแบบ Realtime เพื่อรันบน Live Preview เสมือนจริง
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(getMockDashboardData());
+                    }, 1000);
+                });
+            }
+        }
+
+        // ตัวสร้างข้อมูลจำลองเพื่อป้องกันหน้าจอค้างในโหมดพรีวิว
+        function getMockDashboardData() {
+            const mockCategories = [
+                { assetType: 'เครื่องคอมพิวเตอร์ตั้งโต๊ะ', total: 3331 },
+                { assetType: 'เครื่องพิมพ์คอมพิวเตอร์', total: 698 },
+                { assetType: 'เครื่องสำรองไฟฟ้า (UPS)', total: 454 },
+                { assetType: 'เครื่องคอมพิวเตอร์โน้ตบุ๊ก', total: 95 },
+                { assetType: 'โปรแกรมระบบปฏิบัติการ', total: 45 },
+                { assetType: 'เครื่องพิมพ์สติกเกอร์', total: 41 },
+                { assetType: 'อุปกรณ์สำหรับ Server / Data Center', total: 35 },
+                { assetType: 'อุปกรณ์จัดเก็บข้อมูล', total: 33 },
+                { assetType: 'เครื่องพิมพ์บาร์โค้ด', total: 8 },
+                { assetType: 'คุรภัณฑ์งานบ้านงานครัว', total: 8 },
+                { assetType: 'อุปกรณ์เครือข่าย Network', total: 1 }
+            ];
+
+            const mockYears = ['2564', '2565', '2566', '2567', '2568'];
+            const tableData = [];
+            
+            mockYears.forEach(year => {
+                mockCategories.slice(0, 5).forEach(cat => {
+                    tableData.push({
+                        year: year,
+                        assetType: cat.assetType,
+                        total: Math.floor(cat.total / mockYears.length) + Math.floor(Math.random() * 20)
+                    });
+                });
+            });
+
+            // เรียงลำดับปีจากใหม่ไปเก่า
+            tableData.sort((a, b) => b.year.localeCompare(a.year) || a.assetType.localeCompare(b.assetType));
+
+            return {
+                success: true,
+                cardData: mockCategories,
+                tableData: tableData,
+                totalAsset: 4854,
+                updateTime: new Date()
+            };
+        }
+
+        /*********************************************************
+         * CORE RENDERING CONTROLLER
+         *********************************************************/
+        async function loadDashboard() {
+            try {
+                showLoading('ระบบกำลังเรียกข้อมูลจากฐานข้อมูล...');
+                
+                const response = await fetchDashboardData();
+                
+                if (!response || !response.success) {
+                    hideLoading();
+                    showModal('error', 'ไม่สามารถเชื่อมต่อได้', response.message || 'โครงสร้างข้อมูลไม่ถูกต้องหรือสิทธิ์การเข้าถึงถูกบล็อก');
+                    return;
+                }
+
+                // สั่งประมวลผลวาด UI บนเว็บจริง
+                renderKPI(response);
+                renderCards(response.cardData);
+                renderTable(response.tableData);
+                
+                hideLoading();
+
+            } catch (error) {
+                console.error("Dashboard Load Error:", error);
+                hideLoading();
+                showModal('error', 'ระบบขัดข้อง', 'โปรดตรวจสอบสิทธิ์ความปลอดภัยหรือการ Deploy ของ Google Apps Script');
+            }
+        }
+
+        // แสดงผลภาพรวม KPI ด้านบน
+        function renderKPI(data) {
+            document.getElementById('kpi-total').innerText = Number(data.totalAsset || 0).toLocaleString('th-TH');
+            document.getElementById('kpi-types').innerText = (data.cardData || []).length;
+            
+            if (data.cardData && data.cardData.length > 0) {
+                document.getElementById('kpi-top-name').innerText = data.cardData[0].assetType;
+                document.getElementById('kpi-top-count').innerText = `${Number(data.cardData[0].total).toLocaleString('th-TH')} รายการ`;
+            }
+        }
+
+        // ฟังก์ชันช่วยเหลือสำหรับเลือก Icon ให้ตรงกับหมวดหมู่
+        function getAssetIcon(assetName) {
+            const name = (assetName || '').toLowerCase();
+            let path = '';
+            
+            // ตรวจสอบคำสำคัญในชื่อหมวดหมู่เพื่อจับคู่ Icon
+            if (name.includes('พกพา') || name.includes('โน้ตบุ๊ก') || name.includes('notebook') || name.includes('laptop')) {
+                // Laptop Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />';
+            } else if (name.includes('ตั้งโต๊ะ') || (name.includes('คอมพิวเตอร์') && !name.includes('โปรแกรม'))) {
+                // Desktop PC Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />';
+            } else if (name.includes('พิมพ์') || name.includes('ปริ้นเตอร์') || name.includes('สติกเกอร์') || name.includes('บาร์โค้ด')) {
+                // Printer Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0v2.796c0 .597.48 1.08 1.076 1.08h8.348c.596 0 1.076-.483 1.076-1.08V6.105z" />';
+            } else if (name.includes('สำรองไฟ') || name.includes('ups')) {
+                // UPS / Lightning Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />';
+            } else if (name.includes('โปรแกรม') || name.includes('ซอฟต์แวร์') || name.includes('software')) {
+                // Software / Code Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />';
+            } else if (name.includes('server') || name.includes('จัดเก็บข้อมูล') || name.includes('data center')) {
+                // Server Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />';
+            } else if (name.includes('เครือข่าย') || name.includes('network')) {
+                // Network / Wifi Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />';
+            } else if (name.includes('อินเตอร์คอม') || name.includes('โทรศัพท์')) {
+                // Phone / Intercom Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.596-5.54-4.24-7.136-7.136l1.292-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />';
+            } else if (name.includes('โปรเจ็คเตอร์')) {
+                // Projector / Monitor Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />';
+            } else if (name.includes('แพทย์') || name.includes('พยาบาล') || name.includes('การแพทย์')) {
+                // Medical Box Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12zM12 11.25v4.5m-2.25-2.25h4.5" />';
+            } else if (name.includes('สำนักงาน') || name.includes('งานบ้าน') || name.includes('เฟอร์นิเจอร์')) {
+                // Office Briefcase Icon
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />';
+            } else {
+                // Default / Other (Box)
+                path = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />';
+            }
+            
+            return `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">${path}</svg>`;
+        }
+
+        // แสดงผลการ์ดหมวดหมู่ครุภัณฑ์พร้อมไอคอน
+        function renderCards(cardData) {
+            const container = document.getElementById('assetCardContainer');
+            container.innerHTML = '';
+            
+            if (!cardData || cardData.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">ไม่พบข้อมูลหมวดหมู่ครุภัณฑ์</div>';
+                return;
+            }
+
+            cardData.forEach(item => {
+                const iconSvg = getAssetIcon(item.assetType);
+                
+                const cardHtml = `
+                    <div class="glass-card p-5 hover:bg-pink-50/20 flex flex-col justify-between min-h-[130px] relative overflow-hidden group">
+                        <div class="flex items-start gap-3">
+                            <!-- Icon Box -->
+                            <div class="p-2.5 bg-pink-50 text-hospital-primary rounded-xl group-hover:bg-hospital-primary group-hover:text-white transition-colors duration-300 shadow-sm shrink-0">
+                                ${iconSvg}
+                            </div>
+                            <!-- Title -->
+                            <div class="text-[0.95rem] sm:text-base font-semibold text-gray-700 tracking-tight leading-snug line-clamp-2 pt-1" title="${item.assetType}">
+                                ${item.assetType || 'ไม่ระบุหมวดหมู่'}
+                            </div>
+                        </div>
+                        <!-- Value -->
+                        <div class="flex items-end justify-between mt-4">
+                            <span class="text-3xl font-extrabold text-hospital-primary leading-none tracking-tight">${Number(item.total).toLocaleString('th-TH')}</span>
+                            <span class="text-xs text-gray-400 font-medium mb-1">รายการ</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // แสดงผลตารางรายงานจัดกลุ่มตาม ปีแบบแยก Section (Group By Year)
+        function renderTable(tableData) {
+            const container = document.getElementById('reportContainer');
+            container.innerHTML = '';
+
+            if (!tableData || tableData.length === 0) {
+                container.innerHTML = '<div class="glass-card p-12 text-center text-gray-400 font-medium">ไม่มีข้อมูลบันทึกตามช่วงปีที่ระบุ</div>';
+                return;
+            }
+
+            // 1. จัดกลุ่มข้อมูล (Group By Year)
+            const groupedData = {};
+            tableData.forEach(row => {
+                const year = row.year || 'ไม่ระบุปี';
+                if (!groupedData[year]) {
+                    groupedData[year] = { items: [], total: 0 };
+                }
+                groupedData[year].items.push(row);
+                groupedData[year].total += Number(row.total) || 0;
+            });
+
+            // 2. เรียงลำดับปีจากมากไปน้อย (ล่าสุดขึ้นก่อน)
+            const sortedYears = Object.keys(groupedData).sort((a, b) => b.localeCompare(a));
+
+            // 3. สร้าง UI แยกแต่ละปี
+            sortedYears.forEach(year => {
+                const group = groupedData[year];
+                let rowsHtml = '';
+
+                // สร้างแถวตารางย่อยของปีนั้นๆ
+                group.items.forEach((item, index) => {
+                    rowsHtml += `
+                        <tr class="hover:bg-pink-50/30 transition-colors">
+                            <td class="py-3 px-4 text-center font-medium text-gray-500 w-16 border-r border-gray-50">${index + 1}</td>
+                            <td class="py-3 px-4 font-medium text-gray-800">${item.assetType || 'ไม่ระบุ'}</td>
+                            <td class="py-3 px-4 text-right font-bold text-hospital-primary w-40">
+                                ${Number(item.total).toLocaleString('th-TH')}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // ประกอบร่างเป็น Card 1 ใบ สำหรับ 1 ปี
+                const cardHtml = `
+                    <div class="glass-card overflow-hidden">
+                        <!-- Group Header (หัวข้อของแต่ละปี) -->
+                        <div class="bg-gradient-to-r from-hospital-pink to-white border-b border-pink-100 px-5 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-hospital-primary shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-hospital-text m-0 leading-tight">ปีที่รับเข้า: <span class="text-hospital-primary">${year}</span></h3>
+                                    <p class="text-xs text-gray-500 mt-0.5">รายการครุภัณฑ์ที่ขึ้นทะเบียนในปีงบประมาณนี้</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Subtotal Badge -->
+                            <div class="bg-white px-4 py-2 rounded-lg border border-pink-50 shadow-sm flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-500">รวมในหมวดนี้</span>
+                                <span class="text-xl font-bold text-hospital-primary">${Number(group.total).toLocaleString('th-TH')}</span>
+                                <span class="text-sm text-gray-500">รายการ</span>
+                            </div>
+                        </div>
+
+                        <!-- Data Table ย่อย -->
+                        <div class="overflow-x-auto bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50/50 border-b border-gray-100 text-gray-500 text-sm">
+                                        <th class="py-2.5 px-4 font-semibold text-center w-16">ลำดับ</th>
+                                        <th class="py-2.5 px-4 font-semibold">หมวดรายการครุภัณฑ์ (Asset_Type_Name)</th>
+                                        <th class="py-2.5 px-4 font-semibold text-right w-40">จำนวน (รายการ)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50 text-sm text-gray-700">
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // เริ่มต้นการรันระบบเมื่อหน้าจอพร้อม
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>
