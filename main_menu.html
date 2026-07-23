@@ -1,378 +1,1118 @@
-/**
- * ====================================================================
- * Backend API สำหรับระบบตรวจสอบครุภัณฑ์ (Full Data + All Departments)
- * ====================================================================
- */
-
-const SPREADSHEET_ID = "1ZVzODRCE9xvSAOLdOeicsBFCuUNQTZ7KvaQvdWraweQ"; // Master_Department
-const MASTER_ASSET_ID = "1Mqr2NJz8f_J4kfGjEAvPbSp159Lh72tZRTdX_feZG-0"; // Master_Asset (Asset_DB, Asset_DB2)
-const Master_Logs_ID = "1YViKtORwjdwUaflFuj9ss7iExJ-i75RYbsIILiWAawo"; // Master_Logs (ASSET_LOGS, Asset_Image_Logs)
-const ASSET_IMAGE_FOLDER_ID = "1LIi6TnkImf0VSK53GWKB24uRNCuVbvgr";   
-const ASSET_IMAGE_SHEET = 'Asset_Image_Logs'; 
-
-const LOOKUP = {
-  priorities: {
-    "PIO-001": "ตรวจรักษา (แพทย์)",
-    "PIO-002": "ข้อมูลผู้ป่วย (พยาบาล)",
-    "PIO-003": "บริการ/การเงิน/ห้องบัตร/ห้องยา/Lab",
-    "PIO-004": "งานเอกสาร/ธุรการ",
-    "PIO-005": "บริการทั่วไป/ซ่อมบำรุง/ช่างต่างๆ/โรงรถ"
-  },
-  assetTypes: {
-    "COM-001-0001": "เครื่องคอมพิวเตอร์ (All In One)",
-    "COM-001-0002": "เครื่องคอมพิวเตอร์ (Case)",
-    "COM-001-0003": "จอรับภาพ (Monitor)*ส่วนประกอบ",
-    "UPS-002-0004": "เครื่องสำรองไฟ (UPS)",
-    "PRI-003-0005": "เครื่องปริ้นเตอร์ (Printer Lasers)",
-    "SCA-004-0006": "เครื่องแสกนเนอร์",
-    "CAR-005-0007": "เครื่องอ่านบัตรประชาชน",
-    "PRI-003-0008": "เครื่องปริ้นเตอร์ (Thermal)"
-  },
-  shifts: { "1": "เช้า", "2": "บ่าย", "3": "ดึก" }
-};
-
-function doGet(e) {
-  const action = e.parameter ? e.parameter.action : null;
-  const depId = e.parameter ? e.parameter.DEP_ID : null;
-
-  try {
-    const ssDept = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const ssAsset = SpreadsheetApp.openById(MASTER_ASSET_ID);
-    const ssLog = SpreadsheetApp.openById(Master_Logs_ID);
-
-    // 1. กรณีดึงรายชื่อแผนกทั้งหมด
-    if (action === "getDeptList") {
-      const deptSheet = ssDept.getSheetByName("Department");
-      return createJsonResponse(getRowsData(deptSheet));
-    }
-
-    // 2. ดึงประวัติข้อมูลภาพรวมหน้าแรก (Global Dashboard)
-    if (action === "getGlobalDashboard") {
-      const logSheet = ssLog.getSheetByName("ASSET_LOGS");
-      const logData = getRowsData(logSheet) || [];
-      
-      // ดึงข้อมูล Asset จาก MASTER_ASSET_ID
-      const db1Data = getSheetData("Asset_DB", MASTER_ASSET_ID) || [];
-      const db2Data = getSheetData("Asset_DB2", MASTER_ASSET_ID) || [];
-      
-      // 📌 แก้ไขจุดนี้: ดึง Asset_Image_Logs จาก Master_Logs_ID ตามโครงสร้างของคุณ
-      const imgLogs = getSheetData("Asset_Image_Logs", Master_Logs_ID) || [];
-
-      // Map ข้อมูลรูปภาพ
-      let imageMap = {};
-      imgLogs.forEach(row => {
-        if (!row) return;
-        let aID = String(row['Asset_ID'] || "").trim();
-        let imgID = String(row['IMAGE_ID'] || "").trim();
-        if (aID && imgID) {
-          if (!imageMap[aID]) imageMap[aID] = [];
-          imageMap[aID].push(imgID);
-        }
-      });
-
-      // Map ข้อมูล Asset: หาจาก Asset_DB ก่อน ถ้าไม่เจอค่อยหาใน Asset_DB2 (เฉพาะ Note4 == "NON")
-      let assetMap = new Map();
-
-      const extractAssetDetail = (row) => {
-        const aID = String(row['AssetID'] || row['Asset_ID'] || "").trim();
-        return {
-          "Asset_Type_Group": String(row['Asset_Type_Name'] || row['ชื่อรายการครุภัณฑ์'] || "").trim(),
-          "Asset_Name_Detail": String(row['Asset_Item_Name'] || row['รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์'] || row['Detail'] || "").trim(),
-          "Date_In": String(row['Date_In'] || row['วันที่รับเข้า'] || row['DateIn'] || "").trim(),
-          "Age": String(row['อายุ'] || row['Age'] || row[19] || "ไม่มีบันทึก").trim(),
-          "GPS": String(row['GPS'] || "").trim(),
-          "Images": imageMap[aID] || []
-        };
-      };
-
-      // 2.1 ดึงจาก Asset_DB เป็นหลัก
-      db1Data.forEach(row => {
-        if (!row) return;
-        const key = String(row['AssetID'] || row['NOID'] || row['Serial'] || "").trim();
-        if (key) {
-          assetMap.set(key, extractAssetDetail(row));
-        }
-      });
-
-      // 2.2 ถ้าไม่เจอใน Asset_DB ให้หาใน Asset_DB2 (เฉพาะ Note4 == "NON")
-      db2Data.forEach(row => {
-        if (!row) return;
-        const key = String(row['AssetID'] || row['NOID'] || row['Serial'] || "").trim();
-        const note4Val = String(row['Note4'] || "").trim().toUpperCase();
-
-        if (key && !assetMap.has(key) && note4Val === "NON") {
-          assetMap.set(key, extractAssetDetail(row));
-        }
-      });
-
-      // 2.3 ประกบข้อมูล Log เข้ากับข้อมูล Asset
-      return createJsonResponse(logData.map(row => {
-        if (!row) return {};
-        const key = String(row.Asset_ID || row.NOID || "").trim();
-        const assetInfo = assetMap.get(key) || {};
-
-        return {
-          DEPT_ID: row.DEPT_ID || "",
-          Asset_Type: LOOKUP.assetTypes[row.Asset_Type_ID] || row.Asset_Type_ID || row.Asset_Type || assetInfo["Asset_Type_Group"] || "",
-          CoStatus: row.CoStatus || "",
-          Priority: LOOKUP.priorities[row.PIORITY_ID] || row.PIORITY_ID || row.Priority || "",
-          PIORITY_ID: row.PIORITY_ID || "",
-          NOID: row.NOID || "",
-          Asset_ID: row.Asset_ID || "",
-          Detail_ID: row.Detail_ID || "",
-          Serial_Number: row.Serial_Number || "",
-          
-          // ข้อมูลฟิลด์ที่ดึงมาจาก Asset_DB / Asset_DB2
-          "Asset_Name & Detail": assetInfo["Asset_Name_Detail"] || "",
-          "Date_In": assetInfo["Date_In"] || "",
-          "อายุ": assetInfo["Age"] || "ไม่มีบันทึก",
-          "GPS": assetInfo["GPS"] || "",
-          "Images": assetInfo["Images"] || []
-        };
-      }));
-    }
-
-    // กรณีมี depId
-    if (depId) {
-      switch(action) {
-        case "getDepartment": 
-          return createJsonResponse(getDepartmentData(ssDept, depId));
-        case "getAuditLogs": 
-          return createJsonResponse(getRawAuditLogs(ssLog, ssAsset, depId));
-        case "getFullData":
-        default: 
-          return getFullData(ssDept, ssAsset, ssLog, depId);
-      }
-    }
-
-    // Fallback
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "success",
-      message: "IT UDON HOSP: Asset Survey API is running successfully."
-    })).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (err) {
-    return createJsonResponse({ error: "System Error: " + err.toString() });
-  }
-}
-
-function getFullData(ssDept, ssAsset, ssLog, depId) {
-  const department = getDepartmentData(ssDept, depId);
-  const auditLogs = getRawAuditLogs(ssLog, ssAsset, depId);
-  
-  return createJsonResponse({ 
-    department: department, 
-    auditLogs: auditLogs 
-  });
-}
-
-function getDepartmentData(ssDept, depId) {
-  const deptSheet = ssDept.getSheetByName("Department");
-  if (!deptSheet) return {};
-  const data = deptSheet.getDataRange().getValues();
-  const headers = data[0];
-  const foundRow = data.slice(1).find(row => String(row[0]).trim() === String(depId).trim());
-  
-  let department = {};
-  if (foundRow) {
-    headers.forEach((h, i) => {
-      if (h) department[h.trim()] = foundRow[i];
-    });
-
-    const deptFileId = foundRow[13];
-    if (deptFileId && String(deptFileId).trim().length > 10) {
-      department.photoUrl = `https://drive.google.com/thumbnail?id=${String(deptFileId).trim()}&sz=w600`;
-    } else {
-      department.photoUrl = "";
-    }
-  }
-  return department;
-}
-
-function getRawAuditLogs(ssLog, ssAsset, depId) {
-  const logSheet = ssLog.getSheetByName("ASSET_LOGS");
-  if (!logSheet) return [];
-  const logData = getRowsData(logSheet) || [];
-  
-  // 📌 ฟังก์ชันล้างอักขระพิเศษ เหลือเฉพาะตัวอักษรและตัวเลข
-  const cleanKey = (val) => String(val || "").replace(/[^a-zA-Z0-9ก-ฮ]/g, '').toUpperCase();
-
-  // 1. อ่านข้อมูลอายุจาก Asset_DB โดยเชื่อมด้วย AssetID
-  const dbSheet1 = ssAsset.getSheetByName("Asset_DB");
-  const dbValues1 = dbSheet1 ? dbSheet1.getDataRange().getValues() : [];
-  const ageMap = {};
-  
-  if (dbValues1.length > 1) {
-    dbValues1.slice(1).forEach(row => {
-      // row[0] หรือ row[1] ที่เป็น AssetID
-      const assetIdKey = cleanKey(row['AssetID'] || row['Asset_ID'] || row[0] || row[1]);
-      if (assetIdKey) {
-        ageMap[assetIdKey] = row[18] || "ไม่มีบันทึก"; // Index 18 คือ คอลัมน์อายุ
-      }
-    });
-  }
-
-  // 2. ดึงข้อมูลอายุเพิ่มเติมจาก Asset_DB2 โดยเชื่อมด้วย AssetID
-  const dbSheet2 = ssAsset.getSheetByName("Asset_DB2");
-  const dbValues2 = dbSheet2 ? dbSheet2.getDataRange().getValues() : [];
-  if (dbValues2.length > 1) {
-    dbValues2.slice(1).forEach(row => {
-      const assetIdKey = cleanKey(row['AssetID'] || row['Asset_ID'] || row[0] || row[1]);
-      if (assetIdKey && !ageMap[assetIdKey]) {
-        ageMap[assetIdKey] = row[18] || "ไม่มีบันทึก";
-      }
-    });
-  }
-
-  // 3. ดึงข้อมูลรูปภาพจาก Asset_Image_Logs โดยเชื่อมด้วย Asset_ID
-  const imgSheetData = getSheetData("Asset_Image_Logs", Master_Logs_ID) || [];
-  let imageMap = {};
-  imgSheetData.forEach(row => {
-    if (!row) return;
-    let aID = cleanKey(row['Asset_ID']);
-    let imgID = String(row['IMAGE_ID'] || "").trim();
-    if (aID && imgID) {
-      if (!imageMap[aID]) imageMap[aID] = [];
-      imageMap[aID].push(imgID);
-    }
-  });
-
-  // 4. กรองข้อมูลเฉพาะแผนกที่ระบุ
-  const deptLogs = logData.filter(row => String(row.DEPT_ID).trim() === String(depId).trim());
-  
-  return deptLogs.map(row => {
-    // 📌 ดึงและล้างอักขระ Asset_ID จาก ASSET_LOGS
-    const rawAssetId = row.Asset_ID || row.ASSET_ID || "";
-    const cleanAssetKey = cleanKey(rawAssetId);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="logo003v1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Main Menu - IT UDON HOSP</title>
     
-    // ดึงอายุและรูปภาพโดยใช้ cleanAssetKey (จาก Asset_ID)
-    const ageVal = ageMap[cleanAssetKey] || row["อายุ"] || row.Age || "ไม่มีบันทึก";
-    const imagesFromLog = imageMap[cleanAssetKey] || [];
+    <!-- Google Fonts & Bootstrap & FontAwesome CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    return {
-      DEPT_ID: row.DEPT_ID,
-      Asset_Type: LOOKUP.assetTypes[row.Asset_Type_ID] || row.Asset_Type_ID || row.Asset_Type || "",
-      CoStatus: row.CoStatus || "",
-      Priority: LOOKUP.priorities[row.PIORITY_ID] || row.PIORITY_ID || row.Priority || "",
-      PIORITY_ID: row.PIORITY_ID || "",
-      DB_Age: ageVal,
-      "อายุ": ageVal,
-      NOID: row.NOID || "",
-      Asset_ID: row.Asset_ID || "",
-      Detail_ID: row.Detail_ID || "",
-      Serial_Number: row.Serial_Number || "",
-      Asset_Photo: row.Asset_Photo || row.PhotoUrl || "",
-      Images: imagesFromLog,
-      RegStatus: row.RegStatus || "มีทะเบียน"
-    };
-  });
-}
+    <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal Overlay -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-function doPost(e) {
-  try {
-    const action = e.parameter ? e.parameter.action : null;
+    <!-- ตรวจสอบสิทธิ์ (Auth Check) -->
+    <script src="auth-check.js"></script>
     
-    if (action === "updateAsset") {
-      const assetId = e.parameter.Asset_ID;
-      const detailId = e.parameter.Detail_ID;
-      const noid = e.parameter.NOID;
-      const priority = e.parameter.Priority;
-      const assetPhoto = e.parameter.Asset_Photo;
-
-      const ssLog = SpreadsheetApp.openById(Master_Logs_ID);
-      const logSheet = ssLog.getSheetByName("ASSET_LOGS");
-      if (!logSheet) throw new Error("Sheet ASSET_LOGS not found");
-
-      const logData = logSheet.getDataRange().getValues();
-      const headers = logData[0];
-      
-      const idCol = headers.indexOf("Asset_ID");
-      const detailCol = headers.indexOf("Detail_ID");
-      const noidCol = headers.indexOf("NOID");
-      const priorityCol = headers.indexOf("Priority"); 
-      const pioIdCol = headers.indexOf("PIORITY_ID");
-      const photoCol = headers.indexOf("Asset_Photo");
-      
-      let priorityId = priority;
-      for (let key in LOOKUP.priorities) {
-        if (LOOKUP.priorities[key] === priority) {
-          priorityId = key;
-          break;
+    <style>
+        :root {
+            --pink-soft: #fff0f5;
+            --pink-light: #ffb6c1;
+            --pink-primary: #ff85a2;
+            --pink-dark: #d63384;
+            --pink-neon: #ff1493; /* สีชมพูสว่างสะท้อนแสง (Deep Pink / Neon) */
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
+            --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
+            --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
-      }
 
-      let updated = false;
-      for (let i = 1; i < logData.length; i++) {
-        if (String(logData[i][idCol]) === String(assetId)) {
-          if (detailCol > -1) logSheet.getRange(i + 1, detailCol + 1).setValue(detailId);
-          if (noidCol > -1) logSheet.getRange(i + 1, noidCol + 1).setValue(noid);
-          if (priorityCol > -1) logSheet.getRange(i + 1, priorityCol + 1).setValue(priority);
-          if (pioIdCol > -1) logSheet.getRange(i + 1, pioIdCol + 1).setValue(priorityId);
-          if (photoCol > -1) logSheet.getRange(i + 1, photoCol + 1).setValue(assetPhoto);
-          updated = true;
-          break;
+        /* ป้องกัน Pull-to-refresh และอาการหน้าจอเด้ง (Bounce) บน Mobile */
+        html, body {
+            overscroll-behavior-y: none; 
+            overscroll-behavior-x: none;
         }
-      }
 
-      if (updated) {
-        return createJsonResponse({ status: "success", success: true, message: "อัปเดตข้อมูลสำเร็จ" });
-      } else {
-        return createJsonResponse({ status: "error", success: false, message: "ไม่พบรหัสครุภัณฑ์ในระบบ" });
-      }
-    }
-    
-    return createJsonResponse({ status: "error", success: false, message: "Invalid action" });
-    
-  } catch (err) {
-    return createJsonResponse({ status: "error", success: false, message: err.toString() });
-  }
-}
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
+            min-height: 100vh;
+            color: var(--gray-text);
+            padding-bottom: 90px; 
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-// ==========================================
-// Helper Functions
-// ==========================================
-function getSheetData(sheetName, fileId = SPREADSHEET_ID) {
-  const ss = SpreadsheetApp.openById(fileId);
-  const sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return [];
-  
-  const data = sheet.getDataRange().getValues();
-  if (data.length < 2) return [];
-  
-  const headers = data[0];
-  const records = [];
-  
-  for (let i = 1; i < data.length; i++) {
-    let rowObj = {};
-    if (data[i][0] === "" && data[i][1] === "") continue; 
-    
-    for (let j = 0; j < headers.length; j++) {
-      rowObj[headers[j]] = data[i][j];
-    }
-    records.push(rowObj);
-  }
-  return records;
-}
+       /* ลายน้ำแบบนูน (Embossed Watermark) - แสดงหลายบรรทัดเต็มหน้าจอ */
+        body::before {
+            /* ใช้ทริคสร้างข้อความยาว ๆ ซ้ำกันยาว ๆ หรือใช้ช่องว่างช่วย */
+            content: "UDH-IT TECHNICIAN MAINTERNACE & SUPPORT ";
+            
+            position: fixed;
+            top: -50%;  /* ขยายขอบเขตให้เกินหน้าจอเผื่อตอนหมุน */
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            
+            /* หมุนเอียงลายน้ำ */
+            transform: rotate(-30deg);
+            
+            /* สั่งให้จัดตัวอักษรขึ้นบรรทัดใหม่ซ้ำ ๆ และกระจายตัว */
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            
+            font-size: 5vw; /* ปรับขนาดเล็กลงเพื่อให้เรียงกันสวยงามเต็มหน้า */
+            font-weight: 900;
+            line-height: 2.5; /* ระยะห่างระหว่างบรรทัด */
+            z-index: -1;
+            pointer-events: none;
+            
+            /* สีกึ่งโปร่งใสที่ค่อนข้างกลืนกับพื้นหลังขาว/เทาอ่อน */
+            color: rgba(240, 240, 240, 0.4); 
+            
+            /* เทคนิคสร้างมิตินูนต่ำ (Emboss) ด้วย Shadow สองฝั่ง (แสงและเงา) */
+            text-shadow: 
+                -1px -1px 1px rgba(255, 255, 255, 0.9), /* ขอบแสงสีขาว (ด้านบนซ้าย) */
+                 1px  1px 1px rgba(0, 0, 0, 0.15);      /* ขอบเงาสีเข้ม (ด้านล่างขวา) */
+        }
 
-function getRowsData(sheet) {
-  if (!sheet) return [];
-  const data = sheet.getDataRange().getValues();
-  if (data.length < 1) return [];
-  const headers = data[0];
-  const result = [];
-  
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    const obj = {};
-    for (let j = 0; j < headers.length; j++) {
-      if (headers[j]) obj[headers[j].trim()] = row[j];
-    }
-    result.push(obj);
-  }
-  return result;
-}
+        /* Header */
+        .app-header {
+            background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
+            backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            border-bottom: 6px solid var(--pink-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
+        }
+        .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white); }
+        
+        .org-title { color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); font-weight: 700; line-height: 1.2; }
+        .org-subtitle { color: #f8f9fa; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: 400; line-height: 1.2; }
+        .user-name { font-weight: 700; color: var(--pink-dark); text-shadow: 1px 1px 1px rgba(255,255,255,0.9); }
 
-function createJsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+        /* Section Titles */
+        .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-bottom: 3px solid var(--pink-primary); padding-bottom: 8px; line-height: 1.4; }
+        
+        /* Cards UI */
+        .menu-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 133, 162, 0.15);
+            box-shadow: var(--shadow-sm);
+            padding: 22px 12px;
+            text-align: center;
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu-card:hover, .menu-card:active { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--pink-primary); }
+        .menu-icon { font-size: 2.25rem; margin-bottom: 12px; transition: transform 0.3s; }
+        .menu-card:hover .menu-icon { transform: scale(1.12); }
+        .menu-title { font-weight: 500; color: #2c2c2c; line-height: 1.4; word-wrap: break-word; }
+        .menu-desc { color: #777777; margin-top: 6px; line-height: 1.3; }
+
+        /* ปรับสไตล์สำหรับ Menu Icon ที่เรียกใช้ไฟล์รูปภาพวงกลมให้สวยงามโดดเด่น */
+        img.menu-icon {
+            width: 62px;
+            height: 62px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--pink-light);
+            padding: 3px;
+            background-color: var(--white);
+            box-shadow: 0 4px 10px rgba(214, 51, 132, 0.12);
+            display: inline-block;
+            margin-bottom: 12px;
+            transition: transform 0.3s ease;
+        }
+        .menu-card:hover img.menu-icon {
+            transform: scale(1.12);
+            border-color: var(--pink-primary);
+            box-shadow: 0 6px 15px rgba(214, 51, 132, 0.22);
+        }
+
+        /* สีพิเศษสำหรับ Icon แต่ละประเภท */
+        .icon-default { color: var(--pink-primary); }
+        .icon-blue { color: #0066ff; }
+        .icon-orange { color: #ff6600; }
+        .icon-brown { color: #8d5b4c; }
+        .icon-purple { color: #7d3cff; }
+        .icon-red { color: #e11d48; }
+        .icon-yellow { color: #eab308; }
+        .icon-green { color: #16a34a; }
+
+        /* Alerts Section Enhancements */
+        .alerts-section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--pink-dark);
+            font-weight: 700;
+            font-size: 1.15rem;
+            padding-left: 4px;
+        }
+        .alerts-section-header i {
+            margin-right: 10px;
+            color: var(--pink-neon);
+            font-size: 1.3rem;
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); text-shadow: 0 0 0 rgba(255, 20, 147, 0.7); }
+            50% { transform: scale(1.1); text-shadow: 0 0 12px rgba(255, 20, 147, 0.5); }
+            100% { transform: scale(0.9); text-shadow: 0 0 0 rgba(255, 20, 147, 0); }
+        }
+
+        .alert-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 133, 162, 0.2);
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.08);
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.15);
+        }
+
+        /* Shine effect */
+        .alert-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shine 5s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 200%; }
+            100% { left: 200%; }
+        }
+
+        .alert-icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 14px;
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), 0 3px 8px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+
+        .alert-content {
+            flex-grow: 1;
+            z-index: 1;
+        }
+
+        .alert-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .alert-type {
+            font-weight: 700;
+            color: #2c2c2c;
+            font-size: 0.95rem;
+        }
+
+        .alert-time {
+            font-size: 0.7rem;
+            color: #888;
+            background: #f1f3f5;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid #e9ecef;
+        }
+
+        .alert-message {
+            font-size: 0.85rem;
+            color: var(--gray-text);
+            line-height: 1.5;
+        }
+        
+        .alert-badge-public {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(79, 172, 254, 0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .alert-badge-private {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(255, 8, 68, 0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--white);
+            box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 5px;
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .nav-item {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.75rem;
+            flex: 1;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-item.active, .nav-item:hover { color: var(--pink-dark); }
+        .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+        
+        /* สไตล์สำหรับ Badge ตัวเลขแจ้งเตือน */
+        .icon-wrapper { position: relative; display: inline-block; }
+        .badge-counter {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background: linear-gradient(135deg, #ff1493, #d63384);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(214, 51, 132, 0.3);
+            z-index: 10;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* Floating QR Code Button */
+        .nav-fab-container { position: relative; flex: 1; display: flex; justify-content: center; }
+        .fab-qr {
+            position: absolute; top: -35px; width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.8rem; box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35);
+            border: 4px solid var(--white); cursor: pointer; transition: transform 0.2s;
+        }
+        .fab-qr:active { transform: scale(0.95); }
+        .fab-text { margin-top: 35px; font-size: 0.75rem; color: var(--pink-dark); font-weight: 500;}
+
+        /* Overlay */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+
+        /* Responsive Typography */
+        @media (max-width: 576px) {
+            .app-header { padding: 12px 14px; }
+            .header-logo { width: 38px; height: 38px; }
+            .org-title { font-size: 0.95rem; }
+            .org-subtitle { font-size: 0.65rem; }
+            .user-name { font-size: 0.82rem; }
+            .section-title { font-size: 1.05rem; margin-bottom: 12px; }
+            .menu-card { padding: 16px 8px; border-radius: 12px; }
+            .menu-icon { font-size: 1.9rem; margin-bottom: 8px; }
+            img.menu-icon { width: 50px; height: 50px; border-width: 2px; padding: 2px; margin-bottom: 8px; }
+            .nav-item { font-size: 0.7rem; }
+            .nav-item i { font-size: 1.15rem; }
+            .fab-qr { width: 54px; height: 54px; top: -30px; font-size: 1.6rem; }
+            .fab-text { margin-top: 30px; font-size: 0.7rem; }
+        }
+        @media (min-width: 577px) and (max-width: 992px) {
+            .org-title { font-size: 1.1rem; } .org-subtitle { font-size: 0.72rem; }
+            .section-title { font-size: 1.15rem; } .menu-title { font-size: 0.9rem; }
+        }
+        @media (min-width: 993px) {
+            .org-title { font-size: 1.25rem; } .org-subtitle { font-size: 0.78rem; }
+            .section-title { font-size: 1.25rem; } .menu-title { font-size: 0.95rem; }
+        }
+        @media print { .app-header, .bottom-nav, .fab-qr { display: none !important; } body { background: white; padding: 0; } }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay กำลังโหลด -->
+    <div id="loadingOverlay">
+        <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
+        <div class="mt-3 text-pink-dark fw-bold">กำลังซิงค์ข้อมูลเมนู...</div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="app-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="./logo005v1.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
+            <div>
+                <div class="org-title">IT SUPPORT & MAINTERNANCE SYSTEMS</div>
+                <div class="org-subtitle">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
+                <div class="org-subtitle">UDONTHANI HOSPITAL</div>
+            </div>
+        </div>
+        <div class="text-end" id="authZone"></div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <!-- ส่วนแสดง Alert ทั้งหมดในหน้าหลัก -->
+        <div id="alertsContainer" class="mb-4"></div>
+
+        <!-- หน้าทางลัด (Shortcuts & Fast Menus) -->
+        <div id="shortcutSection" class="mb-4 d-none">
+            <h5 class="section-title"><i class="fa-solid fa-bolt text-warning me-2"></i>เมนูทางลัด / งานด่วน</h5>
+            <div class="row g-3" id="shortcutGrid"></div>
+        </div>
+
+        <!-- แกนหลัก: กลุ่มเมนูต่างๆ -->
+        <div id="mainMenuContainer"></div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'HOME')">
+            <i class="fa-solid fa-house"></i>
+            HOME
+        </a>
+        <a id="nav-myjobs" href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
+            <i class="fa-solid fa-clipboard-list"></i>
+            MY JOBE
+        </a>
+        
+        <!-- Floating QR Button -->
+        <div class="nav-fab-container">
+            <div class="fab-qr" onclick="openScanner()">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <span class="fab-text">สแกน QR</span>
+        </div>
+
+        <a id="nav-alerts" href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')">
+            <!-- หุ้ม icon ด้วย icon-wrapper เพื่อให้ Badge ลอยอยู่มุมขวาบน -->
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-bell"></i>
+                <span id="bottomNavAlertBadge" class="badge-counter d-none">0</span>
+            </div>
+            แจ้งเตือน
+        </a>
+        <a id="nav-settings" href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')">
+            <i class="fa-solid fa-gear"></i>
+            ตั้งค่า
+        </a>
+    </nav>
+
+    <!-- Modal ต่างๆ -->
+    <!-- 1. Bootstrap Modal สำหรับแจ้งเตือนสิทธิ์การล็อกอิน (ชมพู-ขาว) -->
+    <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
+                <div class="modal-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: #fff0f5; border-radius: 50%;">
+                        <i class="fa-solid fa-lock text-danger" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">กรุณาเข้าสู่ระบบก่อนใช้งาน</h5>
+                    <p class="text-muted small mb-4">สิทธิ์การเข้าถึงฟังก์ชันนี้ ถูกจำกัดไว้เฉพาะเจ้าหน้าที่กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี เท่านั้น</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" onclick="goToLogin()" class="btn btn-danger rounded-pill py-2 fw-bold" style="background: linear-gradient(135deg, #ff85a2, #d63384); border: none;">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>เข้าสู่ระบบตอนนี้
+                        </button>
+                        <button type="button" class="btn btn-light rounded-pill py-2 text-muted small" data-bs-dismiss="modal">กลับไปหน้าหลัก</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Bootstrap Modal สำหรับแสดงข้อความแจ้งเตือนระบบทั่วไปกลางหน้าจอ Overlay -->
+    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
+                <div class="modal-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #fff0f5; border-radius: 50%;">
+                        <i id="systemAlertIcon" class="fa-solid fa-circle-info text-pink-dark" style="font-size: 2.2rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3 text-dark" id="systemAlertTitle">แจ้งเตือนระบบ</h5>
+                    <p class="text-muted small mb-4" id="systemAlertMessage"></p>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-dismiss="modal" style="background-color: var(--pink-dark); border: none;">ตกลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Bootstrap Modal สำหรับแสดงรายการแจ้งเตือนส่วนตัว (เปิดจาก Nav Bar) -->
+    <div class="modal fade" id="notificationsListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
+                <div class="modal-header border-0 pb-1 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-bell text-warning me-2"></i>การแจ้งเตือนของฉัน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-2" id="notificationsModalBody">
+                    <!-- รายการจะถูกแทรกที่นี่ด้วย JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3.1 Bootstrap Modal สำหรับแสดงรายละเอียดแจ้งเตือน (Detail Modal) -->
+    <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
+                <div class="modal-header border-0 pb-1 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0" id="detailAlertTitle"><i class="fa-solid fa-bell text-warning me-2"></i>รายละเอียด</h5>
+                    <button type="button" class="btn-close" onclick="closeAlertDetailHandler()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <div class="text-muted small mb-3" id="detailAlertTime"><i class="fa-regular fa-clock me-1"></i></div>
+                    <div class="p-3 rounded-4" style="background-color: #f8f9fa; font-size: 0.9rem; line-height: 1.6; color: var(--gray-text); border: 1px solid #e9ecef;" id="detailAlertMessage">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-pink-dark rounded-pill px-5 py-2 fw-bold text-white" style="background-color: var(--pink-dark); border: none;" onclick="closeAlertDetailHandler()">รับทราบ / ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Bootstrap Modal สำหรับหน้าตั้งค่า -->
+    <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
+                <div class="modal-header border-0 pb-0 justify-content-between">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-sliders text-pink-dark me-2"></i>ตั้งค่าและการแจ้งเตือน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center bg-light p-3 rounded-4 mb-4 mt-3">
+                        <div class="bg-pink-soft rounded-circle p-3 text-pink-dark me-3">
+                            <i class="fa-solid fa-user-gear fs-3" style="color: var(--pink-dark);"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold" id="settingsUserTitle">ผู้ใช้งานระบบ</div>
+                            <div class="small text-muted" id="settingsUserRole">สิทธิ์เข้าถึง: เจ้าหน้าที่ IT</div>
+                        </div>
+                    </div>
+                    <!-- ส่วนคอนโทรลระบบสิทธิ์แจ้งเตือนบนโทรศัพท์มือถือ -->
+                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>ระบบแจ้งเตือนผ่านบราวเซอร์มือถือ</h6>
+                    <div class="bg-light p-3 rounded-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="fw-bold small">สถานะการอนุญาตแจ้งเตือน</div>
+                                <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
+                            </div>
+                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">
+                                เปิดรับแจ้งเตือน
+                            </button>
+                        </div>
+                        <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ Android:</strong> จะมีหน้าต่างเด้งขึ้นมาถามเพื่อขออนุญาตส่งข้อความเตือน</p>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ iOS:</strong> ต้องกดแชร์หน้าเว็บนี้และกด "Add to Home Screen" ก่อนครับ</p>
+                    </div>
+                    <div class="d-grid gap-2 mb-4">
+                        <button onclick="testMobileNotification()" class="btn btn-outline-danger rounded-pill fw-bold" style="border-color: var(--pink-primary); color: var(--pink-dark);">
+                            <i class="fa-solid fa-circle-play me-2"></i>ทดสอบส่งแจ้งเตือนเข้ามือถือทันที
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script ควบคุมระบบ -->
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxPiqo4F8HRP2PWOQcfnZmwDFryOUbc8aBTg4YJcm7-5iUGzabCgsN2kZ2k3NAWkWOB/exec"; 
+        
+        let loginModal;
+        let systemAlertModal;
+        let settingsControlModal;
+        let notificationsListModal;
+        let alertDetailModalInstance;
+        
+        let myCurrentAlerts = []; // เก็บแจ้งเตือนเฉพาะของ user คนนั้น สำหรับแสดงใน Modal
+        let currentDetailAlertIndex = -1; // เก็บ index แถวของแจ้งเตือนที่เปิดดูอยู่
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+            systemAlertModal = new bootstrap.Modal(document.getElementById('systemAlertModal'));
+            settingsControlModal = new bootstrap.Modal(document.getElementById('settingsControlModal'));
+            notificationsListModal = new bootstrap.Modal(document.getElementById('notificationsListModal'));
+            alertDetailModalInstance = new bootstrap.Modal(document.getElementById('alertDetailModal'));
+            
+            // เมื่อปิดหน้าต่าง Detail ให้ทำการอัปเดตสถานะเป็นอ่านแล้ว (STATUS = "CLOSED")
+            document.getElementById('alertDetailModal').addEventListener('hide.bs.modal', function () {
+                if (currentDetailAlertIndex >= 0) {
+                    const alertItem = myCurrentAlerts[currentDetailAlertIndex];
+                    const currentStatus = String(alertItem.STATUS || '').toUpperCase();
+                    
+                    // หากสถานะยังไม่อ่าน (On คือยังไม่อ่าน) ให้ปรับเปลี่ยนเป็น CLOSED (อ่านแล้ว)
+                    if (currentStatus !== 'CLOSED') {
+                        // อัปเดตสถานะในตัวแปร Local
+                        alertItem.STATUS = "CLOSED"; 
+                        
+                        // อัปเดต UI รายการแจ้งเตือนและ Badge ทันทีเพื่อความลื่นไหล (Optimistic Update)
+                        renderNotificationsListBody();
+                        updateUnreadCounts();
+                        
+                        // ส่งคำขอไปอัปเดตที่ Backend
+                        fetch(API_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'updateAlertStatus',
+                                status: 'CLOSED', // อัปเดตเป็น CLOSED
+                                alertData: alertItem
+                            }),
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // ดึงข้อมูลใหม่มาแสดงด้วย หลังจากส่งค่าสำเร็จ
+                            fetchDashboardData();
+                        })
+                        .catch(e => console.error("Update status failed:", e));
+                    }
+                    currentDetailAlertIndex = -1;
+                }
+            });
+
+            renderAuthHeader();
+            fetchDashboardData();
+            updateNotificationStatusUI();
+            
+            setInterval(fetchDashboardData, 15000);
+        });
+
+        function showSystemModal(title, message, iconClass = 'fa-solid fa-circle-info') {
+            document.getElementById('systemAlertTitle').innerText = title;
+            document.getElementById('systemAlertMessage').innerText = message;
+            document.getElementById('systemAlertIcon').className = iconClass;
+            systemAlertModal.show();
+        }
+
+        function renderAuthHeader() {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            const authZone = document.getElementById('authZone');
+            
+            if (activeUser) {
+                const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้งาน");
+                authZone.innerHTML = `
+                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ${displayName}</div>
+                    <button onclick="logout()" class="btn btn-sm btn-outline-light rounded-pill mt-1" style="font-size: 0.7rem; font-weight: 500; border-color: rgba(255,255,255,0.7); color: #ffffff;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
+                    </button>
+                `;
+            } else {
+                authZone.innerHTML = `
+                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> แขกรับเชิญ</div>
+                    <button onclick="goToLogin()" class="btn btn-sm btn-danger rounded-pill mt-1 px-3" style="font-size: 0.7rem; font-weight:600; background-color: var(--pink-dark); border-color: var(--pink-dark);">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> เข้าสู่ระบบ
+                    </button>
+                `;
+            }
+        }
+
+        function goToLogin() {
+            try { window.location.href = "index.html"; } catch(e) { window.location.replace("index.html"); }
+        }
+
+        function handleNavClick(event, name) {
+            event.preventDefault();
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            
+            if (name === 'หน้าแรก') {
+                document.getElementById('nav-home').classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            if (!activeUser) {
+                loginModal.show();
+                return;
+            }
+
+            if (name === 'งานของฉัน') {
+                document.getElementById('nav-myjobs').classList.add('active');
+                showSystemModal('งานของฉัน', 'กำลังเตรียมโหลดรายการงานของคุณ...', 'fa-solid fa-briefcase');
+            } else if (name === 'แจ้งเตือน') {
+                document.getElementById('nav-alerts').classList.add('active');
+                // เปิด Modal รายการแจ้งเตือน
+                openNotificationsModal();
+            } else if (name === 'ตั้งค่า') {
+                document.getElementById('nav-settings').classList.add('active');
+                openSettingsPanel();
+            }
+        }
+
+        // ขอสิทธิ์และการตั้งค่าต่างๆ (คงเดิม)
+        function updateNotificationStatusUI() {
+            const badge = document.getElementById('notificationStatusBadge');
+            const btn = document.getElementById('btnRequestPermission');
+            if (!("Notification" in window)) { badge.innerText = "บราวเซอร์ไม่รองรับ API"; badge.className = "badge bg-danger mt-1"; if(btn) btn.disabled = true; return; }
+            if (Notification.permission === "granted") { badge.innerText = "เปิดรับแจ้งเตือนแล้ว"; badge.className = "badge bg-success mt-1"; if(btn) { btn.innerText = "รับสิทธิ์สำเร็จ"; btn.disabled = true; btn.className = "btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-white"; } }
+            else if (Notification.permission === "denied") { badge.innerText = "บล็อกสิทธิ์การแจ้งเตือน"; badge.className = "badge bg-danger mt-1"; if(btn) { btn.innerText = "สิทธิ์ถูกปฏิเสธ"; btn.className = "btn btn-sm btn-secondary rounded-pill px-3 py-1 fw-bold text-white"; } }
+            else { badge.innerText = "พร้อมขอสิทธิ์"; badge.className = "badge bg-warning text-dark mt-1"; if(btn) { btn.innerText = "เปิดรับแจ้งเตือน"; btn.disabled = false; btn.className = "btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white"; } }
+        }
+
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) { showSystemModal('ไม่สนับสนุนระบบการแจ้งเตือน', 'บราวเซอร์ที่คุณใช้บนมือถือยังไม่เปิดใช้งานฟังก์ชัน Notification API ครับ', 'fa-solid fa-bell-slash'); return; }
+            Notification.requestPermission().then(permission => {
+                updateNotificationStatusUI();
+                if (permission === "granted") {
+                    if ("vibrate" in navigator) navigator.vibrate([150, 100, 150]);
+                    showSystemModal("สิทธิ์สำเร็จ! 🎉", "แอปไอทีโรงพยาบาลอุดรธานี ได้เชื่อมเข้าแจ้งเตือนบนมือถือแล้ว", "fa-solid fa-check-circle text-success");
+                } else {
+                    showSystemModal('ตั้งค่าไม่สำเร็จ', 'คุณปฏิเสธรับสิทธิ์ หรือถูกจำกัดการเข้าถึง ระบบจึงไม่สามารถส่งเสียงเตือนนอกแอปได้', 'fa-solid fa-circle-exclamation');
+                }
+            });
+        }
+
+        function testMobileNotification() {
+            if (!("Notification" in window) || Notification.permission !== "granted") {
+                if ("vibrate" in navigator) navigator.vibrate([150]);
+                showSystemModal('จำเป็นต้องกดยอมรับสิทธิ์', 'กรุณากดปุ่มสีชมพู "เปิดรับแจ้งเตือน" ที่อยู่ด้านบนก่อนครับ', 'fa-solid fa-shield-halved');
+                return;
+            }
+            if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+            try { new Notification("ทดสอบแจ้งงานด่วน IT Udon Hosp", { body: "แจ้งซ่อม: คอมพิวเตอร์ห้องตรวจมีอาการจอฟ้าด่วนที่สุด!", icon: './logo02.png', vibrate: [200, 100, 200] }); } catch(e) {}
+        }
+
+        function openSettingsPanel() {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (activeUser) {
+                const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้ระบบ");
+                document.getElementById('settingsUserTitle').innerText = displayName;
+                let roleThai = activeUser.UserTypeID ? "รหัสกลุ่มงานสิทธิ์: " + activeUser.UserTypeID : "เจ้าหน้าที่กลุ่มงานไอที";
+                document.getElementById('settingsUserRole').innerText = roleThai;
+            }
+            updateNotificationStatusUI();
+            settingsControlModal.show();
+        }
+
+        // ยิง POST ดึงข้อมูลและนำมา Mapping ใหม่
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getDashboardData' }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const result = await response.json();
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                if (result.success) {
+                    const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                    const allAlerts = result.alerts || [];
+                    
+                    // 1. วาดหน้าเมนูหลัก: "แสดงการแจ้งเตือนทั้งหมด"
+                    renderAllAlertsOnMainPage(allAlerts);
+
+                    // 2. กรองข้อมูลแจ้งเตือนเฉพาะของ User นี้ สำหรับ Badge และ Modal 
+                    myCurrentAlerts = [];
+                    if (activeUser && allAlerts.length > 0) {
+                        const myUid = String(activeUser.USERID || '').trim();
+                        myCurrentAlerts = allAlerts.filter(alertItem => {
+                            const targetUid = String(alertItem.USER_ID || '').trim();
+                            // เงื่อนไข: ถ้าว่างคือสาธารณะ หรือถ้าตรงกับ USERID คือของตัวเอง
+                            return targetUid === "" || targetUid === myUid;
+                        });
+                    }
+
+                    // 3. อัปเดตตัวเลขแจ้งเตือนบนแถบ Navigator Bar (นับเฉพาะที่ยังไม่อ่าน)
+                    updateUnreadCounts();
+
+                    // 4. วาดเมนู
+                    if (result.menus) {
+                        const unreadCount = getUnreadAlertCount();
+                        renderMenus(result.menus, unreadCount);
+                    }
+                }
+            } catch (err) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                console.error("Fetch error:", err);
+            }
+        }
+
+        // ฟังก์ชันช่วยนับจำนวนแจ้งเตือนที่ยังไม่อ่าน
+        function getUnreadAlertCount() {
+            return myCurrentAlerts.filter(a => {
+                const s = String(a.STATUS || '').toUpperCase();
+                // ข้ามรายการที่ถูกมาร์คว่า CLOSED (อ่านแล้ว) ส่วน On คือยังไม่อ่าน
+                return s !== 'CLOSED';
+            }).length;
+        }
+
+        // ฟังก์ชันคำนวณและอัปเดต Badge บนแถบ Nav
+        function updateUnreadCounts() {
+            const unreadCount = getUnreadAlertCount();
+            updateNavAlertBadge(unreadCount);
+        }
+
+        // ฟังก์ชันอัปเดตตัวเลขบน Navigator Bar
+        function updateNavAlertBadge(count) {
+            const badge = document.getElementById('bottomNavAlertBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.innerText = count > 99 ? '99+' : count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+        }
+
+        // เปิด Modal นำรายการแจ้งเตือน (เฉพาะของ User) มาแสดง
+        function openNotificationsModal() {
+            renderNotificationsListBody();
+            notificationsListModal.show();
+        }
+
+        // ฟังก์ชันช่วยจัดรูปแบบกลุ่มวันที่
+        function getDateGroupLabel(dateString) {
+            if (!dateString) return "รายการอื่นๆ";
+            const d = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            if (d.toDateString() === today.toDateString()) return "วันนี้";
+            if (d.toDateString() === yesterday.toDateString()) return "เมื่อวาน";
+
+            return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // วาดรายการแจ้งเตือนลง Modal Body แบบจัดกลุ่ม
+        function renderNotificationsListBody() {
+            const body = document.getElementById('notificationsModalBody');
+            body.innerHTML = '';
+
+            if (myCurrentAlerts.length === 0) {
+                body.innerHTML = `
+                    <div class="text-center p-5 text-muted">
+                        <i class="fa-solid fa-bell-slash mb-3" style="font-size: 3rem; color: #e0e0e0;"></i>
+                        <h6 class="fw-bold mb-1">ไม่มีรายการแจ้งเตือน</h6>
+                        <p class="small mb-0">คุณยังไม่มีข้อความแจ้งเตือนใหม่ในขณะนี้</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 1. เรียงลำดับจากใหม่ไปเก่า
+            const sortedAlerts = [...myCurrentAlerts].sort((a, b) => {
+                const dateA = a.ALERT_TIME_START ? new Date(a.ALERT_TIME_START) : new Date(0);
+                const dateB = b.ALERT_TIME_START ? new Date(b.ALERT_TIME_START) : new Date(0);
+                return dateB - dateA;
+            });
+
+            // 2. จัดกลุ่มตามวันที่
+            const groupedAlerts = {};
+            sortedAlerts.forEach((alertItem) => {
+                // หา index เดิมใน myCurrentAlerts เพื่อใช้อ้างอิงเวลาแสดง Detail
+                const originalIndex = myCurrentAlerts.indexOf(alertItem); 
+                const groupLabel = getDateGroupLabel(alertItem.ALERT_TIME_START);
+                if (!groupedAlerts[groupLabel]) groupedAlerts[groupLabel] = [];
+                groupedAlerts[groupLabel].push({ alertItem, originalIndex });
+            });
+
+            let html = '';
+            for (const [groupLabel, items] of Object.entries(groupedAlerts)) {
+                html += `<div class="fw-bold text-pink-dark mt-3 mb-2 ps-2 border-start border-3 border-pink" style="font-size: 0.85rem; border-color: var(--pink-primary) !important;">${groupLabel}</div>`;
+                html += '<div class="list-group list-group-flush mb-2">';
+                
+                items.forEach(({ alertItem, originalIndex }) => {
+                    const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
+                    const text = alertItem.ALERT_TEXT || '';
+                    const time = alertItem.ALERT_TIME_START;
+                    const isPublic = String(alertItem.USER_ID || '').trim() === "";
+                    
+                    const status = String(alertItem.STATUS || '').toUpperCase();
+                    const isRead = (status === 'CLOSED');
+
+                    const labelBadge = isPublic ? `<span class="badge bg-light text-secondary border ms-2" style="font-size: 0.6rem;">สาธารณะ</span>` : `<span class="badge bg-pink-soft text-pink-dark border border-pink-light ms-2" style="font-size: 0.6rem;">ส่วนตัว</span>`;
+
+                    const unreadDot = isRead ? '' : `<span class="position-absolute top-0 start-0 p-1 bg-danger border border-light rounded-circle" style="margin-top: 18px; margin-left: 12px; width: 10px; height: 10px; box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);"></span>`;
+                    const bgClass = isRead ? 'bg-white' : 'bg-pink-soft';
+                    const textClass = isRead ? 'text-secondary' : 'text-dark';
+                    const iconColor = isRead ? 'text-secondary' : 'text-warning';
+
+                    html += `
+                        <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border position-relative ${bgClass}" style="cursor: pointer; transition: all 0.2s;" onclick="openAlertDetail(${originalIndex})">
+                            ${unreadDot}
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-1 ps-3">
+                                <h6 class="mb-0 ${isRead ? 'fw-normal' : 'fw-bold'} ${textClass}" style="font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation ${iconColor} me-2"></i>${type} ${labelBadge}</h6>
+                                <small class="${isRead ? 'text-muted' : 'text-danger fw-bold'}" style="font-size: 0.7rem;">${time ? new Date(time).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : ''}</small>
+                            </div>
+                            <p class="mb-0 ps-3 text-truncate ${isRead ? 'text-muted' : 'text-secondary'}" style="font-size: 0.8rem; line-height: 1.4; max-width: 95%;">${text}</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            body.innerHTML = html;
+        }
+
+        // เปิดหน้าต่างรายละเอียดการแจ้งเตือน
+        function openAlertDetail(index) {
+            currentDetailAlertIndex = index;
+            const alertItem = myCurrentAlerts[index];
+            
+            let iconClass = 'fa-solid fa-circle-info text-primary';
+            if (String(alertItem.USER_ID || '').trim() === "") iconClass = 'fa-solid fa-bullhorn text-info';
+            
+            document.getElementById('detailAlertTitle').innerHTML = `<i class="${iconClass} me-2"></i>${alertItem.ALERT_TYPE_ID || 'รายละเอียดแจ้งเตือน'}`;
+            document.getElementById('detailAlertTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i> ${alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleString('th-TH', {year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'ไม่ระบุเวลา'}`;
+            document.getElementById('detailAlertMessage').innerText = alertItem.ALERT_TEXT || '';
+            
+            alertDetailModalInstance.show();
+        }
+
+        // ปิดหน้าต่างรายละเอียด (จะไปเชื่อมกับการเรียก Event hide.bs.modal อัตโนมัติ)
+        function closeAlertDetailHandler() {
+            alertDetailModalInstance.hide();
+        }
+
+        // วาดส่วนแจ้งเตือน "ทั้งหมด" ลงบนหน้าจอหลัก
+        function renderAllAlertsOnMainPage(alerts) {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = '';
+            if (!alerts || alerts.length === 0) return;
+
+            let html = `
+                <div class="alerts-section-header">
+                    <i class="fa-solid fa-satellite-dish"></i> กระดานข่าวสารและแจ้งเตือน
+                </div>
+            `;
+            
+            alerts.forEach(alertItem => {
+                const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
+                const text = alertItem.ALERT_TEXT || '';
+                const timeStr = alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : 'อัปเดตล่าสุด';
+                const uid = String(alertItem.USER_ID || '').trim();
+                
+                let targetLabel = '';
+                let iconClass = 'fa-solid fa-bell';
+                let borderClass = 'border-left: 6px solid var(--pink-neon);';
+                let iconBoxBg = 'background: linear-gradient(135deg, #fff0f5, #ffe4e1); color: var(--pink-neon);';
+
+                if(uid === "") {
+                    // ประกาศส่วนรวม
+                    targetLabel = '<span class="alert-badge-public">ส่วนรวม</span>';
+                    iconClass = 'fa-solid fa-bullhorn';
+                    borderClass = 'border-left: 5px solid #4facfe;'; 
+                    iconBoxBg = 'background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;';
+                } else {
+                    // แจ้งเตือนของบุคคล (รวมถึงของเราและคนอื่นที่หน้าหลักดึงมา)
+                    targetLabel = '<span class="alert-badge-private">รายบุคคล</span>';
+                    iconClass = 'fa-solid fa-envelope-open-text';
+                    borderClass = 'border-left: 5px solid #ff0844;';
+                    iconBoxBg = 'background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #e11d48;';
+                }
+
+                html += `
+                    <div class="alert-card" style="${borderClass}">
+                        <div class="alert-icon-box" style="${iconBoxBg}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title-row">
+                                <div class="d-flex align-items-center">
+                                    <span class="alert-type">${type}</span>
+                                    ${targetLabel}
+                                </div>
+                                <span class="alert-time"><i class="fa-regular fa-clock me-1"></i>${timeStr}</span>
+                            </div>
+                            <div class="alert-message">${text}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // วาดส่วนจัดกลุ่มเมนูหลัก
+        function renderMenus(menusObj, alertCount = 0) {
+            const shortcutGrid = document.getElementById('shortcutGrid');
+            const mainContainer = document.getElementById('mainMenuContainer');
+            if (!menusObj || Object.keys(menusObj).length === 0) return;
+
+            const finalGrouped = {};
+            const shortcuts = [];
+
+            for (const [groupName, items] of Object.entries(menusObj)) {
+                items.forEach(m => {
+                    const menuType = String(m.MENU_TYPE || '').toLowerCase();
+                    if (menuType === 'fast-menu' || menuType === 'alert-menu') {
+                        shortcuts.push(m);
+                    } else {
+                        if (!finalGrouped[groupName]) finalGrouped[groupName] = [];
+                        finalGrouped[groupName].push(m);
+                    }
+                });
+            }
+
+            if (shortcuts.length > 0) {
+                document.getElementById('shortcutSection').classList.remove('d-none');
+                // กำหนดสีเส้นขีดล่างของเมนูทางลัดให้เป็นสีเหลืองทอง (เพื่อให้ต่างจากกลุ่มอื่น)
+                document.querySelector('#shortcutSection .section-title').style.borderBottomColor = '#eab308';
+                shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m, alertCount)).join('');
+            } else {
+                document.getElementById('shortcutSection').classList.add('d-none');
+            }
+
+            let mainHtml = '';
+            // กำหนดชุดสีสำหรับเส้นแถบหน้าหัวข้อแต่ละกลุ่มให้แตกต่างกัน
+            const headColors = ['#0066ff', '#16a34a', '#7d3cff', '#e11d48', '#ff6600', '#0ea5e9', '#d63384'];
+            let colorIdx = 0;
+
+            for (const [groupName, items] of Object.entries(finalGrouped)) {
+                if (items.length === 0) continue; 
+                
+                // ดึงสีตามลำดับลูป
+                const currentBorderColor = headColors[colorIdx % headColors.length];
+
+                mainHtml += `
+                    <div class="mb-4">
+                        <h5 class="section-title" style="border-bottom-color: ${currentBorderColor};">${groupName}</h5>
+                        <div class="row g-3">
+                            ${items.map(m => createCardHTML(m, alertCount)).join('')}
+                        </div>
+                    </div>
+                `;
+                colorIdx++;
+            }
+            mainContainer.innerHTML = mainHtml;
+        }
+
+        function createCardHTML(menu, alertCount = 0) {
+            const icon = menu.ICON || 'fa-solid fa-layer-group';
+            const name = menu.MENU_NAME || '';
+            const desc = menu.DESC || '';
+            const url = menu.LINK_URL || '#';
+
+            let iconClass = icon;
+            if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
+            
+            let colorClass = 'icon-default';
+            const menuNameLower = name.toLowerCase();
+
+            if (menuNameLower.includes('network')) { iconClass = 'fa-solid fa-network-wired'; colorClass = 'icon-blue'; }
+            else if (menuNameLower.includes('ครุภัณฑ์')) { iconClass = 'fa-solid fa-desktop'; colorClass = 'icon-orange'; }
+            else if (menuNameLower.includes('คลัง') || menuNameLower.includes('อะไหล่')) { iconClass = 'fa-solid fa-boxes-stacked'; colorClass = 'icon-brown'; }
+            else if (menuNameLower.includes('จัดการข้อมูลระบบ')) { iconClass = 'fa-solid fa-server'; colorClass = 'icon-purple'; }
+            else if (menuNameLower.includes('งานด่วน')) { iconClass = 'fa-solid fa-bolt'; colorClass = 'icon-red'; }
+            else if (menuNameLower.includes('แจ้งเตือน')) { iconClass = 'fa-solid fa-bell'; colorClass = 'icon-yellow'; }
+            else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) { iconClass = 'fa-solid fa-briefcase'; colorClass = 'icon-green'; }
+            
+            let cardBadgeHtml = '';
+            if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
+                const displayCount = alertCount > 99 ? '99+' : alertCount;
+                cardBadgeHtml = `<span class="badge-counter" style="top: -8px; right: -15px; font-size: 0.75rem; padding: 3px 8px;">${displayCount}</span>`;
+            }
+
+            // ระบบตรวจสอบการแสดงผลรูปไอคอนเมนู: หากตารางฐานข้อมูลส่งรูปภาพลิงก์ Google Drive (IMAGE_ID_URL) มา ให้จัดแสดงในกรอบวงกลมสวยงามทันที หากไม่มีจะเลือกไอคอน FontAwesome ตัวสำรองเดิม
+            const iconHtml = menu.IMAGE_ID_URL ? 
+                `<img src="${menu.IMAGE_ID_URL}" alt="${name}" class="menu-icon" onerror="this.src='https://placehold.co/50'">` :
+                `<i class="${iconClass} menu-icon ${colorClass}"></i>`;
+
+            return `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="menu-card" onclick="openMenu('${url}')">
+                        <div class="icon-wrapper">
+                            ${iconHtml}
+                            ${cardBadgeHtml}
+                        </div>
+                        <div class="menu-title">${name}</div>
+                        ${desc ? `<div class="menu-desc">${desc}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openMenu(url) {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+
+            if (url !== '#' && url.trim() !== '') {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเข้าสู่ระบบโมดูล...";
+                window.location.href = url;
+            } else {
+                showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน อยู่ระหว่างขั้นตอนการพัฒนาครับ', 'fa-solid fa-code');
+            }
+        }
+
+        function openScanner() {
+            const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเปิดกล้องสแกน QR...";
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showSystemModal('QR Scanner', 'โมดูลสำหรับการอ่านบาร์โค้ด/คิวอาร์โค้ดสำเร็จรูป (กำลังดำเนินการเชื่อมต่อกล้องฮาร์ดแวร์)', 'fa-solid fa-camera');
+            }, 800);
+        }
+    </script>
+</body>
+</html>
