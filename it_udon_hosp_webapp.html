@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="logo003v1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT UDON HOSP - Network PM-Check WebApp</title>
+    <!-- Tailwind CSS for modern responsive layout engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Premium Web Fonts: Sarabun & Inter for flawless readability -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 Icons library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 for beautiful modern notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- HTML5 QR Code library for scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes scan-line {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        .scan-anim::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: #ec4899;
+            box-shadow: 0 0 8px #f43f5e;
+            animation: scan-line 2s linear infinite;
+        }
+        /* print-friendly style override rules */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printQrArea, #printQrArea * {
+                visibility: visible;
+            }
+            #printQrArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+         /* ลายน้ำแบบนูน (Embossed Watermark) */
+        body::before {
+            content: "UDH-IT TECHNICIAN MAINTERNACE & SUPPORT ";
+            position: fixed;
+            top: -50%;  
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            transform: rotate(-30deg);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            font-size: 5vw; 
+            font-weight: 900;
+            line-height: 2.5; 
+            z-index: -1;
+            pointer-events: none;
+            color: rgba(240, 240, 240, 0.4); 
+            text-shadow: 
+                -1px -1px 1px rgba(255, 255, 255, 0.9), 
+                 1px  1px 1px rgba(0, 0, 0, 0.15);      
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden bg-slate-100 text-gray-800">
+
+    <!-- หน้าจอประมวลผล Overlay เมื่อมีการโหลดข้อมูล ค้นหา หรือบันทึกข้อมูลเพื่อความโปร่งใสของ UX -->
+    <div id="globalLoader" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] hidden items-center justify-center flex-col gap-4">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-3 max-w-xs text-center border border-slate-100 animate-in zoom-in-95 duration-150">
+            <div class="relative w-14 h-14">
+                <div class="absolute inset-0 rounded-full border-4 border-rose-100"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-rose-500 border-t-transparent animate-spin"></div>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base mt-2">กำลังประมวลผล...</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">กรุณารอสักครู่ ระบบกำลังทำงานร่วมกับระบบฐานข้อมูล Google Sheets</p>
+        </div>
+    </div>
+
+    <!-- PREVENT SCROLL: Header is sticky top-0 -->
+    <header class="sticky top-0 z-50 bg-gradient-to-br from-pink-200 via-pink-50/50 to-white text-slate-800 shadow-md border-b-4 border-pink-300 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-pink-200 overflow-hidden shadow-inner p-1">
+                    <img src="logo003v1.png" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('fallbackLogoIcon').classList.remove('hidden');" alt="IT UDON HOSP Logo">
+                    <i id="fallbackLogoIcon" class="fas fa-network-wired text-xl text-pink-500 hidden"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight leading-none text-pink-700">IT UDON THANI HOSPITAL</h1>
+                    <span class="text-xs text-slate-500 font-bold">MA & PM IT Technical Network & Server Support</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- 📍 เพิ่มปุ่ม Menu หลักตรงนี้ 📍 -->
+                <a href="https://dakdan.github.io/it-technician-support/main_menu.html" class="flex items-center gap-1.5 bg-pink-500 hover:bg-pink-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm border border-pink-600">
+                    <i class="fas fa-bars"></i>
+                    <span class="hidden sm:inline">เมนูหลัก</span>
+                </a>
+
+                <div id="connectionBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/90 border border-emerald-200 shadow-sm text-emerald-700">
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>Live Database API</span>
+                </div>
+                
+                <div id="userProfile" class="hidden items-center gap-3 bg-white/85 px-3 py-1.5 rounded-xl border border-pink-200 text-slate-700 shadow-sm">
+                    <i class="fas fa-user-circle text-lg text-pink-500"></i>
+                    <span id="userNameText" class="font-bold text-sm">กำลังโหลด...</span>
+                    <button onclick="logout()" class="hover:text-pink-700 text-xs bg-pink-100 hover:bg-pink-200 text-pink-600 px-2.5 py-1 rounded-lg transition" title="ออกจากระบบ">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6 relative">
+        
+        <!-- VIEW: Login Screen -->
+        <section id="loginView" class="flex-1 flex items-center justify-center py-10">
+            <div class="bg-gradient-to-br from-pink-200 via-pink-50/50 to-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-pink-200/50 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/30 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6"></div>
+                
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border border-pink-200 overflow-hidden shadow-md p-2 mx-auto mb-4">
+                        <img src="logo005v1.png" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('fallbackLoginLogoIcon').classList.remove('hidden');" alt="IT UDON HOSP Logo">
+                        <i id="fallbackLoginLogoIcon" class="fas fa-shield-alt text-3xl text-pink-500 hidden"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-pink-700">ลงชื่อเข้าใช้งาน</h2>
+                    <p class="text-slate-500 text-sm mt-1 font-bold">IT Technical & Support App</p>
+                </div>
+                
+                <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-500 font-bold mb-1.5 text-sm">ชื่อผู้ใช้งาน / ID</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" id="username" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent font-medium" placeholder="ระบุผู้เข้าใช้งาน..." required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-500 font-bold mb-1.5 text-sm">รหัสผ่าน</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent font-medium" placeholder="ระบุรหัสผ่าน..." required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-xl shadow-lg shadow-pink-200 hover:shadow-xl hover:shadow-pink-300 transition duration-300">
+                        <i class="fas fa-key mr-2"></i> เข้าสู่ระบบ
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW: Main App View -->
+        <section id="mainAppView" class="hidden flex-col gap-6">
+            
+            <!-- PREVENT SCROLL: Tab Menu Bar is sticky at top-[68px] -->
+            <div class="sticky top-[68px] z-40 bg-slate-100 py-2 border-b border-gray-200 flex overflow-x-auto gap-2 scrollbar-thin">
+                <button onclick="switchTab('dashboard')" id="tab_dashboard" class="px-5 py-2.5 font-bold text-sm rounded-xl transition shrink-0 bg-pink-500 text-white shadow-md">
+                    <i class="fas fa-chart-line mr-2"></i> หน้าแรกและแดชบอร์ด
+                </button>
+                <button onclick="switchTab('surveyList')" id="tab_surveyList" class="px-5 py-2.5 font-bold text-sm text-gray-500 hover:bg-gray-100 rounded-xl transition shrink-0">
+                    <i class="fas fa-map-marked-alt mr-2"></i> ตำแหน่งการติดตั้ง (Physical Location)
+                </button>
+            </div>
+
+            <!-- SUBVIEW: Dashboard -->
+            <div id="subview_dashboard" class="space-y-6">
+                <!-- Status widgets with soft pink glowing corners -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <div class="relative z-10">
+                            <span class="text-sm font-bold text-gray-400 block mb-0.5">จุดติดตั้งสำรวจทั้งหมด</span>
+                            <span id="stat_rooms" class="text-3xl font-black text-rose-500">กำลังโหลด...</span>
+                        </div>
+                        <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 text-lg relative z-10">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <div class="relative z-10">
+                            <span class="text-sm font-bold text-gray-400 block mb-0.5">Supporting Components</span>
+                            <span id="stat_supports" class="text-3xl font-black text-pink-500 font-mono">กำลังโหลด...</span>
+                        </div>
+                        <div class="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500 text-lg relative z-10">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <div class="relative z-10">
+                            <span class="text-sm font-bold text-gray-400 block mb-0.5">Network Devices</span>
+                            <span id="stat_networks" class="text-3xl font-black text-blue-500 font-mono">กำลังโหลด...</span>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 text-lg relative z-10">
+                            <i class="fas fa-server"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SYSTEMIC RISK MAPPING MODEL DASHBOARD CONTAINER -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 space-y-6 relative overflow-hidden border-t-4 border-t-pink-500">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-100/30 rounded-full blur-3xl pointer-events-none -mr-8 -mt-8"></div>
+                    
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                        <div>
+                            <span class="text-xs text-pink-600 font-extrabold uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-full border border-pink-100">System Mapping Model</span>
+                            <h3 class="text-xl font-black text-slate-800 mt-2 flex items-center gap-2">
+                                <i class="fas fa-shield-virus text-pink-500"></i>
+                                <span>แผนภูมิการจัดระดับความเสี่ยงของอุปกรณ์เชิงระบบ (Location × Function)</span>
+                            </h3>
+                            <p class="text-slate-400 text-xs font-bold mt-1">วิเคราะห์ประเมินสภาพแวดล้อมห้องติดตั้ง (Physical Location) และความสำคัญของ Switch เครือข่ายจริง</p>
+                        </div>
+                        
+                        <!-- Filter Controls for Risk Matrix -->
+                        <div class="flex flex-wrap gap-1.5 bg-slate-50 border border-slate-200 p-1 rounded-2xl shadow-inner w-full md:w-auto">
+                            <button onclick="filterRiskModel('ALL')" id="btn_risk_ALL" class="px-3.5 py-2 rounded-xl text-xs font-black transition bg-pink-500 text-white shadow-sm">
+                                ทั้งหมด
+                            </button>
+                            <button onclick="filterRiskModel('CRITICAL')" id="btn_risk_CRITICAL" class="px-3.5 py-2 rounded-xl text-xs font-black transition text-slate-600 hover:bg-white flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full bg-red-500"></span> Critical & Violation
+                            </button>
+                            <button onclick="filterRiskModel('HIGH')" id="btn_risk_HIGH" class="px-3.5 py-2 rounded-xl text-xs font-black transition text-slate-600 hover:bg-white flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full bg-orange-500"></span> High
+                            </button>
+                            <button onclick="filterRiskModel('MEDIUM')" id="btn_risk_MEDIUM" class="px-3.5 py-2 rounded-xl text-xs font-black transition text-slate-600 hover:bg-white flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full bg-yellow-500"></span> Medium
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Cheat Sheet matrix -->
+                    <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-100 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+                        <div class="text-xs leading-relaxed space-y-1.5 border-r border-slate-100 pr-2">
+                            <h4 class="font-extrabold text-slate-700 flex items-center gap-1">
+                                <i class="fas fa-map-marker-alt text-rose-500"></i>
+                                <span>1. จุดที่ติดตั้ง (Location Layer)</span>
+                            </h4>
+                            <ul class="space-y-1 text-slate-500 list-inside list-disc">
+                                <li><strong>L1 Server Room:</strong> แหล่งศูนย์กลาง (เสถียรภาพสูงสุด)</li>
+                                <li><strong>L2 Room SW:</strong> ห้องระบบย่อยประจำตึก</li>
+                                <li><strong>L3 Rack SW:</strong> ตู้แขวนตามฝาผนัง/ทางเดิน</li>
+                            </ul>
+                        </div>
+                        <div class="text-xs leading-relaxed space-y-1.5 border-r border-slate-100 pr-2">
+                            <h4 class="font-extrabold text-slate-700 flex items-center gap-1">
+                                <i class="fas fa-server text-blue-500"></i>
+                                <span>2. ประเภท Switch (Function Layer)</span>
+                            </h4>
+                            <ul class="space-y-1 text-slate-500 list-inside list-disc">
+                                <li><strong>F1 CSW (Core):</strong> หน้าที่ระบบกลาง (สูงสุด)</li>
+                                <li><strong>F2 DST (Distribution):</strong> แยกสัญญาณกระจายอาคาร</li>
+                                <li><strong>F3 ASW (Access):</strong> ลิงค์ผู้ใช้งานระดับผู้ปฏิบัติงาน</li>
+                            </ul>
+                        </div>
+                        <div class="text-xs leading-relaxed space-y-1.5">
+                            <h4 class="font-extrabold text-slate-700 flex items-center gap-1">
+                                <i class="fas fa-exclamation-triangle text-pink-500"></i>
+                                <span>3. ระดับวิกฤต Matrix Mapping</span>
+                            </h4>
+                            <div class="grid grid-cols-2 gap-1 text-[10px] text-slate-500">
+                                <span class="bg-red-50 border border-red-200 text-red-700 px-1.5 py-0.5 rounded font-bold">🔴 CSW @ L1 = Critical</span>
+                                <span class="bg-orange-50 border border-orange-200 text-orange-700 px-1.5 py-0.5 rounded font-bold">🟠 CSW @ L2 = High</span>
+                                <span class="bg-rose-50 border border-rose-300 text-rose-700 px-1.5 py-0.5 rounded font-bold">❌ CSW @ L3 = Violation!</span>
+                                <span class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-1.5 py-0.5 rounded font-bold">🟡 ASW @ L1 = Medium</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Risk Evaluation Table Output -->
+                    <div id="riskMappingInventory" class="space-y-6">
+                        <div class="text-center py-6 text-slate-400 text-xs">
+                            <i class="fas fa-spinner animate-spin text-xl text-pink-500 mb-2"></i>
+                            <p>กำลังรวบรวมและวิเคราะห์ข้อมูลความเสี่ยงเชิงระบบ...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBVIEW: Survey List -->
+            <div id="subview_surveyList" class="space-y-6 hidden">
+                <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                    
+                    <div class="relative w-full md:max-w-md z-10">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                            <i class="fas fa-search text-sm"></i>
+                        </span>
+                        <input type="text" id="roomSearchInput" oninput="filterRoomsList(this.value)" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 font-medium text-sm" placeholder="ค้นหาด้วยรหัสห้อง, ชื่อจุดติดตั้ง...">
+                    </div>
+                    
+                    <div class="flex gap-2 w-full md:w-auto shrink-0 justify-end relative z-10">
+                        <span class="text-xs bg-pink-50 text-pink-600 font-extrabold px-3.5 py-2 rounded-xl border border-pink-100 flex items-center">
+                            พบจุดสำรวจ <strong id="filterCount" class="font-black mx-1">0</strong> รายการ
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Grouped Container for Rooms list by R.LOCAT and R.LOF -->
+                <div id="groupedRoomsContainer" class="space-y-8"></div>
+            </div>
+
+            <!-- SUBVIEW: Room Detail View -->
+            <div id="subview_roomDetail" class="space-y-6 hidden animate-in fade-in duration-150">
+                <div>
+                    <button onclick="switchTab('surveyList')" class="bg-white hover:bg-gray-100 text-gray-600 font-bold px-4 py-2 rounded-xl text-sm transition shadow-sm border border-gray-200">
+                        <i class="fas fa-arrow-left mr-1.5"></i> ย้อนกลับไปหน้ารายการ
+                    </button>
+                </div>
+
+                <!-- Room info header card with map area -->
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-3 relative">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/25 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6 z-10"></div>
+                    
+                    <div class="p-6 md:col-span-2 flex flex-col justify-between gap-4 relative z-10">
+                        <div class="space-y-1">
+                            <span class="text-xs bg-pink-100 text-pink-700 font-extrabold px-3 py-1 rounded-full uppercase" id="detail_ROOMTYP">ประเภทห้อง</span>
+                            <h2 class="text-2xl font-black text-gray-800" id="detail_RNAME">ชื่อจุดติดตั้ง / ห้อง</h2>
+                            <p class="text-gray-400 text-sm flex items-center gap-2 mt-1">
+                                <i class="fas fa-map-marker-alt text-rose-500"></i>
+                                <span id="detail_R_LOCAT">ชั้น </span>
+                            </p>
+                        </div>
+
+                        <!-- 📍 Google Map embedded area dynamically filled with coordinate-based map iframe -->
+                        <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50 h-[170px] relative shadow-inner">
+                            <div id="detail_MapPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2 p-4 text-center">
+                                <i class="fas fa-map-marked-alt text-3xl text-slate-300"></i>
+                                <span class="text-xs font-semibold leading-normal">ระบุพิกัด GPS เพื่อแสดงแผนที่นำทางแบบ Real-time</span>
+                            </div>
+                            <iframe id="detail_MapIframe" src="" class="w-full h-full border-0 hidden" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+
+                        <div class="flex gap-2 flex-wrap">
+                            <div class="bg-pink-50/50 border border-pink-100 rounded-xl px-4 py-2">
+                                <span class="text-xs text-pink-600 block font-bold">Room ID</span>
+                                <strong class="text-sm text-gray-800 font-mono font-bold" id="detail_ROOMID">-</strong>
+                            </div>
+                            <div class="bg-rose-50/50 border border-rose-100 rounded-xl px-4 py-2 flex items-center gap-3">
+                                <div>
+                                    <span class="text-xs text-rose-600 block font-bold">พิกัด GPS</span>
+                                    <strong class="text-sm text-gray-800 font-mono font-bold" id="detail_RoomGPS">-</strong>
+                                </div>
+                                <button id="btn_RoomGpsPopup" onclick="" class="bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-lg text-xs transition relative z-20" title="เปิด Google Map ในหน้าต่างใหม่">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative bg-rose-50 border-t md:border-t-0 md:border-l border-gray-100 flex items-center justify-center overflow-hidden aspect-video md:aspect-auto min-h-[220px]">
+                        <img id="detail_RoomImg" src="" class="w-full h-full object-cover" alt="พิกัดห้อง" onerror="this.src='https://placehold.co/400x300/fbcfe8/be185d?text=No+Photo'">
+                        <button onclick="openLocationEditModal()" class="absolute bottom-3 right-3 bg-slate-900/75 hover:bg-slate-950 text-white font-bold text-xs px-3 py-1.5 rounded-xl border border-white/20 transition flex items-center gap-1.5 shadow backdrop-blur-sm z-20">
+                            <i class="fas fa-camera"></i> แก้ไขพิกัด/รูปห้อง
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex border-b border-gray-200">
+                        <button onclick="switchRoomTab('support')" id="roomTab_support" class="px-5 py-3 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition">
+                            <i class="fas fa-plug mr-1.5"></i> อุปกรณ์สนับสนุน (<span id="count_support">0</span>)
+                        </button>
+                        <button onclick="switchRoomTab('network')" id="roomTab_network" class="px-5 py-3 font-bold text-sm text-gray-500 hover:text-pink-600 transition">
+                            <i class="fas fa-network-wired mr-1.5"></i> อุปกรณ์เครือข่าย (<span id="count_network">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Room Tab: Support Components -->
+                    <div id="roomSubtab_support" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-extrabold text-lg text-gray-800">รายการ Supporting Components</h3>
+                            <button onclick="openEditModal('support', 'add')" class="btn bg-pink-500 hover:bg-pink-600 text-white font-black px-4 py-2 rounded-xl text-sm transition shadow-sm">
+                                <i class="fas fa-plus mr-1"></i> เพิ่มอุปกรณ์สนับสนุน
+                            </button>
+                        </div>
+                        <div id="supportDevicesList" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Room Tab: Network Devices -->
+                    <div id="roomSubtab_network" class="space-y-4 hidden">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-extrabold text-lg text-gray-800">รายการ Network Devices</h3>
+                            <button onclick="openEditModal('network', 'add')" class="btn bg-pink-500 hover:bg-pink-600 text-white font-black px-4 py-2 rounded-xl text-sm transition shadow-sm">
+                                <i class="fas fa-plus mr-1"></i> เพิ่มอุปกรณ์เครือข่าย
+                            </button>
+                        </div>
+                        <div id="networkDevicesList" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: EDIT LOCATION / ROOM DETAIL -->
+    <div id="locationModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden flex flex-col shadow-2xl relative border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/25 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6"></div>
+            
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-pink-500 to-rose-500 text-white relative z-10">
+                <h3 class="font-black text-lg">แก้ไขข้อมูลห้องและพิกัด</h3>
+                <button onclick="closeLocationModal()" class="text-white hover:text-pink-100 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[70vh] relative z-10">
+                <form id="locationForm" onsubmit="handleLocationFormSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-600 font-bold mb-1 text-sm">Room ID *</label>
+                        <input type="text" id="loc_ROOMID" readonly class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 font-mono font-bold text-gray-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-bold mb-1 text-sm">ชื่อห้อง/จุดบริการ *</label>
+                        <input type="text" id="loc_RNAME" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-600 font-bold mb-1 text-sm">ประเภทห้อง *</label>
+                            <input type="text" id="loc_ROOMTYP" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-bold mb-1 text-sm">ชั้น (LOF)</label>
+                            <input type="text" id="loc_RLOF" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-bold mb-1 text-sm">อาคาร / พิกัดสถานที่</label>
+                        <input type="text" id="loc_RLOCAT" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-bold mb-1 text-sm">พิกัด GPS (ละติจูด, ลองจิจูด)</label>
+                        <input type="text" id="loc_RoomGPS" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono" placeholder="เช่น 17.414747, 102.779626">
+                    </div>
+
+                    <!-- Room Image Management Section -->
+                    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+                        <label class="block text-gray-600 font-bold mb-2 text-sm">รูปถ่ายพิกัดห้อง (Google Drive File ID)</label>
+                        <div class="flex gap-4 items-start">
+                            <div class="flex-1 space-y-2">
+                                <input type="text" id="loc_RoomImg_ID" oninput="updateRoomImagePreview()" class="w-full px-4 py-2 text-xs font-mono font-bold rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink-300" placeholder="ระบุ ID ไฟล์รูปจาก Google Drive">
+                                <button type="button" onclick="clearRoomImage()" class="text-xs bg-white border border-gray-300 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 font-bold flex items-center transition shadow-sm">
+                                    <i class="fas fa-trash-alt mr-1"></i> ลบรูปห้อง
+                                </button>
+                            </div>
+                            <div class="w-24 h-24 bg-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
+                                <img id="preview_loc_img" src="" class="w-full h-full object-cover hidden">
+                                <span id="preview_loc_placeholder" class="text-gray-400 text-[10px] text-center px-1">ไม่มีรูปภาพ</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 rounded-b-3xl relative z-10">
+                <button type="button" onclick="closeLocationModal()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition">
+                    ยกเลิก
+                </button>
+                <button type="button" onclick="submitLocationForm()" class="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl text-sm font-black hover:opacity-95 transition shadow-lg shadow-pink-100">
+                    บันทึกพิกัดห้อง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT DEVICE (Supporting & Network) -->
+    <div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/25 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6"></div>
+            
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-pink-500 to-rose-500 text-white relative z-10">
+                <h3 id="editModalTitle" class="font-black text-lg">เพิ่ม/แก้ไขข้อมูล</h3>
+                <button onclick="closeEditModal()" class="text-white hover:text-pink-100 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 relative z-10">
+                <form id="editForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <input type="hidden" name="type" id="form_type" value="support">
+                    <input type="hidden" name="mode" id="form_mode" value="add">
+                    <input type="hidden" name="roomId" id="form_roomId" value="">
+                    <input type="hidden" name="NOID" id="form_NOID" value="">
+                    <input type="hidden" name="NSWNO" id="form_NSWNO" value="">
+
+                    <!-- SUPPORTING DEVICE FIELDS -->
+                    <div id="supportFormFields" class="space-y-4 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 relative">
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">รหัสครุภัณฑ์ (Asset ID)</label>
+                                <div class="flex gap-2 relative">
+                                    <input type="text" name="Asset_ID" id="input_Asset_ID_support" oninput="handleModalSearchTyping(this.value, 'support')" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono font-bold text-base" placeholder="พิมพ์รหัสครุภัณฑ์ หรือชื่อเพื่อค้นหา..." autocomplete="off">
+                                    <button type="button" onclick="openQRScannerForModal('support')" class="btn px-3.5 bg-pink-50 hover:bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 border border-pink-200 rounded-xl" title="สแกนผ่านกล้อง">
+                                        <i class="fas fa-camera text-lg"></i>
+                                    </button>
+                                </div>
+                                <div id="modalSearchDropdown_support" class="absolute left-0 mt-1 w-full bg-white rounded-xl shadow-2xl border border-pink-200 overflow-hidden z-[90] hidden flex-col max-h-[40vh]">
+                                    <div id="modalSearchResults_support" class="overflow-y-auto divide-y divide-gray-100"></div>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">ชื่อครุภัณฑ์ / อุปกรณ์สนับสนุน *</label>
+                                <input type="text" name="CaruName" id="input_CaruName" oninput="updateSupportLabelName()" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold" required placeholder="เช่น เครื่องสำรองไฟ (UPS Server)">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">ป้ายชื่อระบุพิกัด (Label Name)</label>
+                                <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5">
+                                    <span id="label_prefix" class="text-gray-500 font-extrabold select-none text-sm shrink-0 truncate max-w-[220px] md:max-w-[340px]">เครื่องสำรองไฟ-</span>
+                                    <input type="text" id="input_Label_Suffix" oninput="updateSupportLabelName()" class="w-full bg-transparent focus:outline-none font-bold text-gray-800 text-sm" placeholder="เลขรหัส/ลำดับระบุพิกัด (เช่น 01)...">
+                                </div>
+                                <input type="hidden" name="Label_Name" id="input_Label_Name" value="">
+                            </div>
+
+                            <!-- 📍 Dropdown ใหม่ที่ใช้ข้อความสะอาดตามคำขอ -->
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">กลุ่มประเภทอุปกรณ์</label>
+                                <select name="CARUTYPE" id="input_CrutypeName" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold">
+                                    <option value="" disabled selected>-- เลือกกลุ่มประเภทอุปกรณ์ --</option>
+                                    <option value="CH001">ระบบควบคุมการทำงานภายในห้อง (Monitoring & Control Environment)</option>
+                                    <option value="CH002">ระบบไฟฟ้าหลัก (Main Electrical System)</option>
+                                    <option value="CH003">ตู้จัดเก็บอุปกรณ์เครือข่าย / Rack</option>
+                                    <option value="CH004">เครื่องสำรองไฟ / UPS</option>
+                                    <option value="CH005">ระบบปรับอากาศ / Air Conditioning</option>
+                                    <option value="CH006">ตัวห้อง / ตำแหน่งที่ตั้ง / โครงสร้าง</option>
+                                    <option value="DEFAULT">อุปกรณ์สนับสนุนอื่นๆ</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">สถานะ</label>
+                                <select name="STATUS" id="input_STATUS_support" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold">
+                                    <option value="ใช้งาน">ใช้งานปกติ</option>
+                                    <option value="ชำรุด">ชำรุด</option>
+                                    <option value="รอซ่อม">ชำรุด/รอซ่อมบำรุง</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">ยี่ห้อ (Brand)</label>
+                                <input type="text" name="BandName" id="input_BandName" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">รุ่น (Model)</label>
+                                <input type="text" name="MODEL" id="input_MODEL" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">อายุการใช้งาน (ปี)</label>
+                                <input type="number" name="Age" id="input_Age_support" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div class="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+                                <label class="block text-gray-600 font-bold mb-2 text-sm">รูปถ่ายตัวเครื่อง / ครุภัณฑ์ (ถ่ายใหม่หรือแนบไฟล์รูป)</label>
+                                <div class="flex flex-col md:flex-row gap-4 items-start">
+                                    <div class="flex-1 w-full space-y-3">
+                                        <input type="hidden" name="Note9" id="input_Note9">
+                                        <!-- เอา capture="environment" ออก เพื่อให้มือถือเด้งเมนูให้เลือกว่าจะถ่ายรูปใหม่ หรือเลือกจากคลังภาพ/ไฟล์ -->
+                                        <input type="file" id="file_support" accept="image/*" onchange="handleImageSelection(event, 'support')" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 transition cursor-pointer">
+                                        <button type="button" onclick="clearImage('support')" class="text-xs bg-white border border-gray-300 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 font-bold flex items-center transition shadow-sm">
+                                            <i class="fas fa-trash-alt mr-1"></i> ลบรูปถ่ายที่เลือกไว้
+                                        </button>
+                                    </div>
+                                    <div class="w-28 h-28 bg-white rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 relative">
+                                        <img id="preview_img_support" src="" class="w-full h-full object-cover hidden">
+                                        <span id="preview_placeholder_support" class="text-gray-400 text-xs text-center px-2">ไม่มีรูปภาพ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NETWORK DEVICE FIELDS -->
+                    <div id="networkFormFields" class="space-y-4 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 relative">
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">เชื่อมโยงรหัสครุภัณฑ์หลัก (Asset ID)</label>
+                                <div class="flex gap-2 relative">
+                                    <input type="text" name="Asset_ID" id="input_Asset_ID_network" oninput="handleModalSearchTyping(this.value, 'network')" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono font-bold text-base" placeholder="พิมพ์รหัสครุภัณฑ์ หรือชื่อเพื่อค้นหา..." autocomplete="off">
+                                    <button type="button" onclick="openQRScannerForModal('network')" class="btn px-3.5 bg-pink-50 hover:bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 border border-pink-200 rounded-xl" title="สแกนผ่านกล้อง">
+                                        <i class="fas fa-camera text-lg"></i>
+                                    </button>
+                                </div>
+                                <div id="modalSearchDropdown_network" class="absolute left-0 mt-1 w-full bg-white rounded-xl shadow-2xl border border-pink-200 overflow-hidden z-[90] hidden flex-col max-h-[40vh]">
+                                    <div id="modalSearchResults_network" class="overflow-y-auto divide-y divide-gray-100"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">รหัสอุปกรณ์เครือข่ายหลัก (NSWID) *</label>
+                                <input type="text" name="NSWID" id="input_NSWID" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono font-bold" placeholder="ระบุเพื่อแก้ไข หรือเว้นว่างให้ Gen อัตโนมัติ">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Hostname *</label>
+                                <input type="text" name="Hostname" id="input_Hostname" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold" placeholder="เช่น ASWO3-MEC-ARI">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">IP Address *</label>
+                                <input type="text" name="IP Address" id="input_IPAddress" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono font-bold" placeholder="เช่น 10.140.199.63">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">กลุ่มอุปกรณ์ (NetworkPio) *</label>
+                                <select name="NetworkPio" id="input_NetworkPio" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-bold">
+                                    <option value="ASW">ASW (Access Switch)</option>
+                                    <option value="CSW">CSW (Distribution Switch)</option>
+                                    <option value="CORE">Core Switch</option>
+                                    <option value="ROUTER">Router</option>
+                                    <option value="FIREWALL">Firewall</option>
+                                    <option value="AP">Access Point</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">ยี่ห้อ (Product)</label>
+                                <input type="text" name="Product" id="input_Product" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">รุ่น (Model)</label>
+                                <input type="text" name="Model" id="input_Model" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Serial No.</label>
+                                <input type="text" name="Serial No." id="input_Serial" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono font-bold">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Mac Address</label>
+                                <input type="text" name="Mac Address" id="input_MacAddress" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Stack No.</label>
+                                <input type="text" name="Stack No." id="input_StackNo" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium">
+                            </div>
+
+                            <div class="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+                                <label class="block text-gray-600 font-bold mb-2 text-sm">รูปถ่ายพอร์ตพิกัดเชื่อมต่อ (ถ่ายใหม่หรือแนบไฟล์รูป)</label>
+                                <div class="flex flex-col md:flex-row gap-4 items-start">
+                                    <div class="flex-1 w-full space-y-3">
+                                        <input type="hidden" name="Note8" id="input_Note8">
+                                        <!-- เอา capture="environment" ออก เพื่อให้มือถือเด้งเมนูให้เลือกว่าจะถ่ายรูปใหม่ หรือเลือกจากคลังภาพ/ไฟล์ -->
+                                        <input type="file" id="file_network" accept="image/*" onchange="handleImageSelection(event, 'network')" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 transition cursor-pointer">
+                                        <button type="button" onclick="clearImage('network')" class="text-xs bg-white border border-gray-300 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 font-bold flex items-center transition shadow-sm">
+                                            <i class="fas fa-trash-alt mr-1"></i> ลบรูปถ่ายที่เลือกไว้
+                                        </button>
+                                    </div>
+                                    <div class="w-28 h-28 bg-white rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 relative">
+                                        <img id="preview_img_network" src="" class="w-full h-full object-cover hidden">
+                                        <span id="preview_placeholder_network" class="text-gray-400 text-xs text-center px-2">ไม่มีรูปภาพ</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Username เข้าระบบ</label>
+                                <input type="text" name="Username" id="input_Username" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">Password เข้าระบบ</label>
+                                <input type="text" name="Password" id="input_Password" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-mono text-sm">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-600 font-bold mb-1 text-sm">บันทึกเพิ่มเติม (Note)</label>
+                                <textarea name="Note" id="input_Note" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-300 font-medium"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex justify-between items-center rounded-b-3xl relative z-10">
+                <div>
+                    <button type="button" id="btn_delete_device" onclick="handleDeleteDeviceClick()" class="hidden px-4 py-2.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-xl text-sm font-extrabold transition">
+                        <i class="fas fa-trash-alt mr-1"></i> ลบอุปกรณ์
+                    </button>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition">
+                        ยกเลิก
+                    </button>
+                    <button type="button" onclick="submitEditForm()" class="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl text-sm font-black hover:opacity-95 transition shadow-lg shadow-pink-100">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DEVICE SPEC DETAIL VIEW & PRINT QR -->
+    <div id="deviceDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden items-center justify-center p-4 animate-in fade-in duration-150">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden flex flex-col shadow-2xl relative border border-gray-100 animate-in zoom-in-95 duration-150 max-h-[85vh]">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/25 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6"></div>
+            
+            <div id="detail_modal_header" class="p-5 border-b border-gray-100 flex justify-between items-center text-white relative z-10">
+                <h3 id="detail_modal_title" class="font-black text-lg">รายละเอียดอุปกรณ์</h3>
+                <button onclick="closeDeviceDetailModal()" class="text-white hover:opacity-80 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-5 relative z-10">
+                <div class="w-full h-48 rounded-2xl overflow-hidden border border-gray-100 bg-slate-50 relative">
+                    <img id="detail_modal_img" src="" class="w-full h-full object-cover" alt="Device Spec Image">
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">ชื่อป้ายชื่อ / Label</span>
+                        <span id="detail_modal_label" class="text-xs bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg font-mono font-bold">-</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">รหัสครุภัณฑ์ (Asset ID)</span>
+                        <span id="detail_modal_asset" class="text-xs font-mono font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">ยี่ห้อ / Brand</span>
+                        <span id="detail_modal_brand" class="text-xs font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">รุ่น / Model</span>
+                        <span id="detail_modal_model" class="text-xs font-bold text-slate-800">-</span>
+                    </div>
+                    <div id="detail_modal_specs" class="space-y-3"></div>
+                </div>
+            </div>
+            
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 rounded-b-3xl relative z-10">
+                <button type="button" onclick="closeDeviceDetailModal()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition">
+                    ปิดหน้าต่าง
+                </button>
+                <button type="button" id="btn_print_qr" onclick="" class="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl text-sm font-black hover:opacity-95 transition shadow-lg shadow-pink-100">
+                    <i class="fas fa-print mr-1.5"></i> พิมพ์ QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN PRINT AREA FOR PRINT QR ACTION -->
+    <div id="printQrArea" class="hidden flex-col items-center p-8 bg-white text-black font-sans text-center max-w-sm mx-auto border-2 border-dashed border-slate-400 rounded-xl">
+        <h2 class="text-lg font-extrabold tracking-tight">UDON THANI HOSPITAL</h2>
+        <span class="text-xs text-slate-500 font-bold">IT Network Support Asset Label</span>
+        
+        <div class="w-48 h-48 mx-auto my-6 border-4 border-slate-900 flex items-center justify-center p-3 relative">
+            <div id="print_qr_placeholder" class="text-xs text-slate-400 font-mono font-bold flex flex-col items-center gap-1">
+                <i class="fas fa-qrcode text-6xl text-slate-900 mb-2"></i>
+                <span id="print_qr_code_text">-</span>
+            </div>
+        </div>
+        
+        <div class="space-y-1">
+            <p class="text-sm font-black" id="print_label_title">-</p>
+            <p class="text-xs font-bold text-slate-600" id="print_asset_title">-</p>
+        </div>
+    </div>
+
+    <!-- MODAL: QR SCANNER CAM -->
+    <div id="qrScannerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-pink-500 text-white">
+                <h3 class="font-extrabold text-md flex items-center gap-2">
+                    <i class="fas fa-camera"></i>
+                    <span>กล้องสแกน QR / BARCODE</span>
+                </h3>
+                <button onclick="closeQRScanner()" class="text-white hover:text-pink-100 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 text-center space-y-4">
+                <div class="relative mx-auto max-w-[280px] aspect-square rounded-2xl border-4 border-pink-500 overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg">
+                    <div id="qr-reader" class="w-full h-full object-cover"></div>
+                    <div class="absolute inset-0 border-2 border-white/20 pointer-events-none rounded-xl"></div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed font-bold">
+                    จัดให้รหัสสติ๊กเกอร์ QR Code ครุภัณฑ์ หรือ Barcode อยู่ในกรอบกล้องด้านบนเพื่อสแกนอัตโนมัติ
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: WELCOME & AUDIT POPUP -->
+    <div id="welcomeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative overflow-hidden border border-pink-400/30 animate-in fade-in zoom-in-95 duration-200">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl pointer-events-none -mr-8 -mt-8"></div>
+            
+            <div class="flex flex-col items-center text-center gap-5 relative z-10">
+                <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border border-pink-200 overflow-hidden shadow-md p-2">
+                    <img src="logo003v1.png" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('fallbackWelcomeLogoIcon').classList.remove('hidden');" alt="IT UDON HOSP Logo">
+                    <i id="fallbackWelcomeLogoIcon" class="fas fa-network-wired text-3xl text-pink-500 hidden"></i>
+                </div>
+                
+                <h3 class="text-xl md:text-2xl font-black leading-snug">ยินดีต้อนรับสู่ระบบสำรวจเครือข่าย<br>โรงพยาบาลอุดรธานี</h3>
+                
+                <p class="text-rose-100 text-xs md:text-sm leading-relaxed max-w-md">
+                    เครื่องมือบูรณาการข้อมูลอุปกรณ์เครือข่าย และสนับสนุน (Supporting Components) สำหรับดูแล ตรวจเช็ค และซ่อมบำรุงเชิงรุกในทุกจุดบริการและห้องศูนย์ข้อมูลสารสนเทศได้อย่างแม่นยำ
+                </p>
+                
+                <div class="w-full bg-white/10 rounded-2xl p-4 border border-white/10 text-left space-y-2 mt-2">
+                    <h4 class="text-[11px] font-black uppercase tracking-wider text-rose-200 flex items-center gap-1.5">
+                        <i class="fas fa-shield-virus"></i>
+                        <span>สถานะระบบและงานบำรุงรักษา (System Audit Checked)</span>
+                    </h4>
+                    <p class="text-[11px] text-white/90 leading-relaxed">
+                        ระบบทำการเชื่อมต่อฐานข้อมูล Google Sheets และติดตั้ง System Mapping Model ตรวจประเมินสภาพแวดล้อมห้องติดตั้ง (Location) และความสำคัญอุปกรณ์เครือข่ายเรียบร้อยพร้อมใช้งาน
+                    </p>
+                </div>
+                
+                <button onclick="closeWelcomeModal()" class="w-full py-3 bg-white text-rose-600 hover:bg-rose-50 font-black rounded-xl text-sm transition shadow-lg shadow-pink-900/20">
+                    ปิดหน้านี้ & เริ่มใช้งานระบบ <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer of page -->
+    <footer class="bg-slate-900 text-slate-400 py-4 text-center text-xs mt-auto shrink-0 border-t border-slate-800">
+        <p>© 2026 UDON THANI HOSPITAL · กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์ (By IT Technical Team)</p>
+    </footer>
+
+    <script>
+        // API Endpoint สำหรับเชื่อมต่อ Google Apps Script
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvZGucEHuKW4GQ0XFsJ1v3ajmMYmp9-lFUJGar64gH-g8mq5Sf_PL4c38txqDpOhwf/exec"; 
+
+        // ตัวแปรเก็บ State การทำงาน
+        let localRooms = [];
+        let localNetworks = []; // ข้อมูลสวิตช์ดิบทั้งหมดเพื่อนำมาสร้างแผนภูมิวิเคราะห์ความเสี่ยงเชิงระบบ
+        let currentRoomId = null;
+        let html5QrcodeScanner = null;
+        let qrScannerTargetType = null; 
+        let currentRiskFilter = 'ALL'; // ฟิลเตอร์ระบายความเสี่ยง (ALL, CRITICAL, HIGH, MEDIUM)
+
+        // 🌟 ประกาศตัวแปร mapping กลุ่มประเภทอุปกรณ์สนับสนุน (Support) ให้เป็น Global Scope เพื่อใช้ตอนบันทึกข้อมูล
+        const supportTypeMap = {
+            "CH001": "ระบบควบคุมการทำงานภายในห้อง (Monitoring & Control Environment)",
+            "CH002": "ระบบไฟฟ้าหลัก (Main Electrical System)",
+            "CH003": "ตู้จัดเก็บอุปกรณ์เครือข่าย / Rack",
+            "CH004": "เครื่องสำรองไฟ / UPS",
+            "CH005": "ระบบปรับอากาศ / Air Conditioning",
+            "CH006": "ตัวห้อง / ตำแหน่งที่ตั้ง / โครงสร้าง",
+            "DEFAULT": "อุปกรณ์สนับสนุนอื่นๆ"
+        };
+
+        // 🌟 ประกาศตัวแปร networkMapping ใน Global Scope ให้เรียกใช้ได้ตลอดเวลา
+        const networkMapping = {
+            "Web Application Firewall (Project Cyber Security)": { order: 1, bg: 'bg-gradient-to-r from-rose-500 to-pink-600', border: 'border-t-4 border-t-rose-500', text: 'text-rose-700', badge: 'bg-rose-100', icon: 'fa-shield-virus', desc: 'ระบบป้องกันเว็บแอปพลิเคชัน' },
+            "Firewall": { order: 2, bg: 'bg-gradient-to-r from-red-500 to-rose-600', border: 'border-t-4 border-t-red-500', text: 'text-red-700', badge: 'bg-red-100', icon: 'fa-fire-extinguisher', desc: 'ระบบป้องกันเครือข่ายหลัก' },
+            "IPS Secure Firewall 3110 (Project Cyber Security)": { order: 3, bg: 'bg-gradient-to-r from-red-500 to-pink-600', border: 'border-t-4 border-t-red-500', text: 'text-red-700', badge: 'bg-red-100', icon: 'fa-shield-alt', desc: 'ระบบป้องกันการบุกรุกเครือข่าย' },
+            "Firewall (Project Cyber Security)": { order: 4, bg: 'bg-gradient-to-r from-red-500 to-rose-600', border: 'border-t-4 border-t-red-500', text: 'text-red-700', badge: 'bg-red-100', icon: 'fa-shield-alt', desc: 'ความปลอดภัยเครือข่าย' },
+            "Wireless Controller": { order: 5, bg: 'bg-gradient-to-r from-purple-500 to-indigo-600', border: 'border-t-4 border-t-purple-500', text: 'text-purple-700', badge: 'bg-purple-100', icon: 'fa-wifi', desc: 'ควบคุมสัญญาณไร้สาย' },
+            "DST": { order: 6, bg: 'bg-gradient-to-r from-blue-600 to-indigo-700', border: 'border-t-4 border-t-blue-600', text: 'text-blue-700', badge: 'bg-blue-100', icon: 'fa-project-diagram', desc: 'Distribution Switch' },
+            "CSW": { order: 7, bg: 'bg-gradient-to-r from-blue-500 to-cyan-600', border: 'border-t-4 border-t-blue-500', text: 'text-blue-700', badge: 'bg-blue-100', icon: 'fa-network-wired', desc: 'Core / Distribution Switch' },
+            "ASW": { order: 8, bg: 'bg-gradient-to-r from-cyan-500 to-blue-500', border: 'border-t-4 border-t-cyan-500', text: 'text-cyan-700', badge: 'bg-cyan-100', icon: 'fa-sitemap', desc: 'Access Switch' },
+            "Switch Pacs": { order: 9, bg: 'bg-gradient-to-r from-indigo-500 to-purple-600', border: 'border-t-4 border-t-indigo-500', text: 'text-indigo-700', badge: 'bg-indigo-100', icon: 'fa-hdd', desc: 'สวิตช์ระบบภาพทางการแพทย์' },
+            "ASW-CCTV": { order: 10, bg: 'bg-gradient-to-r from-amber-500 to-yellow-600', border: 'border-t-4 border-t-amber-500', text: 'text-amber-700', badge: 'bg-amber-100', icon: 'fa-video', desc: 'Access Switch วงจรปิด' },
+            "SW-CCTV": { order: 11, bg: 'bg-gradient-to-r from-amber-500 to-yellow-600', border: 'border-t-4 border-t-amber-500', text: 'text-amber-700', badge: 'bg-amber-100', icon: 'fa-video', desc: 'Switch วงจรปิด' },
+            "Switch Robot Drug": { order: 12, bg: 'bg-gradient-to-r from-emerald-500 to-teal-600', border: 'border-t-4 border-t-emerald-500', text: 'text-emerald-700', badge: 'bg-emerald-100', icon: 'fa-robot', desc: 'สวิตช์ห้องจ่ายยาอัตโนมัติ' },
+            "DEFAULT": { order: 99, bg: 'bg-gradient-to-r from-slate-500 to-gray-600', border: 'border-t-4 border-t-slate-500', text: 'text-slate-700', badge: 'bg-slate-100', icon: 'fa-server', desc: 'อุปกรณ์เครือข่ายอื่นๆ' }
+        };
+
+        // ระบบจัดการสถานะเข้าสู่ระบบ (Authentication)
+        (function() {
+            try {
+                const userData = localStorage.getItem('currentUser');
+                if (!userData) {
+                    window.user = null;
+                    return;
+                }
+                const user = JSON.parse(userData);
+                if (!user || !user.UserPN) {
+                    localStorage.removeItem('currentUser');
+                    window.user = null;
+                    return;
+                }
+                window.user = user;
+            } catch (err) {
+                console.error("Auth-Check Error: ", err);
+                localStorage.removeItem('currentUser');
+                window.user = null;
+            }
+        })();
+
+        function getCurrentUser() {
+            return window.user || null;
+        }
+
+        function hasRole(role) {
+            if (!window.user) return false;
+            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
+        }
+
+        function getDisplayName() {
+            if (!window.user) return "ผู้ใช้งานทั่วไป";
+            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.clear();
+            window.user = null;
+            Swal.fire({
+                icon: 'info',
+                title: 'ออกจากระบบสำเร็จ',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                location.reload();
+            });
+        }
+
+        // ==========================================
+        // APP INITIALIZATION
+        // ==========================================
+        window.onload = function() {
+            checkConnectivity();
+            
+            if (window.user) {
+                doLoginSuccess(window.user);
+            } else {
+                document.getElementById('loginView').classList.remove('hidden');
+                document.getElementById('mainAppView').classList.add('hidden');
+            }
+        };
+
+        function showLoader() {
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+        }
+
+        function hideLoader() {
+            document.getElementById('globalLoader').classList.add('hidden');
+            document.getElementById('globalLoader').classList.remove('flex');
+        }
+
+        function checkConnectivity() {
+            const badge = document.getElementById('connectionBadge');
+            if (APPS_SCRIPT_URL && APPS_SCRIPT_URL.trim() !== "") {
+                badge.classList.remove('hidden');
+                badge.className = "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/90 border border-emerald-200 shadow-sm text-emerald-700";
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span><span>Live Database API</span>`;
+            } else {
+                badge.classList.remove('hidden');
+                badge.className = "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/90 border border-amber-200 shadow-sm text-amber-700";
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span><span>Server Offline</span>`;
+            }
+        }
+
+        // ==========================================
+        // CALL BACKEND UTILS (With UI Lock Overlay)
+        // ==========================================
+        function callBackend(action, params, onSuccess, onError) {
+            showLoader(); 
+            
+            const payload = { action: action, ...params };
+            
+            fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                redirect: "follow", // ป้องกันปัญหา Redirect
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.text()) // รับเป็น text เพื่อจับ Error Message ได้ชัดเจน
+            .then(text => {
+                hideLoader();
+                try {
+                    const data = JSON.parse(text);
+                    if (onSuccess) onSuccess(data);
+                } catch (e) {
+                    console.error("Invalid JSON response:", text);
+                    if (onError) onError(e);
+                    else Swal.fire('เชื่อมต่อล้มเหลว', 'รูปแบบข้อมูลจาก Server ไม่ถูกต้อง (อาจเกิดจากสิทธิ์การแชร์ Google Sheet)', 'error');
+                }
+            })
+            .catch(err => {
+                hideLoader();
+                if (onError) onError(err);
+                else {
+                    console.error("API error:", err);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อ Server ได้', 'error');
+                }
+            });
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            callBackend("login", { username: u, password: p }, function(res) {
+                if (res.status === "success" && res.data) {
+                    localStorage.setItem('currentUser', JSON.stringify(res.data));
+                    window.user = res.data;
+                    doLoginSuccess(res.data);
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', res.message || 'รหัสผ่านไม่ถูกต้อง', 'error');
+                }
+            });
+        }
+
+        function doLoginSuccess(userObj) {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('mainAppView').classList.remove('hidden');
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('userProfile').classList.add('flex');
+            document.getElementById('userNameText').innerText = getDisplayName();
+            
+            loadInitialData();
+
+            // แสดงหน้าจอ Modal ยินดีต้อนรับหลังจากการเข้าสู่ระบบสำเร็จหรือเช็ค Audit เรียบร้อย
+            if (!sessionStorage.getItem('welcomeShown')) {
+                setTimeout(() => {
+                    const welcomeModal = document.getElementById('welcomeModal');
+                    if (welcomeModal) {
+                        welcomeModal.classList.remove('hidden');
+                        welcomeModal.classList.add('flex');
+                        sessionStorage.setItem('welcomeShown', 'true');
+                    }
+                }, 800);
+            }
+        }
+
+        function closeWelcomeModal() {
+            const welcomeModal = document.getElementById('welcomeModal');
+            if (welcomeModal) {
+                welcomeModal.classList.add('hidden');
+                welcomeModal.classList.remove('flex');
+            }
+        }
+
+        function loadInitialData() {
+            callBackend("getSurveyList", {}, function(response) {
+                if (response.status === "success" && response.data) {
+                    localRooms = response.data;
+                    updateDashboardStats();
+                    renderRoomsGrid();
+                }
+            });
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('stat_rooms').innerText = localRooms.length;
+            
+            callBackend("getDashboard", {}, function(res) {
+                if (res.status === "success" && res.data) {
+                    const supportsSum = Object.values(res.data.supports).reduce((a, b) => a + b, 0);
+                    const networksSum = Object.values(res.data.networks).reduce((a, b) => a + b, 0);
+                    
+                    document.getElementById('stat_supports').innerText = supportsSum;
+                    document.getElementById('stat_networks').innerText = networksSum;
+
+                    localNetworks = res.data.rawNetworks || [];
+                    renderRiskMappingDashboard(); // รันวิเคราะห์ Location × Function Matrix ทันที
+                }
+            });
+        }
+
+        // ==========================================
+        // SYSTEMIC RISK MAPPING LOGIC & RENDERERS
+        // ==========================================
+        function getRoomLayer(room) {
+            const type = String(room.ROOMTYP || "").toUpperCase().trim();
+            if (type.includes("SERVER") || type.includes("DATA CENTER") || type.includes("DC")) {
+                return { code: "L1", name: "Room Server (L1)", desc: "ห้องศูนย์กลาง (ความปลอดภัยสูง)", icon: "fa-server", colorClass: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+            } else if (type.includes("ROOM SW") || type.includes("SWITCH ROOM") || type.includes("ห้อง SW") || type.includes("ROOMSW")) {
+                return { code: "L2", name: "Room SW (L2)", desc: "ห้องสวิตช์ประจำอาคาร/ชั้น", icon: "fa-door-open", colorClass: "text-indigo-700 bg-indigo-50 border-indigo-200" };
+            } else {
+                return { code: "L3", name: "Rack SW (L3)", desc: "ตู้แขวนตามจุดย่อยต่างๆ", icon: "fa-hdd", colorClass: "text-amber-700 bg-amber-50 border-amber-200" };
+            }
+        }
+
+        function getDeviceFunction(device) {
+            const pio = String(device.NetworkPio || "").toUpperCase().trim();
+            if (pio.includes("CSW") || pio.includes("CORE")) {
+                return { code: "F1", name: "CSW (Core Switch)", icon: "fa-shield-virus" };
+            } else if (pio.includes("DST")) {
+                return { code: "F2", name: "DST (Distribution Switch)", icon: "fa-project-diagram" };
+            } else {
+                return { code: "F3", name: "ASW (Access Switch)", icon: "fa-sitemap" };
+            }
+        }
+
+        function calculateRisk(locationCode, functionCode) {
+            // L1 (Room Server)
+            if (locationCode === "L1") {
+                if (functionCode === "F1") return { key: "CRITICAL", text: "🔴 Critical สูงสุด", label: "วิกฤตสูงสุด", textClass: "text-red-700 bg-red-50 border-red-200" };
+                if (functionCode === "F2") return { key: "HIGH", text: "🟠 High (สูง)", label: "สูง", textClass: "text-orange-700 bg-orange-50 border-orange-200" };
+                return { key: "MEDIUM", text: "🟡 Medium (กลาง)", label: "กลาง", textClass: "text-yellow-700 bg-yellow-50 border-yellow-200" };
+            }
+            // L2 (Room SW)
+            if (locationCode === "L2") {
+                if (functionCode === "F1") return { key: "HIGH", text: "🟠 High (สูง)", label: "สูง", textClass: "text-orange-700 bg-orange-50 border-orange-200" };
+                if (functionCode === "F2") return { key: "HIGH", text: "🟠 High (สูง)", label: "สูง", textClass: "text-orange-700 bg-orange-50 border-orange-200" };
+                return { key: "MEDIUM", text: "🟡 Medium (กลาง)", label: "กลาง", textClass: "text-yellow-700 bg-yellow-50 border-yellow-200" };
+            }
+            // L3 (Rack SW)
+            if (locationCode === "L3") {
+                if (functionCode === "F1") return { key: "CRITICAL", text: "❌ Violation (ไม่ควรมี)", label: "ไม่ควรจัดตั้ง CSW ในตู้แขวน!", textClass: "text-rose-800 bg-rose-100 border-rose-300 animate-pulse font-black" };
+                if (functionCode === "F2") return { key: "MEDIUM", text: "🟡 Medium (กลาง)", label: "กลาง", textClass: "text-yellow-700 bg-yellow-50 border-yellow-200" };
+                return { key: "HIGH", text: "🟠 High (สูง)", label: "สูง", textClass: "text-orange-700 bg-orange-50 border-orange-200" };
+            }
+            return { key: "MEDIUM", text: "🟡 Medium (กลาง)", label: "กลาง", textClass: "text-yellow-700 bg-yellow-50 border-yellow-200" };
+        }
+
+        function filterRiskModel(level) {
+            currentRiskFilter = level;
+            const levels = ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM'];
+            levels.forEach(lvl => {
+                const btn = document.getElementById('btn_risk_' + lvl);
+                if (lvl === level) {
+                    btn.className = "px-3.5 py-2 rounded-xl text-xs font-black transition bg-pink-500 text-white shadow-sm";
+                } else {
+                    btn.className = "px-3.5 py-2 rounded-xl text-xs font-black transition text-slate-600 hover:bg-white flex items-center gap-1";
+                }
+            });
+            renderRiskMappingDashboard();
+        }
+
+        function renderRiskMappingDashboard() {
+            const container = document.getElementById('riskMappingInventory');
+            if (!container) return;
+
+            if (localRooms.length === 0 || localNetworks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-slate-400 text-xs">
+                        <i class="fas fa-exclamation-triangle text-amber-500 text-lg mb-1 block"></i>
+                        ไม่มีข้อมูลดิบสวิตช์เครือข่ายสำหรับประเมิน Mapping เชิงระบบ
+                    </div>
+                `;
+                return;
+            }
+
+            let statTotalL1 = 0, statTotalL2 = 0, statTotalL3 = 0;
+            let statTotalCSW = 0, statTotalDST = 0, statTotalASW = 0;
+            let statCritical = 0, statHigh = 0, statMedium = 0;
+
+            localRooms.forEach(room => {
+                const locLayer = getRoomLayer(room);
+                const roomSwitches = localNetworks.filter(n => String(n.ROOMID).trim() === String(room.ROOMID).trim());
+                if (roomSwitches.length === 0) return;
+
+                if (locLayer.code === "L1") statTotalL1++;
+                else if (locLayer.code === "L2") statTotalL2++;
+                else if (locLayer.code === "L3") statTotalL3++;
+
+                roomSwitches.forEach(sw => {
+                    const funcLayer = getDeviceFunction(sw);
+                    const riskEval = calculateRisk(locLayer.code, funcLayer.code);
+
+                    if (funcLayer.code === "F1") statTotalCSW++;
+                    else if (funcLayer.code === "F2") statTotalDST++;
+                    else if (funcLayer.code === "F3") statTotalASW++;
+
+                    if (riskEval.key === "CRITICAL") statCritical++;
+                    else if (riskEval.key === "HIGH") statHigh++;
+                    else if (riskEval.key === "MEDIUM") statMedium++;
+                });
+            });
+
+            const buildingGroups = {};
+
+            localRooms.forEach(room => {
+                const roomImg = room.RoomImg_ID ? `https://lh3.googleusercontent.com/d/${room.RoomImg_ID}=w200` : "";
+                const locLayer = getRoomLayer(room);
+                
+                const roomSwitches = localNetworks.filter(n => String(n.ROOMID).trim() === String(room.ROOMID).trim());
+                if (roomSwitches.length === 0) return;
+
+                const mappedDevices = roomSwitches.map(sw => {
+                    const funcLayer = getDeviceFunction(sw);
+                    const riskEval = calculateRisk(locLayer.code, funcLayer.code);
+                    return {
+                        device: sw,
+                        func: funcLayer,
+                        risk: riskEval
+                    };
+                });
+
+                let highestRisk = 'MEDIUM';
+                if (mappedDevices.some(d => d.risk.key === 'CRITICAL')) highestRisk = 'CRITICAL';
+                else if (mappedDevices.some(d => d.risk.key === 'HIGH')) highestRisk = 'HIGH';
+
+                if (currentRiskFilter !== 'ALL') {
+                    if (currentRiskFilter === 'CRITICAL' && highestRisk !== 'CRITICAL') return;
+                    if (currentRiskFilter === 'HIGH' && highestRisk !== 'HIGH') return;
+                    if (currentRiskFilter === 'MEDIUM' && highestRisk !== 'MEDIUM') return;
+                }
+
+                const bName = room["R.LOCAT"] ? room["R.LOCAT"].trim() : "ไม่ระบุอาคารสถานที่";
+                const fName = room["R.LOF"] ? room["R.LOF"].trim() : "ไม่ระบุชั้น";
+
+                if (!buildingGroups[bName]) buildingGroups[bName] = {};
+                if (!buildingGroups[bName][fName]) buildingGroups[bName][fName] = [];
+
+                buildingGroups[bName][fName].push({
+                    room: room,
+                    img: roomImg,
+                    locLayer: locLayer,
+                    devices: mappedDevices,
+                    highestRisk: highestRisk
+                });
+            });
+
+            const sortedBuildings = Object.keys(buildingGroups).sort();
+
+            let html = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 border border-pink-100 rounded-2xl p-5 bg-pink-50/25 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-100/10 via-white/5 to-white/40 pointer-events-none"></div>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 relative z-10">
+                        <h4 class="text-xs font-black text-slate-800 mb-3 flex items-center gap-1.5 border-b border-pink-50 pb-2">
+                            <i class="fas fa-map-marked text-rose-500"></i>
+                            <span>สถิติตามระดับพื้นที่ติดตั้ง (Location Layers)</span>
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-emerald-50/50 p-2 rounded-lg border border-emerald-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-server text-emerald-500 text-[10px]"></i> Server Room (L1)</span>
+                                <strong class="text-sm text-emerald-700 font-mono font-black">${statTotalL1} <span class="text-[10px] text-emerald-600 font-bold">จุด</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-indigo-50/50 p-2 rounded-lg border border-indigo-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-door-open text-indigo-500 text-[10px]"></i> Room SW (L2)</span>
+                                <strong class="text-sm text-indigo-700 font-mono font-black">${statTotalL2} <span class="text-[10px] text-indigo-600 font-bold">จุด</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-amber-50/50 p-2 rounded-lg border border-amber-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-cabinet-filing text-amber-500 text-[10px]"></i> Rack SW (L3)</span>
+                                <strong class="text-sm text-amber-700 font-mono font-black">${statTotalL3} <span class="text-[10px] text-amber-600 font-bold">จุด</span></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 relative z-10">
+                        <h4 class="text-xs font-black text-slate-800 mb-3 flex items-center gap-1.5 border-b border-pink-50 pb-2">
+                            <i class="fas fa-sitemap text-blue-500"></i>
+                            <span>สถิติตามประเภทหน้าที่ Switch (Function)</span>
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-rose-50/50 p-2 rounded-lg border border-rose-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-shield-virus text-rose-500 text-[10px]"></i> Core (CSW)</span>
+                                <strong class="text-sm text-rose-700 font-mono font-black">${statTotalCSW} <span class="text-[10px] text-rose-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-project-diagram text-blue-500 text-[10px]"></i> Distribution (DST)</span>
+                                <strong class="text-sm text-blue-700 font-mono font-black">${statTotalDST} <span class="text-[10px] text-blue-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-cyan-50/50 p-2 rounded-lg border border-cyan-100">
+                                <span class="font-bold text-slate-600 flex items-center gap-1.5"><i class="fas fa-link text-cyan-500 text-[10px]"></i> Access (ASW)</span>
+                                <strong class="text-sm text-cyan-700 font-mono font-black">${statTotalASW} <span class="text-[10px] text-cyan-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 relative z-10">
+                        <h4 class="text-xs font-black text-slate-800 mb-3 flex items-center gap-1.5 border-b border-pink-50 pb-2">
+                            <i class="fas fa-shield-alt text-fuchsia-500"></i>
+                            <span>สรุปประเมินความเสี่ยงโครงสร้างพื้นฐาน</span>
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-red-100/60 p-2 rounded-lg border border-red-200">
+                                <span class="font-extrabold text-red-800 flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-red-500 animate-ping"></span>🔴 Critical & Violation</span>
+                                <strong class="text-sm text-red-700 font-mono font-black">${statCritical} <span class="text-[10px] text-red-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-orange-100/50 p-2 rounded-lg border border-orange-200">
+                                <span class="font-bold text-orange-800 flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-orange-500"></span>🟠 High (ความเสี่ยงสูง)</span>
+                                <strong class="text-sm text-orange-700 font-mono font-black">${statHigh} <span class="text-[10px] text-orange-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                            <div class="flex justify-between items-center bg-yellow-100/50 p-2 rounded-lg border border-yellow-200">
+                                <span class="font-bold text-yellow-800 flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-yellow-400"></span>🟡 Medium (ปานกลาง)</span>
+                                <strong class="text-sm text-yellow-700 font-mono font-black">${statMedium} <span class="text-[10px] text-yellow-600 font-bold">เครื่อง</span></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (sortedBuildings.length === 0) {
+                container.innerHTML = html + `
+                    <div class="text-center py-10 bg-slate-50 rounded-2xl text-slate-400 text-xs mt-4">
+                        <i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
+                        ไม่พบบันทึกสวิตช์เครือข่ายที่ตรงกับเกณฑ์การประเมินความเสี่ยงที่เลือก
+                    </div>
+                `;
+                return;
+            }
+
+            sortedBuildings.forEach(bName => {
+                const floors = buildingGroups[bName];
+                const sortedFloors = Object.keys(floors).sort();
+
+                html += `
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-sm mt-4">
+                        <div class="bg-gradient-to-br from-pink-200 via-pink-50/50 to-white px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+                            <i class="fas fa-building text-pink-500 text-sm"></i>
+                            <span class="font-extrabold text-sm text-slate-800">${bName}</span>
+                        </div>
+                        <div class="p-4 space-y-4 bg-white">
+                `;
+
+                sortedFloors.forEach(fName => {
+                    const rooms = floors[fName];
+                    html += `
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-400 border-b border-slate-50 pb-1">
+                                <i class="fas fa-layer-group text-slate-300"></i>
+                                <span>ชั้น ${fName}</span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3">
+                    `;
+
+                    rooms.forEach(item => {
+                        let highestRiskBadge = "";
+                        if (item.highestRisk === 'CRITICAL') {
+                            highestRiskBadge = `<span class="bg-red-500 text-white text-[10px] px-2.5 py-1 rounded-full font-black animate-pulse shadow-sm">CRITICAL RISK / VIOLATION</span>`;
+                        } else if (item.highestRisk === 'HIGH') {
+                            highestRiskBadge = `<span class="bg-orange-500 text-white text-[10px] px-2.5 py-1 rounded-full font-black shadow-sm">HIGH RISK</span>`;
+                        } else {
+                            highestRiskBadge = `<span class="bg-yellow-500 text-white text-[10px] px-2.5 py-1 rounded-full font-black shadow-sm">MEDIUM RISK</span>`;
+                        }
+
+                        const locationLayerBadge = `
+                            <span class="text-xs px-3 py-1.5 rounded-xl border-2 ${item.locLayer.colorClass} font-black flex items-center gap-1.5 shadow-sm transform hover:scale-[1.02] transition-all">
+                                <i class="fas ${item.locLayer.icon}"></i> ${item.locLayer.name}
+                            </span>
+                        `;
+
+                        html += `
+                            <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 transition duration-150 flex flex-col md:flex-row gap-4 items-start justify-between">
+                                <div class="space-y-3 min-w-0 flex-1">
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <strong class="text-base text-slate-800">${item.room.RNAME}</strong>
+                                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold">ID: ${item.room.ROOMID}</span>
+                                        ${locationLayerBadge}
+                                        ${highestRiskBadge}
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                        `;
+
+                        item.devices.forEach(devMap => {
+                            const dev = devMap.device;
+                            const pioUpper = String(dev.NetworkPio || "").toUpperCase().trim();
+                            let switchBadgeStyle = "bg-slate-100 text-slate-700 border border-slate-200";
+                            let switchIcon = "fa-network-wired";
+                            
+                            if (pioUpper.includes("CSW") || pioUpper.includes("CORE")) {
+                                switchBadgeStyle = "bg-red-500 text-white border border-red-600 shadow-sm font-black";
+                                switchIcon = "fa-shield-virus";
+                            } else if (pioUpper.includes("DST")) {
+                                switchBadgeStyle = "bg-indigo-600 text-white border border-indigo-700 shadow-sm font-black";
+                                switchIcon = "fa-project-diagram";
+                            } else if (pioUpper.includes("ASW")) {
+                                switchBadgeStyle = "bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-extrabold";
+                                switchIcon = "fa-sitemap";
+                            } else if (pioUpper.includes("AP") || pioUpper.includes("WIRELESS")) {
+                                switchBadgeStyle = "bg-purple-100 text-purple-800 border border-purple-200 font-bold";
+                                switchIcon = "fa-wifi";
+                            }
+
+                            html += `
+                                <div class="bg-white border border-slate-100 rounded-xl p-3.5 flex items-center justify-between gap-2 shadow-sm hover:border-slate-200 transition-all duration-150">
+                                    <div class="min-w-0">
+                                        <span class="text-[9px] ${switchBadgeStyle} px-2 py-0.5 rounded-md font-sans inline-flex items-center gap-1 uppercase tracking-wider mb-1">
+                                            <i class="fas ${switchIcon} text-[8px]"></i>
+                                            <span>${dev.NetworkPio || 'SW'}</span>
+                                        </span>
+                                        <strong class="text-xs text-slate-800 block truncate font-bold mt-1">${dev.Hostname || 'No Hostname'}</strong>
+                                        <span class="text-[10px] text-slate-400 font-mono block truncate">${dev["IP Address"] || '-'}</span>
+                                    </div>
+                                    <div class="shrink-0 text-right space-y-1">
+                                        <span class="text-[10px] font-extrabold px-2 py-1 rounded-md border ${devMap.risk.textClass} block text-center whitespace-nowrap">
+                                            ${devMap.risk.text}
+                                        </span>
+                                        <span class="text-[8px] text-slate-400 block truncate max-w-[100px] font-bold text-center">${devMap.risk.label}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                                    </div>
+                                </div>
+                                <button onclick="showRoomDetail('${item.room.ROOMID}')" class="px-3.5 py-2 bg-white hover:bg-pink-50 text-pink-600 border border-pink-100 text-xs font-black rounded-xl transition shadow-sm w-full md:w-auto shrink-0 flex items-center justify-center gap-1.5 self-center">
+                                    <i class="fas fa-search-plus"></i> ตรวจสอบ
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // SWITCH VIEWS / TABS
+        // ==========================================
+        function switchTab(tabId) {
+            const tabs = ['dashboard', 'surveyList'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab_' + t);
+                btn.className = "px-5 py-2.5 font-bold text-sm text-gray-500 hover:bg-gray-100 rounded-xl transition shrink-0";
+            });
+
+            const activeBtn = document.getElementById('tab_' + tabId);
+            activeBtn.className = "px-5 py-2.5 font-bold text-sm rounded-xl transition shrink-0 bg-pink-500 text-white shadow-md";
+
+            document.getElementById('subview_dashboard').classList.add('hidden');
+            document.getElementById('subview_surveyList').classList.add('hidden');
+            document.getElementById('subview_roomDetail').classList.add('hidden');
+
+            document.getElementById('subview_' + tabId).classList.remove('hidden');
+            
+            if (tabId === 'surveyList') {
+                renderRoomsGrid();
+            }
+        }
+
+        function switchRoomTab(type) {
+            const btnSupport = document.getElementById('roomTab_support');
+            const btnNetwork = document.getElementById('roomTab_network');
+            const tabSupport = document.getElementById('roomSubtab_support');
+            const tabNetwork = document.getElementById('roomSubtab_network');
+
+            if (type === 'support') {
+                btnSupport.className = "px-5 py-3 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition";
+                btnNetwork.className = "px-5 py-3 font-bold text-sm text-gray-500 hover:text-pink-600 transition";
+                tabSupport.classList.remove('hidden');
+                tabNetwork.classList.add('hidden');
+            } else {
+                btnNetwork.className = "px-5 py-3 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition";
+                btnSupport.className = "px-5 py-3 font-bold text-sm text-gray-500 hover:text-pink-600 transition";
+                tabNetwork.classList.remove('hidden');
+                tabSupport.classList.add('hidden');
+            }
+        }
+
+        function openGpsMapPopup(gpsString, event) {
+            if (event) event.stopPropagation(); 
+            
+            if (!gpsString || gpsString.trim() === "" || gpsString.includes("ไม่มี")) {
+                Swal.fire('ไม่พบพิกัด', 'ห้องสำรวจนี้ยังไม่ได้ระบุพิกัด GPS ละติจูด, ลองจิจูด', 'info');
+                return;
+            }
+
+            const cleanGps = gpsString.trim();
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanGps)}`;
+            
+            const popupWidth = 800;
+            const popupHeight = 600;
+            const left = (screen.width - popupWidth) / 2;
+            const top = (screen.height - popupHeight) / 2;
+            
+            window.open(
+                mapUrl, 
+                'GoogleMapsPopup', 
+                `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=yes`
+            );
+        }
+
+        // ==========================================
+        // RENDER ROOM SURVEY LIST (Grouped by Building and sorted by Floor)
+        // ==========================================
+        function renderRoomsGrid(filteredText = "") {
+            const container = document.getElementById('groupedRoomsContainer');
+            container.innerHTML = "";
+            
+            const q = filteredText.toLowerCase().trim();
+            
+            const filteredRooms = localRooms.filter(room => {
+                return String(room.ROOMID).toLowerCase().includes(q) || 
+                       String(room.RNAME).toLowerCase().includes(q) ||
+                       String(room.ROOMTYP || "").toLowerCase().includes(q) ||
+                       String(room["R.LOCAT"] || "").toLowerCase().includes(q) ||
+                       String(room["R.LOF"] || "").toLowerCase().includes(q);
+            });
+
+            document.getElementById('filterCount').innerText = filteredRooms.length;
+
+            if (filteredRooms.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white text-center py-10 px-4 rounded-3xl border border-gray-100 shadow-sm text-gray-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <i class="fas fa-folder-open text-4xl mb-3 block text-gray-300"></i>
+                        ไม่พบข้อมูลจุดสำรวจที่ตรงกับการค้นหา
+                    </div>
+                `;
+                return;
+            }
+
+            const groupedData = {}; 
+            filteredRooms.forEach(room => {
+                const bName = room["R.LOCAT"] ? room["R.LOCAT"].trim() : "ไม่ได้ระบุอาคาร/พิกัดสถานที่";
+                const fName = room["R.LOF"] ? room["R.LOF"].trim() : "ไม่ได้ระบุชั้น";
+                
+                if (!groupedData[bName]) {
+                    groupedData[bName] = {};
+                }
+                if (!groupedData[bName][fName]) {
+                    groupedData[bName][fName] = [];
+                }
+                groupedData[bName][fName].push(room);
+            });
+
+            function getFloorWeight(floorStr) {
+                if (!floorStr || floorStr === "ไม่ได้ระบุชั้น") return 9999;
+                const match = String(floorStr).match(/-?\d+(\.\d+)?/);
+                if (match) {
+                    return parseFloat(match[0]);
+                }
+                return floorStr; 
+            }
+
+            const sortedBuildings = Object.keys(groupedData).sort();
+
+            sortedBuildings.forEach(bName => {
+                const floorsInBuilding = groupedData[bName];
+                
+                const sortedFloors = Object.keys(floorsInBuilding).sort((a, b) => {
+                    const weightA = getFloorWeight(a);
+                    const weightB = getFloorWeight(b);
+                    if (typeof weightA === 'number' && typeof weightB === 'number') {
+                        return weightA - weightB;
+                    }
+                    return String(a).localeCompare(String(b));
+                });
+
+                const buildingCard = document.createElement('div');
+                buildingCard.className = "bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm border-t-4 border-t-fuchsia-600 p-6 space-y-6 relative";
+                
+                let buildingHtml = `
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-pink-400/10 rounded-full blur-2xl pointer-events-none -mr-6 -mt-6"></div>
+                    
+                    <div class="bg-slate-50/80 -mx-6 -mt-6 px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-wrap gap-2 mb-4 relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-building text-base"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-base text-slate-800">${bName}</h3>
+                                <p class="text-[11px] text-slate-400 font-bold uppercase mt-0.5">พิกัดทางกายภาพอาคารโรงพยาบาล</p>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-fuchsia-50 border border-fuchsia-100 text-fuchsia-700 font-black px-3 py-1 rounded-xl shadow-sm">
+                            ทั้งหมด ${Object.values(floorsInBuilding).flat().length} ห้องสำรวจ
+                        </span>
+                    </div>
+                `;
+
+                sortedFloors.forEach(fName => {
+                    const roomsOnFloor = floorsInBuilding[fName];
+                    buildingHtml += `
+                        <div class="space-y-3 relative z-10">
+                            <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                                <i class="fas fa-layer-group text-fuchsia-500 text-sm"></i>
+                                <h4 class="font-extrabold text-sm text-slate-700">ชั้น ${fName}</h4>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-full">${roomsOnFloor.length} ห้อง</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    `;
+
+                    roomsOnFloor.forEach(room => {
+                        const countBadge = room.surveyCount > 0 
+                            ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200/50 text-[11px] font-extrabold px-2.5 py-1 rounded-xl flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>ลงทะเบียนแล้ว (${room.surveyCount})</span>`
+                            : `<span class="bg-amber-50 text-amber-700 border border-amber-200/50 text-[11px] font-extrabold px-2.5 py-1 rounded-xl flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>ไม่มีอุปกรณ์</span>`;
+
+                        let themeClass = "border-slate-200 hover:border-slate-400";
+                        let typeBadgeClass = "bg-slate-100 text-slate-700 border border-slate-200";
+                        let typeIcon = "fa-door-open";
+                        const rType = String(room.ROOMTYP || "").toUpperCase().trim();
+
+                        if (rType.includes("SERVER") || rType.includes("DATA CENTER") || rType.includes("DC")) {
+                            themeClass = "border-l-4 border-l-rose-500 border-slate-200 hover:border-rose-400";
+                            typeBadgeClass = "bg-rose-50 text-rose-700 border border-rose-100";
+                            typeIcon = "fa-server";
+                        } else if (rType.includes("ROOM SW") || rType.includes("SWITCH ROOM") || rType.includes("ห้อง SW") || rType.includes("ROOMSW")) {
+                            themeClass = "border-l-4 border-l-indigo-500 border-slate-200 hover:border-indigo-400";
+                            typeBadgeClass = "bg-indigo-50 text-indigo-700 border border-indigo-100";
+                            typeIcon = "fa-network-wired";
+                        } else if (rType.includes("RACK SW") || rType.includes("RACK") || rType.includes("ตู้ RACK") || rType.includes("RACKSW")) {
+                            themeClass = "border-l-4 border-l-amber-500 border-slate-200 hover:border-amber-400";
+                            typeBadgeClass = "bg-amber-50 text-amber-700 border border-amber-100";
+                            typeIcon = "fa-hdd";
+                        }
+
+                        const roomImg = room.RoomImg_ID 
+                            ? `https://lh3.googleusercontent.com/d/${room.RoomImg_ID}=w300` 
+                            : `https://placehold.co/300x150/ffe4e6/9f1239?text=ID+${room.ROOMID}`;
+
+                        buildingHtml += `
+                            <div onclick="showRoomDetail('${room.ROOMID}')" class="bg-white rounded-2xl border ${themeClass} shadow-sm overflow-hidden hover:shadow-md hover:scale-[1.01] transition duration-200 cursor-pointer flex flex-col justify-between relative">
+                                <div class="relative h-28 bg-slate-100 overflow-hidden shrink-0">
+                                    <img src="${roomImg}" class="w-full h-full object-cover animate-fade-in" alt="${room.RNAME}" onerror="this.src='https://placehold.co/300x150/ffe4e6/9f1239?text=${room.ROOMID}'">
+                                    <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/40 rounded-full blur-xl pointer-events-none -mr-4 -mt-4 z-10"></div>
+                                    <div class="absolute top-2.5 right-2.5 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-rose-600 shadow-sm border border-rose-100 font-mono z-20">
+                                        ID: ${room.ROOMID}
+                                    </div>
+                                </div>
+                                <div class="p-4 flex-1 flex flex-col justify-between gap-4">
+                                    <div class="space-y-1.5">
+                                        <div class="flex justify-between items-center gap-1.5">
+                                            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${typeBadgeClass} flex items-center gap-1">
+                                                <i class="fas ${typeIcon}"></i> ${room.ROOMTYP || 'ไม่ระบุประเภท'}
+                                            </span>
+                                            <button onclick="openGpsMapPopup('${room.RoomGPS || ''}', event)" class="bg-pink-50 hover:bg-pink-100 text-pink-600 border border-pink-200 p-1.5 rounded-lg text-xs transition z-20" title="เปิดดูแผนที่พิกัด Google Maps">
+                                                <i class="fas fa-map-marker-alt text-xs"></i>
+                                            </button>
+                                        </div>
+                                        <h4 class="font-extrabold text-slate-800 text-sm line-clamp-1">${room.RNAME}</h4>
+                                        <p class="text-[11px] text-gray-400 flex items-center gap-1"><i class="fas fa-compass text-rose-500"></i> ${room["R.LOCAT"] || 'ไม่ระบุอาคาร'}</p>
+                                    </div>
+                                    <div class="flex items-center justify-between border-t border-slate-50 pt-2.5">
+                                        ${countBadge}
+                                        <span class="text-xs text-pink-500 font-black">เข้าสำรวจ <i class="fas fa-chevron-right text-[10px] ml-0.5 animate-pulse"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    buildingHtml += `</div></div>`;
+                });
+                buildingCard.innerHTML = buildingHtml;
+                container.appendChild(buildingCard);
+            });
+        }
+
+        function filterRoomsList(val) {
+            renderRoomsGrid(val);
+        }
+
+        // ==========================================
+        // ROOM DETAIL LOGICS
+        // ==========================================
+        function showRoomDetail(roomId) {
+            currentRoomId = String(roomId).trim(); // ตัดช่องว่างส่วนเกินทิ้งเสมอ
+            
+            callBackend("getRoomDetail", { roomId: currentRoomId }, function(res) {
+                if (res && res.status === "success") {
+                    const dataObj = res.data || res;
+                    const room = dataObj.room || dataObj.roomDetail || {};
+                    const supports = dataObj.supportingComponents || dataObj.supports || [];
+                    const networks = dataObj.networkDevices || dataObj.networks || [];
+                    
+                    displayRoomDetail(room, supports, networks);
+                } else {
+                    // 📍 ดึง Error จริงๆ จาก Backend (code.gs) มาโชว์ จะได้รู้ว่าทำไมถึงหาห้องไม่เจอ
+                    const errorMsg = (res && res.message) ? res.message : 'ดึงข้อมูลพิกัดห้องล้มเหลว';
+                    Swal.fire('พบปัญหาการดึงข้อมูล', errorMsg, 'warning');
+                }
+            });
+        }
+
+        function displayRoomDetail(room, supportList, networkList) {
+            document.getElementById('subview_surveyList').classList.add('hidden');
+            document.getElementById('subview_dashboard').classList.add('hidden');
+            document.getElementById('subview_roomDetail').classList.remove('hidden');
+
+            document.getElementById('detail_ROOMTYP').innerText = room.ROOMTYP || 'ไม่ได้ระบุ';
+            document.getElementById('detail_RNAME').innerText = room.RNAME;
+            document.getElementById('detail_R_LOCAT').innerText = (room["R.LOCAT"] || '') + ' ' + (room["R.LOF"] ? `(ชั้น ${room["R.LOF"]})` : '');
+            document.getElementById('detail_ROOMID').innerText = room.ROOMID;
+            
+            const gpsVal = room.RoomGPS ? room.RoomGPS.trim() : "";
+            const gpsEl = document.getElementById('detail_RoomGPS');
+            const mapIframe = document.getElementById('detail_MapIframe');
+            const mapPlaceholder = document.getElementById('detail_MapPlaceholder');
+            const btnPopup = document.getElementById('btn_RoomGpsPopup');
+
+            if (gpsVal && gpsVal !== "" && !gpsVal.includes("ไม่มี")) {
+                gpsEl.innerText = gpsVal;
+                const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(gpsVal)}&hl=th&z=17&output=embed`;
+                mapIframe.src = mapEmbedUrl;
+                mapIframe.classList.remove('hidden');
+                mapPlaceholder.classList.add('hidden');
+                btnPopup.onclick = (e) => openGpsMapPopup(gpsVal, e);
+                btnPopup.classList.remove('hidden');
+            } else {
+                gpsEl.innerText = 'ไม่มีพิกัด GPS';
+                mapIframe.src = "";
+                mapIframe.classList.add('hidden');
+                mapPlaceholder.classList.remove('hidden');
+                btnPopup.classList.add('hidden');
+            }
+
+            const roomImgSrc = room.RoomImg_ID 
+                ? `https://lh3.googleusercontent.com/d/${room.RoomImg_ID}=w600` 
+                : `https://placehold.co/600x400/ffe4e6/9f1239?text=ID+${room.ROOMID}`;
+            document.getElementById('detail_RoomImg').src = roomImgSrc;
+
+            document.getElementById('count_support').innerText = supportList.length;
+            document.getElementById('count_network').innerText = networkList.length;
+
+            renderSupportList(supportList);
+            renderNetworkList(networkList);
+            switchRoomTab('support');
+        }
+
+        function toggleGroup(id, iconId) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(iconId);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        function renderSupportList(list) {
+            const container = document.getElementById('supportDevicesList');
+            container.innerHTML = "";
+            container.className = "space-y-4";
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white text-center py-8 rounded-3xl border border-dashed border-gray-200 text-gray-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <i class="fas fa-plug text-2xl mb-2 block text-gray-300"></i>
+                        ไม่มีอุปกรณ์สนับสนุนติดตั้ง ณ พิกัดนี้
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = {};
+            list.forEach(item => {
+                let groupKey = item.CARUTYPE || item.CrutypeName || 'CH999';
+                if (!grouped[groupKey]) grouped[groupKey] = [];
+                grouped[groupKey].push(item);
+            });
+
+            const supportHeaderMap = {
+                "CH001": { title: "ระบบควบคุมการทำงานภายในห้อง (Monitoring & Control Environment)", icon: "fa-desktop", color: "border-t-indigo-500", bg: "bg-indigo-500" },
+                "CH002": { title: "ระบบไฟฟ้าหลัก (Main Electrical System)", icon: "fa-bolt", color: "border-t-amber-500", bg: "bg-amber-500" },
+                "CH003": { title: "ตู้จัดเก็บอุปกรณ์เครือข่าย / Rack", icon: "fa-box-open", color: "border-t-slate-700", bg: "bg-slate-700" },
+                "CH004": { title: "เครื่องสำรองไฟ / UPS", icon: "fa-car-battery", color: "border-t-orange-500", bg: "bg-orange-500" },
+                "CH005": { title: "ระบบปรับอากาศ / Air Conditioning", icon: "fa-snowflake", color: "border-t-cyan-500", bg: "bg-cyan-500" },
+                "CH006": { title: "ตัวห้อง / ตำแหน่งที่ตั้ง / โครงสร้าง", icon: "fa-door-open", color: "border-t-emerald-500", bg: "bg-emerald-500" },
+                "DEFAULT": { title: "อุปกรณ์สนับสนุนอื่นๆ", icon: "fa-plug", color: "border-t-pink-500", bg: "bg-pink-500" }
+            };
+
+            const sortedGroupKeys = Object.keys(grouped).sort();
+
+            sortedGroupKeys.forEach((gKey, index) => {
+                const items = grouped[gKey];
+                const info = supportHeaderMap[gKey] || { title: items[0].CrutypeName || "อุปกรณ์สนับสนุนอื่นๆ", icon: "fa-plug", color: "border-t-pink-500", bg: "bg-pink-500" };
+                const groupId = `grp-sup-${index}`;
+                const iconId = `icon-sup-${index}`;
+
+                const groupDiv = document.createElement('div');
+                groupDiv.className = `bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm relative border-t-4 ${info.color}`;
+                
+                let html = `
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/10 rounded-full blur-2xl pointer-events-none -mr-4 -mt-4"></div>
+                    <button onclick="toggleGroup('${groupId}', '${iconId}')" class="w-full flex justify-between items-center bg-gradient-to-br from-pink-200 via-pink-50/50 to-white hover:from-pink-300/40 hover:via-pink-100/20 hover:to-white p-4 transition text-left focus:outline-none relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl ${info.bg} text-white flex items-center justify-center shadow-sm shrink-0"><i class="fas ${info.icon} text-lg"></i></div>
+                            <div>
+                                <h4 class="font-black text-gray-800 text-sm md:text-base pr-2">${info.title}</h4>
+                                <p class="text-[11px] md:text-xs text-slate-500 font-bold mt-0.5">รหัสจัดหมวดหมู่: ${gKey}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 pl-2 shrink-0">
+                            <span class="bg-white border border-gray-200 text-gray-600 px-3 py-1 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">ทั้งหมด ${items.length} รายการ</span>
+                            <i id="${iconId}" class="fas fa-chevron-up text-gray-400 w-4 text-center"></i>
+                        </div>
+                    </button>
+                    <div id="${groupId}" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-t border-gray-100 bg-white relative z-10">
+                `;
+
+                items.forEach(item => {
+                    const imgUrl = item.Note9 ? `https://lh3.googleusercontent.com/d/${item.Note9}=w300` : `https://placehold.co/150x150/f8fafc/94a3b8?text=No+Photo`;
+                    html += `
+                        <div onclick='showDeviceDetail("support", ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.02] cursor-pointer transition flex gap-3 items-start relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-12 h-12 bg-pink-400/30 rounded-full blur-lg pointer-events-none -mr-3 -mt-3"></div>
+                            <div class="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 relative z-10">
+                                <img src="${imgUrl}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/150x150/f1f5f9/94a3b8?text=No+Photo'">
+                            </div>
+                            <div class="flex-1 min-w-0 space-y-1.5 relative z-10">
+                                <div class="flex justify-between items-start gap-2">
+                                    <div>
+                                        <span class="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-extrabold px-2 py-0.5 rounded-md uppercase line-clamp-1">${item.CrutypeName || 'Support'}</span>
+                                        <h4 class="font-bold text-gray-800 text-sm mt-1 truncate">${item.CaruName || 'ไม่ได้ระบุชื่ออุปกรณ์'}</h4>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold ${item.STATUS === 'ใช้งาน' ? 'text-emerald-500' : 'text-amber-500'} bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded shrink-0">${item.STATUS || '-'}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 space-y-0.5 font-medium">
+                                    <p class="truncate"><span class="font-bold text-gray-600">ยี่ห้อ/รุ่น:</span> ${item.BandName || '-'} / ${item.MODEL || '-'}</p>
+                                    <p class="truncate font-mono"><span class="font-bold text-gray-600 font-sans">รหัส:</span> ${item.Asset_ID || '-'}</p>
+                                    <p class="truncate"><span class="font-bold text-gray-600">ป้ายชื่อ:</span> <span class="bg-slate-50 border border-slate-100 text-[10px] font-mono font-bold text-slate-700 px-1.5 py-0.5 rounded">${item.Label_Name || '-'}</span></p>
+                                </div>
+                                <div class="flex justify-end pt-1" onclick="event.stopPropagation();">
+                                    <button onclick='handleEditClick("support", ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 hover:text-gray-900 rounded-lg text-[11px] font-extrabold transition">
+                                        <i class="fas fa-edit mr-1"></i> แก้ไข
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                groupDiv.innerHTML = html;
+                container.appendChild(groupDiv);
+            });
+        }
+
+        function renderNetworkList(list) {
+            const container = document.getElementById('networkDevicesList');
+            container.innerHTML = "";
+            container.className = "space-y-4";
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white text-center py-8 rounded-3xl border border-dashed border-gray-200 text-gray-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/20 rounded-full blur-xl pointer-events-none -mr-4 -mt-4"></div>
+                        <i class="fas fa-server text-2xl mb-2 block text-gray-300"></i>
+                        ไม่มีอุปกรณ์เครือข่าย/สวิตช์ติดตั้ง ณ พิกัดนี้
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = {};
+            list.forEach(item => {
+                let pio = item.NetworkPio || 'ไม่ได้ระบุกลุ่ม';
+                if (!grouped[pio]) grouped[pio] = [];
+                grouped[pio].push(item);
+            });
+
+            const sortedKeys = Object.keys(grouped).sort((a, b) => {
+                const orderA = networkMapping[a] ? networkMapping[a].order : networkMapping['DEFAULT'].order;
+                const orderB = networkMapping[b] ? networkMapping[b].order : networkMapping['DEFAULT'].order;
+                return orderA - orderB;
+            });
+
+            sortedKeys.forEach((pio, index) => {
+                const items = grouped[pio];
+                const info = networkMapping[pio] || networkMapping['DEFAULT'];
+                const groupId = `grp-net-${index}`;
+                const iconId = `icon-net-${index}`;
+
+                const groupDiv = document.createElement('div');
+                groupDiv.className = `bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm relative ${info.border}`;
+                
+                let html = `
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-pink-400/10 rounded-full blur-2xl pointer-events-none -mr-4 -mt-4"></div>
+                    <button onclick="toggleGroup('${groupId}', '${iconId}')" class="w-full flex justify-between items-center bg-gradient-to-br from-pink-200 via-pink-50/50 to-white hover:from-pink-300/40 hover:via-pink-100/20 hover:to-white p-4 transition text-left focus:outline-none relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl ${info.bg} text-white flex items-center justify-center shadow-sm shrink-0"><i class="fas ${info.icon} text-lg"></i></div>
+                            <div>
+                                <h4 class="font-black text-gray-800 text-sm md:text-base pr-2">${pio}</h4>
+                                <p class="text-[11px] md:text-xs text-gray-500 font-medium mt-0.5">${info.desc}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 pl-2 shrink-0">
+                            <span class="bg-white border border-gray-200 text-gray-600 px-3 py-1 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">ทั้งหมด ${items.length} รายการ</span>
+                            <i id="${iconId}" class="fas fa-chevron-up text-gray-400 w-4 text-center"></i>
+                        </div>
+                    </button>
+                    <div id="${groupId}" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-t border-gray-100 bg-white relative z-10">
+                `;
+
+                items.forEach(item => {
+                    const imgUrl = item.Note8 ? `https://lh3.googleusercontent.com/d/${item.Note8}=w300` : `https://placehold.co/150x150/f8fafc/cbd5e1?text=No+Photo`;
+                    html += `
+                        <div onclick='showDeviceDetail("network", ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.02] cursor-pointer transition flex gap-3 items-start relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-12 h-12 bg-pink-400/30 rounded-full blur-lg pointer-events-none -mr-3 -mt-3"></div>
+                            <div class="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 relative z-10">
+                                <img src="${imgUrl}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/150x150/f8fafc/cbd5e1?text=No+Photo'">
+                            </div>
+                            <div class="flex-1 min-w-0 space-y-1.5 relative z-10">
+                                <div class="flex justify-between items-start gap-2">
+                                    <div>
+                                        <span class="text-[10px] ${info.badge} ${info.text} font-extrabold px-2 py-0.5 rounded-md uppercase line-clamp-1">${item.NetworkPio || 'Switch'}</span>
+                                        <h4 class="font-bold text-gray-800 text-sm mt-1 truncate">${item.Hostname || 'ไม่ได้ระบุ Hostname'}</h4>
+                                    </div>
+                                    <span class="text-[10px] font-mono font-bold ${info.text} bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded shrink-0">${item.NSWID || 'ไม่มี ID'}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 space-y-0.5 font-medium">
+                                    <p class="truncate font-mono"><span class="font-bold text-gray-600 font-sans">IP Address:</span> ${item["IP Address"] || '-'}</p>
+                                    <p class="truncate"><span class="font-bold text-gray-600">ยี่ห้อ/รุ่น:</span> ${item.Product || '-'} ${item.Model || '-'}</p>
+                                    <p class="truncate font-mono"><span class="font-bold text-gray-600 font-sans">Serial No:</span> ${item["Serial No."] || '-'}</p>
+                                </div>
+                                <div class="flex justify-end pt-1" onclick="event.stopPropagation();">
+                                    <button onclick='handleEditClick("network", ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 hover:text-gray-900 rounded-lg text-[11px] font-extrabold transition">
+                                        <i class="fas fa-edit mr-1"></i> แก้ไข
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                groupDiv.innerHTML = html;
+                container.appendChild(groupDiv);
+            });
+        }
+
+        // ==========================================
+        // DYNAMIC EDIT MODAL BUILDER
+        // ==========================================
+        let selectedImageData = { support: null, network: null };
+
+        function openEditModal(type, mode, data = null) {
+            const modal = document.getElementById('editModal');
+            const title = document.getElementById('editModalTitle');
+            const btnDelete = document.getElementById('btn_delete_device');
+            
+            document.getElementById('form_type').value = type;
+            document.getElementById('form_mode').value = mode;
+            document.getElementById('form_roomId').value = currentRoomId;
+
+            // โหลดข้อมูล getAllData มาเตรียมไว้ล่วงหน้า
+            if (!window.cachedAllAssets || window.cachedAllAssets.length === 0) {
+                callBackend("getAllData", {}, function(res) {
+                    if (res && res.status === "success") {
+                        let rawList = res.data;
+                        if (rawList && rawList.data && Array.isArray(rawList.data)) {
+                            window.cachedAllAssets = rawList.data;
+                        } else if (Array.isArray(rawList)) {
+                            window.cachedAllAssets = rawList;
+                        } else {
+                            window.cachedAllAssets = [];
+                        }
+                    } else {
+                        window.cachedAllAssets = [];
+                    }
+                }, function(err) {
+                    console.warn("Pre-fetch getAllData failed:", err);
+                    window.cachedAllAssets = [];
+                });
+            }
+
+            const modeText = mode === 'add' ? 'เพิ่มอุปกรณ์ใหม่' : 'แก้ไขข้อมูลอุปกรณ์';
+            const suffixText = type === 'support' ? ' (Supporting Component)' : ' (Network Device)';
+            title.innerText = modeText + suffixText;
+
+            document.getElementById('editForm').reset();
+            selectedImageData = { support: null, network: null };
+            document.getElementById('modalSearchDropdown_support').classList.add('hidden');
+            document.getElementById('modalSearchDropdown_network').classList.add('hidden');
+
+            if (mode === 'edit') {
+                btnDelete.classList.remove('hidden');
+            } else {
+                btnDelete.classList.add('hidden');
+            }
+
+            if (type === 'support') {
+                document.getElementById('supportFormFields').classList.remove('hidden');
+                document.getElementById('networkFormFields').classList.add('hidden');
+
+                if (data) {
+                    document.getElementById('form_NOID').value = data.NOID || '';
+                    document.getElementById('input_Asset_ID_support').value = data.Asset_ID || '';
+                    document.getElementById('input_CaruName').value = data.CaruName || '';
+                    
+                    // แปลงค่าข้อความเดิมจาก Database ให้ตรงกับ Dropdown (CH001-CH006) เพื่อให้ไม่โชว์ค่าว่าง
+                    let rawType = String(data.CARUTYPE || data.CrutypeName || '').trim();
+                    let matchedGroup = "DEFAULT";
+                    if (rawType.includes("CH001") || rawType.includes("ควบคุมการทำงาน")) matchedGroup = "CH001";
+                    else if (rawType.includes("CH002") || rawType.includes("ไฟฟ้าหลัก")) matchedGroup = "CH002";
+                    else if (rawType.includes("CH003") || rawType.toUpperCase().includes("RACK") || rawType.includes("ตู้")) matchedGroup = "CH003";
+                    else if (rawType.includes("CH004") || rawType.toUpperCase().includes("UPS") || rawType.includes("สำรองไฟ")) matchedGroup = "CH004";
+                    else if (rawType.includes("CH005") || rawType.includes("ปรับอากาศ") || rawType.includes("แอร์") || rawType.includes("อุณหภูมิ")) matchedGroup = "CH005";
+                    else if (rawType.includes("CH006") || rawType.includes("ห้อง") || rawType.includes("ตำแหน่ง") || rawType.includes("โครงสร้าง")) matchedGroup = "CH006";
+                    
+                    document.getElementById('input_CrutypeName').value = matchedGroup;
+                    
+                    document.getElementById('input_STATUS_support').value = data.STATUS || 'ใช้งาน';
+                    document.getElementById('input_BandName').value = data.BandName || '';
+                    document.getElementById('input_MODEL').value = data.MODEL || '';
+                    document.getElementById('input_Age_support').value = data.Age || '';
+                    document.getElementById('input_Note9').value = data.Note9 || data.PIC || '';
+                    
+                    const labelVal = data.Label_Name || '';
+                    const caruName = data.CaruName || '';
+                    const prefix = caruName + '-';
+                    if (labelVal && labelVal.startsWith(prefix)) {
+                        document.getElementById('input_Label_Suffix').value = labelVal.substring(prefix.length);
+                    } else {
+                        document.getElementById('input_Label_Suffix').value = labelVal;
+                    }
+                } else {
+                    document.getElementById('form_NOID').value = '';
+                }
+                updateSupportLabelName();
+                updateImagePreview('support');
+            } else {
+                document.getElementById('supportFormFields').classList.add('hidden');
+                document.getElementById('networkFormFields').classList.remove('hidden');
+
+                if (data) {
+                    document.getElementById('form_NSWNO').value = data.NSWNO || '';
+                    document.getElementById('input_Asset_ID_network').value = data.Asset_ID || '';
+                    document.getElementById('input_NSWID').value = data.NSWID || '';
+                    document.getElementById('input_Hostname').value = data.Hostname || '';
+                    document.getElementById('input_IPAddress').value = data["IP Address"] || '';
+                    document.getElementById('input_NetworkPio').value = data.NetworkPio || 'ASW';
+                    document.getElementById('input_Product').value = data.Product || '';
+                    document.getElementById('input_Model').value = data.Model || '';
+                    document.getElementById('input_Serial').value = data["Serial No."] || '';
+                    document.getElementById('input_MacAddress').value = data["Mac Address"] || '';
+                    document.getElementById('input_StackNo').value = data["Stack No."] || '';
+                    document.getElementById('input_Note8').value = data.Note8 || data.PIC || '';
+                    document.getElementById('input_Username').value = data.Username || '';
+                    document.getElementById('input_Password').value = data.Password || '';
+                    document.getElementById('input_Note').value = data.Note || '';
+                } else {
+                    document.getElementById('form_NSWNO').value = '';
+                }
+                updateImagePreview('network');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function handleEditClick(type, item) {
+            openEditModal(type, 'edit', item);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            selectedImageData = { support: null, network: null };
+        }
+
+        // ==========================================
+        // AUTOCOMPLETE SEARCH IN MODAL
+        // ==========================================
+        function handleModalSearchTyping(query, type) {
+            const dropdown = document.getElementById('modalSearchDropdown_' + type);
+            
+            if (!query || query.trim().length < 1) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('flex');
+                return;
+            }
+
+            const qStr = query.toLowerCase().trim();
+            const cleanQuery = qStr.replace(/-/g, ''); // 📍 ตัดเครื่องหมาย - ออกจากคำค้นหา เพื่อให้เทียบตัวเลขได้ยืดหยุ่นขึ้น
+            
+            dropdown.classList.remove('hidden');
+            dropdown.classList.add('flex');
+
+            let matches = [];
+            if (window.cachedAllAssets && Array.isArray(window.cachedAllAssets)) {
+                matches = window.cachedAllAssets.filter(item => {
+                    const detail = item.Asset_Detail || item.rawData || item;
+                    
+                    const assetId = String(item.Asset_ID || item.AssetID || detail.Asset_ID || detail.AssetID || "").toLowerCase();
+                    const cleanAssetId = assetId.replace(/-/g, ''); // 📍 ตัดเครื่องหมาย - ออกจากรหัสในฐานข้อมูลก่อนเทียบ
+                    
+                    const serial = String(item.Serial || detail.Serial || "").toLowerCase();
+                    const cleanSerial = serial.replace(/-/g, ''); // 📍 ตัดเครื่องหมาย - ออกจาก Serial
+                    
+                    const name = String(item.CaruName || detail['Asset_Name & Detail'] || "").toLowerCase();
+                    const typeGroup = String(item.Asset_Type_Group || detail.Asset_Type_Group || "").toLowerCase();
+                    
+                    // 📍 ค้นหาโดยเทียบแบบตัดขีด (-) ออกสำหรับรหัส หรือเทียบคำค้นหาปกติสำหรับชื่อ
+                    return cleanAssetId.includes(cleanQuery) || 
+                           cleanSerial.includes(cleanQuery) || 
+                           name.includes(qStr) || 
+                           typeGroup.includes(qStr);
+                });
+            }
+
+            displayModalSearchResults(matches.slice(0, 30), type, qStr);
+        }
+
+        function displayModalSearchResults(records, type, queryStr = "") {
+            const resultsDiv = document.getElementById('modalSearchResults_' + type);
+            resultsDiv.innerHTML = "";
+
+            if (!records || records.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="p-4 text-center text-slate-400 text-xs">
+                        <i class="fas fa-search block text-lg text-slate-300 mb-1"></i>
+                        ไม่พบรายการครุภัณฑ์ที่ตรงกับการค้นหาในระบบ
+                    </div>
+                `;
+                return;
+            }
+
+            records.forEach(rec => {
+                const detail = rec.Asset_Detail || rec.rawData || rec;
+                const rawAssetID = String(rec.Asset_ID || rec.AssetID || detail.Asset_ID || detail.AssetID || "").trim();
+                if (!rawAssetID) return;
+
+                const opt = document.createElement('div');
+                opt.className = "p-3 hover:bg-pink-100 cursor-pointer transition flex flex-col gap-1 border-b border-gray-100 last:border-b-0";
+                
+                const caruName = detail['Asset_Name & Detail'] || detail['Asset_Item_Name'] || rec.CaruName || "ไม่ระบุชื่อ";
+                const typeName = rec.Asset_Type_Group || detail['Asset_Type_Group'] || rec.CrutypeName || "ครุภัณฑ์";
+
+                // ค้นหาและไฮไลท์ จากขวาไปซ้าย (Right to Left)
+                let highlightedAssetID = rawAssetID;
+                if (queryStr) {
+                    const lowerAssetID = rawAssetID.toLowerCase();
+                    const lowerQuery = queryStr.toLowerCase();
+                    const lastIndex = lowerAssetID.lastIndexOf(lowerQuery); 
+                    
+                    if (lastIndex !== -1) {
+                        const before = rawAssetID.substring(0, lastIndex);
+                        const match = rawAssetID.substring(lastIndex, lastIndex + queryStr.length);
+                        const after = rawAssetID.substring(lastIndex + queryStr.length);
+                        highlightedAssetID = `${before}<mark class="bg-yellow-300 text-rose-700 font-black rounded px-0.5">${match}</mark>${after}`;
+                    }
+                }
+
+                opt.innerHTML = `
+                    <div class="flex justify-between items-center pointer-events-none">
+                        <span class="text-sm font-black text-pink-600 font-mono tracking-tight">${highlightedAssetID}</span>
+                        <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-extrabold text-slate-500">${typeName}</span>
+                    </div>
+                    <div class="text-xs text-slate-500 font-medium truncate pointer-events-none">${caruName}</div>
+                `;
+                
+                // ใช้ mousedown เพื่อรับค่าทันที
+                opt.onmousedown = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectAssetResult(rawAssetID, type);
+                };
+                
+                resultsDiv.appendChild(opt);
+            });
+        }
+
+        function selectAssetResult(assetId, type) {
+            // เมื่อเลือก ให้กรอกแค่รหัส Asset_ID เท่านั้น
+            const inputField = document.getElementById('input_Asset_ID_' + type);
+            if (inputField) {
+                inputField.value = assetId;
+                inputField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            const dropdown = document.getElementById('modalSearchDropdown_' + type);
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('flex');
+            }
+        }
+
+        // ==========================================
+        // HELPERS AND IMAGE UPLOAD
+        // ==========================================
+        function updateSupportLabelName() {
+            const prefixEl = document.getElementById('label_prefix');
+            const caruNameEl = document.getElementById('input_CaruName');
+            const suffixEl = document.getElementById('input_Label_Suffix');
+            const hiddenLabelEl = document.getElementById('input_Label_Name');
+
+            const name = caruNameEl.value.trim() || "ชื่อครุภัณฑ์";
+            const prefix = name + '-';
+            const suffix = suffixEl.value.trim();
+
+            prefixEl.innerText = prefix;
+            hiddenLabelEl.value = prefix + suffix;
+        }
+
+        function handleImageSelection(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                selectedImageData[type] = {
+                    file: file,
+                    base64: base64Data.split(',')[1],
+                    mimeType: file.type,
+                    fileName: file.name
+                };
+
+                const previewId = type === 'support' ? 'preview_img_support' : 'preview_img_network';
+                const placeholderId = type === 'support' ? 'preview_placeholder_support' : 'preview_placeholder_network';
+                
+                const previewImg = document.getElementById(previewId);
+                const placeholder = document.getElementById(placeholderId);
+
+                previewImg.src = base64Data;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImagePreview(type) {
+            const inputId = type === 'support' ? 'input_Note9' : 'input_Note8';
+            const previewId = type === 'support' ? 'preview_img_support' : 'preview_img_network';
+            const placeholderId = type === 'support' ? 'preview_placeholder_support' : 'preview_placeholder_network';
+
+            if (selectedImageData[type]) return;
+
+            const fileId = document.getElementById(inputId).value.trim();
+            const previewImg = document.getElementById(previewId);
+            const placeholder = document.getElementById(placeholderId);
+
+            if (fileId && fileId !== 'undefined' && fileId !== 'null') {
+                previewImg.src = `https://lh3.googleusercontent.com/d/${fileId}=w200`;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                previewImg.src = "";
+                previewImg.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        function clearImage(type) {
+            const inputId = type === 'support' ? 'input_Note9' : 'input_Note8';
+            const fileInputId = type === 'support' ? 'file_support' : 'file_network';
+            
+            document.getElementById(inputId).value = "";
+            document.getElementById(fileInputId).value = "";
+            selectedImageData[type] = null;
+            
+            updateImagePreview(type);
+        }
+
+        function showDeviceDetail(type, item) {
+            const modal = document.getElementById('deviceDetailModal');
+            
+            if (type === 'support') {
+                document.getElementById('detail_modal_title').innerText = 'รายละเอียดอุปกรณ์สนับสนุน';
+                document.getElementById('detail_modal_label').innerText = item.Label_Name || '-';
+                document.getElementById('detail_modal_asset').innerText = item.Asset_ID || '-';
+                document.getElementById('detail_modal_brand').innerText = item.BandName || '-';
+                document.getElementById('detail_modal_model').innerText = item.MODEL || '-';
+                
+                const imgSrc = item.Note9 ? `https://lh3.googleusercontent.com/d/${item.Note9}=w600` : `https://placehold.co/600x400/f8fafc/cbd5e1?text=No+Photo`;
+                document.getElementById('detail_modal_img').src = imgSrc;
+                
+                document.getElementById('detail_modal_specs').innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">ชื่อครุภัณฑ์</span>
+                        <span class="text-xs font-bold text-slate-800">${item.CaruName || '-'}</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">สถานะการใช้งาน</span>
+                        <span class="text-[10px] font-extrabold ${item.STATUS === 'ใช้งาน' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'} px-2 py-0.5 rounded border border-gray-100">${item.STATUS || '-'}</span>
+                    </div>
+                `;
+                document.getElementById('btn_print_qr').onclick = () => printDeviceLabel(item.Label_Name || item.CaruName, item.Asset_ID || item.NOID);
+            } else {
+                document.getElementById('detail_modal_title').innerText = 'รายละเอียดอุปกรณ์เครือข่าย';
+                document.getElementById('detail_modal_label').innerText = item.Hostname || '-';
+                document.getElementById('detail_modal_asset').innerText = item.Asset_ID || '-';
+                document.getElementById('detail_modal_brand').innerText = item.Product || '-';
+                document.getElementById('detail_modal_model').innerText = item.Model || '-';
+                
+                const imgSrc = item.Note8 ? `https://lh3.googleusercontent.com/d/${item.Note8}=w600` : `https://placehold.co/600x400/f8fafc/cbd5e1?text=No+Photo`;
+                document.getElementById('detail_modal_img').src = imgSrc;
+                
+                document.getElementById('detail_modal_specs').innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">IP Address</span>
+                        <span class="text-xs font-mono font-bold text-slate-800">${item["IP Address"] || '-'}</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <span class="text-xs text-slate-400 font-bold">Serial No.</span>
+                        <span class="text-xs font-mono font-bold text-slate-800">${item["Serial No."] || '-'}</span>
+                    </div>
+                `;
+                document.getElementById('btn_print_qr').onclick = () => printDeviceLabel(item.Hostname || item.NetworkPio, item.NSWID || item.Asset_ID);
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        
+        function closeDeviceDetailModal() {
+            document.getElementById('deviceDetailModal').classList.add('hidden');
+            document.getElementById('deviceDetailModal').classList.remove('flex');
+        }
+
+        function printDeviceLabel(labelName, assetId) {
+            const cleanLabel = String(labelName).trim();
+            const cleanAsset = String(assetId).trim();
+
+            document.getElementById('print_label_title').innerText = cleanLabel;
+            document.getElementById('print_asset_title').innerText = "Asset ID: " + cleanAsset;
+            document.getElementById('print_qr_code_text').innerText = cleanAsset;
+
+            const printPlaceholder = document.getElementById('print_qr_placeholder');
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(cleanAsset)}`;
+            
+            printPlaceholder.innerHTML = `<img src="${qrApiUrl}" class="w-full h-full object-contain" alt="QR-Code">`;
+
+            setTimeout(() => {
+                window.print();
+            }, 600);
+        }
+
+        // ==========================================
+        // DYNAMIC LOCATION/ROOM MODALS
+        // ==========================================
+        function openLocationEditModal() {
+            callBackend("getRoomDetail", { roomId: currentRoomId }, function(res) {
+                if (res.status === "success" && res.data && res.data.room) {
+                    const room = res.data.room;
+                    document.getElementById('loc_ROOMID').value = room.ROOMID;
+                    document.getElementById('loc_RNAME').value = room.RNAME || '';
+                    document.getElementById('loc_ROOMTYP').value = room.ROOMTYP || '';
+                    document.getElementById('loc_RLOF').value = room["R.LOF"] || '';
+                    document.getElementById('loc_RLOCAT').value = room["R.LOCAT"] || '';
+                    document.getElementById('loc_RoomGPS').value = room.RoomGPS || '';
+                    document.getElementById('loc_RoomImg_ID').value = room.RoomImg_ID || '';
+
+                    updateRoomImagePreview();
+                    
+                    const modal = document.getElementById('locationModal');
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            });
+        }
+
+        function closeLocationModal() {
+            const modal = document.getElementById('locationModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function updateRoomImagePreview() {
+            const fileId = document.getElementById('loc_RoomImg_ID').value.trim();
+            const preview = document.getElementById('preview_loc_img');
+            const placeholder = document.getElementById('preview_loc_placeholder');
+
+            if (fileId) {
+                preview.src = `https://lh3.googleusercontent.com/d/${fileId}=w200`;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = "";
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        function clearRoomImage() {
+            document.getElementById('loc_RoomImg_ID').value = "";
+            updateRoomImagePreview();
+        }
+
+        function submitLocationForm() {
+            document.getElementById('locationForm').dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+
+        function handleLocationFormSubmit(event) {
+            event.preventDefault();
+
+            const payload = {
+                roomId: document.getElementById('loc_ROOMID').value,
+                RNAME: document.getElementById('loc_RNAME').value,
+                ROOMTYP: document.getElementById('loc_ROOMTYP').value,
+                "R.LOF": document.getElementById('loc_RLOF').value,
+                "R.LOCAT": document.getElementById('loc_RLOCAT').value,
+                RoomGPS: document.getElementById('loc_RoomGPS').value,
+                RoomImg_ID: document.getElementById('loc_RoomImg_ID').value
+            };
+
+            callBackend("saveRoom", payload, function(res) {
+                if (res.status === "success") {
+                    Swal.fire('บันทึกพิกัดห้องสำเร็จ', 'ข้อมูลห้องถูกเขียนลง Google Sheets เรียบร้อย', 'success').then(() => {
+                        closeLocationModal();
+                        showRoomDetail(currentRoomId);
+                        loadInitialData();
+                    });
+                } else {
+                    Swal.fire('จัดเก็บล้มเหลว', res.message || 'บันทึกข้อมูลพิกัดสถานที่ล้มเหลว', 'error');
+                }
+            });
+        }
+
+        // ==========================================
+        // DYNAMIC QR SCANNER COMPONENT
+        // ==========================================
+        function openQRScannerForModal(type) {
+            qrScannerTargetType = type;
+            const modal = document.getElementById('qrScannerModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                try {
+                    html5QrcodeScanner = new Html5Qrcode("qr-reader");
+                    html5QrcodeScanner.start(
+                        { facingMode: "environment" },
+                        { fps: 10, qrbox: { width: 200, height: 200 } },
+                        onQrScanSuccess,
+                        onQrScanFailure
+                    );
+                } catch (e) {
+                    console.error("สแกนกล้องขัดข้อง:", e);
+                    Swal.fire('สแกนกล้องขัดข้อง', 'โปรดตรวจสอบสิทธิ์การใช้งานกล้องในอุปกรณ์ของคุณ', 'error');
+                    closeQRScanner();
+                }
+            }, 300);
+        }
+
+        function closeQRScanner() {
+            const modal = document.getElementById('qrScannerModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                }).catch(err => {
+                    console.warn("ไม่สามารถปิดเครื่องสแกน:", err);
+                    html5QrcodeScanner = null;
+                });
+            }
+        }
+
+        function onQrScanSuccess(decodedText) {
+            let cleanVal = String(decodedText).trim();
+            
+            // 1. ตัด link URL ออกให้เหลือแต่ส่วนท้าย
+            if (cleanVal.includes('http://') || cleanVal.includes('https://')) {
+                let parts = cleanVal.split(/[\/\?=\&]+/);
+                cleanVal = parts.pop(); 
+                if (!cleanVal && parts.length > 0) cleanVal = parts.pop(); // กันกรณีมี / ต่อท้ายสุด
+            }
+            
+            // 2. ใช้ Regex ดึงเฉพาะตัวเลข นำหน้า และอาจมีตัวอักษรไทย/อังกฤษต่อท้าย
+            let match = cleanVal.match(/([0-9]+[a-zA-Zก-ฮ]*)/);
+            if (match) {
+                cleanVal = match[1];
+            }
+
+            const inputField = document.getElementById('input_Asset_ID_' + qrScannerTargetType);
+            
+            if (inputField) {
+                inputField.value = cleanVal;
+                // สั่งให้ระบบ Auto-complete ค้นหาทำงานทันทีด้วยค่าที่กรองแล้ว
+                handleModalSearchTyping(cleanVal, qrScannerTargetType);
+            }
+
+            closeQRScanner();
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'สแกนรหัสสำเร็จ: ' + cleanVal,
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        function onQrScanFailure(error) {
+            // ซ่อน error ธรรมดาเพื่อไม่ให้รบกวนการทำงาน
+        }
+
+        // ==========================================
+        // SUBMIT AND DELETE DEVICE FORMS
+        // ==========================================
+        function handleDeleteDeviceClick() {
+            const type = document.getElementById('form_type').value;
+            const roomId = document.getElementById('form_roomId').value;
+            
+            let deviceId = "";
+            let confirmTitle = "";
+
+            if (type === 'support') {
+                deviceId = document.getElementById('form_NOID').value;
+                confirmTitle = "ต้องการนำอุปกรณ์สนับสนุนชิ้นนี้ออกจากพิกัดห้องใช่หรือไม่?";
+            } else {
+                deviceId = document.getElementById('form_NSWNO').value;
+                confirmTitle = "ต้องการนำอุปกรณ์เครือข่ายสวิตช์ชิ้นนี้ออกจากพิกัดห้องใช่หรือไม่?";
+            }
+
+            Swal.fire({
+                title: 'ยืนยันนำออก',
+                text: confirmTitle,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f43f5e',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'ใช่, นำออก!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ใช้ mode: 'edit' เพื่ออัปเดตแถวเดิม แต่ปรับ Location และ ROOMID ให้เป็นค่าว่างเพื่อนำออกจากห้อง
+                    const payload = {
+                        type: type,
+                        mode: 'edit',
+                        roomId: "",      // เคลียร์ค่าตัวแปรหลัก
+                        Location: "",    // เคลียร์พิกัด
+                        ROOMID: "",      // เคลียร์รหัสห้อง
+                        RNAME: ""        // เคลียร์ชื่อห้อง
+                    };
+                    
+                    if (type === 'support') {
+                        payload.NOID = deviceId;
+                        payload.STATUS = "ยกเลิก/ย้าย";
+                    } else {
+                        payload.NSWNO = deviceId;
+                        payload.Note = "ถูกนำออกจากพิกัด";
+                    }
+
+                    callBackend("saveDevice", payload, function(res) {
+                        if (res.status === "success") {
+                            Swal.fire('ดำเนินการสำเร็จ', 'นำอุปกรณ์ออกจากพิกัดจุดติดตั้งเรียบร้อยแล้ว', 'success').then(() => {
+                                closeEditModal();
+                                showRoomDetail(roomId);
+                                loadInitialData();
+                            });
+                        } else {
+                            Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถนำข้อมูลออกได้', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function submitEditForm() {
+            document.getElementById('editForm').dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const type = document.getElementById('form_type').value;
+            const mode = document.getElementById('form_mode').value;
+            const roomId = document.getElementById('form_roomId').value;
+            
+            // อ่านค่าชื่อห้องจากหน้า UI ปัจจุบันเพื่อบังคับบันทึกลงชีทให้สถานที่ถูกต้องเสมอ
+            const rNameText = document.getElementById('detail_RNAME').innerText || "";
+
+            const payload = {
+                type: type,
+                mode: mode,
+                roomId: roomId,
+                Location: roomId, 
+                ROOMID: roomId,
+                RNAME: rNameText 
+            };
+
+            if (type === 'support') {
+                payload.NOID = document.getElementById('form_NOID').value;
+                payload.Asset_ID = document.getElementById('input_Asset_ID_support').value;
+                payload.CaruName = document.getElementById('input_CaruName').value;
+                payload.Label_Name = document.getElementById('input_Label_Name').value;
+                
+                // ควบคุมการบันทึกรหัสลง CARUTYPE และ ชื่อไทยลง CrutypeName อย่างเด็ดขาด
+                const selectedCode = document.getElementById('input_CrutypeName').value;
+                payload.CARUTYPE = selectedCode;
+                payload.CrutypeName = supportTypeMap[selectedCode] || "อุปกรณ์สนับสนุนอื่นๆ";
+                
+                payload.STATUS = document.getElementById('input_STATUS_support').value;
+                payload.BandName = document.getElementById('input_BandName').value;
+                payload.MODEL = document.getElementById('input_MODEL').value;
+                payload.Age = document.getElementById('input_Age_support').value;
+                
+                // รองรับการรับค่ารูปภาพ (Base64) หรือ FileID จาก Google Drive (Note9) ให้ไปถึง Backend เพื่อบันทึกลงชีท
+                if (selectedImageData.support) {
+                    payload.imageBase64 = selectedImageData.support.base64;
+                    payload.mimeType = selectedImageData.support.mimeType;
+                    payload.PIC = selectedImageData.support.fileName;
+                    payload.Note9 = ""; 
+                } else {
+                    const fileId = document.getElementById('input_Note9').value.trim();
+                    payload.Note9 = fileId;
+                    payload.PIC = fileId ? `Support_${fileId}.jpg` : "";
+                }
+            } else {
+                payload.NSWNO = document.getElementById('form_NSWNO').value;
+                payload.Asset_ID = document.getElementById('input_Asset_ID_network').value;
+                payload.NSWID = document.getElementById('input_NSWID').value;
+                payload.Hostname = document.getElementById('input_Hostname').value;
+                payload["IP Address"] = document.getElementById('input_IPAddress').value;
+                payload.NetworkPio = document.getElementById('input_NetworkPio').value;
+                payload.Product = document.getElementById('input_Product').value;
+                payload.Model = document.getElementById('input_Model').value;
+                payload["Serial No."] = document.getElementById('input_Serial').value;
+                payload["Mac Address"] = document.getElementById('input_MacAddress').value;
+                payload["Stack No."] = document.getElementById('input_StackNo').value;
+                payload.Username = document.getElementById('input_Username').value;
+                payload.Password = document.getElementById('input_Password').value;
+                payload.Note = document.getElementById('input_Note').value;
+                
+                // รองรับการรับค่ารูปภาพ (Base64) หรือ FileID จาก Google Drive (Note8) ให้ไปถึง Backend เพื่อบันทึกลงชีท
+                if (selectedImageData.network) {
+                    payload.imageBase64 = selectedImageData.network.base64;
+                    payload.mimeType = selectedImageData.network.mimeType;
+                    payload.PIC = selectedImageData.network.fileName;
+                    payload.Note8 = "";
+                } else {
+                    const fileId = document.getElementById('input_Note8').value.trim();
+                    payload.Note8 = fileId;
+                    payload.PIC = fileId ? `Network_${fileId}.jpg` : "";
+                }
+            }
+
+            callBackend("saveDevice", payload, function(res) {
+                if (res.status === "success") {
+                    Swal.fire('จัดเก็บข้อมูลสำเร็จ', 'อัปเดตลงตารางชีทหลักเรียบร้อย', 'success').then(() => {
+                        closeEditModal();
+                        showRoomDetail(roomId);
+                        loadInitialData(); 
+                    });
+                } else {
+                    Swal.fire('ล้มเหลว', res.message || 'บันทึกข้อมูลไม่สำเร็จ', 'error');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
