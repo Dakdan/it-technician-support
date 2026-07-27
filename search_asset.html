@@ -513,57 +513,98 @@
 
         // ฟังก์ชันคำนวณคะแนน (เน้นจากขวาไปซ้ายตามที่ต้องการ)
         function getSimilarityScoreLocal(assetID, serial, query) {
-            const aID = String(assetID || "").toLowerCase();
-            const ser = String(serial || "").toLowerCase();
+            // ตัดเครื่องหมายขีด (-) ออกก่อนเปรียบเทียบ เพื่อให้อนุโลมการพิมพ์ขีดหรือไม่พิมพ์ก็ได้
+            const aID = String(assetID || "").toLowerCase().replace(/-/g, '');
+            const ser = String(serial || "").toLowerCase().replace(/-/g, '');
+            const cleanQuery = String(query).toLowerCase().replace(/-/g, '');
             
             // กลุ่มที่ 1: ค้นเจอใน AssetID (ให้คะแนนสูงกว่า Serial เสมอ)
             let assetScore = 0;
-            if (aID === query) assetScore = 800; // AssetID ตรงเป๊ะ 100%
-            else if (aID.endsWith(query)) assetScore = 700; // ตรงจาก ขวาไปซ้าย (สำคัญสุด)
-            else if (aID.startsWith(query)) assetScore = 600; // ตรงจาก ซ้ายไปขวา
-            else if (aID.includes(query)) assetScore = 500; // แค่มีคำนี้แทรกอยู่
+            if (aID === cleanQuery) assetScore = 800; // AssetID ตรงเป๊ะ 100%
+            else if (aID.endsWith(cleanQuery)) assetScore = 700; // ตรงจาก ขวาไปซ้าย (สำคัญสุด)
+            else if (aID.startsWith(cleanQuery)) assetScore = 600; // ตรงจาก ซ้ายไปขวา
+            else if (aID.includes(cleanQuery)) assetScore = 500; // แค่มีคำนี้แทรกอยู่
             
             // กลุ่มที่ 2: ค้นเจอใน Serial Number (ให้คะแนนรองลงมา)
             let serialScore = 0;
-            if (ser === query) serialScore = 400; 
-            else if (ser.endsWith(query)) serialScore = 300; 
-            else if (ser.startsWith(query)) serialScore = 200; 
-            else if (ser.includes(query)) serialScore = 100; 
+            if (ser === cleanQuery) serialScore = 400; 
+            else if (ser.endsWith(cleanQuery)) serialScore = 300; 
+            else if (ser.startsWith(cleanQuery)) serialScore = 200; 
+            else if (ser.includes(cleanQuery)) serialScore = 100; 
 
             // คืนค่าคะแนนสูงสุด หากเจอทั้ง AssetID และ Serial ค่าของ AssetID จะชนะเสมอ
             return Math.max(assetScore, serialScore);
         }
 
-        function showLoading(visible) {
-            if (visible) {
-                loadingState.classList.remove('d-none');
-                emptyState.classList.add('d-none');
-            } else {
-                loadingState.classList.add('d-none');
+        // ฟังก์ชันทำ Highlight ให้สอดคล้องกับตรรกะค้นหา (ขวาไปซ้าย) และข้ามเครื่องหมายขีดได้
+        function highlightText(text, keyword) {
+            if (!keyword || !text) return text;
+            
+            // นำคำค้นหามาตัดขีด (-) ออก
+            const cleanKeyword = String(keyword).toLowerCase().replace(/-/g, '');
+            if (!cleanKeyword) return text;
+
+            // สร้าง Regex แบบละเว้นเครื่องหมายขีด (-) ระหว่างตัวอักษร
+            // ตัวอย่าง: ค้นหา "123" Regex จะกลายเป็น "1-?2-?3"
+            const escapedKeyword = cleanKeyword.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            const patternStr = escapedKeyword.join('-?');
+
+            // สร้างเงื่อนไข Regex ตามลำดับความสำคัญ (ตรงทั้งหมด, ท้าย, หน้า, กลาง)
+            const exactRegex = new RegExp('^(' + patternStr + ')$', 'i');
+            const endRegex = new RegExp('(' + patternStr + ')$', 'i');
+            const startRegex = new RegExp('^(' + patternStr + ')', 'i');
+            const anyRegex = new RegExp('(' + patternStr + ')', 'gi'); // ใช้ gi เพื่อหาทั้งหมด แล้วเราจะดึงตัวท้ายสุด
+
+            if (exactRegex.test(text)) {
+                // ตรง 100% ไฮไลท์ทั้งหมด
+                return text.replace(exactRegex, '<span class="highlight">$1</span>');
+            } else if (endRegex.test(text)) {
+                // ตรงจาก ขวาไปซ้าย -> ไฮไลท์เฉพาะส่วนท้ายสุด
+                return text.replace(endRegex, '<span class="highlight">$1</span>');
+            } else if (startRegex.test(text)) {
+                // ตรงจาก ซ้ายไปขวา -> ไฮไลท์เฉพาะส่วนหน้าสุด
+                return text.replace(startRegex, '<span class="highlight">$1</span>');
+            } else if (anyRegex.test(text)) {
+                // ถ้ามีแทรกอยู่ตรงกลาง -> หาตัวที่อยู่ "ขวาสุด" (ท้ายสุดที่เจอ) มาไฮไลท์
+                let match;
+                let lastMatch;
+                while ((match = anyRegex.exec(text)) !== null) {
+                    lastMatch = match;
+                }
+                if (lastMatch) {
+                    const before = text.substring(0, lastMatch.index);
+                    const matched = lastMatch[0];
+                    const after = text.substring(lastMatch.index + matched.length);
+                    return before + `<span class="highlight">${matched}</span>` + after;
+                }
             }
+            return text; // ไม่เจอให้คืนค่าเดิม
         }
 
-        function showEmptyState(title, subtitle) {
-            emptyStateTitle.innerText = title;
-            emptyStateMsg.innerText = subtitle;
-            emptyState.classList.remove('d-none');
-            resultCountLabel.innerText = "ผลการค้นหาเป็นศูนย์";
-        }
-
-        // วาดผลลัพธ์ลงหน้าจอ
+        // ฟังก์ชันวาดผลลัพธ์การค้นหาลงบนหน้าจอ (renderResults)
         function renderResults(data, keyword) {
             resultsContainer.innerHTML = '';
-            resultCountLabel.innerText = `พบรายการที่ตรงกันทั้งหมด ${data.length} รายการ`;
+            
+            // จำกัดการแสดงผลที่ 30 รายการ
+            const totalFound = data.length;
+            const displayData = data.slice(0, 30);
+            
+            // อัปเดตข้อความแสดงจำนวน
+            let countText = `พบรายการที่ตรงกันทั้งหมด ${totalFound} รายการ`;
+            if (totalFound > 30) {
+                countText += ` <span class="text-danger">(แสดง 30 รายการแรก)</span>`;
+            }
+            resultCountLabel.innerHTML = countText;
 
-            data.forEach(item => {
+            displayData.forEach(item => {
                 const detail = item.Asset_Detail || {};
                 const assetId = item.AssetID || detail.AssetID || "";
                 const serial = item.Serial || detail.Serial || "ไม่มี Serial";
                 const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุประเภท";
                 const age = detail["อายุ"] || detail["Age"] || "ไม่ระบุอายุ";
-                const sourceDb = item.Source || detail.Source || "ไม่ระบุคลัง";
+                const source = detail["Source"] || "";
                 
-                // ถอด Link รูปภาพตัวแรก
+                // ถอด Link รูปภาพตัวแรก หากได้ ID จาก Logs
                 let imgUrl = "https://placehold.co/100x100/e2e8f0/475569?text=No+Img";
                 if (detail.Images && detail.Images.length > 0) {
                     const firstImgId = String(detail.Images[0]).trim();
@@ -576,9 +617,14 @@
                 card.className = 'asset-card';
                 card.onclick = () => goToDetail(assetId);
 
-                // ทำ Highlight คำที่ค้นหา (เน้นไฮไลท์จากด้านหลังสุดที่เจอ)
+                // ทำ Highlight คำที่ค้นหา (ข้ามขีด)
                 const displayId = highlightText(assetId, keyword);
                 const displaySerial = highlightText(serial, keyword);
+
+                let sourceBadge = "";
+                if(source) {
+                     sourceBadge = `<span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${source}</span>`;
+                }
 
                 card.innerHTML = `
                     <img src="${imgUrl}" alt="${assetId}" class="asset-img" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/475569?text=IT'">
@@ -588,7 +634,7 @@
                         <div class="asset-badges mt-1">
                             <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${group}</span>
                             <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${age}</span>
-                            <span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${sourceDb}</span>
+                            ${sourceBadge}
                         </div>
                     </div>
                 `;
@@ -596,29 +642,12 @@
             });
         }
 
-        // ฟังก์ชันทำ Highlight ให้สอดคล้องกับตรรกะค้นหา (ขวาไปซ้าย)
-        function highlightText(text, keyword) {
-            if (!keyword || !text) return text;
-            const textLower = String(text).toLowerCase();
-            const keywordLower = String(keyword).toLowerCase();
-            const keywordLen = keyword.length;
-            
-            if (textLower === keywordLower) {
-                // ตรง 100% ไฮไลท์ทั้งหมด
-                return `<span class="highlight">${text}</span>`;
-            } else if (textLower.endsWith(keywordLower)) {
-                // ตรงจาก ขวาไปซ้าย -> ไฮไลท์เฉพาะส่วนท้ายสุด
-                const startIndex = text.length - keywordLen;
-                return text.substring(0, startIndex) + `<span class="highlight">${text.substring(startIndex)}</span>`;
-            } else if (textLower.startsWith(keywordLower)) {
-                // ตรงจาก ซ้ายไปขวา -> ไฮไลท์เฉพาะส่วนหน้าสุด
-                return `<span class="highlight">${text.substring(0, keywordLen)}</span>` + text.substring(keywordLen);
-            } else if (textLower.includes(keywordLower)) {
-                // ถ้ามีแทรกอยู่ตรงกลาง -> หาตัวที่อยู่ "ขวาสุด" (ท้ายสุดที่เจอ) มาไฮไลท์
-                const lastIndex = textLower.lastIndexOf(keywordLower);
-                return text.substring(0, lastIndex) + `<span class="highlight">${text.substring(lastIndex, lastIndex + keywordLen)}</span>` + text.substring(lastIndex + keywordLen);
-            }
-            return text; // ไม่เจอให้คืนค่าเดิม
+        // ฟังก์ชันแสดงหน้าต่างเมื่อค้นหาไม่พบ (showEmptyState)
+        function showEmptyState(title, subtitle) {
+            emptyStateTitle.innerText = title;
+            emptyStateMsg.innerText = subtitle;
+            emptyState.classList.remove('d-none');
+            resultCountLabel.innerText = "ผลการค้นหาเป็นศูนย์";
         }
 
         // นำทางไปยังระบบปลายทาง
@@ -665,40 +694,27 @@
             if ("vibrate" in navigator) navigator.vibrate(200);
             closeScannerModal();
             
-            let rawText = String(decodedText).trim();
-            let extractedCode = rawText;
-        
-            // 1. ตรวจสอบว่าสแกนได้ URL หรือมีคำว่า IcmAssetDetail/ หรือไม่
-            if (rawText.includes("IcmAssetDetail/")) {
-                // แยกเอาข้อความหลัง IcmAssetDetail/ จนถึง / ตัวถัดไป
-                extractedCode = rawText.split("IcmAssetDetail/")[1].split("/")[0];
-            } else if (rawText.includes("/")) {
-                // กรณีเป็น URL หรือ Path อื่นๆ ให้ลองแยกตาม / แล้วเอา Segment ที่ยาวและคล้ายรหัสครุภัณฑ์ที่สุด
-                const segments = rawText.split("/");
-                for (let seg of segments) {
-                    // หา Segment ที่มีตัวเลขและขีด (-) รวมกันมากกว่า 5 ตัวอักษร
-                    if ((seg.match(/\d/g) || []).length >= 5) {
-                        extractedCode = seg;
-                        break;
-                    }
-                }
+            // 1. นำค่าที่สแกนได้มาตัดคำ (จำลอง Logic จากหลังบ้าน)
+            let input = String(decodedText).trim();
+            if (input.includes("IcmAssetDetail/")) {
+                // แยกเอาเฉพาะรหัส AssetID ที่อยู่หลัง /IcmAssetDetail/ 
+                input = input.split("IcmAssetDetail/")[1].split("/")[0];
+            } else {
+                // ตัดตัวอักษรภาษาอังกฤษ ภาษาไทย และ http/https ออก (เหลือแค่ตัวเลขและเครื่องหมายขีด -)
+                input = input.replace(/[a-zA-Zก-ฮ:/]/g, '').trim();
             }
-        
-            // 2. ลบตัวอักษรภาษาไทย ภาษาอังกฤษ และอักขระพิเศษส่วนเกินออกจากส่วนท้ายและส่วนหน้า 
-            // เพื่อให้เหลือเฉพาะรหัสครุภัณฑ์ที่เป็นตัวเลขและเครื่องหมายขีด (-) เช่น 2-08-003-010-66-023
-            extractedCode = extractedCode.replace(/^[^0-9]+|[^0-9]+$/g, '').trim();
-        
-            if (!extractedCode) {
-                showSystemModal("ข้อผิดพลาด", "ไม่พบรหัสครุภัณฑ์ที่ถูกต้องจาก QR Code ที่สแกน", "fa-solid fa-triangle-exclamation text-warning");
+
+            if (!input) {
+                showSystemModal("ข้อผิดพลาด", "ไม่พบรหัสที่ถูกต้องจากภาพที่สแกน โปรดลองใหม่อีกครั้ง", "fa-solid fa-triangle-exclamation text-warning");
                 return;
             }
-        
-            // 3. นำรหัสที่ตัดและทำความสะอาดแล้วไปวางในช่องค้นหา
-            searchInput.value = extractedCode;
+
+            // 2. นำรหัสที่ตัดได้ไปใส่ในช่องค้นหา
+            searchInput.value = input;
             clearBtn.style.display = 'block';
-        
-            // 4. สั่งให้ระบบค้นหาทำงานทันที
-            executeLocalSearch(extractedCode);
+
+            // 3. สั่งค้นหาฝั่ง Client ทันที
+            executeLocalSearch(input);
         }
 
         function onScanFailure(error) {
