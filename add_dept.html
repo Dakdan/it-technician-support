@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์ - รพ.อุดรธานี</title>
+    <title>จัดการข้อมูลระบบ - รพ.อุดรธานี</title>
     <!-- Google Fonts: Kanit -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
@@ -386,22 +386,28 @@
                         const dispName = searchType === 'dept' ? highlightText(dep.DEPNAME, searchTerm) : dep.DEPNAME;
                         const dispId = searchType === 'dept' ? highlightText(dep.DEP_ID, searchTerm) : dep.DEP_ID;
 
-                        // รูปภาพจาก NOTE1
                         let imageHtml = '';
-                        if (dep.NOTE1) {
-                            imageHtml = `<img src="https://drive.google.com/uc?id=${dep.NOTE1}" alt="รูปหน่วยงาน" class="w-full h-32 object-cover rounded-lg mb-3 border border-gray-100" onerror="this.style.display='none'">`;
+                        // ตรวจสอบว่ามี FileID ใน NOTE1 หรือไม่
+                        if (dep.NOTE1 && String(dep.NOTE1).trim() !== '') {
+                            // ใช้ thumbnail endpoint ของ Google Drive ซึ่งแสดงผลได้เสถียรกว่า uc?id
+                            imageHtml = `<img src="https://drive.google.com/thumbnail?id=${String(dep.NOTE1).trim()}&sz=w400" alt="รูปหน่วยงาน" class="w-full h-36 object-cover rounded-t-lg border-b border-gray-100 bg-gray-50" onerror="this.src='https://placehold.co/400x200/fdf2f8/ec4899?text=No+Image'; this.onerror=null;">`;
+                        } else {
+                            // กรณีไม่มีรูปภาพ ให้แสดงกล่องสีชมพูอ่อนแทน
+                            imageHtml = `<div class="w-full h-36 bg-pink-50 flex items-center justify-center rounded-t-lg border-b border-gray-100"><span class="text-pink-300 text-sm font-medium">ไม่มีรูปภาพ</span></div>`;
                         }
 
                         html += `
-                            <div onclick="showDeptDetails('${dep.DEP_ID}')" class="flex flex-col p-3 rounded-lg border border-gray-200 hover:border-pink-400 hover:shadow-md cursor-pointer transition-all bg-white group relative overflow-hidden">
+                            <div onclick="showDeptDetails('${dep.DEP_ID}')" class="flex flex-col rounded-lg border border-gray-200 hover:border-pink-400 hover:shadow-md cursor-pointer transition-all bg-white group relative overflow-hidden">
                                 ${imageHtml}
-                                <div class="flex justify-between items-start mb-1 gap-2">
-                                    <div class="font-medium text-gray-800 group-hover:text-pink-600 pr-1 break-words leading-tight">${dispName}</div>
-                                    <div class="shrink-0 mt-0.5">${statusBadge}</div>
-                                </div>
-                                <div class="text-xs text-gray-500 mt-2 flex justify-between items-center mt-auto pt-2">
-                                    <span>รหัส: ${dispId}</span>
-                                    <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium">${dep.JOBE_SYSTEMP}</span>
+                                <div class="p-3 flex flex-col flex-1">
+                                    <div class="flex justify-between items-start mb-1 gap-2">
+                                        <div class="font-medium text-gray-800 group-hover:text-pink-600 pr-1 break-words leading-tight">${dispName}</div>
+                                        <div class="shrink-0 mt-0.5">${statusBadge}</div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2 flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                                        <span>รหัส: ${dispId}</span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium">${dep.JOBE_SYSTEMP}</span>
+                                    </div>
                                 </div>
                             </div>
                         `;
