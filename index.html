@@ -13,11 +13,16 @@
     
     <style>
         :root {
-            --pink-soft: #fff5f7;
+            --pink-soft: #fff0f5;
+            --pink-light: #ffb6c1;
             --pink-primary: #ff85a2;
             --pink-dark: #d63384;
+            --pink-neon: #ff1493; /* สีชมพูสว่างสะท้อนแสง (Deep Pink / Neon) */
             --white: #ffffff;
-            --gray-text: #666666;
+            --gray-light: #f8f9fa;
+            --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
+            --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
+            --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
 
         body {
@@ -37,7 +42,7 @@
             content: "IT UDON HOSP";
             position: absolute;
             font-size: 10vw;
-            color: rgba(214, 51, 132, 0.03);
+            color: rgba(255, 20, 147, 0.04); /* ใช้โทน neon โปร่งแสง */
             font-weight: 800;
             transform: rotate(-25deg);
             white-space: nowrap;
@@ -46,10 +51,9 @@
         }
 
         .login-card {
-            /* แก้ไขพื้นหลังเป็นไล่ระดับสีชมพูอ่อนไปขาว บนลงล่าง เพื่อให้ดูฟรุ้งและมีสัดส่วนชัดเจน */
-            background: linear-gradient(to bottom, #ffe8ef 0%, #ffffff 100%);
+            background: linear-gradient(to bottom, var(--pink-soft) 0%, var(--white) 100%);
             border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(255, 133, 162, 0.12);
+            box-shadow: var(--shadow-md);
             width: 100%;
             max-width: 440px;
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -68,11 +72,11 @@
             width: 130px;
             height: 130px;
             margin: 0 auto 1.25rem;
-            background: white;
+            background: var(--white);
             border-radius: 50%;
             padding: 5px;
-            box-shadow: 0 10px 25px rgba(214, 51, 132, 0.15);
-            border: 3px solid var(--pink-primary);
+            box-shadow: var(--shadow-sm);
+            border: 3px solid var(--pink-neon);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -87,7 +91,7 @@
         }
 
         .title-main {
-            color: var(--pink-dark);
+            color: var(--pink-neon);
             font-weight: 600;
             font-size: 1.35rem;
             margin-bottom: 0.3rem;
@@ -104,7 +108,7 @@
             display: block;
             text-align: left;
             font-size: 0.85rem;
-            color: #444;
+            color: var(--gray-text);
             margin-bottom: 6px;
             margin-left: 5px;
             font-weight: 500;
@@ -113,27 +117,26 @@
         .form-control {
             border-radius: 12px;
             padding: 10px 18px;
-            border: 1.5px solid #ffeef2;
-            background: #fff;
+            border: 1.5px solid var(--pink-light);
+            background: var(--white);
             transition: all 0.3s ease;
             font-size: 0.95rem;
         }
 
         .form-control:focus {
-            border-color: var(--pink-primary);
-            box-shadow: 0 0 0 4px rgba(255, 133, 162, 0.15);
+            border-color: var(--pink-neon);
+            box-shadow: 0 0 0 4px rgba(255, 20, 147, 0.15);
             outline: none;
         }
 
-        /* เพิ่ม CSS ทำให้ Placeholder (ข้อความตัวอย่างในช่องกรอก) สีจางและตัวเอียง */
         .form-control::placeholder {
-            color: #b5b5b5; /* ทำให้สีจางลง */
-            font-style: italic; /* ทำให้เป็นตัวเอียง */
+            color: #b5b5b5; 
+            font-style: italic; 
         }
 
         .btn-submit {
-            background: linear-gradient(45deg, #ff85a2, #d63384);
-            color: white;
+            background: linear-gradient(45deg, var(--pink-primary), var(--pink-neon));
+            color: var(--white);
             border: none;
             border-radius: 12px;
             padding: 12px;
@@ -142,13 +145,13 @@
             font-size: 1.05rem;
             margin-top: 1rem;
             transition: all 0.3s;
-            box-shadow: 0 6px 15px rgba(214, 51, 132, 0.2);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(214, 51, 132, 0.3);
-            color: white;
+            box-shadow: var(--shadow-md);
+            color: var(--white);
         }
 
         .btn-link-action {
@@ -161,13 +164,13 @@
         }
 
         .btn-link-action:hover {
-            color: #b8226b;
+            color: var(--pink-neon);
             text-decoration: underline;
         }
 
         .divider {
             height: 1px;
-            background-color: #ffeef2;
+            background-color: var(--pink-soft);
             margin: 1.5rem 0;
         }
 
@@ -202,8 +205,8 @@
 
 <!-- ส่วนแสดงผลสถานะการโหลด -->
 <div id="loadingOverlay">
-    <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
-    <div class="mt-3 text-pink-dark fw-bold" id="loadingText">กำลังดำเนินการ...</div>
+    <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--pink-neon);" role="status"></div>
+    <div class="mt-3 fw-bold" style="color: var(--pink-neon);" id="loadingText">กำลังดำเนินการ...</div>
 </div>
 
 <div class="login-card">
@@ -212,20 +215,20 @@
         <div class="logo-wrapper">
             <img src="./logo005v1.png" alt="UDH Logo" class="logo-img">
         </div>
-        <div class="title-main">UDON HOSP IT APP</div>
+        <div class="title-main">UDON HOSP IT App</div>
         <div class="title-sub fw-medium">โรงพยาบาลอุดรธานี</div>
-        <div class="title-sub" style="font-size: 0.90rem; color: #999;">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
+        <div class="title-sub" style="font-size: 0.75rem; color: var(--gray-text);">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
     </div>
 
     <!-- ==================== STATE 1: ฟอร์ม LOGIN ==================== -->
     <div id="loginState" class="form-transition">
         <form id="loginForm">
             <div class="mb-3 text-start">
-                <label class="form-label" for="userpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (User Login)</label>
+                <label class="form-label" for="userpn"><i class="fa-solid fa-user me-1" style="color: var(--pink-light);"></i> ชื่อผู้ใช้งาน (User Login)</label>
                 <input type="text" id="userpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required autocomplete="username">
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="userpw"><i class="fa-solid fa-lock me-1 text-secondary"></i> รหัสผ่าน (Password)</label>
+                <label class="form-label" for="userpw"><i class="fa-solid fa-lock me-1" style="color: var(--pink-light);"></i> รหัสผ่าน (Password)</label>
                 <input type="password" id="userpw" class="form-control" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
             </div>
             <button type="submit" class="btn btn-submit"><i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ</button>
@@ -242,16 +245,16 @@
 
     <!-- ==================== STATE 2: ฟอร์มขอรหัสผ่านใหม่ (REQUEST PASSWORD) ==================== -->
     <div id="requestState" class="form-transition d-none">
-        <h5 class="fw-semibold text-pink-dark mb-3"><i class="fa-solid fa-unlock-keyhole me-2"></i>ขอรหัสผ่านชั่วคราว</h5>
+        <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-unlock-keyhole me-2"></i>ขอรหัสผ่านชั่วคราว</h5>
         <p class="text-muted small mb-4">กรอกข้อมูลส่วนบุคคลที่ตรงกับฐานข้อมูลของโรงพยาบาล เพื่อส่งรหัสผ่านชั่วคราวไปยังอีเมลของคุณ</p>
         
         <form id="requestForm">
             <div class="mb-3 text-start">
-                <label class="form-label" for="reqUserpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (UserPN)</label>
+                <label class="form-label" for="reqUserpn"><i class="fa-solid fa-user me-1" style="color: var(--pink-light);"></i> ชื่อผู้ใช้งาน (UserPN)</label>
                 <input type="text" id="reqUserpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งานระบบ" required>
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="reqEmail"><i class="fa-solid fa-envelope me-1 text-secondary"></i> อีเมลที่ลงทะเบียน (UserMail)</label>
+                <label class="form-label" for="reqEmail"><i class="fa-solid fa-envelope me-1" style="color: var(--pink-light);"></i> อีเมลที่ลงทะเบียน (UserMail)</label>
                 <input type="email" id="reqEmail" class="form-control" placeholder="example@udh.go.th" required>
             </div>
             <div class="row g-2 mb-3">
@@ -272,20 +275,20 @@
 
     <!-- ==================== STATE 3: ฟอร์มเปลี่ยนรหัสผ่าน (CHANGE PASSWORD) ==================== -->
     <div id="changeState" class="form-transition d-none">
-        <h5 class="fw-semibold text-pink-dark mb-3"><i class="fa-solid fa-key me-2"></i>เปลี่ยนรหัสผ่านใหม่</h5>
+        <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-key me-2"></i>เปลี่ยนรหัสผ่านใหม่</h5>
         <p class="text-muted small mb-4" id="changePassDesc">กรอกชื่อผู้ใช้งาน และกำหนดรหัสผ่านใหม่ที่ต้องการใช้งาน</p>
         
         <form id="changeForm">
             <div class="mb-3 text-start">
-                <label class="form-label" for="changeUserpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (UserPN)</label>
+                <label class="form-label" for="changeUserpn"><i class="fa-solid fa-user me-1" style="color: var(--pink-light);"></i> ชื่อผู้ใช้งาน (UserPN)</label>
                 <input type="text" id="changeUserpn" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required>
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="newPassword"><i class="fa-solid fa-lock me-1 text-secondary"></i> รหัสผ่านใหม่ (New Password)</label>
+                <label class="form-label" for="newPassword"><i class="fa-solid fa-lock me-1" style="color: var(--pink-light);"></i> รหัสผ่านใหม่ (New Password)</label>
                 <input type="password" id="newPassword" class="form-control" placeholder="รหัสผ่านใหม่" required minlength="4">
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="confirmPassword"><i class="fa-solid fa-shield-halved me-1 text-secondary"></i> ยืนยันรหัสผ่านใหม่ (Confirm Password)</label>
+                <label class="form-label" for="confirmPassword"><i class="fa-solid fa-shield-halved me-1" style="color: var(--pink-light);"></i> ยืนยันรหัสผ่านใหม่ (Confirm Password)</label>
                 <input type="password" id="confirmPassword" class="form-control" placeholder="ยืนยันรหัสผ่านใหม่อีกครั้ง" required minlength="4">
             </div>
             <button type="submit" class="btn btn-submit"><i class="fa-solid fa-floppy-disk me-2"></i>บันทึกรหัสผ่านใหม่</button>
@@ -296,20 +299,20 @@
 
     <!-- ==================== STATE 4: ฟอร์มลงทะเบียน (REGISTER) ==================== -->
     <div id="registerState" class="form-transition d-none">
-        <h5 class="fw-semibold text-pink-dark mb-3"><i class="fa-solid fa-user-plus me-2"></i>ลงทะเบียนผู้ใช้งาน</h5>
+        <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-user-plus me-2"></i>ลงทะเบียนผู้ใช้งาน</h5>
         <p class="text-muted small mb-4">กรอกข้อมูลให้ครบถ้วนเพื่อขอสิทธิ์การเข้าใช้งานระบบ</p>
         
         <form id="registerForm">
             <div class="mb-3 text-start">
-                <label class="form-label" for="regUserpn"><i class="fa-solid fa-user me-1 text-secondary"></i> ชื่อผู้ใช้งาน (UserPN)</label>
+                <label class="form-label" for="regUserpn"><i class="fa-solid fa-user me-1" style="color: var(--pink-light);"></i> ชื่อผู้ใช้งาน (UserPN)</label>
                 <input type="text" id="regUserpn" class="form-control" placeholder="ตั้งชื่อผู้ใช้งาน" required>
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="regPassword"><i class="fa-solid fa-lock me-1 text-secondary"></i> รหัสผ่าน (Password)</label>
+                <label class="form-label" for="regPassword"><i class="fa-solid fa-lock me-1" style="color: var(--pink-light);"></i> รหัสผ่าน (Password)</label>
                 <input type="password" id="regPassword" class="form-control" placeholder="ตั้งรหัสผ่าน" required minlength="4">
             </div>
             <div class="mb-3 text-start">
-                <label class="form-label" for="regEmail"><i class="fa-solid fa-envelope me-1 text-secondary"></i> อีเมล (UserMail)</label>
+                <label class="form-label" for="regEmail"><i class="fa-solid fa-envelope me-1" style="color: var(--pink-light);"></i> อีเมล (UserMail)</label>
                 <input type="email" id="regEmail" class="form-control" placeholder="example@udh.go.th" required>
             </div>
             <div class="row g-2 mb-3">
@@ -329,13 +332,13 @@
     </div>
 </div>
 
-<!-- ==================== POPUP MODAL (การแจ้งเตือนสไตล์พาสเทลเดิม) ==================== -->
+<!-- ==================== POPUP MODAL ==================== -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4">
             <div class="modal-body text-center p-5">
                 <div id="alertIcon" style="font-size: 4.5rem;" class="mb-3"></div>
-                <h4 id="alertTitle" class="mb-2 fw-semibold"></h4>
+                <h4 id="alertTitle" class="mb-2 fw-semibold" style="color: var(--pink-dark);"></h4>
                 <p id="alertMsg" class="text-muted mb-4"></p>
                 <button type="button" id="btnModalClose" class="btn btn-submit w-100" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
             </div>
@@ -347,10 +350,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ดึง URL ของ Google Apps Script Web App
     const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
-    // จัดการ DOM Elements
     const loginForm = document.getElementById('loginForm');
     const requestForm = document.getElementById('requestForm');
     const changeForm = document.getElementById('changeForm');
@@ -358,10 +359,8 @@
     const loading = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
 
-    // ตัวแปรเก็บประวัติผู้ใช้กรณีต้องบังคับเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบสำเร็จ
     let forceResetUser = null;
 
-    // ฟังก์ชันเปิด/ปิด สเตทหน้าจอย่อยแบบสมูท
     function switchState(stateId) {
         document.getElementById('loginState').classList.add('d-none');
         document.getElementById('requestState').classList.add('d-none');
@@ -370,7 +369,6 @@
         
         document.getElementById(stateId).classList.remove('d-none');
 
-        // เคลียร์ค่าหากสลับหน้าไปมา
         if (stateId === 'loginState') {
             forceResetUser = null;
             document.getElementById('changeUserpn').readOnly = false;
@@ -380,7 +378,6 @@
         }
     }
 
-    // จัดการ Loading Spinner
     function showLoading(text) {
         loadingText.innerText = text;
         loading.style.display = 'flex';
@@ -390,7 +387,6 @@
         loading.style.display = 'none';
     }
 
-    // ฟังก์ชันจัดการ Redirect เพื่อให้ทดสอบในหน้าต่าง Preview (Canvas) ได้โดยไม่เกิด Error
     function safeRedirect(url) {
         try {
             window.location.href = url;
@@ -404,11 +400,8 @@
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const username =
-            document.getElementById('userpn').value.trim();
-
-        const password =
-            document.getElementById('userpw').value;
+        const username = document.getElementById('userpn').value.trim();
+        const password = document.getElementById('userpw').value;
 
         loading.style.display = 'flex';
 
@@ -430,19 +423,11 @@
             loading.style.display = 'none';
 
             if (!result.success) {
-                showAlert(
-                    'เข้าสู่ระบบไม่สำเร็จ',
-                    result.message,
-                    'error'
-                );
-
+                showAlert('เข้าสู่ระบบไม่สำเร็จ', result.message, 'error');
                 return;
             }
 
-            localStorage.setItem(
-                'currentUser',
-                JSON.stringify(result.data)
-            );
+            localStorage.setItem('currentUser', JSON.stringify(result.data));
 
             if (result.resetRequired === true) {
                 safeRedirect('change-password.html');
@@ -453,14 +438,8 @@
 
         } catch (err) {
             loading.style.display = 'none';
-
             console.error(err);
-
-            showAlert(
-                'ระบบขัดข้อง',
-                'ไม่สามารถเชื่อมต่อ Server ได้',
-                'error'
-            );
+            showAlert('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อ Server ได้', 'error');
         }
     });
 
@@ -470,9 +449,7 @@
     }
 
     function getCurrentUser() {
-        return JSON.parse(
-            localStorage.getItem('currentUser')
-        );
+        return JSON.parse(localStorage.getItem('currentUser'));
     }
 
     // ==================== FLOW 2: REQUEST NEW PASSWORD PROCESS ====================
@@ -525,7 +502,6 @@
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // ตรวจสอบรหัสผ่านตรงกันบนเบราว์เซอร์
         if (newPassword !== confirmPassword) {
             showAlert('คำเตือน', 'รหัสผ่านใหม่ และ รหัสผ่านยืนยัน ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง', 'error');
             return;
@@ -558,10 +534,8 @@
                     if (modal) modal.hide();
 
                     if (forceResetUser) {
-                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
                         safeRedirect('main_menu.html');
                     } else {
-                        // สลับสเตทกลับหน้าปกติ
                         switchState('loginState');
                     }
                 }, 2000);
@@ -619,13 +593,11 @@
         });
     });
 
-    // แสดงแจ้งเตือนผ่าน Bootstrap Modal (สไตล์ดีไซน์เดิม)
     function showAlert(title, msg, type) {
         const modal = new bootstrap.Modal(document.getElementById('alertModal'));
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMsg').innerText = msg;
         
-        // กำหนด Emoji สื่ออารมณ์ประเภทต่างๆ
         let icon = '🌸';
         if (type === 'error') {
             icon = '❌';
