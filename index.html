@@ -350,8 +350,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // ดึง URL ของ Google Apps Script Web App
     const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
+    // จัดการ DOM Elements
     const loginForm = document.getElementById('loginForm');
     const requestForm = document.getElementById('requestForm');
     const changeForm = document.getElementById('changeForm');
@@ -359,8 +361,10 @@
     const loading = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
 
+    // ตัวแปรเก็บประวัติผู้ใช้กรณีต้องบังคับเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบสำเร็จ
     let forceResetUser = null;
 
+    // ฟังก์ชันเปิด/ปิด สเตทหน้าจอย่อยแบบสมูท
     function switchState(stateId) {
         document.getElementById('loginState').classList.add('d-none');
         document.getElementById('requestState').classList.add('d-none');
@@ -369,6 +373,7 @@
         
         document.getElementById(stateId).classList.remove('d-none');
 
+        // เคลียร์ค่าหากสลับหน้าไปมา
         if (stateId === 'loginState') {
             forceResetUser = null;
             document.getElementById('changeUserpn').readOnly = false;
@@ -378,6 +383,7 @@
         }
     }
 
+    // จัดการ Loading Spinner
     function showLoading(text) {
         loadingText.innerText = text;
         loading.style.display = 'flex';
@@ -387,6 +393,7 @@
         loading.style.display = 'none';
     }
 
+    // ฟังก์ชันจัดการ Redirect เพื่อให้ทดสอบในหน้าต่าง Preview (Canvas) ได้โดยไม่เกิด Error
     function safeRedirect(url) {
         try {
             window.location.href = url;
@@ -396,12 +403,15 @@
         }
     }
 
-    // ==================== FLOW 1: LOGIN PROCESS ====================
+   // ==================== FLOW 1: LOGIN PROCESS ====================
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const username = document.getElementById('userpn').value.trim();
-        const password = document.getElementById('userpw').value;
+        const username =
+            document.getElementById('userpn').value.trim();
+
+        const password =
+            document.getElementById('userpw').value;
 
         loading.style.display = 'flex';
 
@@ -423,23 +433,55 @@
             loading.style.display = 'none';
 
             if (!result.success) {
-                showAlert('เข้าสู่ระบบไม่สำเร็จ', result.message, 'error');
+                showAlert(
+                    'เข้าสู่ระบบไม่สำเร็จ',
+                    result.message,
+                    'error'
+                );
+
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify(result.data));
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify(result.data)
+            );
 
+            // ตรวจสอบเงื่อนไขบังคับเปลี่ยนรหัสผ่าน (resetRequired)
             if (result.resetRequired === true) {
-                safeRedirect('change-password.html');
+                // 1. บันทึกโปรไฟล์ผู้ใช้ลงตัวแปรที่เตรียมไว้
+                forceResetUser = result.data;
+
+                // 2. สลับหน้าไปยังฟอร์มเปลี่ยนรหัสผ่านภายในหน้าเดียวกัน
+                switchState('changeState');
+
+                // 3. นำชื่อผู้ใช้งานไปใส่ในฟอร์มเปลี่ยนรหัสผ่าน และล็อกให้เป็น ReadOnly ป้องกันการแก้ไข
+                const changeUserpn = document.getElementById('changeUserpn');
+                if (changeUserpn) {
+                    changeUserpn.value = username;
+                    changeUserpn.readOnly = true; 
+                }
+
+                // 4. ปรับเปลี่ยนคำอธิบาย และซ่อนปุ่ม "กลับไปหน้าเข้าสู่ระบบ" เพื่อบังคับให้เปลี่ยนรหัสผ่านให้เสร็จ
+                document.getElementById('changePassDesc').innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>เนื่องจากคุณใช้รหัสผ่านชั่วคราว หรือระบบบังคับให้เปลี่ยนรหัสผ่าน</span><br>กรุณากำหนดรหัสผ่านใหม่เพื่อความปลอดภัยของบัญชี`;
+                document.getElementById('btnBackToLogin').classList.add('d-none');
+                document.getElementById('changeDivider').classList.add('d-none');
+                
                 return;
             }
 
-            safeRedirect('index.html');
+            safeRedirect('main_menu.html');
 
         } catch (err) {
             loading.style.display = 'none';
+
             console.error(err);
-            showAlert('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อ Server ได้', 'error');
+
+            showAlert(
+                'ระบบขัดข้อง',
+                'ไม่สามารถเชื่อมต่อ Server ได้',
+                'error'
+            );
         }
     });
 
@@ -449,7 +491,9 @@
     }
 
     function getCurrentUser() {
-        return JSON.parse(localStorage.getItem('currentUser'));
+        return JSON.parse(
+            localStorage.getItem('currentUser')
+        );
     }
 
     // ==================== FLOW 2: REQUEST NEW PASSWORD PROCESS ====================
@@ -502,6 +546,7 @@
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
+        // ตรวจสอบรหัสผ่านตรงกันบนเบราว์เซอร์
         if (newPassword !== confirmPassword) {
             showAlert('คำเตือน', 'รหัสผ่านใหม่ และ รหัสผ่านยืนยัน ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง', 'error');
             return;
@@ -534,8 +579,10 @@
                     if (modal) modal.hide();
 
                     if (forceResetUser) {
+                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
                         safeRedirect('main_menu.html');
                     } else {
+                        // สลับสเตทกลับหน้าปกติ
                         switchState('loginState');
                     }
                 }, 2000);
@@ -593,11 +640,13 @@
         });
     });
 
+    // แสดงแจ้งเตือนผ่าน Bootstrap Modal (สไตล์ดีไซน์เดิม)
     function showAlert(title, msg, type) {
         const modal = new bootstrap.Modal(document.getElementById('alertModal'));
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMsg').innerText = msg;
         
+        // กำหนด Emoji สื่ออารมณ์ประเภทต่างๆ
         let icon = '🌸';
         if (type === 'error') {
             icon = '❌';
