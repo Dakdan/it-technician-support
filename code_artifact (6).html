@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Document Tracking</title>
+    <!-- นำเข้า Tailwind CSS สำหรับจัดการ Layout และความสวยงาม -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- นำเข้าฟอนต์ Kanit จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f3f4f6; /* สีเทาอ่อน */
+        }
+        
+        /* ซ่อน Input File ของระบบ แต่เราจะใช้ Label เป็นปุ่มแทน */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* อนิเมชันการโหลด */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d81b60; /* สีบานเย็น */
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-pink-600 to-rose-500 p-6 text-white text-center">
+            <h1 class="text-2xl md:text-3xl font-semibold tracking-wide">ระบบลงรับหนังสือเข้า</h1>
+            <p class="text-pink-100 mt-1 text-sm md:text-base">อัปโหลดภาพเอกสารเพื่อดึงข้อมูลอัตโนมัติด้วย AI</p>
+        </div>
+
+        <!-- ฟอร์มข้อมูล -->
+        <div class="p-6 md:p-8">
+            <form id="docForm" class="space-y-5">
+                
+                <div class="w-full">
+                    <label class="block text-gray-700 font-medium mb-2">ภาพถ่ายเอกสาร <span class="text-red-500">*</span></label>
+                    
+                    <!-- พื้นที่สำหรับกดอัปโหลด -->
+                    <label for="docImage" id="uploadArea" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500" id="uploadPlaceholder">
+                            <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16V8a2 2 0 012-2h4l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m0 0l-3-3m3 3l3-3"></path></svg>
+                            <p class="mb-2 text-sm"><span class="font-semibold">คลิกเพื่อถ่ายรูป</span> หรือเลือกไฟล์</p>
+                            <p class="text-xs">รองรับ JPG, PNG</p>
+                        </div>
+                        <!-- ซ่อนตัวพรีวิวไว้ก่อน จนกว่าจะอัปโหลด -->
+                        <img id="imagePreview" class="hidden h-full w-full object-contain p-2 rounded-xl" alt="Preview" />
+                    </label>
+                    <input type="file" id="docImage" accept="image/*" capture="environment">
+                </div>
+
+                <div>
+                    <button type="button" id="scanBtn" onclick="scanDocument()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center hover:bg-blue-100 transition duration-200" disabled>
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                        สแกนข้อมูลด้วย AI (OCR)
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="docNo" class="block text-gray-700 font-medium mb-2 text-sm">เลขที่หนังสือ</label>
+                        <input type="text" id="docNo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="ตัวอย่าง: ศธ 0501/ว123" required>
+                    </div>
+                    <div>
+                        <label for="docDate" class="block text-gray-700 font-medium mb-2 text-sm">ลงวันที่</label>
+                        <input type="date" id="docDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="title" class="block text-gray-700 font-medium mb-2 text-sm">เรื่อง</label>
+                    <input type="text" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="หัวข้อหรือเรื่องของหนังสือ" required>
+                </div>
+
+                <!-- กล่องข้อความแจ้งเตือน (ซ่อนไว้เริ่มต้น) -->
+                <div id="statusBox" class="hidden p-4 text-sm rounded-lg text-center font-medium"></div>
+
+                <div class="pt-4">
+                    <button type="button" id="saveBtn" onclick="saveDocument()" class="w-full text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 font-medium rounded-lg text-base px-5 py-3.5 text-center transition-colors shadow-md">
+                        <span id="saveBtnText">บันทึกลงระบบ</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- ตัวแปรสำหรับใช้งาน ---
+        const fileInput = document.getElementById('docImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const scanBtn = document.getElementById('scanBtn');
+        const statusBox = document.getElementById('statusBox');
+        
+        let currentBase64 = null; // เก็บไฟล์ภาพแบบ Base64
+
+        // URL จาก Google Apps Script (Backend) ที่ผู้ใช้ระบุ
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwacbyB5iGEjJ-8vwNudY0m66UY-FDKmHnj6WskSg4QpyZP1z-VKY1pw8SzhnpWHOSm/exec";
+        let ocrRawText = "";    // เก็บข้อความเต็มที่แกะได้จาก OCR
+        let currentFile = null; // เก็บ object ของไฟล์เพื่อดึงชื่อและประเภท (MimeType)
+
+        // --- 1. จัดการเมื่อมีการเลือกไฟล์ (Preview ภาพ) ---
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFile = file; // เซฟไฟล์ไว้ใช้ส่งตอนบันทึก
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // แสดงภาพ Preview
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('hidden');
+                    
+                    // เก็บค่า Base64 (เอาส่วน data:image/jpeg;base64, ออก)
+                    currentBase64 = e.target.result.split(',')[1];
+                    
+                    // เปิดใช้งานปุ่มสแกน
+                    scanBtn.disabled = false;
+                    scanBtn.classList.remove('bg-blue-50', 'text-blue-600');
+                    scanBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-md');
+                    
+                    showStatus('', 'hidden'); // เคลียร์สถานะเดิม
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- 2. ฟังก์ชันแสดงข้อความแจ้งเตือน ---
+        function showStatus(message, type) {
+            statusBox.className = 'p-4 text-sm rounded-lg text-center font-medium mb-4 transition-all';
+            
+            if (type === 'hidden') {
+                statusBox.classList.add('hidden');
+                return;
+            }
+            
+            statusBox.classList.remove('hidden');
+            if (type === 'success') {
+                statusBox.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+            } else if (type === 'error') {
+                statusBox.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+            } else if (type === 'info') {
+                statusBox.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+            }
+            statusBox.innerHTML = message;
+        }
+
+        async function scanDocument() {
+            if (!currentBase64) return;
+
+            const originalBtnContent = scanBtn.innerHTML;
+            
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = '<span class="loader"></span> กำลังวิเคราะห์ข้อความ...';
+            showStatus('กำลังส่งภาพไปประมวลผลที่ระบบ AI...', 'info');
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "scan",
+                        imageBase64: currentBase64
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    // เติมข้อมูลลงช่อง Input หาก Backend สกัดข้อมูลออกมาได้
+                    if(result.data && result.data.docNo) document.getElementById('docNo').value = result.data.docNo;
+                    if(result.data && result.data.title) document.getElementById('title').value = result.data.title;
+                    
+                    ocrRawText = result.rawText || ""; // เก็บข้อความเต็มเผื่อส่งบันทึกลง Database
+
+                    scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ดึงข้อมูลสำเร็จ';
+                    scanBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                    scanBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+                    
+                    showStatus('ดึงข้อมูลอัตโนมัติสำเร็จ! กรุณาตรวจสอบความถูกต้องก่อนกดบันทึก', 'success');
+                } else {
+                    throw new Error(result.message || "ระบบไม่สามารถอ่านข้อมูลได้");
+                }
+            } catch (error) {
+                // คืนค่าปุ่มหากล้มเหลว
+                scanBtn.innerHTML = originalBtnContent;
+                scanBtn.disabled = false;
+                showStatus('การสแกนล้มเหลว: ' + error.message, 'error');
+            }
+        }
+
+        async function saveDocument() {
+            const docNo = document.getElementById('docNo').value;
+            const title = document.getElementById('title').value;
+            const docDate = document.getElementById('docDate').value;
+
+            if (!currentBase64 || !currentFile) {
+                showStatus('กรุณาอัปโหลดหรือถ่ายรูปเอกสารก่อน', 'error');
+                return;
+            }
+            if (!docNo || !title || !docDate) {
+                showStatus('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน', 'error');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            const saveBtnText = document.getElementById('saveBtnText');
+            
+            saveBtn.disabled = true;
+            saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            saveBtnText.innerHTML = '<span class="loader"></span> กำลังบันทึกข้อมูล...';
+            showStatus('กำลังอัปโหลดไฟล์และบันทึกข้อมูลลงระบบ...', 'info');
+
+            const payload = {
+                action: "save",
+                docNo: docNo,
+                title: title,
+                docDate: docDate,
+                fileName: currentFile.name,
+                mimeType: currentFile.type,
+                imageBase64: currentBase64,
+                rawText: ocrRawText
+            };
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload) 
+                });
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    // หาก Backend ส่งลิงก์ไฟล์กลับมา ให้แสดงลิงก์เปิดไฟล์ด้วย
+                    let fileLink = result.fileUrl ? `<br><a href="${result.fileUrl}" target="_blank" class="underline font-bold hover:text-green-900 mt-2 inline-block">เปิดดูไฟล์ที่อัปโหลดใน Drive</a>` : '';
+                    showStatus(`บันทึกหนังสือ <b>${docNo}</b> เรียบร้อยแล้ว! ${fileLink}`, 'success');
+                    
+                    // รีเซ็ตหน้าจอเพื่อรับงานใหม่
+                    document.getElementById('docForm').reset();
+                    currentBase64 = null;
+                    currentFile = null;
+                    ocrRawText = "";
+                    imagePreview.classList.add('hidden');
+                    imagePreview.src = '';
+                    uploadPlaceholder.classList.remove('hidden');
+                    
+                    scanBtn.disabled = true;
+                    scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg> สแกนข้อมูลด้วย AI (OCR)';
+                    scanBtn.className = 'w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center transition duration-200';
+                } else {
+                    throw new Error(result.message || "การบันทึกผิดพลาด");
+                }
+            } catch (error) {
+                showStatus('เกิดข้อผิดพลาดในการบันทึก: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                saveBtnText.innerText = 'บันทึกลงระบบ';
+            }
+        }
+    </script>
+</body>
+</html>
