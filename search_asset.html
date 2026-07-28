@@ -601,7 +601,7 @@
                 const assetId = item.AssetID || detail.AssetID || "";
                 const serial = item.Serial || detail.Serial || "ไม่มี Serial";
                 const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุประเภท";
-                const age = detail["อายุ"] || detail["Age"] || "ไม่ระบุอายุ";
+                const age = detail["อายุ"] || "ไม่ระบุอายุ";
                 const source = detail["Source"] || "";
                 
                 // ถอด Link รูปภาพตัวแรก หากได้ ID จาก Logs
@@ -633,7 +633,7 @@
                         <div class="asset-serial"><i class="fa-solid fa-barcode me-1 text-secondary"></i> SN: ${displaySerial}</div>
                         <div class="asset-badges mt-1">
                             <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${group}</span>
-                            <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${age}</span>
+                            <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${age} ปี</span>
                             ${sourceBadge}
                         </div>
                     </div>
