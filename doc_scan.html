@@ -12,30 +12,23 @@
     <script>
         /*
          * ============================================================================
-         * ระบบตรวจสอบและจัดการสถานะการเข้าสู่ระบบ (Authentication)
+         * ไฟล์: auth-check.js
+         * วัตถุประสงค์: ตรวจสอบและจัดการสถานะการเข้าสู่ระบบ (Authentication) จาก LocalStorage
          * ============================================================================
          */
         (function () {
             try {
-                // ดึงข้อมูลจาก LocalStorage ด้วย Key: 'currentUser'
                 const userData = localStorage.getItem('currentUser');
-                
-                // เงื่อนไข 1: หากไม่มีข้อมูลในระบบ
                 if (!userData) {
-                    window.user = null; // Soft Check
-                    return;
-                }
-
-                const user = JSON.parse(userData);
-                
-                // เงื่อนไข 2: หากมีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
-                if (!user || !user.UserPN) {
-                    localStorage.removeItem('currentUser'); // ล้างข้อมูลขยะทิ้ง
                     window.user = null;
                     return;
                 }
-
-                // เงื่อนไข 3: ข้อมูลถูกต้อง ผูก Object ผู้ใช้งานเข้ากับ Global Window
+                const user = JSON.parse(userData);
+                if (!user || !user.UserPN) {
+                    localStorage.removeItem('currentUser');
+                    window.user = null;
+                    return;
+                }
                 window.user = user;
             } catch (err) {
                 console.error("Auth-Check error: ", err);
@@ -44,43 +37,33 @@
             }
         })();
 
-        // 🛠️ ฟังก์ชันดึงข้อมูลผู้ใช้
-        function getCurrentUser() {
-            return window.user || null;
-        }
+        function getCurrentUser() { return window.user || null; }
 
-        // 🛠️ ฟังก์ชันตรวจสอบสิทธิ์ผู้ใช้งาน
         function hasRole(role) {
             if (!window.user) return false;
             return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
         }
 
-        // 🛠️ ฟังก์ชันดึงชื่อมาแสดงผล
         function getDisplayName() {
             if (!window.user) return "ผู้ใช้งานทั่วไป";
             return (window.user.UserName || "") + " " + (window.user.UserSname || "");
         }
 
-        // 🛠️ ฟังก์ชันออกจากระบบ
         function logout() {
             localStorage.removeItem('currentUser');
             sessionStorage.clear();
-            try {
-                window.location.replace("index.html");
-            } catch(e) {
-                window.location.href = "index.html";
-            }
+            window.location.reload();
         }
 
-        // 🛠️ ฟังก์ชันจำลองล็อกอินสำหรับทดสอบ (Demo Only)
-        function demoLogin() {
-            const mockUser = {
-                UserPN: "EMP9901",
-                UserName: "สมชาย",
-                UserSname: "ใจดี",
-                DeptName: "ฝ่ายสารบรรณกลาง",
-                UserTypeID: "ADMIN"
-            };
+        function demoLogin(role) {
+            let mockUser = {};
+            if(role === 'ADMIN') {
+                mockUser = { UserPN: "EMP001", UserName: "สมชาย", UserSname: "ใจดี", DeptName: "งานสารบรรณ", UserTypeID: "ADMIN" };
+            } else if(role === 'EXEC') {
+                mockUser = { UserPN: "EXEC01", UserName: "ท่านผอ.", UserSname: "วิสัยทัศน์ไกล", DeptName: "ผู้บริหาร", UserTypeID: "EXEC" };
+            } else {
+                mockUser = { UserPN: "STAFF01", UserName: "สมหญิง", UserSname: "ขยันงาน", DeptName: "ฝ่ายการเงิน", UserTypeID: "STAFF" };
+            }
             localStorage.setItem('currentUser', JSON.stringify(mockUser));
             window.location.reload();
         }
@@ -92,15 +75,11 @@
             background-color: #f3f4f6; /* สีเทาอ่อน */
         }
         
-        /* ซ่อน Input File ของระบบ */
-        input[type="file"] {
-            display: none;
-        }
+        input[type="file"] { display: none; }
 
-        /* อนิเมชันการโหลด */
         .loader {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #d81b60; /* สีบานเย็น */
+            border-top: 3px solid #d81b60;
             border-radius: 50%;
             width: 20px;
             height: 20px;
@@ -114,133 +93,274 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #d81b60;
+            color: #d81b60;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center">
+<body class="min-h-screen flex flex-col">
 
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden my-auto">
+    <header class="bg-gradient-to-r from-pink-600 to-rose-500 shadow-md text-white sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold backdrop-blur-sm">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-semibold leading-tight">ระบบลงรับหนังสืออัจฉริยะ</h1>
+                    <div id="userDisplayName" class="text-xs text-pink-100 flex items-center gap-1"></div>
+                </div>
+            </div>
+            
+            <div id="authActionArea" class="flex gap-2">
+                <!-- ปุ่มล็อกอินจำลอง หรือ ล็อกเอาท์ จะถูกสร้างจาก JS -->
+            </div>
+        </div>
+
+        <!-- แท็บนำทาง (Tabs) -->
+        <div class="bg-white text-gray-600 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4 flex overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-active px-4 py-3 whitespace-nowrap transition-colors hover:text-pink-600 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    แดชบอร์ดติดตามงาน
+                </button>
+                <button onclick="switchTab('register')" id="tab-register" class="px-4 py-3 whitespace-nowrap transition-colors hover:text-pink-600 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    ลงรับหนังสือใหม่
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-6 w-full max-w-6xl mx-auto">
         
-        <!-- Header & Auth Status Bar -->
-        <div class="bg-gradient-to-r from-pink-600 to-rose-500 p-6 text-white">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-pink-400/50 pb-4 mb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold backdrop-blur-sm">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </div>
-                    <div>
-                        <div class="text-xs text-pink-100">ผู้ใช้งานระบบ</div>
-                        <div id="userDisplayName" class="font-semibold text-sm md:text-base leading-tight"></div>
-                        <div id="userDeptName" class="text-xs text-pink-200"></div>
-                    </div>
+        <section id="view-dashboard" class="space-y-6">
+            
+            <!-- สรุปสถานะการดำเนินงาน (Stats) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col justify-center">
+                    <div class="text-sm text-gray-500 font-medium">1. รอเสนอผู้บริหาร</div>
+                    <div class="text-2xl font-bold text-gray-800 mt-1">12 <span class="text-sm font-normal text-gray-500">เรื่อง</span></div>
                 </div>
-                <!-- ปุ่มสลับสำหรับ Log In / Log Out -->
-                <div id="authActionArea"></div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col justify-center border-l-4 border-l-yellow-400">
+                    <div class="text-sm text-gray-500 font-medium">2. รอลงนาม/สั่งการ</div>
+                    <div class="text-2xl font-bold text-gray-800 mt-1">5 <span class="text-sm font-normal text-gray-500">เรื่อง</span></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col justify-center border-l-4 border-l-purple-500">
+                    <div class="text-sm text-gray-500 font-medium">3. รอดำเนินการ</div>
+                    <div class="text-2xl font-bold text-gray-800 mt-1">8 <span class="text-sm font-normal text-gray-500">เรื่อง</span></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col justify-center border-l-4 border-l-green-500">
+                    <div class="text-sm text-gray-500 font-medium">4. เสร็จสิ้นแล้ว</div>
+                    <div class="text-2xl font-bold text-gray-800 mt-1">145 <span class="text-sm font-normal text-gray-500">เรื่อง</span></div>
+                </div>
             </div>
 
-            <div class="text-center">
-                <h1 class="text-2xl md:text-3xl font-semibold tracking-wide">ระบบลงรับหนังสือเข้า</h1>
-                <p class="text-pink-100 mt-1 text-sm md:text-base">อัปโหลดภาพเอกสารเพื่อดึงข้อมูลอัตโนมัติด้วย AI</p>
+            <!-- ตารางแสดงรายการหนังสือ -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h2 class="text-lg font-semibold text-gray-800">รายการหนังสือเข้าล่าสุด</h2>
+                    <button class="text-sm text-pink-600 hover:text-pink-800 font-medium">ดูทั้งหมด</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">เลขที่หนังสือ / วันที่</th>
+                                <th scope="col" class="px-6 py-3">เรื่อง</th>
+                                <th scope="col" class="px-6 py-3">ขั้นตอนปัจจุบัน (สถานะ)</th>
+                                <th scope="col" class="px-6 py-3">ผู้รับผิดชอบ</th>
+                                <th scope="col" class="px-6 py-3 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentTableBody" class="divide-y divide-gray-100">
+                            <!-- แถวข้อมูลจะถูกสร้างโดย JavaScript (Mock Data) -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- ฟอร์มข้อมูล -->
-        <div class="p-6 md:p-8">
-            <form id="docForm" class="space-y-5">
+        <section id="view-register" class="hidden flex justify-center">
+            <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-lg font-semibold text-gray-800">1. ขั้นตอนลงรับหนังสือเข้าใหม่ (สารบรรณ)</h2>
+                    <p class="text-sm text-gray-500">อัปโหลดภาพเอกสารเพื่อดึงข้อมูลอัตโนมัติด้วย AI</p>
+                </div>
                 
-                <div class="w-full">
-                    <label class="block text-gray-700 font-medium mb-2">ภาพถ่ายเอกสาร <span class="text-red-500">*</span></label>
-                    
-                    <!-- พื้นที่สำหรับกดอัปโหลด -->
-                    <label for="docImage" id="uploadArea" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500" id="uploadPlaceholder">
-                            <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16V8a2 2 0 012-2h4l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m0 0l-3-3m3 3l3-3"></path></svg>
-                            <p class="mb-2 text-sm"><span class="font-semibold">คลิกเพื่อถ่ายรูป</span> หรือเลือกไฟล์</p>
-                            <p class="text-xs">รองรับ JPG, PNG</p>
+                <div class="p-6 md:p-8">
+                    <form id="docForm" class="space-y-5">
+                        <div class="w-full">
+                            <label class="block text-gray-700 font-medium mb-2">ภาพถ่ายเอกสาร <span class="text-red-500">*</span></label>
+                            
+                            <label for="docImage" id="uploadArea" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500" id="uploadPlaceholder">
+                                    <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16V8a2 2 0 012-2h4l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m0 0l-3-3m3 3l3-3"></path></svg>
+                                    <p class="mb-2 text-sm"><span class="font-semibold">คลิกเพื่อถ่ายรูป</span> หรือเลือกไฟล์</p>
+                                    <p class="text-xs">รองรับ JPG, PNG</p>
+                                </div>
+                                <img id="imagePreview" class="hidden h-full w-full object-contain p-2 rounded-xl" alt="Preview" />
+                            </label>
+                            <input type="file" id="docImage" accept="image/*" capture="environment">
                         </div>
-                        <!-- ซ่อนตัวพรีวิวไว้ก่อน จนกว่าจะอัปโหลด -->
-                        <img id="imagePreview" class="hidden h-full w-full object-contain p-2 rounded-xl" alt="Preview" />
-                    </label>
-                    <input type="file" id="docImage" accept="image/*" capture="environment">
-                </div>
 
-                <div>
-                    <button type="button" id="scanBtn" onclick="scanDocument()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center transition duration-200" disabled>
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-                        สแกนข้อมูลด้วย AI (OCR)
-                    </button>
-                </div>
+                        <div>
+                            <button type="button" id="scanBtn" onclick="simulateAIOCR()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center transition duration-200" disabled>
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                                สแกนข้อมูลด้วย AI (OCR)
+                            </button>
+                        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label for="docNo" class="block text-gray-700 font-medium mb-2 text-sm">เลขที่หนังสือ</label>
-                        <input type="text" id="docNo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="ตัวอย่าง: ศธ 0501/ว123" required>
-                    </div>
-                    <div>
-                        <label for="docDate" class="block text-gray-700 font-medium mb-2 text-sm">ลงวันที่</label>
-                        <input type="date" id="docDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" required>
-                    </div>
-                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label for="docNo" class="block text-gray-700 font-medium mb-2 text-sm">เลขที่หนังสือ</label>
+                                <input type="text" id="docNo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="ตัวอย่าง: ศธ 0501/ว123" required>
+                            </div>
+                            <div>
+                                <label for="docDate" class="block text-gray-700 font-medium mb-2 text-sm">ลงวันที่</label>
+                                <input type="date" id="docDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" required>
+                            </div>
+                        </div>
 
-                <div>
-                    <label for="title" class="block text-gray-700 font-medium mb-2 text-sm">เรื่อง</label>
-                    <input type="text" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="หัวข้อหรือเรื่องของหนังสือ" required>
-                </div>
+                        <div>
+                            <label for="title" class="block text-gray-700 font-medium mb-2 text-sm">เรื่อง</label>
+                            <input type="text" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 transition-colors" placeholder="หัวข้อหรือเรื่องของหนังสือ" required>
+                        </div>
 
-                <!-- กล่องข้อความแจ้งเตือน (ซ่อนไว้เริ่มต้น) -->
-                <div id="statusBox" class="hidden p-4 text-sm rounded-lg text-center font-medium"></div>
+                        <div id="statusBox" class="hidden p-4 text-sm rounded-lg text-center font-medium"></div>
 
-                <div class="pt-2">
-                    <button type="button" id="saveBtn" onclick="saveDocument()" class="w-full text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 font-medium rounded-lg text-base px-5 py-3.5 text-center transition-colors shadow-md">
-                        <span id="saveBtnText">บันทึกลงระบบ</span>
-                    </button>
+                        <div class="pt-2 border-t border-gray-100 mt-4">
+                            <button type="button" id="saveBtn" onclick="saveDocument()" class="mt-4 w-full text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 font-medium rounded-lg text-base px-5 py-3.5 text-center transition-colors shadow-md">
+                                <span id="saveBtnText">บันทึกลงระบบ (และส่งต่อผู้บริหาร)</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
+        </section>
+
+    </main>
 
     <script>
-        // --- ตัวแปรสำหรับใช้งาน ---
+        const mockDocuments = [
+            { id: "RCV-69004", docNo: "นร 0101/ว789", title: "ขอเชิญประชุมสัมมนาประจำปี", date: "2026-07-28", status: "REGISTERED", assignee: "งานสารบรรณ" },
+            { id: "RCV-69003", docNo: "ศธ 0501/ว123", title: "นโยบายการจัดการเอกสารอิเล็กทรอนิกส์", date: "2026-07-27", status: "ROUTED", assignee: "ผู้บริหาร (รอพิจารณา)" },
+            { id: "RCV-69002", docNo: "กค 0402/ว456", title: "การจัดสรรงบประมาณไตรมาส 3", date: "2026-07-25", status: "ASSIGNED", assignee: "ฝ่ายการเงิน (รอดำเนินการ)" },
+            { id: "RCV-69001", docNo: "มท 0201/ว111", title: "รายงานผลการดำเนินงาน", date: "2026-07-20", status: "COMPLETED", assignee: "-" }
+        ];
+
+        const statusConfig = {
+            "REGISTERED": { text: "1. ลงรับ (รอแทงหนังสือ)", color: "bg-gray-100 text-gray-700 border-gray-200" },
+            "ROUTED": { text: "2. เสนอผู้บริหาร", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+            "ASSIGNED": { text: "3. ผู้บริหารสั่งการแล้ว", color: "bg-purple-50 text-purple-700 border-purple-200" },
+            "COMPLETED": { text: "4. ดำเนินการเสร็จสิ้น", color: "bg-green-50 text-green-700 border-green-200" }
+        };
+
+        // GAS Backend URL
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwacbyB5iGEjJ-8vwNudY0m66UY-FDKmHnj6WskSg4QpyZP1z-VKY1pw8SzhnpWHOSm/exec";
+
+        document.addEventListener("DOMContentLoaded", function() {
+            renderUserHeader();
+            renderDashboard();
+        });
+
+        function switchTab(tabName) {
+            // ซ่อนทุก Section
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-register').classList.add('hidden');
+            
+            // นำคลาส tab-active ออกจากปุ่มทั้งหมด
+            document.getElementById('tab-dashboard').classList.remove('tab-active');
+            document.getElementById('tab-register').classList.remove('tab-active');
+            
+            // แสดง Section ที่เลือก และตั้งปุ่มให้ Active
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
+        }
+
+        function renderUserHeader() {
+            const user = getCurrentUser();
+            const displayNameElem = document.getElementById('userDisplayName');
+            const actionAreaElem = document.getElementById('authActionArea');
+
+            if (user) {
+                // มีข้อมูลผู้ใช้
+                displayNameElem.innerHTML = `
+                    <span class="font-medium">${getDisplayName()}</span>
+                    <span class="opacity-75">| ${user.DeptName} (${user.UserTypeID})</span>
+                `;
+                actionAreaElem.innerHTML = `
+                    <button type="button" onclick="logout()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs rounded-lg transition-colors border border-white/30">ออกจากระบบ</button>
+                `;
+            } else {
+                // ไม่มีผู้ใช้งาน
+                displayNameElem.innerHTML = `<span class="opacity-75">ผู้ใช้งานทั่วไป (ยังไม่ได้เข้าระบบ)</span>`;
+                actionAreaElem.innerHTML = `
+                    <button type="button" onclick="demoLogin('ADMIN')" class="px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-[10px] font-bold rounded shadow transition-colors">เข้าฐานะ สารบรรณ</button>
+                    <button type="button" onclick="demoLogin('EXEC')" class="px-2 py-1 bg-blue-400 hover:bg-blue-500 text-white text-[10px] font-bold rounded shadow transition-colors">เข้าฐานะ ผู้บริหาร</button>
+                `;
+            }
+        }
+
+        function renderDashboard() {
+            const tbody = document.getElementById('documentTableBody');
+            tbody.innerHTML = '';
+
+            mockDocuments.forEach(doc => {
+                const statusInfo = statusConfig[doc.status];
+                
+                // กำหนดปุ่มจัดการ ตาม Status
+                let actionBtn = `<button class="text-xs px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-50">ดูรายละเอียด</button>`;
+                
+                if (doc.status === 'REGISTERED' && hasRole('ADMIN')) {
+                    actionBtn = `<button class="text-xs px-3 py-1.5 bg-pink-600 text-white rounded hover:bg-pink-700 shadow-sm">แทงหนังสือส่งต่อ</button>`;
+                } else if (doc.status === 'ROUTED' && hasRole('EXEC')) {
+                    actionBtn = `<button class="text-xs px-3 py-1.5 bg-yellow-500 text-white rounded hover:bg-yellow-600 shadow-sm">ลงนาม/สั่งการ</button>`;
+                } else if (doc.status === 'ASSIGNED' && hasRole('STAFF')) {
+                    actionBtn = `<button class="text-xs px-3 py-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 shadow-sm">บันทึกการดำเนินการ</button>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">${doc.docNo}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">ลงวันที่ ${doc.date}</div>
+                    </td>
+                    <td class="px-6 py-4 font-medium">${doc.title}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 text-xs font-medium border rounded-full ${statusInfo.color}">
+                            ${statusInfo.text}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">${doc.assignee}</td>
+                    <td class="px-6 py-4 text-center">${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
         const fileInput = document.getElementById('docImage');
         const imagePreview = document.getElementById('imagePreview');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
         const scanBtn = document.getElementById('scanBtn');
         const statusBox = document.getElementById('statusBox');
         
-        let currentBase64 = null; // เก็บไฟล์ภาพแบบ Base64
-
-        // URL จาก Google Apps Script (Backend)
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwacbyB5iGEjJ-8vwNudY0m66UY-FDKmHnj6WskSg4QpyZP1z-VKY1pw8SzhnpWHOSm/exec";
-        let ocrRawText = "";    
-        let currentFile = null; 
-
-        document.addEventListener("DOMContentLoaded", function() {
-            renderUserHeader();
-        });
-
-        function renderUserHeader() {
-            const user = getCurrentUser();
-            const displayNameElem = document.getElementById('userDisplayName');
-            const deptNameElem = document.getElementById('userDeptName');
-            const actionAreaElem = document.getElementById('authActionArea');
-
-            displayNameElem.innerText = getDisplayName();
-
-            if (user) {
-                deptNameElem.innerText = user.DeptName || user.UserPN || "เจ้าหน้าที่";
-                actionAreaElem.innerHTML = `
-                    <button type="button" onclick="logout()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs rounded-lg transition-colors border border-white/30 backdrop-blur-sm">
-                        ออกจากระบบ
-                    </button>
-                `;
-            } else {
-                deptNameElem.innerText = "ยังไม่ได้เข้าสู่ระบบ";
-                actionAreaElem.innerHTML = `
-                    <button type="button" onclick="demoLogin()" class="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-semibold rounded-lg shadow transition-colors">
-                        จำลองเข้าสู่ระบบ
-                    </button>
-                `;
-            }
-        }
+        let currentBase64 = null; 
+        let currentFile = null;
+        let ocrRawText = ""; 
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -251,13 +371,11 @@
                     imagePreview.src = e.target.result;
                     imagePreview.classList.remove('hidden');
                     uploadPlaceholder.classList.add('hidden');
-                    
                     currentBase64 = e.target.result.split(',')[1];
                     
                     scanBtn.disabled = false;
                     scanBtn.classList.remove('bg-blue-50', 'text-blue-600');
                     scanBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-md');
-                    
                     showStatus('', 'hidden'); 
                 }
                 reader.readAsDataURL(file);
@@ -265,86 +383,52 @@
         });
 
         function showStatus(message, type) {
-            statusBox.className = 'p-4 text-sm rounded-lg text-center font-medium mb-4 transition-all';
-            
+            statusBox.className = 'p-4 text-sm rounded-lg text-center font-medium mt-4 transition-all';
             if (type === 'hidden') {
                 statusBox.classList.add('hidden');
                 return;
             }
-            
             statusBox.classList.remove('hidden');
-            if (type === 'success') {
-                statusBox.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
-            } else if (type === 'error') {
-                statusBox.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
-            } else if (type === 'info') {
-                statusBox.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
-            }
+            if (type === 'success') statusBox.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+            else if (type === 'error') statusBox.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+            else if (type === 'info') statusBox.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+            
             statusBox.innerHTML = message;
         }
 
-        async function scanDocument() {
+        async function simulateAIOCR() {
             if (!currentBase64) return;
-
             const originalBtnContent = scanBtn.innerHTML;
             
             scanBtn.disabled = true;
-            scanBtn.innerHTML = '<span class="loader"></span> กำลังวิเคราะห์ข้อความ...';
-            showStatus('กำลังส่งภาพไปประมวลผลที่ระบบ AI...', 'info');
+            scanBtn.innerHTML = '<span class="loader"></span> กำลังวิเคราะห์ข้อความด้วย AI...';
+            showStatus('ระบบกำลังอ่านข้อมูลจากรูปภาพ...', 'info');
 
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: "scan",
-                        imageBase64: currentBase64
-                    })
-                });
+            // จำลองเวลาประมวลผล 1.5 วินาที
+            setTimeout(() => {
+                document.getElementById('docNo').value = "ศธ 0201/ว1992";
+                document.getElementById('title').value = "รายงานการประชุมประจำเดือน";
+                document.getElementById('docDate').value = "2026-07-28";
                 
-                const result = await response.json();
+                scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ดึงข้อมูลสำเร็จ';
+                scanBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                scanBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
                 
-                if (result.status === "success") {
-                    if(result.data && result.data.docNo) document.getElementById('docNo').value = result.data.docNo;
-                    if(result.data && result.data.title) document.getElementById('title').value = result.data.title;
-                    
-                    ocrRawText = result.rawText || "";
-
-                    scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ดึงข้อมูลสำเร็จ';
-                    scanBtn.classList.replace('bg-blue-600', 'bg-green-600');
-                    scanBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
-                    
-                    showStatus('ดึงข้อมูลอัตโนมัติสำเร็จ! กรุณาตรวจสอบความถูกต้องก่อนกดบันทึก', 'success');
-                } else {
-                    throw new Error(result.message || "ระบบไม่สามารถอ่านข้อมูลได้");
-                }
-            } catch (error) {
-                scanBtn.innerHTML = originalBtnContent;
-                scanBtn.disabled = false;
-                showStatus('การสแกนล้มเหลว: ' + error.message, 'error');
-            }
+                showStatus('ดึงข้อมูลอัตโนมัติสำเร็จ! กรุณาตรวจสอบและกดบันทึก', 'success');
+            }, 1500);
         }
 
         async function saveDocument() {
             const currentUser = getCurrentUser();
-            
-            // Soft check warning if user is not logged in
-            if (!currentUser) {
-                if (!confirm("คุณยังไม่ได้เข้าสู่ระบบอย่างเป็นทางการ ข้อมูลจะถูกบันทึกเป็น 'ผู้ใช้งานทั่วไป' ต้องการดำเนินการต่อหรือไม่?")) {
-                    return;
-                }
-            }
-
             const docNo = document.getElementById('docNo').value;
             const title = document.getElementById('title').value;
             const docDate = document.getElementById('docDate').value;
 
             if (!currentBase64 || !currentFile) {
-                showStatus('กรุณาอัปโหลดหรือถ่ายรูปเอกสารก่อน', 'error');
-                return;
+                showStatus('กรุณาอัปโหลดรูปภาพก่อน', 'error'); return;
             }
             if (!docNo || !title || !docDate) {
-                showStatus('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน', 'error');
-                return;
+                showStatus('กรุณากรอกข้อมูลให้ครบถ้วน', 'error'); return;
             }
 
             const saveBtn = document.getElementById('saveBtn');
@@ -353,54 +437,50 @@
             saveBtn.disabled = true;
             saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
             saveBtnText.innerHTML = '<span class="loader"></span> กำลังบันทึกข้อมูล...';
-            showStatus('กำลังอัปโหลดไฟล์และบันทึกข้อมูลลงระบบ...', 'info');
+            showStatus('กำลังอัปโหลดไฟล์และบันทึกข้อมูล...', 'info');
 
             const payload = {
                 action: "save",
-                docNo: docNo,
-                title: title,
-                docDate: docDate,
-                fileName: currentFile.name,
-                mimeType: currentFile.type,
-                imageBase64: currentBase64,
-                rawText: ocrRawText,
-                // แนบข้อมูลผู้บันทึกจาก Auth System
+                docNo: docNo, title: title, docDate: docDate,
+                fileName: currentFile.name, mimeType: currentFile.type,
+                imageBase64: currentBase64, rawText: ocrRawText,
                 userPN: currentUser ? currentUser.UserPN : "GUEST",
                 createdByName: getDisplayName()
             };
 
             try {
-                const response = await fetch(GAS_WEB_APP_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload) 
-                });
+                // ยิง API จริงไปที่ Google Apps Script
+                const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
                 
                 if (result.status === "success") {
-                    let fileLink = result.fileUrl ? `<br><a href="${result.fileUrl}" target="_blank" class="underline font-bold hover:text-green-900 mt-2 inline-block">เปิดดูไฟล์ที่อัปโหลดใน Drive</a>` : '';
-                    showStatus(`บันทึกหนังสือ <b>${docNo}</b> เรียบร้อยแล้ว! ${fileLink}`, 'success');
+                    // หากสำเร็จ ให้จำลองการอัปเดต Dashboard
+                    mockDocuments.unshift({ 
+                        id: "RCV-NEW", docNo: docNo, title: title, date: docDate, 
+                        status: "REGISTERED", assignee: "ระบบสารบรรณกลาง" 
+                    });
+                    renderDashboard(); // โหลดตารางใหม่
+
+                    showStatus(`บันทึกสำเร็จ! ข้อมูลถูกส่งเข้าขั้นตอนที่ 1 แล้ว`, 'success');
                     
-                    // รีเซ็ตหน้าจอเพื่อรับงานใหม่
-                    document.getElementById('docForm').reset();
-                    currentBase64 = null;
-                    currentFile = null;
-                    ocrRawText = "";
-                    imagePreview.classList.add('hidden');
-                    imagePreview.src = '';
-                    uploadPlaceholder.classList.remove('hidden');
-                    
-                    scanBtn.disabled = true;
-                    scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg> สแกนข้อมูลด้วย AI (OCR)';
-                    scanBtn.className = 'w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center transition duration-200';
+                    // หน่วงเวลา 2 วินาทีแล้วสลับกลับไปหน้า Dashboard อัตโนมัติ
+                    setTimeout(() => {
+                        document.getElementById('docForm').reset();
+                        currentBase64 = null; currentFile = null;
+                        imagePreview.classList.add('hidden'); imagePreview.src = '';
+                        uploadPlaceholder.classList.remove('hidden');
+                        showStatus('', 'hidden');
+                        switchTab('dashboard'); // สลับหน้าอัตโนมัติ
+                    }, 2000);
                 } else {
-                    throw new Error(result.message || "การบันทึกผิดพลาด");
+                    throw new Error(result.message);
                 }
             } catch (error) {
-                showStatus('เกิดข้อผิดพลาดในการบันทึก: ' + error.message, 'error');
+                showStatus('เกิดข้อผิดพลาด: ' + error.message, 'error');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
-                saveBtnText.innerText = 'บันทึกลงระบบ';
+                saveBtnText.innerText = 'บันทึกลงระบบ (และส่งต่อผู้บริหาร)';
             }
         }
     </script>
