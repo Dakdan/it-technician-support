@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <link rel="icon" type="image/png" href="logo003v1.png">
+    <link rel="icon" type="image/png" href="logo02.png">
     <meta charset="UTF-8">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ค้นหาครุภัณฑ์ - IT UDON HOSP</title>
@@ -59,19 +59,23 @@
             pointer-events: none;
         }
 
-        /* Header */
+        /* Header Layout */
         .app-header {
             background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--pink-dark) 100%);
             backdrop-filter: blur(10px);
-            padding: 14px 16px;
+            padding: 0;
             border-bottom: 6px solid #b02a6c;
             position: sticky;
             top: 0;
             z-index: 1000;
             box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
+        }
+
+        .header-content {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            padding: 14px 16px;
         }
         
         .btn-back {
@@ -157,7 +161,7 @@
         }
         .search-clear-btn:hover { color: var(--pink-dark); }
 
-        /* Result List */
+        /* Result List Cards */
         .result-count {
             font-size: 0.85rem;
             color: var(--gray-text);
@@ -212,7 +216,7 @@
         .badge-age { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; font-weight: 500;}
         .badge-source { background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; font-weight: 500;}
 
-        /* Highlight Search Text - เปลี่ยนเป็นสีเขียว */
+        /* Highlight Search Text (Green Theme - ตรงตามกฏ) */
         .highlight {
             background-color: #bbf7d0; 
             color: #15803d; 
@@ -221,7 +225,7 @@
             border-radius: 3px;
         }
 
-        /* ปุ่มสแกน QR/Barcode ข้างช่องกรอกข้อมูล */
+        /* Scan Button on Search Bar */
         .btn-scan-bar {
             width: 48px;
             height: 48px;
@@ -259,7 +263,7 @@
             transition: opacity 0.3s;
         }
 
-        /* Shimmer Loading Spinner */
+        /* Loading Spinner */
         .loading-state {
             display: flex;
             flex-direction: column;
@@ -268,7 +272,7 @@
             padding: 50px 20px;
         }
 
-        /* จัดการ Layout สำหรับ PC ให้กึ่งกลาง */
+        /* Layout Container for Mobile / Tablet / PC */
         .app-layout-wrapper {
             max-width: 768px;
             margin: 0 auto;
@@ -276,16 +280,15 @@
         }
 
         @media (max-width: 576px) {
-            .app-header { padding: 12px 14px; }
+            .app-header { padding: 0; }
             .org-title { font-size: 1.1rem; }
             .search-container { padding: 10px 15px; }
-            .fab-scanner { bottom: 20px; right: 20px; width: 60px; height: 60px; font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Initial Loading Overlay (โหลดข้อมูลครั้งแรก) -->
+    <!-- Initial Loading Overlay -->
     <div id="initialLoadingOverlay">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--pink-neon);" role="status"></div>
         <h5 class="fw-bold" style="color: var(--pink-dark);">กำลังเตรียมข้อมูล...</h5>
@@ -293,12 +296,12 @@
     </div>
 
     <!-- HEADER -->
-    <header class="app-header" style="display: block; padding: 0;">
-        <div class="app-layout-wrapper" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px;">
+    <header class="app-header">
+        <div class="app-layout-wrapper header-content">
             <a href="main_menu.html" class="btn-back" title="กลับหน้าหลัก">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <img src="./logo005v1.png" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white);" onerror="this.src='https://placehold.co/42?text=IT'">
+            <img src="./logo02.png" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white);" onerror="this.src='https://placehold.co/42?text=IT'">
             
             <div class="header-title-box">
                 <div class="org-title">ค้นหาข้อมูลครุภัณฑ์</div>
@@ -307,17 +310,17 @@
         </div>
     </header>
 
-    <!-- SEARCH BAR WITH SCANNER BUTTON -->
+    <!-- SEARCH BAR -->
     <div class="search-container">
         <div class="search-input-wrapper app-layout-wrapper d-flex align-items-center gap-2">
             <div class="position-relative flex-grow-1">
                 <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์เลขท้ายของรหัสครุภัณฑ์ หรือ Serial เพื่อค้นหา..." autocomplete="off" disabled>
+                <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์เลขท้ายของรหัสครุภัณฑ์ หรือ Serial..." autocomplete="off" disabled>
                 <button type="button" id="clearBtn" class="search-clear-btn">
                     <i class="fa-solid fa-circle-xmark"></i>
                 </button>
             </div>
-            <!-- ปุ่มสแกน QR ถูกย้ายมาอยู่ตรงนี้ข้างๆ ช่องกรอกข้อมูล -->
+            <!-- ปุ่มสแกน QR ย้ายมาอยู่ข้างๆ กล่องค้นหา -->
             <button type="button" class="btn-scan-bar" onclick="openScannerModal()" title="Scan QR / Barcode">
                 <i class="fa-solid fa-qrcode"></i>
             </button>
@@ -327,9 +330,7 @@
     <!-- MAIN CONTENT (Result List) -->
     <div class="container app-layout-wrapper pb-5">
         <div class="result-count" id="resultCount">กำลังเชื่อมต่อฐานข้อมูล...</div>
-        <div id="resultsContainer">
-            <!-- Results will be injected here via JS -->
-        </div>
+        <div id="resultsContainer"></div>
 
         <!-- State: Loading -->
         <div id="loadingState" class="loading-state d-none">
@@ -380,20 +381,66 @@
         </div>
     </div>
 
+    <!-- Modal: Asset Detail (หน้าต่างดูข้อมูลครุภัณฑ์) -->
+    <div class="modal fade" id="assetDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-0 pb-0 justify-content-between align-items-center bg-light">
+                    <h5 class="fw-bold text-pink-dark mb-0"><i class="fa-solid fa-circle-info me-2"></i>รายละเอียดครุภัณฑ์</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Image -->
+                    <div class="text-center mb-3">
+                        <img id="modalAssetImg" src="https://placehold.co/400x300/e2e8f0/475569?text=No+Image" alt="Asset Image" class="img-fluid rounded-3 shadow-sm" style="max-height: 250px; object-fit: contain;">
+                    </div>
+                    <!-- Status Badges -->
+                    <div id="modalStatusBadges" class="d-flex justify-content-center gap-2 mb-3 flex-wrap"></div>
+                    <!-- Details Grid -->
+                    <div class="card border-0 bg-light rounded-3 p-3 mb-3">
+                        <div class="row g-2 text-start">
+                            <div class="col-12 col-md-6"><span class="text-muted small">Asset ID:</span> <div class="fw-bold text-pink-dark" id="modalFieldAssetID">-</div></div>
+                            <div class="col-12 col-md-6"><span class="text-muted small">Serial Number:</span> <div class="fw-bold text-dark" id="modalFieldSerial">-</div></div>
+                            <div class="col-12 col-md-6"><span class="text-muted small">ประเภท/กลุ่ม:</span> <div class="fw-bold text-dark" id="modalFieldType">-</div></div>
+                            <div class="col-12 col-md-6"><span class="text-muted small">อายุการใช้งาน:</span> <div class="fw-bold text-dark" id="modalFieldAge">-</div></div>
+                            <div class="col-12"><span class="text-muted small">ชื่อรายการ/รายละเอียด:</span> <div class="fw-bold text-dark" id="modalFieldName">-</div></div>
+                            <div class="col-6"><span class="text-muted small">แหล่งข้อมูล (Source):</span> <div class="fw-bold text-dark" id="modalFieldSource">-</div></div>
+                            <div class="col-3"><span class="text-muted small">NO:</span> <div class="fw-bold text-dark" id="modalFieldNO">-</div></div>
+                            <div class="col-3"><span class="text-muted small">NOID:</span> <div class="fw-bold text-dark" id="modalFieldNOID">-</div></div>
+                        </div>
+                    </div>
+                    <!-- GPS Google Maps Embed -->
+                    <div id="modalGpsContainer" class="d-none">
+                        <h6 class="fw-bold text-pink-dark mb-2"><i class="fa-solid fa-location-dot me-2"></i>ตำแหน่ง GPS</h6>
+                        <div id="modalGpsMap" class="rounded-3 overflow-hidden shadow-sm" style="height: 200px; width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 bg-light">
+                    <!-- ปุ่มเปิดประวัติไปยังไฟล์ระบบเก่า -->
+                    <button type="button" id="btnViewHistory" class="btn text-white rounded-pill px-4 fw-bold" style="background-color: var(--pink-dark); border: none;">
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>ดูประวัติการซ่อม
+                    </button>
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // URL ปลายทางเมื่อเลือกรายการหรือสแกนสำเร็จ
+        // TARGET URL Base (สำหรับลิงก์ไปหน้าประวัติ)
         const TARGET_URL_BASE = "https://dakdan.github.io/it-technician-support/asset_detail.html?Asset_ID=";
-        // API ปลายทางที่ทำงานร่วมกับ code.gs
+        // API URL (ชี้ไปยัง Google Apps Script ที่เพิ่มโหมด getAllData แล้ว)
         const API_URL = "https://script.google.com/macros/s/AKfycbxLCgrDKBHjBp24Cfv4zk7aEWLnv-CCXoROVHRqyfeaULZ6gat4WQHcfH9_xBsUFgpVGQ/exec";
 
         let html5QrcodeScanner = null;
         let scannerModalInstance = null;
         let systemAlertModal = null;
+        let detailModalInstance = null;
+        let onlineSearchDebounce = null;
         
-        // ตัวแปรเก็บข้อมูลครุภัณฑ์ทั้งหมดในฝั่ง Client
         let allAssetsData = []; 
 
         // Element References
@@ -408,39 +455,54 @@
         const initialLoadingOverlay = document.getElementById('initialLoadingOverlay');
 
         document.addEventListener('DOMContentLoaded', () => {
-            scannerModalInstance = new bootstrap.Modal(document.getElementById('scannerModal'));
-            systemAlertModal = new bootstrap.Modal(document.getElementById('systemAlertModal'));
+            // Safe initialization of Bootstrap modals (ป้องกัน Error 'backdrop')
+            const scannerModalEl = document.getElementById('scannerModal');
+            if (scannerModalEl) scannerModalInstance = new bootstrap.Modal(scannerModalEl);
             
-            // โหลดข้อมูลทั้งหมดเมื่อเข้าหน้าเว็บ
+            const systemAlertModalEl = document.getElementById('systemAlertModal');
+            if (systemAlertModalEl) systemAlertModal = new bootstrap.Modal(systemAlertModalEl);
+            
+            const assetDetailModalEl = document.getElementById('assetDetailModal');
+            if (assetDetailModalEl) detailModalInstance = new bootstrap.Modal(assetDetailModalEl);
+            
+            // ดึงข้อมูลแคชตั้งแต่แรก
             fetchAllData();
 
-            // Event Listener สำหรับช่องป้อนข้อความค้นหา (Real-time Client Search)
+            // Event ตอนพิมพ์ค้นหา
             searchInput.addEventListener('input', function() {
                 const keyword = this.value.trim();
                 
                 if (keyword.length > 1) {
                     clearBtn.style.display = 'block';
-                    executeLocalSearch(keyword); // ค้นหาฝั่ง Client ทันที
+                    // หากมีแคชข้อมูลให้ใช้ Local Search ทันที
+                    if (allAssetsData.length > 0) {
+                        executeLocalSearch(keyword); 
+                    } else {
+                        // ระบบ Fallback: หากโหลดข้อมูลตอนแรกไม่เข้า ให้ใช้ค้นหาออนไลน์สด
+                        clearTimeout(onlineSearchDebounce);
+                        onlineSearchDebounce = setTimeout(() => {
+                            executeOnlineSearch(keyword);
+                        }, 400);
+                    }
                 } else {
                     clearBtn.style.display = 'none';
                     resultsContainer.innerHTML = '';
-                    resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน";
+                    resultCountLabel.innerText = allAssetsData.length > 0 ? "ระบุข้อมูลในการค้นหาด้านบน" : "พิมพ์รหัสครุภัณฑ์หรือ Serial เพื่อค้นหาออนไลน์";
                     emptyState.classList.add('d-none');
                 }
             });
 
-            // Event สำหรับปุ่มล้างค่า (Clear)
             clearBtn.addEventListener('click', () => {
                 searchInput.value = '';
                 clearBtn.style.display = 'none';
                 resultsContainer.innerHTML = '';
-                resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน";
+                resultCountLabel.innerText = allAssetsData.length > 0 ? "ระบุข้อมูลในการค้นหาด้านบน" : "พิมพ์รหัสครุภัณฑ์หรือ Serial เพื่อค้นหาออนไลน์";
                 emptyState.classList.add('d-none');
                 searchInput.focus();
             });
         });
 
-        // ฟังก์ชันดึงข้อมูลทั้งหมด 1 ครั้งตอนโหลดหน้า
+        // 1. ดึงข้อมูลทั้งหมดมาเก็บที่เครื่อง (Local Cache)
         async function fetchAllData() {
             try {
                 const response = await fetch(API_URL, {
@@ -449,30 +511,61 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
-                if (!response.ok) throw new Error("Network Response Fail");
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 const result = await response.json();
 
-                if (result.status === "success") {
-                    allAssetsData = result.data || [];
-                    resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (พร้อมใช้งานแล้ว)";
-                    searchInput.disabled = false; // ปลดล็อกให้พิมพ์ได้
-                    searchInput.focus();
+                if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
+                    allAssetsData = result.data;
+                    resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (โหลดแคชข้อมูลสำเร็จ)";
                 } else {
-                    showSystemModal("ดึงข้อมูลล้มเหลว", result.message || "ไม่สามารถดึงข้อมูลครุภัณฑ์ได้");
-                    resultCountLabel.innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+                    console.warn("getAllData warning:", result.message);
+                    resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ไม่พบข้อมูลแคช)";
                 }
             } catch (err) {
                 console.error("Fetch Data Error:", err);
-                showSystemModal("เกิดข้อผิดพลาดในการเชื่อมต่อ", "ไม่สามารถติดต่อฐานข้อมูลโรงพยาบาลอุดรธานีได้ในขณะนี้");
-                resultCountLabel.innerText = "ระบบออฟไลน์ (โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือ URL API)";
+                resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ระบบสลับเป็นโหมดออนไลน์)";
             } finally {
-                // ซ่อนหน้าจอ Loading
-                initialLoadingOverlay.style.opacity = '1';
-                setTimeout(() => initialLoadingOverlay.style.display = 'none', 300);
+                // ปลดล็อกช่องค้นหาเสมอ ไม่ว่าจะโหลดแคชสำเร็จหรือไม่ก็ตาม
+                searchInput.disabled = false; 
+                initialLoadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    initialLoadingOverlay.style.display = 'none';
+                    searchInput.focus();
+                }, 300);
             }
         }
 
-        // ค้นหาแบบ Local (Client-side) ทันที
+        // 2. ค้นหาแบบออนไลน์ (ทำงานเมื่อแคชพังเท่านั้น)
+        async function executeOnlineSearch(keyword) {
+            resultsContainer.innerHTML = '';
+            emptyState.classList.add('d-none');
+            loadingState.classList.remove('d-none');
+            resultCountLabel.innerText = "กำลังค้นหาจากฐานข้อมูลออนไลน์...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ mode: 'search', query: keyword }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                loadingState.classList.add('d-none');
+
+                if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
+                    renderResults(result.data, keyword);
+                } else {
+                    showEmptyState("ไม่พบข้อมูลที่ตรงกับการค้นหา", "โปรดตรวจสอบสะกดตัวอักษร, รหัสครุภัณฑ์ หรือ Serial ของคุณอีกครั้ง");
+                }
+            } catch (err) {
+                loadingState.classList.add('d-none');
+                console.error("Online Search Error:", err);
+                showSystemModal("เกิดข้อผิดพลาดในการเชื่อมต่อ", "ไม่สามารถติดต่อฐานข้อมูลได้ โปรดลองใหม่อีกครั้ง", "fa-solid fa-triangle-exclamation text-warning");
+            }
+        }
+
+        // 3. ค้นหาผ่านตัวแปร Local (Zero Latency)
         function executeLocalSearch(keyword) {
             const qStr = String(keyword).toLowerCase().trim();
             resultsContainer.innerHTML = '';
@@ -482,10 +575,8 @@
 
             let results = [];
             
-            // วนลูปหาในข้อมูลทั้งหมด
             allAssetsData.forEach(item => {
                 let similarity = getSimilarityScoreLocal(item.AssetID, item.Serial, qStr);
-                
                 if (similarity > 0) {
                     results.push({
                         ...item, 
@@ -494,7 +585,7 @@
                 }
             });
 
-            // จัดเรียงความเหมือน (มากไปน้อย) และถ้าคะแนนเท่ากัน ให้เรียงลำดับตามตัวอักษร
+            // เรียงลำดับคะแนนความแม่นยำ หากคะแนนเท่ากันให้เรียงตามอักษร
             results.sort((a, b) => {
                 if (b.score !== a.score) {
                     return b.score - a.score;
@@ -511,63 +602,56 @@
             }
         }
 
-        // ฟังก์ชันคำนวณคะแนน (เน้นจากขวาไปซ้ายตามที่ต้องการ)
+        // ระบบให้คะแนนความเหมือน (หักล้างขีดออกตอนเทียบ)
         function getSimilarityScoreLocal(assetID, serial, query) {
-            // ตัดเครื่องหมายขีด (-) ออกก่อนเปรียบเทียบ เพื่อให้อนุโลมการพิมพ์ขีดหรือไม่พิมพ์ก็ได้
             const aID = String(assetID || "").toLowerCase().replace(/-/g, '');
             const ser = String(serial || "").toLowerCase().replace(/-/g, '');
             const cleanQuery = String(query).toLowerCase().replace(/-/g, '');
             
-            // กลุ่มที่ 1: ค้นเจอใน AssetID (ให้คะแนนสูงกว่า Serial เสมอ)
             let assetScore = 0;
-            if (aID === cleanQuery) assetScore = 800; // AssetID ตรงเป๊ะ 100%
-            else if (aID.endsWith(cleanQuery)) assetScore = 700; // ตรงจาก ขวาไปซ้าย (สำคัญสุด)
-            else if (aID.startsWith(cleanQuery)) assetScore = 600; // ตรงจาก ซ้ายไปขวา
-            else if (aID.includes(cleanQuery)) assetScore = 500; // แค่มีคำนี้แทรกอยู่
+            // เน้นความสำคัญที่ AssetID เป็นอันดับ 1
+            if (aID === cleanQuery) assetScore = 800; 
+            else if (aID.endsWith(cleanQuery)) assetScore = 700; // ค้นหาตรงจากท้าย (ขวาไปซ้าย) ได้คะแนนสูง
+            else if (aID.startsWith(cleanQuery)) assetScore = 600; 
+            else if (aID.includes(cleanQuery)) assetScore = 500; 
             
-            // กลุ่มที่ 2: ค้นเจอใน Serial Number (ให้คะแนนรองลงมา)
             let serialScore = 0;
+            // Serial เป็นอันดับ 2 เสมอ
             if (ser === cleanQuery) serialScore = 400; 
             else if (ser.endsWith(cleanQuery)) serialScore = 300; 
             else if (ser.startsWith(cleanQuery)) serialScore = 200; 
             else if (ser.includes(cleanQuery)) serialScore = 100; 
 
-            // คืนค่าคะแนนสูงสุด หากเจอทั้ง AssetID และ Serial ค่าของ AssetID จะชนะเสมอ
             return Math.max(assetScore, serialScore);
         }
 
-        // ฟังก์ชันทำ Highlight ให้สอดคล้องกับตรรกะค้นหา (ขวาไปซ้าย) และข้ามเครื่องหมายขีดได้
+        // ระบบ Highlight ข้ามเครื่องหมายขีด (เช่น ค้นหา "66" จะไฮไลท์เฉพาะตัวขวาสุดที่เจอ)
         function highlightText(text, keyword) {
             if (!keyword || !text) return text;
             
-            // นำคำค้นหามาตัดขีด (-) ออก
             const cleanKeyword = String(keyword).toLowerCase().replace(/-/g, '');
             if (!cleanKeyword) return text;
 
-            // สร้าง Regex แบบละเว้นเครื่องหมายขีด (-) ระหว่างตัวอักษร
-            // ตัวอย่าง: ค้นหา "123" Regex จะกลายเป็น "1-?2-?3"
+            // แปลงคำค้นเป็น Regex ที่ยอมให้มีขีดคั่นกลางได้
             const escapedKeyword = cleanKeyword.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             const patternStr = escapedKeyword.join('-?');
 
-            // สร้างเงื่อนไข Regex ตามลำดับความสำคัญ (ตรงทั้งหมด, ท้าย, หน้า, กลาง)
             const exactRegex = new RegExp('^(' + patternStr + ')$', 'i');
             const endRegex = new RegExp('(' + patternStr + ')$', 'i');
             const startRegex = new RegExp('^(' + patternStr + ')', 'i');
-            const anyRegex = new RegExp('(' + patternStr + ')', 'gi'); // ใช้ gi เพื่อหาทั้งหมด แล้วเราจะดึงตัวท้ายสุด
+            const anyRegex = new RegExp('(' + patternStr + ')', 'gi');
 
+            // ลำดับความสำคัญในการไฮไลท์: ตรงหมด -> ตรงท้ายสุด -> ตรงหน้าสุด -> ตรงกลาง (ตัวสุดท้ายที่เจอ)
             if (exactRegex.test(text)) {
-                // ตรง 100% ไฮไลท์ทั้งหมด
                 return text.replace(exactRegex, '<span class="highlight">$1</span>');
             } else if (endRegex.test(text)) {
-                // ตรงจาก ขวาไปซ้าย -> ไฮไลท์เฉพาะส่วนท้ายสุด
                 return text.replace(endRegex, '<span class="highlight">$1</span>');
             } else if (startRegex.test(text)) {
-                // ตรงจาก ซ้ายไปขวา -> ไฮไลท์เฉพาะส่วนหน้าสุด
                 return text.replace(startRegex, '<span class="highlight">$1</span>');
             } else if (anyRegex.test(text)) {
-                // ถ้ามีแทรกอยู่ตรงกลาง -> หาตัวที่อยู่ "ขวาสุด" (ท้ายสุดที่เจอ) มาไฮไลท์
                 let match;
                 let lastMatch;
+                // กวาดหา Match ทั้งหมดแล้วเลือกอันสุดท้าย (ขวาสุด) ตามนโยบายค้นหาจากขวาไปซ้าย
                 while ((match = anyRegex.exec(text)) !== null) {
                     lastMatch = match;
                 }
@@ -578,18 +662,16 @@
                     return before + `<span class="highlight">${matched}</span>` + after;
                 }
             }
-            return text; // ไม่เจอให้คืนค่าเดิม
+            return text;
         }
 
-        // ฟังก์ชันวาดผลลัพธ์การค้นหาลงบนหน้าจอ (renderResults)
+        // วาดการ์ดแสดงผลลัพธ์การค้นหา
         function renderResults(data, keyword) {
             resultsContainer.innerHTML = '';
             
-            // จำกัดการแสดงผลที่ 30 รายการ
             const totalFound = data.length;
-            const displayData = data.slice(0, 30);
+            const displayData = data.slice(0, 30); // แสดงแค่ 30 รายการแรกกันเครื่องค้าง
             
-            // อัปเดตข้อความแสดงจำนวน
             let countText = `พบรายการที่ตรงกันทั้งหมด ${totalFound} รายการ`;
             if (totalFound > 30) {
                 countText += ` <span class="text-danger">(แสดง 30 รายการแรก)</span>`;
@@ -601,29 +683,28 @@
                 const assetId = item.AssetID || detail.AssetID || "";
                 const serial = item.Serial || detail.Serial || "ไม่มี Serial";
                 const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุประเภท";
-                const age = detail["อายุ"] || "ไม่ระบุอายุ";
+                const age = detail["อายุ"] || "ไม่ระบุอายุ"; // ดึงจาก "อายุ" ที่ Backend ส่งมาให้
                 const source = detail["Source"] || "";
                 
-                // ถอด Link รูปภาพตัวแรก หากได้ ID จาก Logs
                 let imgUrl = "https://placehold.co/100x100/e2e8f0/475569?text=No+Img";
                 if (detail.Images && detail.Images.length > 0) {
                     const firstImgId = String(detail.Images[0]).trim();
-                    if (firstImgId !== "") {
+                    if (firstImgId !== "" && firstImgId !== "-") {
                         imgUrl = "https://lh3.googleusercontent.com/d/" + firstImgId;
                     }
                 }
 
                 const card = document.createElement('div');
                 card.className = 'asset-card';
-                card.onclick = () => goToDetail(assetId);
+                // เมื่อกดการ์ด ให้แสดง Modal แทนการเด้งไปหน้าอื่นทันที
+                card.onclick = () => openAssetDetailModal(assetId);
 
-                // ทำ Highlight คำที่ค้นหา (ข้ามขีด)
                 const displayId = highlightText(assetId, keyword);
                 const displaySerial = highlightText(serial, keyword);
 
                 let sourceBadge = "";
                 if(source) {
-                     sourceBadge = `<span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${source}</span>`;
+                    sourceBadge = `<span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${source}</span>`;
                 }
 
                 card.innerHTML = `
@@ -642,7 +723,6 @@
             });
         }
 
-        // ฟังก์ชันแสดงหน้าต่างเมื่อค้นหาไม่พบ (showEmptyState)
         function showEmptyState(title, subtitle) {
             emptyStateTitle.innerText = title;
             emptyStateMsg.innerText = subtitle;
@@ -650,25 +730,111 @@
             resultCountLabel.innerText = "ผลการค้นหาเป็นศูนย์";
         }
 
-        // นำทางไปยังระบบปลายทาง
+        // ฟังก์ชันเมื่อกดปุ่ม "ดูประวัติการซ่อม" ใน Modal
         function goToDetail(assetId) {
             if (!assetId) return;
             const finalUrl = TARGET_URL_BASE + encodeURIComponent(assetId.trim());
-            window.location.href = finalUrl;
+            
+            // แสดง Overlay กำลังโหลด
+            initialLoadingOverlay.style.display = 'flex';
+            initialLoadingOverlay.style.opacity = '1';
+            document.querySelector('#initialLoadingOverlay h5').innerText = "กำลังเปลี่ยนหน้า...";
+            document.querySelector('#initialLoadingOverlay p').innerText = "กำลังพาท่านไปยังระบบประวัติครุภัณฑ์";
+            
+            setTimeout(() => {
+                window.location.href = finalUrl;
+            }, 500);
         }
 
+        // ฟังก์ชันเปิด Modal แสดงข้อมูลละเอียดที่ดึงมาจาก Cache
+        function openAssetDetailModal(assetId) {
+            // โชว์ Overlay จำลองการโหลด
+            initialLoadingOverlay.style.display = 'flex';
+            initialLoadingOverlay.style.opacity = '1';
+            document.querySelector('#initialLoadingOverlay h5').innerText = "กำลังประมวลผล...";
+            document.querySelector('#initialLoadingOverlay p').innerText = "กำลังดึงรายละเอียดข้อมูลครุภัณฑ์แบบเต็ม";
+
+            setTimeout(() => {
+                // ค้นหาข้อมูลในแคช
+                const item = allAssetsData.find(a => (a.AssetID === assetId) || (a.Asset_Detail && a.Asset_Detail.AssetID === assetId));
+                
+                initialLoadingOverlay.style.display = 'none'; 
+
+                if (!item) {
+                    showSystemModal("ข้อผิดพลาด", "ไม่พบข้อมูลรายละเอียดของครุภัณฑ์นี้ในระบบ", "fa-solid fa-triangle-exclamation text-warning");
+                    return;
+                }
+
+                const detail = item.Asset_Detail || item || {};
+                
+                // รูปภาพ
+                let imgUrl = "https://placehold.co/400x300/e2e8f0/475569?text=No+Image";
+                if (detail.Images && detail.Images.length > 0 && String(detail.Images[0]).trim() !== "" && String(detail.Images[0]).trim() !== "-") {
+                    imgUrl = "https://lh3.googleusercontent.com/d/" + String(detail.Images[0]).trim();
+                }
+                document.getElementById('modalAssetImg').src = imgUrl;
+
+                // สถานะ
+                const statusContainer = document.getElementById('modalStatusBadges');
+                statusContainer.innerHTML = '';
+                if(detail.MaStatus) statusContainer.innerHTML += `<span class="badge bg-primary rounded-pill px-3 py-2"><i class="fa-solid fa-wrench me-1"></i>สถานะ MA: ${detail.MaStatus}</span>`;
+                if(detail.CoStatus) statusContainer.innerHTML += `<span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check-circle me-1"></i>สถานะ CO: ${detail.CoStatus}</span>`;
+
+                // ข้อมูลฟิลด์ต่างๆ (ดึงโครงสร้างตรงกับ JSON ของ Backend)
+                document.getElementById('modalFieldAssetID').innerText = detail.AssetID || assetId || "-";
+                document.getElementById('modalFieldSerial').innerText = detail.Serial || "-";
+                document.getElementById('modalFieldType').innerText = detail.Asset_Type_Group || "-";
+                document.getElementById('modalFieldName').innerText = detail["Asset_Name & Detail"] || "-";
+                document.getElementById('modalFieldAge').innerText = detail["อายุ"] ? detail["อายุ"] + " ปี" : "-";
+                document.getElementById('modalFieldSource').innerText = detail.Source || "-";
+                document.getElementById('modalFieldNO').innerText = detail.NO || "-";
+                document.getElementById('modalFieldNOID').innerText = detail.NOID || "-";
+
+                // แผนที่ GPS
+                const gpsContainer = document.getElementById('modalGpsContainer');
+                const gpsMap = document.getElementById('modalGpsMap');
+                const gpsValue = String(detail.GPS || "").trim();
+
+                if (gpsValue && gpsValue.length > 3 && gpsValue !== "-") {
+                    gpsContainer.classList.remove('d-none');
+                    const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(gpsValue)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                    gpsMap.innerHTML = `<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="${embedUrl}"></iframe>`;
+                } else {
+                    gpsContainer.classList.add('d-none');
+                    gpsMap.innerHTML = '';
+                }
+
+                // ผูกปุ่มดูประวัติ
+                document.getElementById('btnViewHistory').onclick = () => {
+                    if (detailModalInstance) detailModalInstance.hide();
+                    goToDetail(assetId); 
+                };
+
+                // เปิด Modal อย่างปลอดภัย
+                if (detailModalInstance) {
+                    detailModalInstance.show();
+                } else {
+                    const el = document.getElementById('assetDetailModal');
+                    if (el) {
+                        detailModalInstance = new bootstrap.Modal(el);
+                        detailModalInstance.show();
+                    }
+                }
+
+            }, 300); // ดีเลย์จำลองเพื่อความสมูท
+        }
+
+        // ระบบแจ้งเตือนกลาง
         function showSystemModal(title, message, iconClass = 'fa-solid fa-circle-info') {
             document.getElementById('systemAlertTitle').innerText = title;
             document.getElementById('systemAlertMessage').innerText = message;
             document.getElementById('systemAlertIcon').className = iconClass;
-            systemAlertModal.show();
+            if (systemAlertModal) systemAlertModal.show();
         }
 
-        // ==============================
-        // ส่วนควบคุมระบบกล้องสแกน QR Code / Barcode (ยิง API ไปประมวลผลที่ Apps Script)
-        // ==============================
+        // ระบบกล้องสแกน
         function openScannerModal() {
-            scannerModalInstance.show();
+            if (scannerModalInstance) scannerModalInstance.show();
             html5QrcodeScanner = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
             
@@ -687,20 +853,18 @@
                     html5QrcodeScanner = null;
                 }).catch(err => console.error("Stop Camera Error", err));
             }
-            scannerModalInstance.hide();
+            if (scannerModalInstance) scannerModalInstance.hide();
         }
 
         function onScanSuccess(decodedText) {
             if ("vibrate" in navigator) navigator.vibrate(200);
             closeScannerModal();
             
-            // 1. นำค่าที่สแกนได้มาตัดคำ (จำลอง Logic จากหลังบ้าน)
+            // ตัดข้อความขยะฝั่งบราวเซอร์เลย
             let input = String(decodedText).trim();
             if (input.includes("IcmAssetDetail/")) {
-                // แยกเอาเฉพาะรหัส AssetID ที่อยู่หลัง /IcmAssetDetail/ 
                 input = input.split("IcmAssetDetail/")[1].split("/")[0];
             } else {
-                // ตัดตัวอักษรภาษาอังกฤษ ภาษาไทย และ http/https ออก (เหลือแค่ตัวเลขและเครื่องหมายขีด -)
                 input = input.replace(/[a-zA-Zก-ฮ:/]/g, '').trim();
             }
 
@@ -709,12 +873,16 @@
                 return;
             }
 
-            // 2. นำรหัสที่ตัดได้ไปใส่ในช่องค้นหา
+            // นำรหัสที่ตัดเสร็จแล้วยัดใส่ช่องค้นหา และสั่งรัน Local Search
             searchInput.value = input;
             clearBtn.style.display = 'block';
 
-            // 3. สั่งค้นหาฝั่ง Client ทันที
-            executeLocalSearch(input);
+            // หากมีแคชแล้ว สั่งค้นหา Local ได้เลย (เร็วมาก)
+            if (allAssetsData.length > 0) {
+                executeLocalSearch(input);
+            } else {
+                executeOnlineSearch(input); // กรณีแคชไม่มาจริงๆ
+            }
         }
 
         function onScanFailure(error) {
