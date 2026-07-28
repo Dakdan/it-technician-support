@@ -9,13 +9,90 @@
     <!-- นำเข้าฟอนต์ Kanit จาก Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <script>
+        /*
+         * ============================================================================
+         * ระบบตรวจสอบและจัดการสถานะการเข้าสู่ระบบ (Authentication)
+         * ============================================================================
+         */
+        (function () {
+            try {
+                // ดึงข้อมูลจาก LocalStorage ด้วย Key: 'currentUser'
+                const userData = localStorage.getItem('currentUser');
+                
+                // เงื่อนไข 1: หากไม่มีข้อมูลในระบบ
+                if (!userData) {
+                    window.user = null; // Soft Check
+                    return;
+                }
+
+                const user = JSON.parse(userData);
+                
+                // เงื่อนไข 2: หากมีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
+                if (!user || !user.UserPN) {
+                    localStorage.removeItem('currentUser'); // ล้างข้อมูลขยะทิ้ง
+                    window.user = null;
+                    return;
+                }
+
+                // เงื่อนไข 3: ข้อมูลถูกต้อง ผูก Object ผู้ใช้งานเข้ากับ Global Window
+                window.user = user;
+            } catch (err) {
+                console.error("Auth-Check error: ", err);
+                localStorage.removeItem('currentUser');
+                window.user = null;
+            }
+        })();
+
+        // 🛠️ ฟังก์ชันดึงข้อมูลผู้ใช้
+        function getCurrentUser() {
+            return window.user || null;
+        }
+
+        // 🛠️ ฟังก์ชันตรวจสอบสิทธิ์ผู้ใช้งาน
+        function hasRole(role) {
+            if (!window.user) return false;
+            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
+        }
+
+        // 🛠️ ฟังก์ชันดึงชื่อมาแสดงผล
+        function getDisplayName() {
+            if (!window.user) return "ผู้ใช้งานทั่วไป";
+            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+        }
+
+        // 🛠️ ฟังก์ชันออกจากระบบ
+        function logout() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.clear();
+            try {
+                window.location.replace("index.html");
+            } catch(e) {
+                window.location.href = "index.html";
+            }
+        }
+
+        // 🛠️ ฟังก์ชันจำลองล็อกอินสำหรับทดสอบ (Demo Only)
+        function demoLogin() {
+            const mockUser = {
+                UserPN: "EMP9901",
+                UserName: "สมชาย",
+                UserSname: "ใจดี",
+                DeptName: "ฝ่ายสารบรรณกลาง",
+                UserTypeID: "ADMIN"
+            };
+            localStorage.setItem('currentUser', JSON.stringify(mockUser));
+            window.location.reload();
+        }
+    </script>
+
     <style>
         body {
             font-family: 'Kanit', sans-serif;
             background-color: #f3f4f6; /* สีเทาอ่อน */
         }
         
-        /* ซ่อน Input File ของระบบ แต่เราจะใช้ Label เป็นปุ่มแทน */
+        /* ซ่อน Input File ของระบบ */
         input[type="file"] {
             display: none;
         }
@@ -39,14 +116,31 @@
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center">
 
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden my-auto">
         
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-pink-600 to-rose-500 p-6 text-white text-center">
-            <h1 class="text-2xl md:text-3xl font-semibold tracking-wide">ระบบลงรับหนังสือเข้า</h1>
-            <p class="text-pink-100 mt-1 text-sm md:text-base">อัปโหลดภาพเอกสารเพื่อดึงข้อมูลอัตโนมัติด้วย AI</p>
+        <!-- Header & Auth Status Bar -->
+        <div class="bg-gradient-to-r from-pink-600 to-rose-500 p-6 text-white">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-pink-400/50 pb-4 mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold backdrop-blur-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-xs text-pink-100">ผู้ใช้งานระบบ</div>
+                        <div id="userDisplayName" class="font-semibold text-sm md:text-base leading-tight"></div>
+                        <div id="userDeptName" class="text-xs text-pink-200"></div>
+                    </div>
+                </div>
+                <!-- ปุ่มสลับสำหรับ Log In / Log Out -->
+                <div id="authActionArea"></div>
+            </div>
+
+            <div class="text-center">
+                <h1 class="text-2xl md:text-3xl font-semibold tracking-wide">ระบบลงรับหนังสือเข้า</h1>
+                <p class="text-pink-100 mt-1 text-sm md:text-base">อัปโหลดภาพเอกสารเพื่อดึงข้อมูลอัตโนมัติด้วย AI</p>
+            </div>
         </div>
 
         <!-- ฟอร์มข้อมูล -->
@@ -70,7 +164,7 @@
                 </div>
 
                 <div>
-                    <button type="button" id="scanBtn" onclick="scanDocument()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center hover:bg-blue-100 transition duration-200" disabled>
+                    <button type="button" id="scanBtn" onclick="scanDocument()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-medium rounded-lg text-sm px-5 py-3 text-center inline-flex justify-center items-center transition duration-200" disabled>
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
                         สแกนข้อมูลด้วย AI (OCR)
                     </button>
@@ -95,7 +189,7 @@
                 <!-- กล่องข้อความแจ้งเตือน (ซ่อนไว้เริ่มต้น) -->
                 <div id="statusBox" class="hidden p-4 text-sm rounded-lg text-center font-medium"></div>
 
-                <div class="pt-4">
+                <div class="pt-2">
                     <button type="button" id="saveBtn" onclick="saveDocument()" class="w-full text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 font-medium rounded-lg text-base px-5 py-3.5 text-center transition-colors shadow-md">
                         <span id="saveBtnText">บันทึกลงระบบ</span>
                     </button>
@@ -114,38 +208,62 @@
         
         let currentBase64 = null; // เก็บไฟล์ภาพแบบ Base64
 
-        // URL จาก Google Apps Script (Backend) ที่ผู้ใช้ระบุ
+        // URL จาก Google Apps Script (Backend)
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwacbyB5iGEjJ-8vwNudY0m66UY-FDKmHnj6WskSg4QpyZP1z-VKY1pw8SzhnpWHOSm/exec";
-        let ocrRawText = "";    // เก็บข้อความเต็มที่แกะได้จาก OCR
-        let currentFile = null; // เก็บ object ของไฟล์เพื่อดึงชื่อและประเภท (MimeType)
+        let ocrRawText = "";    
+        let currentFile = null; 
 
-        // --- 1. จัดการเมื่อมีการเลือกไฟล์ (Preview ภาพ) ---
+        document.addEventListener("DOMContentLoaded", function() {
+            renderUserHeader();
+        });
+
+        function renderUserHeader() {
+            const user = getCurrentUser();
+            const displayNameElem = document.getElementById('userDisplayName');
+            const deptNameElem = document.getElementById('userDeptName');
+            const actionAreaElem = document.getElementById('authActionArea');
+
+            displayNameElem.innerText = getDisplayName();
+
+            if (user) {
+                deptNameElem.innerText = user.DeptName || user.UserPN || "เจ้าหน้าที่";
+                actionAreaElem.innerHTML = `
+                    <button type="button" onclick="logout()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs rounded-lg transition-colors border border-white/30 backdrop-blur-sm">
+                        ออกจากระบบ
+                    </button>
+                `;
+            } else {
+                deptNameElem.innerText = "ยังไม่ได้เข้าสู่ระบบ";
+                actionAreaElem.innerHTML = `
+                    <button type="button" onclick="demoLogin()" class="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-semibold rounded-lg shadow transition-colors">
+                        จำลองเข้าสู่ระบบ
+                    </button>
+                `;
+            }
+        }
+
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                currentFile = file; // เซฟไฟล์ไว้ใช้ส่งตอนบันทึก
+                currentFile = file; 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // แสดงภาพ Preview
                     imagePreview.src = e.target.result;
                     imagePreview.classList.remove('hidden');
                     uploadPlaceholder.classList.add('hidden');
                     
-                    // เก็บค่า Base64 (เอาส่วน data:image/jpeg;base64, ออก)
                     currentBase64 = e.target.result.split(',')[1];
                     
-                    // เปิดใช้งานปุ่มสแกน
                     scanBtn.disabled = false;
                     scanBtn.classList.remove('bg-blue-50', 'text-blue-600');
                     scanBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-md');
                     
-                    showStatus('', 'hidden'); // เคลียร์สถานะเดิม
+                    showStatus('', 'hidden'); 
                 }
                 reader.readAsDataURL(file);
             }
         });
 
-        // --- 2. ฟังก์ชันแสดงข้อความแจ้งเตือน ---
         function showStatus(message, type) {
             statusBox.className = 'p-4 text-sm rounded-lg text-center font-medium mb-4 transition-all';
             
@@ -186,11 +304,10 @@
                 const result = await response.json();
                 
                 if (result.status === "success") {
-                    // เติมข้อมูลลงช่อง Input หาก Backend สกัดข้อมูลออกมาได้
                     if(result.data && result.data.docNo) document.getElementById('docNo').value = result.data.docNo;
                     if(result.data && result.data.title) document.getElementById('title').value = result.data.title;
                     
-                    ocrRawText = result.rawText || ""; // เก็บข้อความเต็มเผื่อส่งบันทึกลง Database
+                    ocrRawText = result.rawText || "";
 
                     scanBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ดึงข้อมูลสำเร็จ';
                     scanBtn.classList.replace('bg-blue-600', 'bg-green-600');
@@ -201,7 +318,6 @@
                     throw new Error(result.message || "ระบบไม่สามารถอ่านข้อมูลได้");
                 }
             } catch (error) {
-                // คืนค่าปุ่มหากล้มเหลว
                 scanBtn.innerHTML = originalBtnContent;
                 scanBtn.disabled = false;
                 showStatus('การสแกนล้มเหลว: ' + error.message, 'error');
@@ -209,6 +325,15 @@
         }
 
         async function saveDocument() {
+            const currentUser = getCurrentUser();
+            
+            // Soft check warning if user is not logged in
+            if (!currentUser) {
+                if (!confirm("คุณยังไม่ได้เข้าสู่ระบบอย่างเป็นทางการ ข้อมูลจะถูกบันทึกเป็น 'ผู้ใช้งานทั่วไป' ต้องการดำเนินการต่อหรือไม่?")) {
+                    return;
+                }
+            }
+
             const docNo = document.getElementById('docNo').value;
             const title = document.getElementById('title').value;
             const docDate = document.getElementById('docDate').value;
@@ -238,7 +363,10 @@
                 fileName: currentFile.name,
                 mimeType: currentFile.type,
                 imageBase64: currentBase64,
-                rawText: ocrRawText
+                rawText: ocrRawText,
+                // แนบข้อมูลผู้บันทึกจาก Auth System
+                userPN: currentUser ? currentUser.UserPN : "GUEST",
+                createdByName: getDisplayName()
             };
 
             try {
@@ -249,7 +377,6 @@
                 const result = await response.json();
                 
                 if (result.status === "success") {
-                    // หาก Backend ส่งลิงก์ไฟล์กลับมา ให้แสดงลิงก์เปิดไฟล์ด้วย
                     let fileLink = result.fileUrl ? `<br><a href="${result.fileUrl}" target="_blank" class="underline font-bold hover:text-green-900 mt-2 inline-block">เปิดดูไฟล์ที่อัปโหลดใน Drive</a>` : '';
                     showStatus(`บันทึกหนังสือ <b>${docNo}</b> เรียบร้อยแล้ว! ${fileLink}`, 'success');
                     
