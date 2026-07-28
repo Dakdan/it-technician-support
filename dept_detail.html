@@ -306,7 +306,7 @@
                         <td class="px-6 py-4 font-bold text-pink-700 group-hover:text-pink-600">${item.Asset_ID || item.NOID}</td>
                         <td class="px-6 py-4 text-xs text-slate-600">${item.Priority || '-'}</td>
                         <td class="px-6 py-4 text-slate-500 truncate max-w-[200px] text-xs">${item.DB_Detail || '-'}</td>
-                        <td class="px-6 py-4 text-center font-bold text-pink-600">${item.DB_Age || '0'} ปี</td>
+                        <td class="px-6 py-4 text-center font-bold text-pink-600">${item.AgeInfo || '0'} ปี</td>
                         <td class="px-6 py-4 text-center">
                             <span class="px-2 py-1 rounded-md text-[10px] font-bold ${item.CoStatus === '✅ใช้งานอยู่' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">
                                 ${item.CoStatus || 'ไม่มีการบันทึก'}
@@ -340,7 +340,7 @@
         setSafeText('modalAssetId', item.Asset_ID || item.NOID);
         setSafeText('modalType', item.Asset_Type);
         setSafeText('modalDetail', item.DB_Detail || 'ไม่มีรายละเอียด');
-        setSafeText('modalAge', `${item.DB_Age || '0'} ปี`);
+        setSafeText('modalAge', `${item.AgeInfo || '0'} ปี`);
         setSafeText('modalPriority', item.Priority);
         setSafeText('modalShift_Work', item.Shift_Work); // ตอนนี้จะใช้งานได้แล้ว
         setSafeText('modalRegStatus', item.RegStatus);
@@ -386,7 +386,7 @@
                     <td style="border:1px solid #cbd5e1; padding:8px;">${item.Asset_ID || item.NOID}</td>
                     <td style="border:1px solid #cbd5e1; padding:8px;">${item.Asset_Type || '-'}</td>
                     <td style="border:1px solid #cbd5e1; padding:8px;">${item.DB_Detail || '-'}</td>
-                    <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${item.DB_Age || '0'}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${item.AgeInfo || '0'}</td>
                     <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${item.CoStatus || '-'}</td>
                     <td style="border:1px solid #cbd5e1; padding:8px;">${item.Priority || '-'}</td>
                 </tr>`;
@@ -406,7 +406,7 @@
                 "รหัสครุภัณฑ์": item.Asset_ID || item.NOID,
                 "ประเภท": item.Asset_Type,
                 "รายละเอียด": item.DB_Detail,
-                "อายุ (ปี)": item.DB_Age,
+                "อายุ (ปี)": item.AgeInfo,
                 "สถานะ": item.CoStatus,
                 "การใช้งาน":item.Priority ,
                 "วันที่ตรวจ": item.Timestamp ? new Date(item.Timestamp).toLocaleDateString('th-TH') : '-'
