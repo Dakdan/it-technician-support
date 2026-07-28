@@ -312,13 +312,13 @@
         <div class="search-input-wrapper app-layout-wrapper d-flex align-items-center gap-2">
             <div class="position-relative flex-grow-1">
                 <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์ Asset ID หรือ Serial เพื่อค้นหา..." autocomplete="off" disabled>
+                <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์เลขท้ายของรหัสครุภัณฑ์ หรือ Serial เพื่อค้นหา..." autocomplete="off" disabled>
                 <button type="button" id="clearBtn" class="search-clear-btn">
                     <i class="fa-solid fa-circle-xmark"></i>
                 </button>
             </div>
             <!-- ปุ่มสแกน QR ถูกย้ายมาอยู่ตรงนี้ข้างๆ ช่องกรอกข้อมูล -->
-            <button type="button" class="btn-scan-bar" onclick="openScannerModal()" title="สแกน QR / Barcode">
+            <button type="button" class="btn-scan-bar" onclick="openScannerModal()" title="Scan QR / Barcode">
                 <i class="fa-solid fa-qrcode"></i>
             </button>
         </div>
@@ -350,7 +350,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg">
                 <div class="modal-header border-0 pb-0 justify-content-between align-items-center">
-                    <h5 class="fw-bold text-pink-dark mb-0"><i class="fa-solid fa-camera me-2"></i>สแกน QR / Barcode</h5>
+                    <h5 class="fw-bold text-pink-dark mb-0"><i class="fa-solid fa-camera me-2"></i>Scan QR / Barcode</h5>
                     <button type="button" class="btn-close" onclick="closeScannerModal()" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center p-3">
@@ -418,7 +418,7 @@
             searchInput.addEventListener('input', function() {
                 const keyword = this.value.trim();
                 
-                if (keyword.length > 0) {
+                if (keyword.length > 1) {
                     clearBtn.style.display = 'block';
                     executeLocalSearch(keyword); // ค้นหาฝั่ง Client ทันที
                 } else {
@@ -467,7 +467,7 @@
                 resultCountLabel.innerText = "ระบบออฟไลน์ (โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือ URL API)";
             } finally {
                 // ซ่อนหน้าจอ Loading
-                initialLoadingOverlay.style.opacity = '0';
+                initialLoadingOverlay.style.opacity = '1';
                 setTimeout(() => initialLoadingOverlay.style.display = 'none', 300);
             }
         }
