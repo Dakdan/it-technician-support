@@ -306,7 +306,7 @@
                         <td class="px-6 py-4 font-bold text-pink-700 group-hover:text-pink-600">${item.Asset_ID || item.NOID}</td>
                         <td class="px-6 py-4 text-xs text-slate-600">${item.Priority || '-'}</td>
                         <td class="px-6 py-4 text-slate-500 truncate max-w-[200px] text-xs">${item.DB_Detail || '-'}</td>
-                        <td class="px-6 py-4 text-center font-bold text-pink-600">${item.DB_Age || '0'} ปี</td>
+                        <td class="px-6 py-4 text-center font-bold text-pink-600">${item.ageVal || '0'} ปี</td>
                         <td class="px-6 py-4 text-center">
                             <span class="px-2 py-1 rounded-md text-[10px] font-bold ${item.CoStatus === '✅ใช้งานอยู่' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">
                                 ${item.CoStatus || 'ไม่มีการบันทึก'}
