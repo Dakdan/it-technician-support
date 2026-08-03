@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Sticker Printer</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* รูปแบบสำหรับตัว Sticker Label ในหน้าจอ (Screen) */
+        .sticker-preview {
+            width: 90mm;
+            height: 20mm;
+            background-color: white;
+            border: 1px dashed #9ca3af;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 2mm;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .sticker-qr {
+            width: 16mm;
+            height: 16mm;
+            flex-shrink: 0;
+            background-color: #fff;
+        }
+        
+        .sticker-qr img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .sticker-details {
+            margin-left: 3mm;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.2;
+            overflow: hidden;
+        }
+
+        .sticker-details p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .text-id { font-size: 8pt; font-weight: bold; color: #000; }
+        .text-serial { font-size: 7pt; color: #333; }
+        .text-date { font-size: 6pt; color: #555; }
+
+        /* ซ่อนส่วน Preview ตอนเริ่มต้น */
+        #print-preview-section { display: none; }
+        #print-area { display: none; }
+
+        /* จัดการระบบตอนสั่ง Print */
+        @media print {
+            /* ซ่อน UI ทั้งหมดที่ไม่เกี่ยวกับการปริ้น */
+            body * {
+                visibility: hidden;
+            }
+            
+            /* กำหนดให้ Print Area แสดงผล */
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            
+            #print-area {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* ล้าง Margin ของหน้ากระดาษ */
+            @page {
+                margin: 0;
+                /* ถ้าใช้เครื่องปริ้นสติ๊กเกอร์โดยเฉพาะ ให้ตั้งค่า Page Size ที่เครื่องปริ้นเป็น 90mm x 20mm */
+            }
+
+            /* รูปแบบสติ๊กเกอร์ตอนปริ้นจริง */
+            .sticker-label-print {
+                width: 90mm;
+                height: 20mm;
+                display: flex;
+                align-items: center;
+                padding: 2mm;
+                box-sizing: border-box;
+                background-color: white;
+                page-break-inside: avoid;
+                page-break-after: always; /* ตัดหน้าทุก 1 ดวง (สำหรับเครื่องปริ้น Barcode) */
+                border: none; /* เอาเส้นประออกตอนปริ้นจริง */
+            }
+
+            /* ถ้าปริ้นลงกระดาษ A4 แบบตัดเอง ให้เอา page-break-after: always ออก แล้วใช้ float หรือ flex แทน */
+            /* .print-a4-mode .sticker-label-print { page-break-after: auto; float: left; margin: 2mm; border: 1px solid #ccc; } */
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="max-w-6xl mx-auto p-4 sm:p-6" id="app-container">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    ระบบพิมพ์สติ๊กเกอร์ครุภัณฑ์ (9x2 ซม.)
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">ดึงข้อมูลจากฐานข้อมูลเพื่อสร้าง QR Code Label</p>
+            </div>
+            
+            <div class="w-full md:w-auto">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Google Apps Script Web App URL</label>
+                <div class="flex gap-2">
+                    <input type="text" id="api-url" value="https://script.google.com/macros/s/AKfycbxLCgrDKBHjBp24Cfv4zk7aEWLnv-CCXoROVHRqyfeaULZ6gat4WQHcfH9_xBsUFgpVGQ/exec" class="text-sm border-gray-300 rounded-lg shadow-sm w-full md:w-80 px-3 py-2 border focus:ring-blue-500 focus:border-blue-500" placeholder="วาง URL ของ Web App Code.gs ที่นี่...">
+                    <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        โหลดข้อมูล
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content">
+            <!-- Search & Controls -->
+            <div class="bg-white rounded-xl shadow-sm p-4 mb-4 flex flex-col sm:flex-row justify-between gap-4 items-center">
+                <div class="relative w-full sm:w-96">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="text" id="search-input" onkeyup="filterTable()" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="ค้นหา Asset ID หรือ Serial...">
+                </div>
+                
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="selectAll(true)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">เลือกทั้งหมด</button>
+                    <button onclick="selectAll(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">ยกเลิก</button>
+                    <button onclick="preparePrint()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                        สร้างสติ๊กเกอร์
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Message -->
+            <div id="status-msg" class="hidden rounded-lg p-4 mb-4 text-sm"></div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                                    เลือก
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Asset ID
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Serial
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ประเภท/รายละเอียด
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    สถานะ
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="bg-white divide-y divide-gray-200 text-sm">
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                    กรุณาระบุ Web App URL และกดปุ่ม "โหลดข้อมูล"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Preview Section -->
+        <div id="print-preview-section" class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h2 class="text-xl font-bold text-gray-800">ตัวอย่างสติ๊กเกอร์ก่อนพิมพ์</h2>
+                <div class="flex gap-2">
+                    <button onclick="cancelPrint()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        กลับไปแก้ไข
+                    </button>
+                    <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                        สั่งปริ้น (Print)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-gray-100 p-6 rounded-lg flex flex-wrap gap-4 justify-center" id="preview-container">
+                <!-- Preview items will be injected here -->
+            </div>
+            
+            <div class="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                <strong>คำแนะนำการปริ้น:</strong><br>
+                1. หากใช้เครื่องปริ้น Barcode/สติ๊กเกอร์ (เช่น Zebra) ให้ตั้งค่า Paper Size เป็น <strong>90mm x 20mm</strong> และตั้ง Margin เป็น <strong>None</strong><br>
+                2. แนะนำให้ปิด Header/Footer ในการตั้งค่า Browser ก่อนปริ้น
+            </div>
+        </div>
+    </div>
+
+    <!-- ส่วนนี้จะแสดงเฉพาะตอนสั่ง Print เท่านั้น -->
+    <div id="print-area">
+        <!-- Print items will be injected here -->
+    </div>
+
+    <script>
+        // กำหนด URL ของหน้าแสดงรายละเอียดเมื่อแสกน QR Code
+        const QR_BASE_URL = "https://dakdan.github.io/it-technician-support/asset_detail.html?Asset_ID=";
+        
+        let allAssets = []; // เก็บข้อมูลทั้งหมด
+        
+        // อ่านค่า Asset_ID จาก URL (ถ้ามีการส่งมาผ่านลิงก์)
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetAssetId = urlParams.get('Asset_ID');
+
+        window.onload = function() {
+            const savedApiUrl = localStorage.getItem('stickerApiUrl');
+            const defaultApiUrl = "https://script.google.com/macros/s/AKfycbxLCgrDKBHjBp24Cfv4zk7aEWLnv-CCXoROVHRqyfeaULZ6gat4WQHcfH9_xBsUFgpVGQ/exec";
+            
+            // ตั้งค่า URL (ใช้ของที่เคยเซฟไว้ หรือถ้าไม่มีให้ใช้ Default)
+            if (savedApiUrl) {
+                document.getElementById('api-url').value = savedApiUrl;
+            } else {
+                document.getElementById('api-url').value = defaultApiUrl;
+            }
+                
+            // ถ้ามี Asset_ID ส่งมาด้วยผ่าน URL ให้พิมพ์ลงในช่องค้นหาและดึงข้อมูลอัตโนมัติทันที
+            if (targetAssetId) {
+                document.getElementById('search-input').value = targetAssetId;
+                fetchData();
+            }
+        };
+
+        function showMessage(msg, isError = false) {
+            const msgBox = document.getElementById('status-msg');
+            msgBox.innerHTML = msg;
+            msgBox.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'bg-blue-50', 'text-blue-700');
+            
+            if (isError) {
+                msgBox.classList.add('bg-red-50', 'text-red-700');
+            } else {
+                msgBox.classList.add('bg-blue-50', 'text-blue-700');
+            }
+        }
+
+        async function fetchData() {
+            const apiUrl = document.getElementById('api-url').value.trim();
+            if (!apiUrl) {
+                showMessage("กรุณาระบุ Google Apps Script Web App URL", true);
+                return;
+            }
+
+            // บันทึก API URL ไว้ใช้ครั้งต่อไปในเครื่อง
+            localStorage.setItem('stickerApiUrl', apiUrl);
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center"><div class="flex flex-col items-center justify-center"><div class="loader mb-2"></div><p class="text-gray-500">กำลังดึงข้อมูล...</p></div></td></tr>`;
+            showMessage("กำลังดึงข้อมูล กรุณารอสักครู่...");
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ mode: 'getAllData', query: '' }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // หลีกเลี่ยง CORS preflight
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success' && result.data) {
+                    allAssets = result.data;
+                    
+                    if (targetAssetId) {
+                        // ถ้ามาจากการคลิกลิงก์ ให้กรองข้อมูลตาม Asset_ID ทันที
+                        filterTable();
+                        
+                        // เลือกรายการที่กรองมาให้อัตโนมัติและสลับไปหน้าพรีวิวทันที
+                        setTimeout(() => {
+                            selectAll(true);
+                            const checkedCount = document.querySelectorAll('.asset-checkbox:checked').length;
+                            
+                            if (checkedCount > 0) {
+                                preparePrint();
+                                showMessage(`พบข้อมูลรหัส: ${targetAssetId} และสร้างตัวอย่างสติ๊กเกอร์อัตโนมัติ`);
+                            } else {
+                                showMessage(`ไม่พบข้อมูลสำหรับรหัส: ${targetAssetId} กรุณาตรวจสอบฐานข้อมูล`, true);
+                            }
+                        }, 200); // ดีเลย์เล็กน้อยเพื่อให้ DOM อัปเดตตารางเสร็จก่อน
+                        
+                    } else {
+                        renderTable(allAssets);
+                        showMessage(`ดึงข้อมูลสำเร็จ จำนวน ${allAssets.length} รายการ`);
+                    }
+                } else {
+                    showMessage(result.message || "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์", true);
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">ไม่พบข้อมูล</td></tr>`;
+                }
+            } catch (error) {
+                console.error(error);
+                showMessage("เชื่อมต่อ API ไม่สำเร็จ: " + error.message, true);
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">การเชื่อมต่อล้มเหลว ตรวจสอบ URL หรือ CORS</td></tr>`;
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">ไม่มีข้อมูล</td></tr>`;
+                return;
+            }
+
+            // แสดงแค่ 100 รายการแรกเพื่อไม่ให้เบราว์เซอร์ค้าง หากมีข้อมูลเยอะ แนะนำให้ใช้ช่องค้นหา
+            const displayData = data.slice(0, 200); 
+
+            displayData.forEach((item, index) => {
+                const assetId = item.AssetID || "-";
+                const serial = item.Serial || "-";
+                const typeName = item.Asset_Type_Group || item.Asset_Detail?.Asset_Type_Group || "-";
+                const status = item.Asset_Detail?.MaStatus || "-";
+                
+                // เก็บข้อมูลดิบไว้ใน attribute เพื่อใช้อ้างอิงตอนสร้าง Label
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-3 whitespace-nowrap">
+                        <input type="checkbox" class="asset-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                            data-id="${assetId}" 
+                            data-serial="${serial}"
+                            data-date="${item.Asset_Detail?.["อายุ"] || "ไม่ระบุ"}">
+                    </td>
+                    <td class="px-6 py-3 whitespace-nowrap font-medium text-gray-900">${assetId}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-gray-500">${serial}</td>
+                    <td class="px-6 py-3 text-gray-500 max-w-xs truncate" title="${typeName}">${typeName}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            ${status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            if(data.length > 200) {
+                 const tr = document.createElement('tr');
+                 tr.innerHTML = `<td colspan="5" class="px-6 py-4 text-center text-orange-500 text-xs">แสดงผลเพียง 200 รายการแรกจาก ${data.length} รายการ กรุณาพิมพ์ค้นหา</td>`;
+                 tbody.appendChild(tr);
+            }
+        }
+
+        function filterTable() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            if (!query) {
+                renderTable(allAssets);
+                return;
+            }
+
+            const filtered = allAssets.filter(item => {
+                const idMatch = (item.AssetID || "").toLowerCase().includes(query);
+                const snMatch = (item.Serial || "").toLowerCase().includes(query);
+                const typeMatch = (item.Asset_Type_Group || "").toLowerCase().includes(query);
+                return idMatch || snMatch || typeMatch;
+            });
+            renderTable(filtered);
+        }
+
+        function selectAll(state) {
+            const checkboxes = document.querySelectorAll('.asset-checkbox');
+            checkboxes.forEach(cb => cb.checked = state);
+        }
+
+        function preparePrint() {
+            const selected = [];
+            const checkboxes = document.querySelectorAll('.asset-checkbox:checked');
+            
+            checkboxes.forEach(cb => {
+                selected.push({
+                    id: cb.getAttribute('data-id'),
+                    serial: cb.getAttribute('data-serial'),
+                    date: cb.getAttribute('data-date')
+                });
+            });
+
+            if (selected.length === 0) {
+                alert("กรุณาเลือกรายการที่ต้องการสร้างสติ๊กเกอร์อย่างน้อย 1 รายการ");
+                return;
+            }
+
+            // สลับหน้าจอ
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('print-preview-section').style.display = 'block';
+
+            const previewContainer = document.getElementById('preview-container');
+            const printArea = document.getElementById('print-area');
+            
+            previewContainer.innerHTML = '';
+            printArea.innerHTML = '';
+
+            selected.forEach((item, index) => {
+                const qrUrl = QR_BASE_URL + encodeURIComponent(item.id);
+                // กำหนดข้อความ "วันที่รับเข้า" หรือดึงมาจาก "อายุ"
+                const dateText = item.date !== "ไม่ระบุ" ? item.date : "-";
+                
+                const uniqueId = `qr-code-${index}`;
+                const uniqueIdPrint = `qr-print-${index}`;
+
+                // HTML สำหรับ Preview (จอคอม)
+                const previewHtml = `
+                    <div class="sticker-preview">
+                        <div class="sticker-qr" id="${uniqueId}"></div>
+                        <div class="sticker-details">
+                            <p class="text-id">ID: ${item.id !== '-' ? item.id : ''}</p>
+                            <p class="text-serial">SN: ${item.serial !== '-' ? item.serial : ''}</p>
+                            <p class="text-date">วันที่: ${dateText}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // HTML สำหรับ Print Area (ของจริงซ่อนไว้)
+                const printHtml = `
+                    <div class="sticker-label-print">
+                        <div class="sticker-qr" id="${uniqueIdPrint}"></div>
+                        <div class="sticker-details">
+                            <p class="text-id">ID: ${item.id !== '-' ? item.id : ''}</p>
+                            <p class="text-serial">SN: ${item.serial !== '-' ? item.serial : ''}</p>
+                            <p class="text-date">วันที่: ${dateText}</p>
+                        </div>
+                    </div>
+                `;
+
+                previewContainer.insertAdjacentHTML('beforeend', previewHtml);
+                printArea.insertAdjacentHTML('beforeend', printHtml);
+
+                // สร้าง QR Code (ต้องทำหลังจากแทรก HTML ลง DOM แล้ว)
+                // ขนาด QR code ตั้งไว้ที่ 16mm (ประมาณ 60px)
+                setTimeout(() => {
+                    new QRCode(document.getElementById(uniqueId), {
+                        text: qrUrl,
+                        width: 64,
+                        height: 64,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.L
+                    });
+                    
+                    new QRCode(document.getElementById(uniqueIdPrint), {
+                        text: qrUrl,
+                        width: 64,
+                        height: 64,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.L
+                    });
+                }, 50); // delay เล็กน้อยให้ DOM วาดเสร็จ
+            });
+        }
+
+        function cancelPrint() {
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('print-preview-section').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
