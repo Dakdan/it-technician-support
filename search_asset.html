@@ -44,57 +44,31 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ลายน้ำ (Watermark) */
-      /***  body::before {
-            content: "ค้นหาครุภัณฑ์";
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 8vw;
-            color: rgba(214, 51, 132, 0.03);
-            font-weight: 800;
-            white-space: nowrap;
-            z-index: -1;
-            pointer-events: none;
-        }
-       ***/
-
          /* ลายน้ำแบบนูน (Embossed Watermark) - แสดงหลายบรรทัดเต็มหน้าจอ */
         body::before {
-            /* ใช้ทริคสร้างข้อความยาว ๆ ซ้ำกันยาว ๆ หรือใช้ช่องว่างช่วย */
             content: "ค้นหาครุภัณฑ์ ";
-            
             position: fixed;
             top: -50%;  /* ขยายขอบเขตให้เกินหน้าจอเผื่อตอนหมุน */
             left: -50%;
             width: 200vw;
             height: 200vh;
-            
-            /* หมุนเอียงลายน้ำ */
             transform: rotate(-30deg);
-            
-            /* สั่งให้จัดตัวอักษรขึ้นบรรทัดใหม่ซ้ำ ๆ และกระจายตัว */
             display: flex;
             flex-wrap: wrap;
             align-content: space-around;
             justify-content: space-around;
             word-break: break-all;
-            
-            font-size: 7vw; /* ปรับขนาดเล็กลงเพื่อให้เรียงกันสวยงามเต็มหน้า */
+            font-size: 7vw; 
             font-weight: 900;
-            line-height: 2.5; /* ระยะห่างระหว่างบรรทัด */
+            line-height: 2.5; 
             z-index: -1;
             pointer-events: none;
-            
-            /* สีกึ่งโปร่งใสที่ค่อนข้างกลืนกับพื้นหลังขาว/เทาอ่อน */
             color: rgba(214, 51, 132, 0.03); 
-            
-            /* เทคนิคสร้างมิตินูนต่ำ (Emboss) ด้วย Shadow สองฝั่ง (แสงและเงา) */
             text-shadow: 
-                -1px -1px 1px rgba(255, 255, 255, 0.9), /* ขอบแสงสีขาว (ด้านบนซ้าย) */
-                 1px  1px 1px rgba(0, 0, 0, 0.15);      /* ขอบเงาสีเข้ม (ด้านล่างขวา) */
+                -1px -1px 1px rgba(255, 255, 255, 0.9),
+                 1px  1px 1px rgba(0, 0, 0, 0.15);      
         }
+        
         /* Header Layout */
         .app-header {
             background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--pink-dark) 100%);
@@ -451,10 +425,14 @@
                         <div id="modalGpsMap" class="rounded-3 overflow-hidden shadow-sm" style="height: 200px; width: 100%;"></div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 justify-content-center gap-2 bg-light">
+                <div class="modal-footer border-0 justify-content-center gap-2 bg-light flex-wrap">
                     <!-- ปุ่มเปิดประวัติไปยังไฟล์ระบบเก่า -->
                     <button type="button" id="btnViewHistory" class="btn text-white rounded-pill px-4 fw-bold" style="background-color: var(--pink-dark); border: none;">
                         <i class="fa-solid fa-clock-rotate-left me-2"></i>ดูประวัติครุภัณฑ์
+                    </button>
+                    <!-- ปุ่มเปิดหน้าพิมพ์สติ๊กเกอร์ (เพิ่มใหม่) -->
+                    <button type="button" id="btnPrintSticker" class="btn rounded-pill px-4 fw-bold" style="background-color: var(--pink-soft); color: var(--pink-dark); border: 1px solid var(--pink-dark);">
+                        <i class="fa-solid fa-print me-2"></i>พิมพ์สติ๊กเกอร์
                     </button>
                     <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิด</button>
                 </div>
@@ -647,7 +625,7 @@
             let assetScore = 0;
             // เน้นความสำคัญที่ AssetID เป็นอันดับ 1
             if (aID === cleanQuery) assetScore = 800; 
-            else if (aID.endsWith(cleanQuery)) assetScore = 700; // ค้นหาตรงจากท้าย (ขวาไปซ้าย) ได้คะแนนสูง
+            else if (aID.endsWith(cleanQuery)) assetScore = 700; 
             else if (aID.startsWith(cleanQuery)) assetScore = 600; 
             else if (aID.includes(cleanQuery)) assetScore = 500; 
             
@@ -661,14 +639,13 @@
             return Math.max(assetScore, serialScore);
         }
 
-        // ระบบ Highlight ข้ามเครื่องหมายขีด (เช่น ค้นหา "66" จะไฮไลท์เฉพาะตัวขวาสุดที่เจอ)
+        // ระบบ Highlight ข้ามเครื่องหมายขีด 
         function highlightText(text, keyword) {
             if (!keyword || !text) return text;
             
             const cleanKeyword = String(keyword).toLowerCase().replace(/-/g, '');
             if (!cleanKeyword) return text;
 
-            // แปลงคำค้นเป็น Regex ที่ยอมให้มีขีดคั่นกลางได้
             const escapedKeyword = cleanKeyword.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             const patternStr = escapedKeyword.join('-?');
 
@@ -677,7 +654,6 @@
             const startRegex = new RegExp('^(' + patternStr + ')', 'i');
             const anyRegex = new RegExp('(' + patternStr + ')', 'gi');
 
-            // ลำดับความสำคัญในการไฮไลท์: ตรงหมด -> ตรงท้ายสุด -> ตรงหน้าสุด -> ตรงกลาง (ตัวสุดท้ายที่เจอ)
             if (exactRegex.test(text)) {
                 return text.replace(exactRegex, '<span class="highlight">$1</span>');
             } else if (endRegex.test(text)) {
@@ -687,7 +663,6 @@
             } else if (anyRegex.test(text)) {
                 let match;
                 let lastMatch;
-                // กวาดหา Match ทั้งหมดแล้วเลือกอันสุดท้าย (ขวาสุด) ตามนโยบายค้นหาจากขวาไปซ้าย
                 while ((match = anyRegex.exec(text)) !== null) {
                     lastMatch = match;
                 }
@@ -706,7 +681,7 @@
             resultsContainer.innerHTML = '';
             
             const totalFound = data.length;
-            const displayData = data.slice(0, 30); // แสดงแค่ 30 รายการแรกกันเครื่องค้าง
+            const displayData = data.slice(0, 30); // แสดงแค่ 30 รายการแรก
             
             let countText = `พบรายการที่ตรงกันทั้งหมด ${totalFound} รายการ`;
             if (totalFound > 30) {
@@ -719,7 +694,7 @@
                 const assetId = item.AssetID || detail.AssetID || "";
                 const serial = item.Serial || detail.Serial || "ไม่มี Serial";
                 const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุประเภท";
-                const age = detail["อายุ"] || "ไม่ระบุอายุ"; // ดึงจาก "อายุ" ที่ Backend ส่งมาให้
+                const age = detail["อายุ"] || "ไม่ระบุอายุ"; 
                 const source = detail["Source"] || "";
                 
                 let imgUrl = "https://placehold.co/100x100/e2e8f0/475569?text=No+Img";
@@ -732,7 +707,7 @@
 
                 const card = document.createElement('div');
                 card.className = 'asset-card';
-                // เมื่อกดการ์ด ให้แสดง Modal แทนการเด้งไปหน้าอื่นทันที
+                // เมื่อกดการ์ด ให้แสดง Modal 
                 card.onclick = () => openAssetDetailModal(assetId);
 
                 const displayId = highlightText(assetId, keyword);
@@ -771,7 +746,6 @@
             if (!assetId) return;
             const finalUrl = TARGET_URL_BASE + encodeURIComponent(assetId.trim());
             
-            // แสดง Overlay กำลังโหลด
             initialLoadingOverlay.style.display = 'flex';
             initialLoadingOverlay.style.opacity = '1';
             document.querySelector('#initialLoadingOverlay h5').innerText = "กำลังเปลี่ยนหน้า...";
@@ -784,14 +758,12 @@
 
         // ฟังก์ชันเปิด Modal แสดงข้อมูลละเอียดที่ดึงมาจาก Cache
         function openAssetDetailModal(assetId) {
-            // โชว์ Overlay จำลองการโหลด
             initialLoadingOverlay.style.display = 'flex';
             initialLoadingOverlay.style.opacity = '1';
             document.querySelector('#initialLoadingOverlay h5').innerText = "กำลังประมวลผล...";
             document.querySelector('#initialLoadingOverlay p').innerText = "กำลังดึงรายละเอียดข้อมูลครุภัณฑ์แบบเต็ม";
 
             setTimeout(() => {
-                // ค้นหาข้อมูลในแคช
                 const item = allAssetsData.find(a => (a.AssetID === assetId) || (a.Asset_Detail && a.Asset_Detail.AssetID === assetId));
                 
                 initialLoadingOverlay.style.display = 'none'; 
@@ -816,7 +788,7 @@
                 if(detail.MaStatus) statusContainer.innerHTML += `<span class="badge bg-primary rounded-pill px-3 py-2"><i class="fa-solid fa-wrench me-1"></i>สถานะ MA: ${detail.MaStatus}</span>`;
                 if(detail.CoStatus) statusContainer.innerHTML += `<span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check-circle me-1"></i>สถานะ CO: ${detail.CoStatus}</span>`;
 
-                // ข้อมูลฟิลด์ต่างๆ (ดึงโครงสร้างตรงกับ JSON ของ Backend)
+                // ข้อมูลฟิลด์ต่างๆ
                 document.getElementById('modalFieldAssetID').innerText = detail.AssetID || assetId || "-";
                 document.getElementById('modalFieldSerial').innerText = detail.Serial || "-";
                 document.getElementById('modalFieldType').innerText = detail.Asset_Type_Group || "-";
@@ -846,7 +818,13 @@
                     goToDetail(assetId); 
                 };
 
-                // เปิด Modal อย่างปลอดภัย
+                // ผูกปุ่มเปิดหน้าพิมพ์สติ๊กเกอร์ (ใหม่)
+                document.getElementById('btnPrintSticker').onclick = () => {
+                    const printUrl = `https://dakdan.github.io/it-technician-support/asset_label_printer.html?Asset_ID=${encodeURIComponent(assetId)}`;
+                    window.open(printUrl, '_blank'); 
+                };
+
+                // เปิด Modal 
                 if (detailModalInstance) {
                     detailModalInstance.show();
                 } else {
@@ -857,7 +835,7 @@
                     }
                 }
 
-            }, 300); // ดีเลย์จำลองเพื่อความสมูท
+            }, 300); 
         }
 
         // ระบบแจ้งเตือนกลาง
@@ -896,7 +874,6 @@
             if ("vibrate" in navigator) navigator.vibrate(200);
             closeScannerModal();
             
-            // ตัดข้อความขยะฝั่งบราวเซอร์เลย
             let input = String(decodedText).trim();
             if (input.includes("IcmAssetDetail/")) {
                 input = input.split("IcmAssetDetail/")[1].split("/")[0];
@@ -909,15 +886,13 @@
                 return;
             }
 
-            // นำรหัสที่ตัดเสร็จแล้วยัดใส่ช่องค้นหา และสั่งรัน Local Search
             searchInput.value = input;
             clearBtn.style.display = 'block';
 
-            // หากมีแคชแล้ว สั่งค้นหา Local ได้เลย (เร็วมาก)
             if (allAssetsData.length > 0) {
                 executeLocalSearch(input);
             } else {
-                executeOnlineSearch(input); // กรณีแคชไม่มาจริงๆ
+                executeOnlineSearch(input); 
             }
         }
 
