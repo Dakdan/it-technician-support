@@ -255,7 +255,7 @@
             box-shadow: 0 2px 6px rgba(214, 51, 132, 0.15); 
         }
 
-        /* Custom Class สำหรับหัวข้อใน Modal Detail ให้ไล่ระดับสีและดูฟรุ้งฟริ้งเด่นชัด */
+        /* Custom Class สำหรับหัวข้อใน Modal Detail */
         .modal-section-title {
             background: linear-gradient(135deg, #fff0f5 0%, #ffb6c1 50%, #ff85a2 100%);
             color: #8b0042;
@@ -459,7 +459,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 justify-content-center gap-2 bg-light">
-                    <!-- ปุ่มเปิดประวัติไปยังไฟล์ระบบเก่า -->
+                    <!-- ปุ่มเปิดประวัติไปยังแท็บใหม่ (New Tab) -->
                     <button type="button" id="btnViewHistory" class="btn text-white rounded-pill px-4 fw-bold" style="background-color: var(--pink-dark); border: none;">
                         <i class="fa-solid fa-clock-rotate-left me-2"></i>ดูประวัติครุภัณฑ์เต็มรูปแบบ
                     </button>
@@ -735,22 +735,15 @@
         function showEmptyState(title, subtitle) {
             emptyStateTitle.innerText = title;
             emptyStateMsg.innerText = subtitle;
-            emptyState.classList.remove('d-none');
+            emptyState.classList.add('d-none');
             resultCountLabel.innerText = "ผลการค้นหาเป็นศูนย์";
         }
 
+        // ฟังก์ชันเปิดหน้าประวัติในแท็บใหม่ (New Tab) โดยไม่เปลี่ยนหน้าปัจจุบัน
         function goToDetail(assetId) {
             if (!assetId) return;
             const finalUrl = TARGET_URL_BASE + encodeURIComponent(assetId.trim());
-            
-            initialLoadingOverlay.style.display = 'flex';
-            initialLoadingOverlay.style.opacity = '1';
-            document.querySelector('#initialLoadingOverlay h5').innerText = "กำลังเปลี่ยนหน้า...";
-            document.querySelector('#initialLoadingOverlay p').innerText = "กำลังพาท่านไปยังระบบประวัติครุภัณฑ์";
-            
-            setTimeout(() => {
-                window.location.href = finalUrl;
-            }, 500);
+            window.open(finalUrl, '_blank');
         }
 
         function openAssetDetailModal(assetId) {
@@ -806,9 +799,9 @@
                 document.getElementById('modalFieldUsage').innerText = latestUsage["การใช้งาน"] || "-";
                 document.getElementById('modalFieldPriority').innerText = latestUsage["กลุ่มผู้ใช้งาน"] || "-";
                 document.getElementById('modalFieldShift').innerText = latestUsage["ช่วงเวลาที่ใช้งาน"] || "-";
-                document.getElementById('modalFieldNote2').innerText = latestUsage["NOTE"] || detail["Note2"] || "-"; // อ่าน NOTE จาก Usage หรือ Note2 โดยตรง
+                document.getElementById('modalFieldNote2').innerText = latestUsage["NOTE"] || detail["Note2"] || "-";
 
-                // จัดการ GPS Map (เลือกดึงจาก Inspection ล่าสุดเป็นหลัก หากไม่มีจะใช้จาก detail.GPS ทั่วไป)
+                // จัดการ GPS Map
                 const gpsContainer = document.getElementById('modalGpsContainer');
                 const gpsMap = document.getElementById('modalGpsMap');
                 const gpsValue = String(latestInspection["ตำแหน่ง GPS"] || detail.GPS || "").trim();
@@ -822,8 +815,8 @@
                     gpsMap.innerHTML = '';
                 }
 
+                // สั่งเปิดแท็บใหม่เมื่อคลิกปุ่ม
                 document.getElementById('btnViewHistory').onclick = () => {
-                    if (detailModalInstance) detailModalInstance.hide();
                     goToDetail(assetId); 
                 };
 
