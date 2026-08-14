@@ -105,21 +105,21 @@
 </head>
 <body class="antialiased">
 
-    <div class="watermark-bg">ประวัติครุภัณฑ์</div>
+    <div class="watermark-bg">ประวัติครุภัณฑ์[cite: 1]</div>
 
     <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
         <div class="spinner mb-6"></div>
         <h2 class="text-2xl font-bold text-brand-700">Loading Data...</h2>
-        <p class="text-slate-500 mt-2">กำลังเชื่อมต่อฐานข้อมูลโรงพยาบาลอุดรธานี</p>
+        <p class="text-slate-500 mt-2">กำลังเชื่อมต่อฐานข้อมูลโรงพยาบาลอุดรธานี[cite: 1]</p>
     </div>
 
     <div id="errorScreen" class="hidden flex-col items-center justify-center min-h-screen text-center px-4">
         <div class="w-24 h-24 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-6 text-5xl">
             <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-        <h2 id="errorMsg" class="text-2xl font-bold text-slate-800 mb-6">ไม่พบข้อมูลครุภัณฑ์ชิ้นนี้</h2>
-        <button class="px-6 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition shadow-lg" onclick="window.history.back()">
-            <i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับหน้าหลัก
+        <h2 id="errorMsg" class="text-2xl font-bold text-slate-800 mb-6">ไม่พบข้อมูลครุภัณฑ์ชิ้นนี้[cite: 1]</h2>
+        <button class="px-6 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition shadow-lg" onclick="closeWindow()">
+            <i class="fa-solid fa-xmark mr-2"></i> ปิดหน้านี้[cite: 1]
         </button>
     </div>
 
@@ -132,8 +132,8 @@
                     <img src="./logo003v1.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/eff6ff/3b82f6?text=UDON'">
                 </div>
                 <div>
-                    <h1 class="text-lg md:text-2xl font-extrabold text-slate-800 leading-tight tracking-tight">โรงพยาบาลอุดรธานี</h1>
-                    <p class="text-[#E6005C] font-bold text-xs md:text-sm tracking-wide">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    <h1 class="text-lg md:text-2xl font-extrabold text-slate-800 leading-tight tracking-tight">โรงพยาบาลอุดรธานี[cite: 1]</h1>
+                    <p class="text-[#E6005C] font-bold text-xs md:text-sm tracking-wide">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์[cite: 1]</p>
                     <p id="valAssetID" class="text-sm md:text-xl font-medium text-accent-500">-</p>
                 </div>
             </div>
@@ -141,17 +141,17 @@
             <div class="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
                 <p id="currentDateTime" class="text-xs md:text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-full md:w-auto text-center"></p>
                 <div class="flex flex-wrap justify-center md:justify-end gap-2 w-full md:w-auto no-print">
-                    <button onclick="window.history.back()" class="flex-1 md:flex-none px-4 py-2 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-200 transition text-sm font-bold shadow-sm flex items-center justify-center">
-                        <i class="fa-solid fa-arrow-left mr-2"></i> Back
+                    <button onclick="closeWindow()" class="flex-1 md:flex-none px-4 py-2 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-200 transition text-sm font-bold shadow-sm flex items-center justify-center">
+                        <i class="fa-solid fa-xmark mr-2"></i> ปิด[cite: 1]
                     </button>
                     <button onclick="window.print()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-brand-600 transition text-sm font-bold shadow-sm">
-                        <i class="fa-solid fa-print"></i> พิมพ์
+                        <i class="fa-solid fa-print"></i> พิมพ์[cite: 1]
                     </button>
                     <button onclick="location.reload()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-brand-600 transition text-sm font-bold shadow-sm">
-                        <i class="fa-solid fa-rotate-right"></i> รีเฟรช
+                        <i class="fa-solid fa-rotate-right"></i> รีเฟรช[cite: 1]
                     </button>
                     <button onclick="copyAssetLink()" class="flex-1 md:flex-none px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition text-sm font-bold shadow-sm">
-                        <i class="fa-solid fa-link"></i> ลิงก์
+                        <i class="fa-solid fa-link"></i> ลิงก์[cite: 1]
                     </button>
                 </div>
             </div>
@@ -169,7 +169,7 @@
                     </div>
                     
                     <div class="flex-1 lg:w-full flex flex-col items-center justify-center bg-slate-50 rounded-xl p-3 z-10 border border-slate-100 h-28 sm:h-40 lg:h-auto">
-                        <p class="text-[10px] sm:text-xs font-bold text-slate-400 mb-1 sm:mb-2 uppercase tracking-wider">Scan to View</p>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-400 mb-1 sm:mb-2 uppercase tracking-wider">Scan to View[cite: 1]</p>
                         <div id="qrFrame" class="w-16 h-16 sm:w-24 sm:h-24 bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform z-10" title="คลิกเพื่อขยาย QR Code">
                             <i class="fa-solid fa-qrcode text-3xl text-slate-300"></i>
                         </div>
@@ -181,14 +181,14 @@
                     <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 w-full">
                         <div class="w-full md:flex-1 min-w-0">
                             <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-lg font-bold text-xs mb-3 border border-brand-100 shadow-sm">
-                                <i class="fa-solid fa-microchip"></i> <span id="valCategory">กำลังโหลด...</span>
+                                <i class="fa-solid fa-microchip"></i> <span id="valCategory">กำลังโหลด...[cite: 1]</span>
                             </div>
-                            <h2 id="valAssetNameGroup" class="text-xl md:text-3xl font-extrabold text-slate-800 mb-2 leading-tight tracking-tight">กำลังโหลดข้อมูล...</h2>
+                            <h2 id="valAssetNameGroup" class="text-xl md:text-3xl font-extrabold text-slate-800 mb-2 leading-tight tracking-tight">กำลังโหลดข้อมูล...[cite: 1]</h2>
                             <p id="valAssetName" class="text-slate-500 font-semibold text-sm md:text-lg">-</p>
                         </div>
                         
                         <div class="bg-slate-800 text-white rounded-2xl p-4 md:px-6 shadow-lg border border-slate-700 flex flex-col justify-center text-center md:text-right w-full md:w-auto flex-shrink-0 mt-4 md:mt-0">
-                            <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)</p>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-barcode"></i> รหัสครุภัณฑ์ (Asset_ID)[cite: 1]</p>
                             <div class="w-full max-w-full overflow-x-auto" style="scrollbar-width: none; -ms-overflow-style: none;">
                                 <p id="valCode" class="text-xl md:text-2xl font-extrabold text-teal-400 whitespace-nowrap tracking-wide">-</p>
                             </div>
@@ -197,15 +197,15 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-auto border-t border-slate-100 pt-6 w-full">
                         <div>
-                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Serial Number (S/N)</p>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Serial Number (S/N)[cite: 1]</p>
                             <p id="valSerial" class="text-slate-800 font-extrabold text-sm md:text-base truncate" title="-">-</p>
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะใช้งาน (MA Status)</p>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะใช้งาน (MA Status)[cite: 1]</p>
                             <span id="valMaStatus" class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg font-bold text-xs border border-emerald-200 shadow-sm">-</span>
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะครอบครอง (CO Status)</p>
+                            <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">สถานะครอบครอง (CO Status)[cite: 1]</p>
                             <span id="valCoStatus" class="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-200 shadow-sm">-</span>
                         </div>
                     </div>
@@ -215,7 +215,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
                 <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Health Score</h3>
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Health Score[cite: 1]</h3>
                         <i class="fa-solid fa-heart-pulse text-[#E6005C] bg-pink-50 p-2 rounded-xl"></i>
                     </div>
                     <div id="kpiHealth" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
@@ -226,16 +226,16 @@
                 
                 <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Risk Level</h3>
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Risk Level[cite: 1]</h3>
                         <i class="fa-solid fa-shield-halved text-amber-500 bg-amber-50 p-2 rounded-xl"></i>
                     </div>
                     <div id="kpiRisk" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
-                    <div id="valRiskScore" class="text-xs font-bold text-slate-400 mt-auto pt-3">คะแนนความเสี่ยง: 0</div>
+                    <div id="valRiskScore" class="text-xs font-bold text-slate-400 mt-auto pt-3">คะแนนความเสี่ยง: 0[cite: 1]</div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Asset Age</h3>
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">Asset Age[cite: 1]</h3>
                         <i class="fa-solid fa-clock-rotate-left text-brand-500 bg-brand-50 p-2 rounded-xl"></i>
                     </div>
                     <div id="kpiAge" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
@@ -244,11 +244,11 @@
 
                 <div class="bg-white rounded-2xl shadow-sm p-4 md:p-5 border border-slate-100 border-t-4 border-t-udon flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">MA Count</h3>
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-wide">MA Count[cite: 1]</h3>
                         <i class="fa-solid fa-screwdriver-wrench text-purple-500 bg-purple-50 p-2 rounded-xl"></i>
                     </div>
                     <div id="kpiMA" class="text-2xl md:text-3xl font-extrabold text-slate-800">-</div>
-                    <div id="valTotalRepairCost" class="text-xs font-bold text-slate-400 mt-auto pt-3">มูลค่าซ่อมสะสม: 0 ฿</div>
+                    <div id="valTotalRepairCost" class="text-xs font-bold text-slate-400 mt-auto pt-3">มูลค่าซ่อมสะสม: 0 ฿[cite: 1]</div>
                 </div>
             </div>
 
@@ -258,28 +258,28 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-clipboard-check"></i></div>
-                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Asset Inspection & Usage Logs</h3>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Asset Inspection & Usage Logs[cite: 1]</h3>
                     </div>
                     <div class="p-4 md:p-5 flex flex-col flex-1">
                         
                         <!-- 1. Physical Asset Inspection -->
                         <div class="mb-5">
-                            <h4 class="text-sm font-extrabold text-brand-600 mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-magnifying-glass-chart mr-1"></i> 1. ตรวจครุภัณฑ์ประจำปี</h4>
+                            <h4 class="text-sm font-extrabold text-brand-600 mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-magnifying-glass-chart mr-1"></i> 1. ตรวจครุภัณฑ์ประจำปี[cite: 1]</h4>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ปีที่ตรวจสอบ</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ปีที่ตรวจสอบ[cite: 1]</p>
                                     <p id="valInspYear" class="text-slate-700 font-bold text-sm bg-slate-50 px-2 py-1 rounded inline-block">-</p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">วัน/เวลา ที่ตรวจสอบ</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">วัน/เวลา ที่ตรวจสอบ[cite: 1]</p>
                                     <p id="valInspDate" class="text-slate-700 font-semibold text-sm">-</p>
                                 </div>
                                 <div class="col-span-2">
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">หน่วยงาน/กลุ่มงาน/สถานที่</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">หน่วยงาน/กลุ่มงาน/สถานที่[cite: 1]</p>
                                     <p id="valInspDept" class="text-slate-800 font-bold text-sm bg-blue-50 border border-blue-100 px-3 py-2 rounded-xl">-</p>
                                 </div>
                                 <div class="col-span-2">
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ตำแหน่ง GPS</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ตำแหน่ง GPS[cite: 1]</p>
                                     <div id="valInspGps" class="text-sm">-</div>
                                 </div>
                             </div>
@@ -287,18 +287,18 @@
 
                         <!-- 2. ข้อมูลการใช้งาน -->
                         <div class="mt-auto">
-                            <h4 class="text-sm font-extrabold text-emerald-600 mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-users-gear mr-1"></i> 2. ข้อมูลการใช้งาน</h4>
+                            <h4 class="text-sm font-extrabold text-emerald-600 mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-users-gear mr-1"></i> 2. ข้อมูลการใช้งาน[cite: 1]</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="col-span-1 sm:col-span-2">
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">การใช้งาน (Job Type)</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">การใช้งาน (Job Type)[cite: 1]</p>
                                     <p id="valUsageJob" class="text-slate-700 font-semibold text-sm">-</p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">กลุ่มผู้ใช้งาน</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">กลุ่มผู้ใช้งาน[cite: 1]</p>
                                     <p id="valUsagePriority" class="text-slate-700 font-semibold text-sm">-</p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ช่วงเวลาที่ใช้งาน</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ช่วงเวลาที่ใช้งาน[cite: 1]</p>
                                     <p id="valUsageShift" class="text-slate-700 font-semibold text-sm">-</p>
                                 </div>
                             </div>
@@ -311,29 +311,29 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-laptop-code"></i></div>
-                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Technical Specifications</h3>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Technical Specifications[cite: 1]</h3>
                     </div>
                     <div class="p-4 md:p-5 flex flex-col gap-5 flex-1">
                         <div>
-                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ยี่ห้อ / รุ่น / รูปลักษณ์</p>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ยี่ห้อ / รุ่น / รูปลักษณ์[cite: 1]</p>
                             <p id="valSpec" class="text-slate-700 font-semibold text-sm line-clamp-3">-</p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                             <div class="overflow-hidden">
-                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">IP Address</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">IP Address[cite: 1]</p>
                                 <p id="valTechIP" class="text-indigo-700 font-extrabold font-mono text-sm truncate">-</p>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">MAC Address</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">MAC Address[cite: 1]</p>
                                 <p id="valTechMAC" class="text-slate-600 font-mono font-semibold text-sm truncate">-</p>
                             </div>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระบบปฏิบัติการ (OS)</p>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระบบปฏิบัติการ (OS)[cite: 1]</p>
                             <p id="valTechOS" class="text-slate-700 font-semibold text-sm">-</p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">Hardware Specs</p>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">Hardware Specs[cite: 1]</p>
                             <p id="valTechSpecs" class="text-slate-700 font-semibold text-sm">-</p>
                         </div>
                     </div>
@@ -343,34 +343,34 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-udon overflow-hidden flex flex-col">
                     <div class="bg-slate-50 px-4 md:px-5 py-4 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Financial & Contract</h3>
+                        <h3 class="font-extrabold text-slate-800 text-sm md:text-base tracking-wide">Financial & Contract[cite: 1]</h3>
                     </div>
                     <div class="p-4 md:p-5 flex flex-col gap-5 flex-1">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-end border-b border-dashed border-slate-200 pb-4 gap-2">
                             <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">ราคาทุนครุภัณฑ์</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">ราคาทุนครุภัณฑ์[cite: 1]</p>
                                 <p id="valPrice" class="text-xl md:text-2xl font-extrabold text-emerald-600">-</p>
                             </div>
                             <div class="sm:text-right">
-                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">วันที่รับเข้า</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">วันที่รับเข้า[cite: 1]</p>
                                 <p id="valReceiveDate" class="text-slate-700 font-semibold text-sm">-</p>
                             </div>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">แหล่งงบประมาณจัดซื้อ</p>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">แหล่งงบประมาณจัดซื้อ[cite: 1]</p>
                             <p id="valFund" class="text-slate-700 font-semibold text-sm">-</p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระยะเวลารับประกันสินค้า</p>
+                            <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">ระยะเวลารับประกันสินค้า[cite: 1]</p>
                             <p id="valWarranty" class="text-amber-800 font-bold text-sm bg-amber-50 p-2.5 rounded-xl border border-amber-200 shadow-sm">-</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4 mt-auto">
                             <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">อายุทางบัญชี</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">อายุทางบัญชี[cite: 1]</p>
                                 <p id="valAssetAgeSheet" class="text-slate-700 font-semibold text-sm">-</p>
                             </div>
                             <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">เกณฑ์มาตรฐาน</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">เกณฑ์มาตรฐาน[cite: 1]</p>
                                 <p id="valAssetUnderStd" class="text-slate-700 font-semibold text-sm">-</p>
                             </div>
                         </div>
@@ -385,20 +385,20 @@
                         <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Movement & Maintenance</h3>
+                        <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Movement & Maintenance[cite: 1]</h3>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="w-full overflow-hidden">
-                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-truck-fast"></i> ประวัติเคลื่อนย้าย</h4>
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-truck-fast"></i> ประวัติเคลื่อนย้าย[cite: 1]</h4>
                             <div id="timelineMovement" class="timeline">
-                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...[cite: 1]</p>
                             </div>
                         </div>
                         <div class="w-full overflow-hidden">
-                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-wrench"></i> ประวัติซ่อมบำรุง</h4>
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-wrench"></i> ประวัติซ่อมบำรุง[cite: 1]</h4>
                             <div id="timelineMA" class="timeline">
-                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...</p>
+                                <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติ...[cite: 1]</p>
                             </div>
                         </div>
                     </div>
@@ -411,15 +411,15 @@
                             <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-paperclip"></i>
                             </div>
-                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Notes & Attachments</h3>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Notes & Attachments[cite: 1]</h3>
                         </div>
                         <div class="space-y-5">
                             <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">พิกัดตำแหน่ง GPS</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">พิกัดตำแหน่ง GPS[cite: 1]</p>
                                 <div id="valNote2" class="text-sm">-</div>
                             </div>
                             <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">บันทึกเพิ่มเติม</p>
+                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">บันทึกเพิ่มเติม[cite: 1]</p>
                                 <div id="valNote3" class="text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-100 font-medium">-</div>
                             </div>
                         </div>
@@ -430,10 +430,10 @@
                             <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-images"></i>
                             </div>
-                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Image Logs Gallery</h3>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Image Logs Gallery[cite: 1]</h3>
                         </div>
                         <div id="galleryContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            <p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม</p>
+                            <p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม[cite: 1]</p>
                         </div>
                     </div>
                 </div>
@@ -444,7 +444,7 @@
 
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-        <img id="lightboxImg" src="" alt="ขยายภาพ">
+        <img id="lightboxImg" src="" alt="ขยายภาพ[cite: 1]">
         <div id="lightboxCaption" class="lightbox-caption"></div>
     </div>
 
@@ -458,10 +458,19 @@
             if (assetId) {
                 fetchDataFromGAS(assetId);
             } else {
-                showError("ไม่พบรหัสครุภัณฑ์ใน URL กรุณาระบุ Asset_ID");
+                showError("ไม่พบรหัสครุภัณฑ์ใน URL กรุณาระบุ Asset_ID[cite: 1]");
             }
             startClock();
         });
+
+        // ฟังก์ชันสำหรับปิดหน้าต่าง (ทำงานเป็นปิดหน้านี้)[cite: 1]
+        function closeWindow() {
+            window.close();
+            // กรณีที่เบราว์เซอร์ไม่อนุญาตให้ปิดแท็บที่ไม่ได้เปิดผ่าน script ให้แจ้งเตือนหรือเด้งกลับหน้าหลักแทน
+            setTimeout(() => {
+                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
+            }, 300);
+        }
 
         async function fetchDataFromGAS(assetId) {
             try {
@@ -473,13 +482,13 @@
                 renderDashboard(result);
             } catch (err) {
                 console.error("Fetch Error:", err);
-                showError("ดึงข้อมูลไม่สำเร็จ: ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
+                showError("ดึงข้อมูลไม่สำเร็จ: ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้[cite: 1]");
             }
         }
 
         function renderDashboard(response) {
             if (!response || response.status === 'error' || !response.data) {
-                showError(response ? response.message : "ไม่พบชุดรหัสครุภัณฑ์ดังกล่าวในระบบฐานข้อมูล");
+                showError(response ? response.message : "ไม่พบชุดรหัสครุภัณฑ์ดังกล่าวในระบบฐานข้อมูล[cite: 1]");
                 return;
             }
 
@@ -515,18 +524,18 @@
             const photoFrame = document.getElementById('photoFrame');
             if (logs.images && logs.images.length > 0 && logs.images[0].IMAGE_URL) {
                 const directImgUrl = logs.images[0].IMAGE_URL;
-                photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
+                photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์[cite: 1]" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
             } 
             else if (asset['Ass_Img'] && asset['Ass_Img'] !== '-') {
                 const directImgUrl = convertDriveUrl(asset['Ass_Img']);
-                photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
+                photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์[cite: 1]" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
             } else {
                 photoFrame.innerHTML = `<i class="fa-solid fa-image text-4xl text-slate-300"></i>`;
             }
 
             const qrFrame = document.getElementById('qrFrame');
             const currentUrl = window.location.href;
-            qrFrame.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}" alt="Scan QR Code" class="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform" onclick="openLightbox('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}', 'QR Code สำหรับเข้าถึงข้อมูลครุภัณฑ์นี้')" title="คลิกเพื่อขยาย QR Code">`;
+            qrFrame.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}" alt="Scan QR Code[cite: 1]" class="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform" onclick="openLightbox('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}', 'QR Code สำหรับเข้าถึงข้อมูลครุภัณฑ์นี้')" title="คลิกเพื่อขยาย QR Code">`;
 
             // --- BASIC INFO ---
             safeSetText('valCategory', getVal('หมวดครุภัณฑ์', 'Asset_Group'));
@@ -534,14 +543,12 @@
 
             // --- INSPECTION & USAGE LOGS (NEW SECTION) ---
             if (logs.inspection && logs.inspection.length > 0) {
-                // สมมติฐานว่า backend เรียงจากล่าสุดมาแล้ว ใช้ index [0]
                 const latestInsp = logs.inspection[0]; 
                 
                 safeSetText('valInspYear', latestInsp.inspectionYear || '-');
                 safeSetText('valInspDate', latestInsp.inspectionDate || '-');
                 safeSetText('valInspDept', latestInsp.deptName || '-');
                 
-                // --- แก้ไขการแสดงผล GPS เป็น Embed Google Maps ---
                 const gpsVal = latestInsp.gps || (latestInsp.raw && latestInsp.raw['Asset_Gps']);
                 const gpsEl = document.getElementById('valInspGps');
                 if (gpsEl) {
@@ -554,7 +561,7 @@
                                 </iframe>
                             </div>
                             <a href="https://maps.google.com/?q=${cleanGps}" target="_blank" class="inline-block mt-1.5 text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">
-                                <i class="fa-solid fa-map-location-dot"></i> เปิดแอปแผนที่
+                                <i class="fa-solid fa-map-location-dot"></i> เปิดแอปแผนที่[cite: 1]
                             </a>
                         `;
                     } else {
@@ -562,13 +569,7 @@
                     }
                 }
 
-                // --- แก้ไข Mapping Shift_Work และ Priority ที่ฝั่ง Frontend (ดักจับเผื่อ Backend ส่งค่าดิบมา) ---
-                const shiftMap = {
-                    "1": "เช้า",
-                    "2": "บ่าย",
-                    "3": "ดึก"
-                };
-
+                const shiftMap = { "1": "เช้า", "2": "บ่าย", "3": "ดึก" };
                 const priorityMap = {
                     "PIO-001": "ตรวจรักษา (แพทย์)",
                     "PIO-002": "ข้อมูลผู้ป่วย (พยาบาล)",
@@ -581,7 +582,6 @@
                 let sVal = latestInsp.shiftName || latestInsp.shiftId || (latestInsp.raw && latestInsp.raw['Shift_Work']) || '-';
                 let jVal = latestInsp.jobType || (latestInsp.raw && latestInsp.raw['Jobe_Type_ID']) || '-';
 
-                // ประมวลผลกรณีที่มีหลายค่า (เช่น "1,2,3" หรือ "PIO-001,PIO-002") โดยแยกด้วยลูกน้ำ แล้วแปลทีละค่า
                 let mappedPriority = pVal !== '-' ? String(pVal).split(',').map(item => priorityMap[item.trim()] || item.trim()).join(', ') : '-';
                 let mappedShift = sVal !== '-' ? String(sVal).split(',').map(item => shiftMap[item.trim()] || item.trim()).join(', ') : '-';
 
@@ -677,7 +677,7 @@
             const note2El = document.getElementById('valNote2');
             if (note2El) {
                 if (note2Val !== '-') {
-                    note2El.innerHTML = `<a href="https://maps.google.com/?q=${encodeURIComponent(note2Val.trim())}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-100"><i class="fa-solid fa-map-location-dot"></i> ดูพิกัดบนแผนที่</a>`;
+                    note2El.innerHTML = `<a href="https://maps.google.com/?q=${encodeURIComponent(note2Val.trim())}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-100"><i class="fa-solid fa-map-location-dot"></i> ดูพิกัดบนแผนที่[cite: 1]</a>`;
                 } else {
                     note2El.textContent = '-';
                 }
@@ -696,7 +696,7 @@
                         </div>
                     `).join('');
                 } else {
-                    timelineMovement.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติการย้ายสถานที่</p>';
+                    timelineMovement.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติการย้ายสถานที่[cite: 1]</p>';
                 }
             }
 
@@ -723,7 +723,7 @@
                         </div>
                     `).join('');
                 } else {
-                    timelineMA.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติซ่อมบำรุงหรือ PM</p>';
+                    timelineMA.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติซ่อมบำรุงหรือ PM[cite: 1]</p>';
                 }
             }
 
@@ -735,12 +735,12 @@
                         const directUrl = item.IMAGE_URL || convertDriveUrl(item.IMAGE_ID);
                         return `
                             <div class="aspect-square rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-brand-400 shadow-sm transition-all hover:scale-105" onclick="openLightbox('${directUrl}', 'ภาพประวัติแนบเพิ่มเติมชิ้นที่ ${index + 1}')">
-                                <img src="${directUrl}" alt="Log Image" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=&quot;w-full h-full bg-slate-100 flex items-center justify-center text-slate-400&quot;><i class=&quot;fa-solid fa-image-broken&quot;></i></div>'">
+                                <img src="${directUrl}" alt="Log Image[cite: 1]" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=&quot;w-full h-full bg-slate-100 flex items-center justify-center text-slate-400&quot;><i class=&quot;fa-solid fa-image-broken&quot;></i></div>'">
                             </div>
                         `;
                     }).join('');
                 } else {
-                    galleryContainer.innerHTML = '<p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม</p>';
+                    galleryContainer.innerHTML = '<p class="text-sm text-slate-400 italic col-span-full">ไม่มีรูปภาพแนบประวัติเพิ่มเติม[cite: 1]</p>';
                 }
             }
         }
@@ -783,7 +783,7 @@
                 el.textContent = now.toLocaleDateString('th-TH', { 
                     day: 'numeric', month: 'short', year: 'numeric',
                     hour: '2-digit', minute: '2-digit', second: '2-digit'
-                }) + ' น.';
+                }) + ' น.[cite: 1]';
             }
             update();
             setInterval(update, 1000);
@@ -808,9 +808,9 @@
             tempInput.select();
             try {
                 document.execCommand("copy");
-                showToast('คัดลอกลิงก์เรียบร้อยแล้ว');
+                showToast('คัดลอกลิงก์เรียบร้อยแล้ว[cite: 1]');
             } catch (err) {
-                showToast('ไม่สามารถคัดลอกได้');
+                showToast('ไม่สามารถคัดลอกได้[cite: 1]');
             }
             document.body.removeChild(tempInput);
         }
