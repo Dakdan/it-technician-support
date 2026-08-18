@@ -99,7 +99,11 @@
                 <img src="./logo005v1.png" alt="Logo" class="w-9 h-9 md:w-11 md:h-11 object-contain">
                 <div>
                     <h1 class="text-sm md:text-xl font-extrabold text-slate-800 leading-tight">Physical Asset Inspection</h1>
-                    <p id="statusIndicator" class="text-[8px] md:text-[10px] font-bold text-pink-600 tracking-widest uppercase">Udon Hospital</p>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <p id="statusIndicator" class="text-[8px] md:text-[10px] font-bold text-pink-600 tracking-widest uppercase">Udon Hospital</p>
+                        <span class="text-gray-300 text-[10px] leading-none">•</span>
+                        <p id="userNameDisplay" class="text-[8px] md:text-[10px] font-bold text-slate-500 tracking-wide"></p>
+                    </div>
                 </div>
             </div>
             <div class="flex bg-slate-100 p-1 rounded-xl border">
@@ -471,6 +475,15 @@
     let currentRecordDetail = null; 
     
     window.onload = () => {
+        // แสดงชื่อผู้ใช้งาน
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        if (userNameDisplay) {
+            userNameDisplay.innerHTML = `<i data-lucide="user" class="w-3 h-3 inline-block align-text-bottom mr-0.5"></i>${getDisplayName()}`;
+            if (getCurrentUser()) {
+                userNameDisplay.classList.replace('text-slate-500', 'text-blue-500');
+            }
+        }
+
         lucide.createIcons();
         initApp();
         signaturePad = new SignaturePad(document.getElementById('signature-pad'));
