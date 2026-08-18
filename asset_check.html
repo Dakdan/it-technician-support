@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <link rel="icon" type="image/png" href="logo005v1.png">
+    <link rel="icon" type="image/png" href="logo0005v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Physical Asset Inspection - IT UDH</title>
+    <title>Physical Asset Inspection - Udon Hospital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
@@ -47,6 +47,7 @@
     </style>
 
     <script>
+        
         /*
          * ============================================================================
          * ไฟล์: auth-check.js
@@ -96,11 +97,11 @@
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-200/60 p-3 md:p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2 md:gap-3">
-                <img src="./logo005v1.png" alt="Logo" class="w-9 h-9 md:w-11 md:h-11 object-contain">
+                <img src="./logo0005v1.png" alt="Logo" class="w-9 h-9 md:w-11 md:h-11 object-contain">
                 <div>
                     <h1 class="text-sm md:text-xl font-extrabold text-slate-800 leading-tight">Physical Asset Inspection</h1>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <p id="statusIndicator" class="text-[8px] md:text-[10px] font-bold text-pink-600 tracking-widest uppercase">IT UDH</p>
+                        <p id="statusIndicator" class="text-[8px] md:text-[10px] font-bold text-pink-600 tracking-widest uppercase">Udon Hospital</p>
                         <span class="text-gray-300 text-[10px] leading-none">•</span>
                         <p id="userNameDisplay" class="text-[8px] md:text-[10px] font-bold text-slate-500 tracking-wide"></p>
                     </div>
@@ -113,7 +114,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
-                  📲MENU
+                  กลับหน้าหลัก
                 </button>
             </div>
         </div>
@@ -443,6 +444,29 @@
             <div class="flex gap-3">
                 <button onclick="closeModal('confirmDeleteModal')" class="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs active:bg-slate-200 transition-colors">ยกเลิก</button>
                 <button onclick="executeDeleteLog()" class="w-full py-3 bg-red-500 text-white font-bold rounded-xl text-xs active:bg-red-600 transition-colors">ลบข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="duplicateWarningModal" class="fixed inset-0 bg-slate-900/60 z-[110] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] w-full max-w-sm p-7 text-center shadow-2xl">
+            <div class="w-14 h-14 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-2 uppercase tracking-wide">พบข้อมูลซ้ำ!</h3>
+            <p class="text-xs font-medium text-slate-500 mb-6 leading-relaxed">
+                ครุภัณฑ์รหัสนี้ ถูกตรวจสอบในหน่วยงาน และประเภทนี้ไปแล้ว คุณต้องการทำสิ่งใด?
+            </p>
+            <div class="space-y-3">
+                <button onclick="editDuplicate()" class="w-full py-3.5 bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 active:bg-blue-600 shadow-md shadow-blue-100">
+                    <i data-lucide="edit" class="w-4 h-4"></i> แก้ไขข้อมูลเดิม
+                </button>
+                <button onclick="confirmSaveDuplicate()" class="w-full py-3.5 bg-pink-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 active:bg-pink-600 shadow-md shadow-pink-100">
+                    <i data-lucide="save" class="w-4 h-4"></i> ยืนยันบันทึกเพิ่ม
+                </button>
+                <button onclick="closeModal('duplicateWarningModal')" class="w-full py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs active:bg-slate-200">
+                    ❌ ยกเลิก / ปิด
+                </button>
             </div>
         </div>
     </div>
@@ -826,11 +850,71 @@
                 itemData.Serial = document.getElementById('nr_serial')?.value || "-";
             }
 
-            await executeSave(itemData);
+            await checkDuplicateBeforeSave(itemData);
 
         } catch (err) {
             hideProcess();
             showAlert("ข้อมูลไม่ครบ/ผิดพลาด", err.message);
+        }
+    }
+
+    async function checkDuplicateBeforeSave(preparedData) {
+        // หากอยู่ในโหมดแก้ไข (Update) ให้ข้ามการเช็คซ้ำแล้วบันทึกเลย
+        if (submitMode === 'UPDATE') {
+            await executeSave(preparedData);
+            return;
+        }
+
+        showProcess("กำลังตรวจสอบข้อมูลซ้ำ...");
+        try {
+            // ดึงข้อมูลรายการที่ตรวจวันนี้มาตรวจสอบ
+            const response = await fetch(`${API_URL}?action=getTodayRecords`);
+            const records = await response.json();
+
+            // ค้นหาข้อมูลที่ตรงกัน (Asset_ID, DEPT_ID, Asset_Type_ID)
+            const duplicate = records.find(item => {
+                const matchAssetId = String(item.Asset_ID || item.asset_id).trim() === String(preparedData.Asset_ID).trim();
+                const matchDeptId = String(item.department || item.dept_id || item.DEP_ID).trim() === String(preparedData.DEPT_ID).trim();
+                const matchTypeId = String(item.Asset_Type_ID || item.asset_type_id).trim() === String(preparedData.Asset_Type_ID).trim();
+                
+                return matchAssetId && matchDeptId && matchTypeId;
+            });
+
+            hideProcess();
+
+            if (duplicate) {
+                // เก็บค่าเผื่อผู้ใช้กดยืนยันบันทึกต่อ หรือกดแก้ไข
+                window.pendingSaveData = preparedData;
+                window.foundDuplicateRecord = duplicate;
+                document.getElementById('duplicateWarningModal').classList.remove('hidden');
+                if(window.lucide) lucide.createIcons();
+            } else {
+                // ถ้าไม่ซ้ำ ให้ดำเนินการบันทึกปกติ
+                await executeSave(preparedData);
+            }
+        } catch (err) {
+            console.error("Duplicate check error:", err);
+            // หากระบบเช็คซ้ำขัดข้อง (เช่น เน็ตหลุด) ให้พยายามบันทึกข้อมูลไปก่อน
+            await executeSave(preparedData);
+        }
+    }
+
+    function confirmSaveDuplicate() {
+        closeModal('duplicateWarningModal');
+        if (window.pendingSaveData) {
+            executeSave(window.pendingSaveData);
+        }
+    }
+
+    function editDuplicate() {
+        closeModal('duplicateWarningModal');
+        closeModal('auditFormModal');
+        closeModal('nonRegisterModal');
+        
+        if (window.foundDuplicateRecord) {
+            // โอนข้อมูลที่ซ้ำไปที่ currentRecordDetail เพื่อจำลองการกดจากหน้า Report
+            currentRecordDetail = window.foundDuplicateRecord;
+            prepareEditLog();
         }
     }
 
@@ -1374,7 +1458,7 @@
     }
 
     function goToMainPage() {
-        window.location.replace("main_menu.html");
+        window.location.replace("dept_main_asset.html");
     }        
 </script>
 <input type="hidden" id="selectedDeptId">
