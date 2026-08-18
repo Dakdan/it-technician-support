@@ -1376,13 +1376,6 @@
     function goToMainPage() {
         window.location.replace("dept_main_asset.html");
     }        
-
-    function setGpsStatus(status) {
-        const gpsElem = document.getElementById('gpsIcon'); 
-        if (gpsElem) {
-            gpsElem.className = (status === 'success') ? 'text-pink-500' : 'text-gray-400'; 
-        }
-    }
 </script>
 <input type="hidden" id="selectedDeptId">
 </body>
