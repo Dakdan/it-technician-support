@@ -2,7 +2,6 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="logo003v1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
     <!-- Google Font: Kanit -->
@@ -16,10 +15,10 @@
     
     <style>
         :root {
-            --primary-color: #ec4899;      /* ชมพูสดใส */
-            --secondary-color: #f472b6;    /* ชมพูอ่อนหวาน */
-            --accent-color: #8b5cf6;       /* ม่วงพาสเทลฟรุ้งฟริ้ง */
-            --bg-color: #fdf2f8;           /* ชมพูพาสเทลระเรื่อพื้นหลัง */
+            --primary-color: #ec4899;      
+            --secondary-color: #f472b6;    
+            --accent-color: #8b5cf6;       
+            --bg-color: #fdf2f8;           
             --text-main: #374151;
             --white: #ffffff;
             --border-color: #fbcfe8;
@@ -39,12 +38,10 @@
             overflow-x: hidden;
         }
 
-        /* Sparkle & Glow Decorative Elements */
         .sparkle-glow {
             text-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
         }
 
-        /* Watermark Background */
         .watermark {
             position: fixed;
             top: 50%;
@@ -70,7 +67,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Fancy Card Hover & Glassmorphism */
         .glass-card {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
@@ -135,7 +131,7 @@
             <div class="flex items-center">
                 <div class="relative">
                     <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                    <img src="./logo005v1.png" alt="Logo" class="w-9 h-9 md:w-11 md:h-11 object-contain">
+                    <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
@@ -241,16 +237,11 @@
                             <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="referenceNo">เลขที่เอกสารอ้างอิง (Reference No)</label>
                             <input type="text" id="referenceNo" placeholder="ระบุเลขที่เอกสาร (ถ้ามี)" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm">
                         </div>
-
-                        <div class="form-group md:col-span-2">
-                            <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="userName">ชื่อผู้ส่งมอบ (User Name) <span class="text-pink-500">*</span></label>
-                            <input type="text" id="userName" required placeholder="ชื่อ-นามสกุล ผู้ส่งมอบ" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm">
-                        </div>
                     </div>
                 </form>
             </div>
 
-            <!-- Card 2: ค้นหาและเลือกรายการครุภัณฑ์ (Without Search Button) -->
+            <!-- Card 2: ค้นหาและเลือกรายการครุภัณฑ์ -->
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
                     🔍 ค้นหาและเลือกรายการครุภัณฑ์ (Inventory Asset)
@@ -293,8 +284,8 @@
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-dashed border-pink-200">
-                    <button type="button" class="bg-amber-400 hover:bg-amber-500 text-white px-5 py-3 rounded-2xl text-sm font-medium transition-all shadow-md flex items-center gap-1.5" onclick="draftData()">
-                        💾 พักข้อมูล (Draft)
+                    <button type="button" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md flex items-center gap-1.5" onclick="saveStockInDirect()">
+                        💾 บันทึกข้อมูล
                     </button>
                     <button type="button" class="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-7 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md flex items-center gap-1.5" onclick="openSignatureModal()">
                         ✨ ตรวจสอบ & ลงลายมือชื่อ
@@ -316,7 +307,6 @@
                 </div>
             </div>
         </div>
-
     </main>
 
     <!-- Modal 1: Audit Item Details (Inv_Status & Photo Capture) -->
@@ -370,10 +360,16 @@
             <h3 class="text-pink-600 font-bold text-base border-b border-dashed border-pink-200 pb-3 mb-3 flex items-center gap-2">
                 ✍️ ยืนยันการรับเข้าและลงลายมือชื่อ
             </h3>
-            <p class="text-xs text-gray-500 mb-3">กรุณาเซ็นชื่อลงในช่องสี่เหลี่ยมด้านล่างเพื่อบันทึกข้อมูลหลักฐาน ✨</p>
+            
+            <div class="mb-4">
+                <label class="block mb-1.5 font-semibold text-xs text-gray-700" for="userName">ชื่อผู้ส่งมอบ (User Name) <span class="text-pink-500">*</span></label>
+                <input type="text" id="userName" placeholder="ระบุชื่อ-นามสกุล ผู้ส่งมอบ" class="w-full px-4 py-2.5 border border-pink-200 rounded-xl text-sm bg-white focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all shadow-sm">
+            </div>
+
+            <p class="text-xs text-gray-500 mb-2 font-medium">กรุณาเซ็นชื่อลงในช่องสี่เหลี่ยมด้านล่าง ✨</p>
             
             <div class="border-2 border-dashed border-pink-300 rounded-2xl bg-white mb-4 overflow-hidden relative shadow-inner">
-                <canvas id="signatureCanvas" class="w-full h-48 cursor-crosshair touch-none"></canvas>
+                <canvas id="signatureCanvas" class="w-full h-48 cursor-crosshair touch-none block"></canvas>
             </div>
             
             <div class="flex justify-between items-center">
@@ -382,6 +378,22 @@
                     <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-medium" onclick="closeModal('signatureModal')">ยกเลิก</button>
                     <button type="button" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-2 rounded-xl text-xs font-semibold shadow-md" onclick="submitStockIn()">ยืนยันบันทึกข้อมูล</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2.5: Confirmation Modal after Direct Save -->
+    <div id="confirmSignModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center">
+            <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                ✅
+            </div>
+            <h3 class="text-gray-800 font-bold text-base mb-1">บันทึกข้อมูลเรียบร้อยแล้ว ✨</h3>
+            <p id="savedStockInInfo" class="text-xs font-semibold text-pink-600 mb-3"></p>
+            <p class="text-xs text-gray-600 mb-5 leading-relaxed">คุณต้องการลงลายมือชื่อยืนยันการส่งมอบตอนนี้เลยหรือไม่?</p>
+            <div class="flex gap-2">
+                <button type="button" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-xl text-xs font-medium transition-all" onclick="finishWithoutSignature()">ไว้ทีหลัง</button>
+                <button type="button" class="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-2.5 rounded-xl text-xs font-semibold shadow-md transition-all" onclick="proceedToSignatureFromSave()">ใช่ (ลงชื่อ)</button>
             </div>
         </div>
     </div>
@@ -415,23 +427,21 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- CONFIGURATION ---
         const API_URL = "https://script.google.com/macros/s/AKfycbwBGas7woh3Zn4w3dJa1BkqcgI17nlHqm1bmCpQiGE9qQX_J28lc8bVLixs2dl7QguS/exec";
 
-        // --- STATE MANAGEMENT ---
         let selectedAssetsList = [];
         let globalDepartments = [];
         let pendingAuditItem = null;
         let base64PhotoData = "";
         let html5QrCode = null;
+        let lastSavedStockInNo = "";
+        let canvas, ctx, isDrawing = false;
 
         window.onload = function() {
-            // Display User Info from auth-check
             const currentUser = getCurrentUser();
             if (currentUser) {
                 document.getElementById('headerDisplayName').innerText = getDisplayName();
                 document.getElementById('headerUserPN').innerText = `ID: ${currentUser.UserPN} | ${currentUser.UserTypeID || 'User'}`;
-                // Auto fill IT User field if available
                 const itUserField = document.getElementById('itUser');
                 if (itUserField && currentUser.UserPN) {
                     itUserField.value = currentUser.UserPN;
@@ -445,7 +455,6 @@
             initSignatureCanvas();
             initHtml5QrCode();
 
-            // Setup Custom Searchable Dropdown for Departments
             const depInput = document.getElementById('depInput');
             const depList = document.getElementById('depList');
 
@@ -488,7 +497,6 @@
             }
         }
 
-        // --- FETCH DEPARTMENTS ---
         async function loadDepartments() {
             showLoading();
             try {
@@ -524,7 +532,6 @@
             });
         }
 
-        // --- SEARCH ASSET LOGIC (Instant on Type) ---
         function debouncedSearch() {
             clearTimeout(window.sTimeout);
             const q = document.getElementById('assetQuery').value.trim();
@@ -626,7 +633,6 @@
             }
         }
 
-        // --- QR SCANNER INTEGRATION ---
         function initHtml5QrCode() {
             if (typeof Html5Qrcode !== 'undefined') {
                 html5QrCode = new Html5Qrcode("reader");
@@ -667,7 +673,6 @@
             closeModal('scannerModal'); 
         }
 
-        // --- AUDIT MODAL (Status & Photo) ---
         function prepareAuditItem(item) {
             const exists = selectedAssetsList.some(a => a.AssetID === item.AssetID);
             if (exists) {
@@ -758,59 +763,83 @@
             });
         }
 
-        // --- SIGNATURE CANVAS ---
-        let canvas, ctx, isDrawing = false;
-
         function initSignatureCanvas() {
             canvas = document.getElementById('signatureCanvas');
             ctx = canvas.getContext('2d');
 
-            function resize() {
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * window.devicePixelRatio;
-                canvas.height = rect.height * window.devicePixelRatio;
-                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#db2777';
-            }
-            setTimeout(resize, 100);
-
-            canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-            canvas.addEventListener('mousemove', (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
-            canvas.addEventListener('mouseup', () => isDrawing = false);
-            canvas.addEventListener('mouseleave', () => isDrawing = false);
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
 
             canvas.addEventListener('touchstart', (e) => {
+                const pos = getTouchPos(canvas, e);
                 isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
                 ctx.beginPath();
-                ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                ctx.moveTo(pos.x, pos.y);
                 e.preventDefault();
             }, { passive: false });
 
             canvas.addEventListener('touchmove', (e) => {
                 if (isDrawing) {
-                    const rect = canvas.getBoundingClientRect();
-                    ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                    const pos = getTouchPos(canvas, e);
+                    ctx.lineTo(pos.x, pos.y);
                     ctx.stroke();
                     e.preventDefault();
                 }
             }, { passive: false });
-            canvas.addEventListener('touchend', () => isDrawing = false);
+
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#db2777';
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function getTouchPos(canvasDom, touchEvent) {
+            const rect = canvasDom.getBoundingClientRect();
+            return {
+                x: touchEvent.touches[0].clientX - rect.left,
+                y: touchEvent.touches[0].clientY - rect.top
+            };
         }
 
         function clearSignature() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
         }
 
         function openSignatureModal() {
             const itUser = document.getElementById('itUser').value.trim();
             const depId = document.getElementById('depId').value;
             const sourceType = document.getElementById('sourceType').value;
-            const userName = document.getElementById('userName').value.trim();
 
-            if (!itUser || !depId || !sourceType || !userName) {
+            if (!itUser || !depId || !sourceType) {
                 showAlert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกข้อมูลรับเข้าในช่องที่มีเครื่องหมาย * ให้ครบถ้วนนะจ๊ะ ✨");
                 return;
             }
@@ -820,11 +849,95 @@
             }
 
             showModal('signatureModal');
-            setTimeout(() => { clearSignature(); }, 150);
+            setTimeout(() => {
+                resizeCanvas();
+                clearSignature();
+            }, 100);
         }
 
-        // --- SUBMIT TO BACKEND ---
+        async function saveStockInDirect() {
+            const itUser = document.getElementById('itUser').value.trim();
+            const depId = document.getElementById('depId').value;
+            const sourceType = document.getElementById('sourceType').value;
+
+            if (!itUser || !depId || !sourceType) {
+                showAlert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกข้อมูลรับเข้าในช่องที่มีเครื่องหมาย * ให้ครบถ้วนนะจ๊ะ ✨");
+                return;
+            }
+            if (selectedAssetsList.length === 0) {
+                showAlert("ข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการครุภัณฑ์อย่างน้อย 1 รายการเพื่อบันทึกรับเข้า ✨");
+                return;
+            }
+
+            const payloadObject = {
+                action: 'saveStockIn',
+                payload: {
+                    itUser: document.getElementById('itUser').value,
+                    depId: document.getElementById('depId').value,
+                    sourceType: document.getElementById('sourceType').value,
+                    referenceNo: document.getElementById('referenceNo').value,
+                    userName: "-",
+                    signatureBase64: "",
+                    items: selectedAssetsList
+                }
+            };
+
+            showLoading();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payloadObject)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    lastSavedStockInNo = result.stockInNo;
+                    document.getElementById('savedStockInInfo').innerText = `เลขที่ Stock In: ${result.stockInNo}`;
+                    showModal('confirmSignModal');
+                } else {
+                    showAlert("❌ เกิดข้อผิดพลาด", result.message || "ไม่สามารถบันทึกข้อมูลได้");
+                }
+            } catch (error) {
+                showAlert("ข้อผิดพลาดระบบ", "การเชื่อมต่อเพื่อบันทึกข้อมูลล้มเหลว: " + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function proceedToSignatureFromSave() {
+            closeModal('confirmSignModal');
+            openSignatureModal();
+        }
+
+        function finishWithoutSignature() {
+            closeModal('confirmSignModal');
+            resetStockInForm();
+            showAlert("✨ สำเร็จ", "บันทึกข้อมูลเข้าสู่ระบบเรียบร้อยแล้วจ้า");
+        }
+
+        function resetStockInForm() {
+            document.getElementById('stockInForm').reset();
+            document.getElementById('depInput').value = "";
+            document.getElementById('depId').value = "";
+            document.getElementById('userName').value = "";
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.UserPN) {
+                document.getElementById('itUser').value = currentUser.UserPN;
+            }
+            selectedAssetsList = [];
+            updateSelectedAssetsTable();
+            clearSignature();
+        }
+
         async function submitStockIn() {
+            const userName = document.getElementById('userName').value.trim();
+            if (!userName) {
+                showAlert("คำเตือน", "กรุณากรอกชื่อผู้ส่งมอบ (User Name) ด้วยนะจ๊ะ ✨");
+                return;
+            }
+
             const blankCanvas = document.createElement('canvas');
             blankCanvas.width = canvas.width;
             blankCanvas.height = canvas.height;
@@ -841,7 +954,7 @@
                     depId: document.getElementById('depId').value,
                     sourceType: document.getElementById('sourceType').value,
                     referenceNo: document.getElementById('referenceNo').value,
-                    userName: document.getElementById('userName').value,
+                    userName: userName,
                     signatureBase64: signatureBase64,
                     items: selectedAssetsList
                 }
@@ -859,15 +972,8 @@
                 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    showAlert("✅ บันทึกสำเร็จ", `บันทึกข้อมูลเข้าสู่ระบบเรียบร้อยแล้วจ้า ✨\nเลขที่ Stock In: ${result.stockInNo}\nจำนวนรายการ: ${result.itemCount} รายการ`);
-                    document.getElementById('stockInForm').reset();
-                    const currentUser = getCurrentUser();
-                    if(currentUser && currentUser.UserPN) {
-                        document.getElementById('itUser').value = currentUser.UserPN;
-                    }
-                    selectedAssetsList = [];
-                    updateSelectedAssetsTable();
-                    clearSignature();
+                    showAlert("✅ บันทึกสำเร็จ", `บันทึกข้อมูลและลงลายมือชื่อเรียบร้อยแล้วจ้า ✨\nเลขที่ Stock In: ${result.stockInNo}\nจำนวนรายการ: ${result.itemCount} รายการ`);
+                    resetStockInForm();
                 } else {
                     showAlert("❌ เกิดข้อผิดพลาด", result.message || "ไม่สามารถบันทึกข้อมูลได้");
                 }
@@ -878,20 +984,6 @@
             }
         }
 
-        function draftData() {
-            const draft = {
-                itUser: document.getElementById('itUser').value,
-                depId: document.getElementById('depId').value,
-                sourceType: document.getElementById('sourceType').value,
-                referenceNo: document.getElementById('referenceNo').value,
-                userName: document.getElementById('userName').value,
-                items: selectedAssetsList
-            };
-            localStorage.setItem('stockInDraft', JSON.stringify(draft));
-            showAlert("บันทึกฉบับร่าง ✨", "ข้อมูลฟอร์มถูกพักไว้ในอุปกรณ์เรียบร้อยแล้วจ้า");
-        }
-
-        // --- UI HELPERS ---
         function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
         function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
