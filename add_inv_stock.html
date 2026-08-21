@@ -753,7 +753,7 @@
                 tr.className = "border-b border-pink-100 hover:bg-pink-50/35 transition-all";
                 
                 const stockInNo = rec.Stock_In_No || "-";
-                const timestamp = rec.Timestamp || "-";
+                const timestamp = rec.Date_Time || "-";
                 const deptName = rec.DEPT_ID || "-";
                 const userName = rec.User_Name || "-";
                 const signatureUrl = rec.User_Confirm || "";
@@ -808,7 +808,7 @@
                 tr.className = "border-b border-purple-100 hover:bg-purple-50/35 transition-all";
                 
                 const stockOutNo = rec.Stock_Out_No || "-";
-                const timestamp = rec.Timestamp || "-";
+                const timestamp = rec.Date_Time || "-";
                 const deptId = rec.DEPT_ID || "-";
                 const itUser = rec.IT_User || "-";
                 const signatureUrl = rec.User_Confirm || "";
@@ -906,7 +906,7 @@
                     <div class="grid grid-cols-2 gap-2 bg-pink-50/60 p-3 rounded-xl border border-pink-100">
                         <p><b>เลขที่ Stock In:</b> ${record.Stock_In_No || '-'}</p>
                         <p><b>รหัส Stock In ID:</b> ${record.Stock_In_ID || '-'}</p>
-                        <p><b>วันที่เวลา:</b> ${record.Timestamp || '-'}</p>
+                        <p><b>วันที่เวลา:</b> ${record.Date_Time || '-'}</p>
                         <p><b>หน่วยงาน:</b> ${record.DEPT_ID || '-'}</p>
                         <p><b>ประเภทรับเข้า:</b> ${record.sourceType || '-'}</p>
                         <p><b>เลขอ้างอิง:</b> ${record.referenceNo || '-'}</p>
@@ -920,7 +920,7 @@
                     <div class="grid grid-cols-2 gap-2 bg-purple-50/60 p-3 rounded-xl border border-purple-100">
                         <p><b>เลขที่ Stock Out:</b> ${record.Stock_Out_No || '-'}</p>
                         <p><b>รหัส Stock Out ID:</b> ${record.Stock_Out_ID || '-'}</p>
-                        <p><b>วันที่เวลา:</b> ${record.Timestamp || '-'}</p>
+                        <p><b>วันที่เวลา:</b> ${record.Date_Time || '-'}</p>
                         <p><b>หน่วยงาน:</b> ${record.DEPT_ID || '-'}</p>
                         <p><b>ผู้ใช้งาน IT:</b> ${record.IT_User || '-'}</p>
                     </div>
@@ -1496,7 +1496,7 @@
                             tr.innerHTML = `
                                 <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
                                 <td class="border border-gray-300 p-2 font-bold">${row.Stock_In_No || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.Timestamp || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.sourceType || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.User_Name || '-'}</td>
@@ -1529,7 +1529,7 @@
                             tr.innerHTML = `
                                 <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
                                 <td class="border border-gray-300 p-2 font-bold">${row.Stock_Out_No || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.Timestamp || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.IT_User || '-'}</td>
                                 <td class="border border-gray-300 p-2 text-center">${signed}</td>
