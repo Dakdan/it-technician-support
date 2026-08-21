@@ -5,13 +5,9 @@
     <link rel="icon" type="image/png" href="logo003v1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
-    <!-- Google Font: Kanit -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- HTML5 QR Code Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
@@ -80,14 +76,15 @@
             box-shadow: 0 15px 30px -5px rgba(236, 72, 153, 0.2);
         }
 
+        /* Thermal Receipt Slip Print Mode (80mm) */
         @media print {
-            @page {
+            body.printing-receipt @page {
                 size: 80mm auto;
                 margin: 0;
             }
-            body, body * { visibility: hidden !important; }
-            #recordDetailModal, #recordDetailModal * { visibility: visible !important; }
-            #recordDetailModal {
+            body.printing-receipt, body.printing-receipt * { visibility: hidden !important; }
+            body.printing-receipt #recordDetailModal, body.printing-receipt #recordDetailModal * { visibility: visible !important; }
+            body.printing-receipt #recordDetailModal {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -101,26 +98,19 @@
                 font-size: 11px !important;
                 overflow: visible !important;
             }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            
-            #recordDetailModal table {
-                font-size: 10px !important;
-            }
-            #recordDetailModal th, #recordDetailModal td {
-                padding: 4px 2px !important;
-            }
+            body.printing-receipt .no-print { display: none !important; }
+            body.printing-receipt .print-only-receipt { display: block !important; }
         }
 
-        /* Dedicated Media Print Rule for A4 Reports Tab */
+        /* Formal A4 Report Print Mode */
         @media print {
             body.printing-a4 @page {
                 size: A4 portrait;
                 margin: 15mm;
             }
             body.printing-a4, body.printing-a4 * { visibility: hidden !important; }
-            body.printing-a4 #printArea, body.printing-a4 #printArea * { visibility: visible !important; }
-            body.printing-a4 #printArea {
+            body.printing-a4 #a4ReportModal, body.printing-a4 #a4ReportModal * { visibility: visible !important; }
+            body.printing-a4 #a4ReportModal {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -133,14 +123,16 @@
                 border: none !important;
                 font-size: 12pt !important;
             }
+            body.printing-a4 .no-print { display: none !important; }
+            body.printing-a4 .print-only-a4 { display: block !important; }
         }
         
-        .print-only { display: none; }
+        .print-only-receipt { display: none; }
+        .print-only-a4 { display: none; }
     </style>
 </head>
 <body class="relative min-h-screen pb-12">
 
-    <!-- Auth-Check Script Integration -->
     <script>
         (function () {
             try {
@@ -183,8 +175,8 @@
     <!-- Watermark -->
     <div class="watermark">IT UDON HOSP ✨</div>
 
-    <!-- Header Section -->
-    <header class="bg-gradient-to-r from-pink-500 via-pink-400 to-purple-500 text-white shadow-lg relative z-10 border-b-4 border-pink-200">
+    <!-- Header Section (Fixed at top, diagonal pink-dominant background) -->
+    <header class="sticky top-0 z-50 text-white shadow-lg border-b-4 border-pink-300" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
         <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center">
                 <div class="relative">
@@ -201,7 +193,7 @@
             </div>
 
             <!-- User Info & Logout Badge -->
-            <div class="bg-white/20 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
+            <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
                 <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
                     👤
                 </div>
@@ -217,7 +209,7 @@
     </header>
 
     <!-- Tabs Navigation -->
-    <nav class="max-w-6xl mx-auto mt-4 px-4 relative z-10">
+    <nav class="max-w-6xl mx-auto mt-4 px-4 relative z-40">
         <div class="glass-card rounded-2xl p-1.5 flex gap-1 shadow-sm overflow-x-auto">
             <button id="btnTabDashboard" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('dashboard', event)">
                 📊 สรุปรายการ
@@ -235,7 +227,7 @@
                 📦 คลังครุภัณฑ์
             </button>
             <button id="btnTabReports" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('reports', event)">
-                🖨️ ออกใบสลิป
+                🖨️ รายงาน
             </button>
         </div>
     </nav>
@@ -276,8 +268,8 @@
                 <form id="stockInForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="form-group">
-                            <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="itUser">รหัสผู้ใช้งาน IT (IT_User) <span class="text-pink-500">*</span></label>
-                            <input type="text" id="itUser" required placeholder="เช่น IT001" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm">
+                            <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="itUser">ชื่อ-นามสกุล ผู้ใช้งาน IT (IT_User) <span class="text-pink-500">*</span></label>
+                            <input type="text" id="itUser" required placeholder="ชื่อ-นามสกุล ผู้ใช้งาน IT" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm">
                         </div>
                         
                         <div class="form-group relative">
@@ -371,6 +363,7 @@
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-pink-100/70 text-pink-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5 text-center w-16">เลขหน้า</th>
                                 <th class="p-3.5">เลขที่ Stock In</th>
                                 <th class="p-3.5">วันที่ / เวลา</th>
                                 <th class="p-3.5">หน่วยงาน</th>
@@ -382,12 +375,11 @@
                         </thead>
                         <tbody id="stockInTableBody">
                             <tr>
-                                <td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                                <td colspan="8" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Controls for Stock In -->
                 <div id="stockInPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
@@ -407,6 +399,7 @@
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-purple-100/70 text-purple-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5 text-center w-16">เลขหน้า</th>
                                 <th class="p-3.5">เลขที่ Stock Out</th>
                                 <th class="p-3.5">วันที่ / เวลา</th>
                                 <th class="p-3.5">หน่วยงาน</th>
@@ -418,12 +411,11 @@
                         </thead>
                         <tbody id="stockOutTableBody">
                             <tr>
-                                <td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                                <td colspan="8" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Controls for Stock Out -->
                 <div id="stockOutPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
@@ -443,6 +435,7 @@
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-indigo-100/70 text-indigo-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5 text-center w-16">เลขหน้า</th>
                                 <th class="p-3.5">Inv No</th>
                                 <th class="p-3.5">ID ครุภัณฑ์ (Asset / NOID)</th>
                                 <th class="p-3.5">รายละเอียด & สเปค</th>
@@ -453,12 +446,11 @@
                         </thead>
                         <tbody id="inventoryTableBody">
                             <tr>
-                                <td colspan="6" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                                <td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Controls for Inventory -->
                 <div id="inventoryPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
@@ -467,40 +459,40 @@
         <div id="tab-reports" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
-                    🖨️ ออกใบสลิปและเอกสารรายงาน (A4 Formal Print)
+                    🖨️ ออกเอกสารรายงานทางการ (A4 Formal Report)
                 </h3>
-                <p class="text-gray-500 text-xs md:text-sm mb-4">พิมพ์รายงานสรุปรายการรับเข้าและจ่ายออกในรูปแบบกระดาษ A4 ทางการ ✨</p>
+                <p class="text-gray-500 text-xs md:text-sm mb-4">เลือกประเภทรายงานเพื่อแสดงรายชื่อเอกสาร และกดปุ่มพิมพ์รายงาน A4 แยกตามแต่ละรายการได้ทันที ✨</p>
                 <div class="flex flex-wrap gap-3 mb-6">
-                    <button onclick="generatePrintReport('stockIn')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
-                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานรับเข้า (A4 Stock In Report)
+                    <button onclick="loadReportList('stockIn')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> รายการรับเข้า (Stock In Reports)
                     </button>
-                    <button onclick="generatePrintReport('stockOut')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
-                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานจ่ายออก (A4 Stock Out Report)
+                    <button onclick="loadReportList('stockOut')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> รายการจ่ายออก (Stock Out Reports)
                     </button>
                 </div>
                 
                 <!-- Print Preview Area -->
-                <div id="printArea" class="bg-white p-6 rounded-2xl border border-gray-200 shadow-inner">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-inner">
                     <div class="text-center mb-6">
                         <h2 class="text-lg font-bold text-gray-800">โรงพยาบาลอุดรธานี - กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</h2>
-                        <p id="printTitle" class="text-sm text-pink-600 font-medium">รายงานสรุปข้อมูลคลังครุภัณฑ์คอมพิวเตอร์</p>
+                        <p id="printTitle" class="text-sm text-pink-600 font-medium">รายการเอกสารสำหรับพิมพ์รายงาน A4</p>
                         <p class="text-[11px] text-gray-400" id="printTimestamp">-</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs border-collapse border border-gray-300">
                             <thead>
                                 <tr id="printTableHeader" class="bg-gray-100 text-gray-700">
-                                    <th class="border border-gray-300 p-2">ลำดับ</th>
+                                    <th class="border border-gray-300 p-2 text-center w-12">ลำดับ</th>
                                     <th class="border border-gray-300 p-2">เลขที่เอกสาร</th>
-                                    <th class="border border-gray-300 p-2">วันที่</th>
+                                    <th class="border border-gray-300 p-2">วันที่เวลา</th>
                                     <th class="border border-gray-300 p-2">หน่วยงาน</th>
-                                    <th class="border border-gray-300 p-2">ผู้เกี่ยวข้อง</th>
                                     <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                                    <th class="border border-gray-300 p-2 text-center w-36">พิมพ์รายงาน A4</th>
                                 </tr>
                             </thead>
                             <tbody id="printTableBody">
                                 <tr>
-                                    <td colspan="6" class="text-center p-6 text-gray-400">กรุณาเลือกประเภทรายงานด้านบนเพื่อแสดงข้อมูล</td>
+                                    <td colspan="6" class="text-center p-6 text-gray-400">กรุณาเลือกประเภทรายงานด้านบนเพื่อแสดงข้อมูลรายการ</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -602,7 +594,7 @@
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto">
             
             <!-- Convenience Store Receipt Style Print Header -->
-            <div class="print-only text-center mb-4 border-b border-dashed border-gray-400 pb-3">
+            <div class="print-only-receipt text-center mb-4 border-b border-dashed border-gray-400 pb-3">
                 <h2 class="text-sm font-bold text-gray-900 mb-0.5">โรงพยาบาลอุดรธานี</h2>
                 <p class="text-[10px] text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
                 <p class="text-[10px] text-gray-600 font-semibold mt-1">ใบรับเข้า/ส่งมอบครุภัณฑ์คอมพิวเตอร์</p>
@@ -613,10 +605,10 @@
                     📄 รายละเอียดเอกสาร <span id="detailDocNo" class="text-gray-800 bg-pink-100 px-3 py-1 rounded-xl shadow-inner"></span>
                 </h3>
                 <div class="flex items-center flex-wrap gap-2">
-                    <button onclick="printDetailModal()" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
-                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์สลิป (Print Slip)
+                    <button onclick="printReceiptSlip()" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์สลิป (Receipt Slip)
                     </button>
-                    <button onclick="printDetailModal()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
+                    <button onclick="openA4ReportModal()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
                         <i data-lucide="file-text" class="w-4 h-4"></i> สร้างรายงาน
                     </button>
                     <button onclick="closeModal('recordDetailModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-xl transition-all ml-1">✕</button>
@@ -634,6 +626,29 @@
                         ✍️ ไปยังหน้าลงลายมือชื่อ
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3.5: Formal A4 Report Modal -->
+    <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
+            
+            <div class="flex justify-between items-center border-b border-gray-300 pb-4 mb-6 no-print">
+                <h3 class="text-gray-800 font-bold text-lg flex items-center gap-2">
+                    🖨️ ตัวอย่างรายงานทางการ (A4 Formal Report)
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="printA4ReportModal()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์เอกสาร A4
+                    </button>
+                    <button onclick="closeModal('a4ReportModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-xl transition-all ml-1">✕</button>
+                </div>
+            </div>
+
+            <!-- Printable A4 Area -->
+            <div id="a4ReportContent" class="space-y-6 text-sm text-gray-800 p-4">
+                <!-- Dynamically populated formal A4 report layout -->
             </div>
         </div>
     </div>
@@ -665,7 +680,6 @@
         <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังสื่อสารกับฐานข้อมูล Google Sheets...</p>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwBGas7woh3Zn4w3dJa1BkqcgI17nlHqm1bmCpQiGE9qQX_J28lc8bVLixs2dl7QguS/exec";
 
@@ -680,23 +694,21 @@
         let lastSavedStockInNo = "";
         let activeDetailRecord = null;
         let canvas, ctx, isDrawing = false;
-
-        // Pagination State Variables
+        
         const ITEMS_PER_PAGE = 10;
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
         let currentInventoryPage = 1;
 
-        // Safe JSON API fetch wrapper to prevent SyntaxError: Unexpected token '<'
         async function fetchAPI(url, options = {}) {
             try {
-                const res = await fetch(url, options);
-                const text = await res.text();
+                const response = await fetch(url, options);
+                const text = await response.text();
                 try {
                     return JSON.parse(text);
-                } catch (jsonErr) {
-                    console.error("Non-JSON API response received:", text.substring(0, 150));
-                    throw new Error("เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (ข้อมูลไม่ใช่รูปแบบ JSON)");
+                } catch (e) {
+                    console.error("Non-JSON Response received:", text);
+                    throw new Error("เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (Non-JSON)");
                 }
             } catch (err) {
                 console.error("API Fetch Error:", err);
@@ -711,8 +723,8 @@
                 document.getElementById('headerDisplayName').innerText = fullName;
                 document.getElementById('headerUserPN').innerText = `ID: ${currentUser.UserPN} | ${currentUser.UserTypeID || 'User'}`;
                 const itUserField = document.getElementById('itUser');
-                if (itUserField && (currentUser.UserName || currentUser.UserPN)) {
-                    itUserField.value = currentUser.UserName ? `${currentUser.UserName} ${currentUser.UserSname || ''}`.trim() : currentUser.UserPN;
+                if (itUserField && fullName) {
+                    itUserField.value = fullName;
                 }
             } else {
                 document.getElementById('headerDisplayName').innerText = "ผู้ใช้งานทั่วไป (Guest)";
@@ -794,9 +806,9 @@
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => [])
                 ]);
 
-                if (Array.isArray(resIn)) globalStockInRecords = resIn.reverse();
-                if (Array.isArray(resOut)) globalStockOutRecords = resOut.reverse();
-                if (Array.isArray(resInv)) globalInventoryRecords = resInv.reverse();
+                if (Array.isArray(resIn)) globalStockInRecords = resIn.slice().reverse();
+                if (Array.isArray(resOut)) globalStockOutRecords = resOut.slice().reverse();
+                if (Array.isArray(resInv)) globalInventoryRecords = resInv.slice().reverse();
 
                 const inCount = globalStockInRecords.length;
                 const outCount = globalStockOutRecords.length;
@@ -814,7 +826,7 @@
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockIn`);
-                globalStockInRecords = Array.isArray(data) ? data.reverse() : [];
+                globalStockInRecords = Array.isArray(data) ? data.slice().reverse() : [];
                 currentStockInPage = 1;
                 renderStockInTable(globalStockInRecords);
             } catch (err) {
@@ -832,7 +844,7 @@
             paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกรับเข้าในระบบ</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกรับเข้าในระบบ</td></tr>';
                 return;
             }
 
@@ -843,10 +855,11 @@
             const endIndex = startIndex + ITEMS_PER_PAGE;
             const paginatedRecords = records.slice(startIndex, endIndex);
 
-            paginatedRecords.forEach(rec => {
+            paginatedRecords.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-pink-100 hover:bg-pink-50/35 transition-all";
                 
+                const pageNumber = startIndex + idx + 1;
                 const stockInNo = rec.Stock_In_No || "-";
                 const timestamp = rec.Date_Time || "-";
                 const deptName = rec.DEPT_ID || "-";
@@ -860,6 +873,7 @@
                     `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-semibold">รอลงชื่อ</span>`;
 
                 tr.innerHTML = `
+                    <td class="p-3.5 text-center font-bold text-gray-500">${pageNumber}</td>
                     <td class="p-3.5 font-bold text-pink-600">${stockInNo}</td>
                     <td class="p-3.5 text-gray-600">${timestamp}</td>
                     <td class="p-3.5 text-gray-700 font-medium">${deptName}</td>
@@ -891,7 +905,7 @@
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockOut`);
-                globalStockOutRecords = Array.isArray(data) ? data.reverse() : [];
+                globalStockOutRecords = Array.isArray(data) ? data.slice().reverse() : [];
                 currentStockOutPage = 1;
                 renderStockOutTable(globalStockOutRecords);
             } catch (err) {
@@ -909,7 +923,7 @@
             paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกจ่ายออกในระบบ (Inv_Status = Out)</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกจ่ายออกในระบบ (Inv_Status = Out)</td></tr>';
                 return;
             }
 
@@ -920,10 +934,11 @@
             const endIndex = startIndex + ITEMS_PER_PAGE;
             const paginatedRecords = records.slice(startIndex, endIndex);
 
-            paginatedRecords.forEach(rec => {
+            paginatedRecords.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-purple-100 hover:bg-purple-50/35 transition-all";
                 
+                const pageNumber = startIndex + idx + 1;
                 const stockOutNo = rec.Stock_Out_No || "-";
                 const timestamp = rec.Date_Time || "-";
                 const deptId = rec.DEPT_ID || "-";
@@ -937,6 +952,7 @@
                     `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-semibold">รอลงชื่อ</span>`;
 
                 tr.innerHTML = `
+                    <td class="p-3.5 text-center font-bold text-gray-500">${pageNumber}</td>
                     <td class="p-3.5 font-bold text-purple-600">${stockOutNo}</td>
                     <td class="p-3.5 text-gray-600">${timestamp}</td>
                     <td class="p-3.5 text-gray-700 font-medium">${deptId}</td>
@@ -968,7 +984,7 @@
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getInventory`);
-                globalInventoryRecords = Array.isArray(data) ? data.reverse() : [];
+                globalInventoryRecords = Array.isArray(data) ? data.slice().reverse() : [];
                 currentInventoryPage = 1;
                 renderInventoryTable(globalInventoryRecords);
             } catch (err) {
@@ -986,7 +1002,7 @@
             paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบรายการครุภัณฑ์ในคลัง</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบรายการครุภัณฑ์ในคลัง</td></tr>';
                 return;
             }
 
@@ -997,10 +1013,11 @@
             const endIndex = startIndex + ITEMS_PER_PAGE;
             const paginatedRecords = records.slice(startIndex, endIndex);
 
-            paginatedRecords.forEach(rec => {
+            paginatedRecords.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-indigo-100 hover:bg-indigo-50/30 transition-all";
                 
+                const pageNumber = startIndex + idx + 1;
                 const invNo = rec.Inv_No || "-";
                 const assetId = rec.AssetID || rec.Asset_ID || rec.NOID || rec.NoID || "-";
                 const detail = rec.Asset_FullDescription || rec.FullDescription || rec.Spec_Detai || "-";
@@ -1012,6 +1029,7 @@
                 let imgEl = imgUrl ? `<img src="${imgUrl}" class="w-10 h-10 object-cover rounded-xl border border-indigo-200 mx-auto" onerror="this.style.display='none'">` : `<span class="text-gray-300 text-xs">ไม่มีรูป</span>`;
 
                 tr.innerHTML = `
+                    <td class="p-3.5 text-center font-bold text-gray-500">${pageNumber}</td>
                     <td class="p-3.5 font-bold text-indigo-600">${invNo}</td>
                     <td class="p-3.5 font-semibold text-gray-800">${assetId}</td>
                     <td class="p-3.5 text-gray-600 text-xs leading-tight">${detail}</td>
@@ -1039,7 +1057,6 @@
             renderInventoryTable(globalInventoryRecords);
         }
 
-        // Helper Function: แปลง Google Drive Link เป็น Image Link สำหรับแสดงผล
         function getDriveImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/(.+?)\//);
@@ -1108,13 +1125,12 @@
             if (Array.isArray(record.items) && record.items.length > 0) {
                 html += `
                     <div class="overflow-hidden border border-gray-200 rounded-xl shadow-sm">
-                        <table class="w-full text-left text-xs print:text-[11px]">
+                        <table class="w-full text-left text-xs">
                             <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
                                 <tr>
-                                    <th class="p-3 text-center w-12 font-bold">ลำดับ</th>
-                                    <th class="p-3 font-bold">Inv No</th>
-                                    <th class="p-3 font-bold">ID ครุภัณฑ์</th>
-                                    <th class="p-3 font-bold w-1/3">รายละเอียด & ประเภท</th>
+                                    <th class="p-3 text-center w-12 font-bold">เลขหน้า</th>
+                                    <th class="p-3 font-bold">รหัส</th>
+                                    <th class="p-3 font-bold w-1/2">รายละเอียด</th>
                                     <th class="p-3 text-center font-bold">S/N & อายุ</th>
                                     <th class="p-3 text-center font-bold">สถานะ</th>
                                 </tr>
@@ -1133,7 +1149,6 @@
                     html += `
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="p-3 text-center font-bold text-gray-500">${index + 1}</td>
-                            <td class="p-3 font-semibold text-gray-700">${iNo}</td>
                             <td class="p-3 text-pink-600 font-bold">${aId}</td>
                             <td class="p-3 leading-relaxed text-gray-800">${desc}</td>
                             <td class="p-3 text-center text-gray-600 whitespace-nowrap">
@@ -1222,8 +1237,217 @@
             showModal('recordDetailModal');
         }
 
-        function printDetailModal() {
+        function printReceiptSlip() {
+            document.body.classList.add('printing-receipt');
             window.print();
+            document.body.classList.remove('printing-receipt');
+        }
+
+        function openA4ReportModal() {
+            if (!activeDetailRecord) return;
+            const { type, record } = activeDetailRecord;
+            
+            const docNo = type === 'stockIn' ? (record.Stock_In_No || '-') : (record.Stock_Out_No || '-');
+            const docId = type === 'stockIn' ? (record.Stock_In_ID || record.Doc_ID || '-') : (record.Stock_Out_ID || '-');
+            const dateTime = record.Date_Time || record.Timestamp || '-';
+            const deptId = record.DEPT_ID || '-';
+            const sourceType = record.Source_Type || record.sourceType || '-';
+            const refNo = record.Reference_No || record.referenceNo || '-';
+            const signatureUrl = getDriveImageUrl(record.User_Confirm || '');
+            const itUserText = record.IT_User || record.itUser || '-';
+            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
+
+            let html = `
+                <div class="text-center mb-6 border-b-2 border-gray-800 pb-4">
+                    <h2 class="text-xl font-bold text-gray-900">โรงพยาบาลอุดรธานี</h2>
+                    <p class="text-xs text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    <h3 class="text-base font-bold text-pink-600 mt-2">${type === 'stockIn' ? 'รายงานใบรับเข้าครุภัณฑ์คอมพิวเตอร์' : 'รายงานใบจ่ายออกครุภัณฑ์คอมพิวเตอร์'}</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p><strong>เลขที่เอกสาร:</strong> ${docNo}</p>
+                    <p><strong>รหัสอ้างอิงระบบ:</strong> ${docId}</p>
+                    <p><strong>วันที่ / เวลา:</strong> ${dateTime}</p>
+                    <p><strong>หน่วยงาน:</strong> ${deptId}</p>
+                    <p><strong>ประเภทรับเข้า:</strong> ${sourceType}</p>
+                    <p><strong>เลขอ้างอิง / Doc ID:</strong> ${refNo}</p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs text-gray-700 mb-2 uppercase tracking-wider">รายการครุภัณฑ์ย่อย</h4>
+                    <table class="w-full text-xs border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700">
+                                <th class="border border-gray-300 p-2 text-center w-12">เลขหน้า</th>
+                                <th class="border border-gray-300 p-2">รหัส (Asset ID)</th>
+                                <th class="border border-gray-300 p-2">รายละเอียด</th>
+                                <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (Array.isArray(record.items) && record.items.length > 0) {
+                record.items.forEach((item, idx) => {
+                    const iNo = item.Inv_No || '-';
+                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
+                    const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
+                    const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || '-';
+                    const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
+
+                    html += `
+                        <tr>
+                            <td class="border border-gray-300 p-2 text-center font-bold">${idx + 1}</td>
+                            <td class="border border-gray-300 p-2 font-bold text-pink-600">${aId}</td>
+                            <td class="border border-gray-300 p-2">${desc}</td>
+                            <td class="border border-gray-300 p-2 text-center">${stat}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                html += `<tr><td colspan="4" class="text-center p-4 text-gray-400">ไม่พบรายการครุภัณฑ์ย่อย</td></tr>`;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mt-12 pt-6 border-t border-gray-300 text-center text-xs break-inside-avoid">
+                    <div>
+                        <p class="font-bold mb-8">ลงชื่อผู้ดำเนินการ (IT)</p>
+                        <p class="font-semibold">(${itUserText})</p>
+                    </div>
+                    <div>
+                        <p class="font-bold mb-2">ลงชื่อผู้เกี่ยวข้อง (User)</p>
+            `;
+
+            if (signatureUrl && String(signatureUrl).trim().length > 5) {
+                html += `<img src="${signatureUrl}" class="h-14 mx-auto object-contain mb-1" alt="Signature"><p class="font-semibold">(${userNameText})</p>`;
+            } else {
+                html += `<div class="h-12 flex items-center justify-center text-gray-400 italic">ยังไม่มีลายมือชื่อ</div><p class="font-semibold">(${userNameText})</p>`;
+            }
+
+            html += `</div></div>`;
+
+            document.getElementById('a4ReportContent').innerHTML = html;
+            closeModal('recordDetailModal');
+            showModal('a4ReportModal');
+        }
+
+        function printA4ReportModal() {
+            document.body.classList.add('printing-a4');
+            window.print();
+            document.body.classList.remove('printing-a4');
+        }
+
+        async function loadReportList(type) {
+            showLoading();
+            const titleEl = document.getElementById('printTitle');
+            const headerEl = document.getElementById('printTableHeader');
+            const bodyEl = document.getElementById('printTableBody');
+            document.getElementById('printTimestamp').innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+
+            try {
+                if (type === 'stockIn') {
+                    titleEl.innerText = "รายการรับเข้าครุภัณฑ์ทั้งหมด (Asset Stock In List)";
+                    headerEl.innerHTML = `
+                        <th class="border border-gray-300 p-2 text-center w-12">ลำดับ</th>
+                        <th class="border border-gray-300 p-2">เลขที่ Stock In</th>
+                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
+                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
+                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                        <th class="border border-gray-300 p-2 text-center w-36">พิมพ์รายงาน A4</th>
+                    `;
+                    
+                    const res = await fetch(`${API_URL}?action=getStockIn`);
+                    const data = await res.json();
+                    globalStockInRecords = Array.isArray(data) ? data.slice().reverse() : [];
+                    bodyEl.innerHTML = '';
+
+                    if (!globalStockInRecords || globalStockInRecords.length === 0) {
+                        bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานรับเข้า</td></tr>';
+                    } else {
+                        globalStockInRecords.forEach((row, idx) => {
+                            const tr = document.createElement('tr');
+                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
+                            const docNo = row.Stock_In_No || '';
+                            tr.innerHTML = `
+                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
+                                <td class="border border-gray-300 p-2 font-bold text-pink-600">${docNo}</td>
+                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
+                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
+                                <td class="border border-gray-300 p-2 text-center">
+                                    <button onclick="openA4ReportModalFromList('stockIn', '${docNo}')" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow hover:from-pink-600 hover:to-rose-600 transition-all inline-flex items-center gap-1">
+                                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> พิมพ์รายงาน A4
+                                    </button>
+                                </td>
+                            `;
+                            bodyEl.appendChild(tr);
+                        });
+                    }
+                } else {
+                    titleEl.innerText = "รายการจ่ายออกครุภัณฑ์ทั้งหมด (Asset Stock Out List)";
+                    headerEl.innerHTML = `
+                        <th class="border border-gray-300 p-2 text-center w-12">ลำดับ</th>
+                        <th class="border border-gray-300 p-2">เลขที่ Stock Out</th>
+                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
+                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
+                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                        <th class="border border-gray-300 p-2 text-center w-36">พิมพ์รายงาน A4</th>
+                    `;
+                    
+                    const res = await fetch(`${API_URL}?action=getStockOut`);
+                    const data = await res.json();
+                    globalStockOutRecords = Array.isArray(data) ? data.slice().reverse() : [];
+                    bodyEl.innerHTML = '';
+
+                    if (!globalStockOutRecords || globalStockOutRecords.length === 0) {
+                        bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานจ่ายออก</td></tr>';
+                    } else {
+                        globalStockOutRecords.forEach((row, idx) => {
+                            const tr = document.createElement('tr');
+                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
+                            const docNo = row.Stock_Out_No || '';
+                            tr.innerHTML = `
+                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
+                                <td class="border border-gray-300 p-2 font-bold text-purple-600">${docNo}</td>
+                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
+                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
+                                <td class="border border-gray-300 p-2 text-center">
+                                    <button onclick="openA4ReportModalFromList('stockOut', '${docNo}')" class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow hover:from-purple-600 hover:to-indigo-600 transition-all inline-flex items-center gap-1">
+                                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> พิมพ์รายงาน A4
+                                    </button>
+                                </td>
+                            `;
+                            bodyEl.appendChild(tr);
+                        });
+                    }
+                }
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                console.error("Load report list error", err);
+                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลรายงานได้");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function openA4ReportModalFromList(type, docNo) {
+            let record = null;
+            if (type === 'stockIn') {
+                record = globalStockInRecords.find(r => r.Stock_In_No === docNo);
+            } else {
+                record = globalStockOutRecords.find(r => r.Stock_Out_No === docNo);
+            }
+            if (!record) {
+                showAlert("ไม่พบข้อมูล", "ไม่พบเอกสารหมายเลข " + docNo);
+                return;
+            }
+            activeDetailRecord = { type, record };
+            openA4ReportModal();
         }
 
         function openUpdateSignatureFromDetail() {
@@ -1630,8 +1854,9 @@
 
             const currentUser = getCurrentUser();
             const itUserField = document.getElementById('itUser');
+            const fullName = getDisplayName();
             if (currentUser && itUserField) {
-                itUserField.value = currentUser.UserName ? `${currentUser.UserName} ${currentUser.UserSname || ''}`.trim() : currentUser.UserPN;
+                itUserField.value = fullName;
             }
             selectedAssetsList = [];
             updateSelectedAssetsTable();
@@ -1700,91 +1925,6 @@
                 }
             } catch (error) {
                 showAlert("ข้อผิดพลาดระบบ", "การเชื่อมต่อเพื่อบันทึกข้อมูลล้มเหลว: " + error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function generatePrintReport(type) {
-            showLoading();
-            const titleEl = document.getElementById('printTitle');
-            const headerEl = document.getElementById('printTableHeader');
-            const bodyEl = document.getElementById('printTableBody');
-            document.getElementById('printTimestamp').innerText = `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')}`;
-
-            try {
-                if (type === 'stockIn') {
-                    titleEl.innerText = "รายงานสรุปรายการรับเข้าครุภัณฑ์ (Asset Stock In Report)";
-                    headerEl.innerHTML = `
-                        <th class="border border-gray-300 p-2">ลำดับ</th>
-                        <th class="border border-gray-300 p-2">เลขที่ Stock In</th>
-                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
-                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
-                        <th class="border border-gray-300 p-2">ประเภทรับเข้า</th>
-                        <th class="border border-gray-300 p-2">ผู้ส่งมอบ</th>
-                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
-                    `;
-                    
-                    const data = await fetchAPI(`${API_URL}?action=getStockIn`);
-                    bodyEl.innerHTML = '';
-
-                    if (!Array.isArray(data) || data.length === 0) {
-                        bodyEl.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานรับเข้า</td></tr>';
-                    } else {
-                        data.slice().reverse().forEach((row, idx) => {
-                            const tr = document.createElement('tr');
-                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
-                            tr.innerHTML = `
-                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
-                                <td class="border border-gray-300 p-2 font-bold">${row.Stock_In_No || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.Source_Type || row.sourceType || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.User_Name || '-'}</td>
-                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
-                            `;
-                            bodyEl.appendChild(tr);
-                        });
-                    }
-                } else {
-                    titleEl.innerText = "รายงานสรุปรายการจ่ายออกครุภัณฑ์ (Asset Stock Out Report)";
-                    headerEl.innerHTML = `
-                        <th class="border border-gray-300 p-2">ลำดับ</th>
-                        <th class="border border-gray-300 p-2">เลขที่ Stock Out</th>
-                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
-                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
-                        <th class="border border-gray-300 p-2">ผู้ใช้งาน IT</th>
-                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
-                    `;
-                    
-                    const data = await fetchAPI(`${API_URL}?action=getStockOut`);
-                    bodyEl.innerHTML = '';
-
-                    if (!Array.isArray(data) || data.length === 0) {
-                        bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานจ่ายออก (Out)</td></tr>';
-                    } else {
-                        data.slice().reverse().forEach((row, idx) => {
-                            const tr = document.createElement('tr');
-                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
-                            tr.innerHTML = `
-                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
-                                <td class="border border-gray-300 p-2 font-bold">${row.Stock_Out_No || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.IT_User || '-'}</td>
-                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
-                            `;
-                            bodyEl.appendChild(tr);
-                        });
-                    }
-                }
-
-                document.body.classList.add('printing-a4');
-                window.print();
-                document.body.classList.remove('printing-a4');
-            } catch (err) {
-                console.error("Print report error", err);
-                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถสร้างรายงานเพื่อพิมพ์ได้");
             } finally {
                 hideLoading();
             }
