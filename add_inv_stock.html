@@ -81,23 +81,36 @@
         }
 
         @media print {
-            body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
-            
-            /* Specific Modal Print View isolation */
+            @page {
+                size: 80mm auto;
+                margin: 0;
+            }
+            body, body * { visibility: hidden !important; }
             #recordDetailModal, #recordDetailModal * { visibility: visible !important; }
             #recordDetailModal {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 100% !important;
+                width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 !important;
+                padding: 4mm !important;
                 background: white !important;
                 box-shadow: none !important;
-                padding: 0 !important;
+                border: none !important;
+                font-size: 11px !important;
+                overflow: visible !important;
             }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
+            
+            /* Convenience store receipt styling tweaks */
+            #recordDetailModal table {
+                font-size: 10px !important;
+            }
+            #recordDetailModal th, #recordDetailModal td {
+                padding: 4px 2px !important;
+            }
         }
         
         .print-only { display: none; }
@@ -105,7 +118,6 @@
 </head>
 <body class="relative min-h-screen pb-12">
 
-    <!-- Auth-Check Script Integration -->
     <script>
         (function () {
             try {
@@ -148,7 +160,6 @@
     <!-- Watermark -->
     <div class="watermark">IT UDON HOSP ✨</div>
 
-    <!-- Header Section -->
     <header class="bg-gradient-to-r from-pink-500 via-pink-400 to-purple-500 text-white shadow-lg relative z-10 border-b-4 border-pink-200">
         <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center">
@@ -181,7 +192,6 @@
         </div>
     </header>
 
-    <!-- Tabs Navigation -->
     <nav class="max-w-6xl mx-auto mt-4 px-4 relative z-10">
         <div class="glass-card rounded-2xl p-1.5 flex gap-1 shadow-sm overflow-x-auto">
             <button id="btnTabDashboard" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('dashboard', event)">
@@ -205,7 +215,6 @@
         </div>
     </nav>
 
-    <!-- Main Container -->
     <main class="max-w-6xl mx-auto my-6 px-4 relative z-10">
         
         <!-- Tab 1: Dashboard -->
@@ -560,10 +569,11 @@
     <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto">
             
-            <!-- Print Only Header -->
-            <div class="print-only text-center mb-8 border-b-2 border-gray-800 pb-4">
-                <h2 class="text-2xl font-bold text-gray-900 mb-1">ใบส่งมอบ/รับเข้าครุภัณฑ์คอมพิวเตอร์</h2>
-                <p class="text-sm text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+            <!-- Print Only Header (Convenience Store Receipt Style) -->
+            <div class="print-only text-center mb-4 border-b border-dashed border-gray-400 pb-3">
+                <h2 class="text-sm font-bold text-gray-900 mb-0.5">โรงพยาบาลอุดรธานี</h2>
+                <p class="text-[10px] text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                <p class="text-[10px] text-gray-600 font-semibold mt-1">ใบรับเข้า/ส่งมอบครุภัณฑ์คอมพิวเตอร์</p>
             </div>
 
             <div class="flex flex-col md:flex-row md:justify-between md:items-center border-b border-dashed border-pink-200 pb-4 mb-5 no-print gap-4">
@@ -623,7 +633,6 @@
         <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังสื่อสารกับฐานข้อมูล Google Sheets...</p>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwBGas7woh3Zn4w3dJa1BkqcgI17nlHqm1bmCpQiGE9qQX_J28lc8bVLixs2dl7QguS/exec";
 
@@ -729,7 +738,6 @@
                     fetch(`${API_URL}?action=getInventory`).then(r => r.json()).catch(() => [])
                 ]);
 
-                // อัปเดต Global Variables ไว้ในหน่วยความจำ เพื่อให้หน้า Detail นำไปดึง (Cross-reference) ข้อมูลอายุและประเภทได้ทันที
                 if (Array.isArray(resIn)) globalStockInRecords = resIn;
                 if (Array.isArray(resOut)) globalStockOutRecords = resOut;
                 if (Array.isArray(resInv)) globalInventoryRecords = resInv;
@@ -885,7 +893,6 @@
                 tr.className = "border-b border-indigo-100 hover:bg-indigo-50/30 transition-all";
                 
                 const invNo = rec.Inv_No || "-";
-                // ดึง Asset_ID ถ้าไม่มีให้ดึง AssetID หรือ NOID จากข้อมูลที่ map มา
                 const assetId = rec.AssetID || rec.Asset_ID || rec.NOID || rec.NoID || "-";
                 const detail = rec.Asset_FullDescription || rec.FullDescription || rec.Spec_Detai || "-";
                 const serial = rec.Asset_Serial || "-";
@@ -910,7 +917,6 @@
             });
         }
 
-        // Helper Function: แปลง Google Drive Link เป็น Image Link สำหรับแสดงผล
         function getDriveImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/(.+?)\//);
@@ -939,10 +945,7 @@
             let signatureUrl = '';
             
             if (type === 'stockIn') {
-                // แปลงรูปจาก Google Drive Viewer URL เป็น Raw Image URL
                 signatureUrl = getDriveImageUrl(record.User_Confirm || '');
-                
-                // Mapping ตัวแปรให้ตรงกับหัวคอลัมน์ใหม่ (พร้อม Fallback เผื่อใช้ชื่อเก่า)
                 const stockInNo = record.Stock_In_No || '-';
                 const stockInId = record.Stock_In_ID || '-';
                 const dateTime = record.Date_Time || record.Timestamp || '-';
@@ -950,7 +953,6 @@
                 const docId = record.Doc_ID || '-';
                 const sourceType = record.Source_Type || record.sourceType || '-';
                 const refNo = record.Reference_No || record.referenceNo || '-';
-                // ตัด itUser และ uName ออกจากส่วนบนเพื่อนำไปแสดงด้านล่าง
 
                 html = `
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-pink-50 to-white p-5 rounded-2xl border border-pink-100 shadow-sm">
@@ -979,12 +981,11 @@
                 `;
             }
 
-            // Render Inventory Sub-items table mapping with Code.gs exact keys
             html += `<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2">📋 รายการครุภัณฑ์ที่ดำเนินการ</h4>`;
             if (Array.isArray(record.items) && record.items.length > 0) {
                 html += `
                     <div class="overflow-hidden border border-gray-200 rounded-xl shadow-sm">
-                        <table class="w-full text-left text-xs print:text-[11px]">
+                        <table class="w-full text-left text-xs print:text-[10px]">
                             <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
                                 <tr>
                                     <th class="p-3 text-center w-12 font-bold">ลำดับ</th>
@@ -1025,9 +1026,6 @@
                 html += `<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p></div>`;
             }
 
-            // ==========================================
-            // โซนข้อมูลผู้ รับ/ส่ง และ ลายมือชื่อ (รวมไว้ด้วยกัน)
-            // ==========================================
             html += `
                 <div class="mt-8 break-inside-avoid">
                     <h4 class="font-bold text-sm mb-4 text-gray-800 flex items-center gap-2 border-b border-gray-200 pb-2">
@@ -1040,7 +1038,6 @@
             const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
 
             if (type === 'stockIn') {
-                // สำหรับรับเข้า: IT เป็นผู้รับมอบ(บันทึก), User เป็นผู้ส่งมอบ(คืน)
                 html += `
                     <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
                         <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">ผู้รับมอบ (IT / ผู้ทำรายการ)</p>
@@ -1068,7 +1065,6 @@
                 }
                 html += `</div>`;
             } else {
-                // สำหรับจ่ายออก: IT เป็นผู้ส่งมอบ(จ่าย), User เป็นผู้รับมอบ
                 html += `
                     <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
                         <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">ผู้ส่งมอบ (IT / ผู้จ่ายออก)</p>
@@ -1092,12 +1088,12 @@
                         <p class="font-bold text-purple-700 text-sm">(${userNameText})</p>
                         <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
                     `;
-                    signAction.classList.add('hidden'); // จ่ายออกอาจจะไม่มีให้ลงชื่อย้อนหลังผ่านหน้า UI นี้ จึงซ่อนไว้
+                    signAction.classList.add('hidden');
                 }
                 html += `</div>`;
             }
 
-            html += `</div></div>`; // ปิด Grid และ Section ผู้รับ/ส่ง
+            html += `</div></div>`;
 
             content.innerHTML = html;
             showModal('recordDetailModal');
