@@ -111,6 +111,29 @@
                 padding: 4px 2px !important;
             }
         }
+
+        /* Dedicated Media Print Rule for A4 Reports Tab */
+        @media print {
+            body.printing-a4 @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+            body.printing-a4, body.printing-a4 * { visibility: hidden !important; }
+            body.printing-a4 #printArea, body.printing-a4 #printArea * { visibility: visible !important; }
+            body.printing-a4 #printArea {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                font-size: 12pt !important;
+            }
+        }
         
         .print-only { display: none; }
     </style>
@@ -444,15 +467,15 @@
         <div id="tab-reports" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
-                    🖨️ ออกใบสลิปและเอกสารรายงาน (Landscape Print)
+                    🖨️ ออกใบสลิปและเอกสารรายงาน (A4 Formal Print)
                 </h3>
-                <p class="text-gray-500 text-xs md:text-sm mb-4">พิมพ์รายงานสรุปรายการรับเข้าและจ่ายออกในรูปแบบแนวนอนอย่างเป็นทางการ ✨</p>
+                <p class="text-gray-500 text-xs md:text-sm mb-4">พิมพ์รายงานสรุปรายการรับเข้าและจ่ายออกในรูปแบบกระดาษ A4 ทางการ ✨</p>
                 <div class="flex flex-wrap gap-3 mb-6">
                     <button onclick="generatePrintReport('stockIn')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
-                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานรับเข้า (Stock In Report)
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานรับเข้า (A4 Stock In Report)
                     </button>
                     <button onclick="generatePrintReport('stockOut')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
-                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานจ่ายออก (Stock Out Report)
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานจ่ายออก (A4 Stock Out Report)
                     </button>
                 </div>
                 
@@ -1708,7 +1731,7 @@
                     if (!Array.isArray(data) || data.length === 0) {
                         bodyEl.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานรับเข้า</td></tr>';
                     } else {
-                        data.reverse().forEach((row, idx) => {
+                        data.slice().reverse().forEach((row, idx) => {
                             const tr = document.createElement('tr');
                             const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
                             tr.innerHTML = `
@@ -1716,7 +1739,7 @@
                                 <td class="border border-gray-300 p-2 font-bold">${row.Stock_In_No || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.Date_Time || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
-                                <td class="border border-gray-300 p-2">${row.sourceType || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.Source_Type || row.sourceType || '-'}</td>
                                 <td class="border border-gray-300 p-2">${row.User_Name || '-'}</td>
                                 <td class="border border-gray-300 p-2 text-center">${signed}</td>
                             `;
@@ -1740,7 +1763,7 @@
                     if (!Array.isArray(data) || data.length === 0) {
                         bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานจ่ายออก (Out)</td></tr>';
                     } else {
-                        data.reverse().forEach((row, idx) => {
+                        data.slice().reverse().forEach((row, idx) => {
                             const tr = document.createElement('tr');
                             const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
                             tr.innerHTML = `
@@ -1756,7 +1779,9 @@
                     }
                 }
 
+                document.body.classList.add('printing-a4');
                 window.print();
+                document.body.classList.remove('printing-a4');
             } catch (err) {
                 console.error("Print report error", err);
                 showAlert("เกิดข้อผิดพลาด", "ไม่สามารถสร้างรายงานเพื่อพิมพ์ได้");
