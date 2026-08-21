@@ -104,7 +104,6 @@
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             
-            /* Convenience store receipt styling tweaks */
             #recordDetailModal table {
                 font-size: 10px !important;
             }
@@ -118,6 +117,7 @@
 </head>
 <body class="relative min-h-screen pb-12">
 
+    <!-- Auth-Check Script Integration -->
     <script>
         (function () {
             try {
@@ -160,6 +160,7 @@
     <!-- Watermark -->
     <div class="watermark">IT UDON HOSP ✨</div>
 
+    <!-- Header Section -->
     <header class="bg-gradient-to-r from-pink-500 via-pink-400 to-purple-500 text-white shadow-lg relative z-10 border-b-4 border-pink-200">
         <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center">
@@ -192,6 +193,7 @@
         </div>
     </header>
 
+    <!-- Tabs Navigation -->
     <nav class="max-w-6xl mx-auto mt-4 px-4 relative z-10">
         <div class="glass-card rounded-2xl p-1.5 flex gap-1 shadow-sm overflow-x-auto">
             <button id="btnTabDashboard" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('dashboard', event)">
@@ -215,6 +217,7 @@
         </div>
     </nav>
 
+    <!-- Main Container -->
     <main class="max-w-6xl mx-auto my-6 px-4 relative z-10">
         
         <!-- Tab 1: Dashboard -->
@@ -341,7 +344,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60">
+                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60 mb-4">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-pink-100/70 text-pink-700 font-semibold text-xs uppercase tracking-wider">
@@ -361,6 +364,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination Controls for Stock In -->
+                <div id="stockInPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
 
@@ -375,7 +380,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60">
+                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60 mb-4">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-purple-100/70 text-purple-700 font-semibold text-xs uppercase tracking-wider">
@@ -395,6 +400,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination Controls for Stock Out -->
+                <div id="stockOutPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
 
@@ -409,7 +416,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-indigo-200 rounded-2xl shadow-sm bg-white/60">
+                <div class="overflow-x-auto border border-indigo-200 rounded-2xl shadow-sm bg-white/60 mb-4">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-indigo-100/70 text-indigo-700 font-semibold text-xs uppercase tracking-wider">
@@ -428,6 +435,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination Controls for Inventory -->
+                <div id="inventoryPagination" class="flex justify-between items-center px-2"></div>
             </div>
         </div>
 
@@ -569,7 +578,7 @@
     <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto">
             
-            <!-- Print Only Header (Convenience Store Receipt Style) -->
+            <!-- Convenience Store Receipt Style Print Header -->
             <div class="print-only text-center mb-4 border-b border-dashed border-gray-400 pb-3">
                 <h2 class="text-sm font-bold text-gray-900 mb-0.5">โรงพยาบาลอุดรธานี</h2>
                 <p class="text-[10px] text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
@@ -633,6 +642,7 @@
         <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังสื่อสารกับฐานข้อมูล Google Sheets...</p>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwBGas7woh3Zn4w3dJa1BkqcgI17nlHqm1bmCpQiGE9qQX_J28lc8bVLixs2dl7QguS/exec";
 
@@ -648,14 +658,38 @@
         let activeDetailRecord = null;
         let canvas, ctx, isDrawing = false;
 
+        // Pagination State Variables
+        const ITEMS_PER_PAGE = 10;
+        let currentStockInPage = 1;
+        let currentStockOutPage = 1;
+        let currentInventoryPage = 1;
+
+        // Safe JSON API fetch wrapper to prevent SyntaxError: Unexpected token '<'
+        async function fetchAPI(url, options = {}) {
+            try {
+                const res = await fetch(url, options);
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (jsonErr) {
+                    console.error("Non-JSON API response received:", text.substring(0, 150));
+                    throw new Error("เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (ข้อมูลไม่ใช่รูปแบบ JSON)");
+                }
+            } catch (err) {
+                console.error("API Fetch Error:", err);
+                throw err;
+            }
+        }
+
         window.onload = function() {
             const currentUser = getCurrentUser();
             if (currentUser) {
-                document.getElementById('headerDisplayName').innerText = getDisplayName();
+                const fullName = getDisplayName();
+                document.getElementById('headerDisplayName').innerText = fullName;
                 document.getElementById('headerUserPN').innerText = `ID: ${currentUser.UserPN} | ${currentUser.UserTypeID || 'User'}`;
                 const itUserField = document.getElementById('itUser');
-                if (itUserField && currentUser.UserPN) {
-                    itUserField.value = currentUser.UserPN;
+                if (itUserField && (currentUser.UserName || currentUser.UserPN)) {
+                    itUserField.value = currentUser.UserName ? `${currentUser.UserName} ${currentUser.UserSname || ''}`.trim() : currentUser.UserPN;
                 }
             } else {
                 document.getElementById('headerDisplayName').innerText = "ผู้ใช้งานทั่วไป (Guest)";
@@ -720,8 +754,7 @@
         async function loadDepartments() {
             showLoading();
             try {
-                const res = await fetch(`${API_URL}?action=getDepartments`);
-                const result = await res.json();
+                const result = await fetchAPI(`${API_URL}?action=getDepartments`);
                 globalDepartments = Array.isArray(result) ? result : (result.data || []);
             } catch (err) {
                 console.error("Load Dept Error:", err);
@@ -733,18 +766,18 @@
         async function loadDashboardStats() {
             try {
                 const [resIn, resOut, resInv] = await Promise.all([
-                    fetch(`${API_URL}?action=getStockIn`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_URL}?action=getStockOut`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_URL}?action=getInventory`).then(r => r.json()).catch(() => [])
+                    fetchAPI(`${API_URL}?action=getStockIn`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getStockOut`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getInventory`).catch(() => [])
                 ]);
 
-                if (Array.isArray(resIn)) globalStockInRecords = resIn;
-                if (Array.isArray(resOut)) globalStockOutRecords = resOut;
-                if (Array.isArray(resInv)) globalInventoryRecords = resInv;
+                if (Array.isArray(resIn)) globalStockInRecords = resIn.reverse();
+                if (Array.isArray(resOut)) globalStockOutRecords = resOut.reverse();
+                if (Array.isArray(resInv)) globalInventoryRecords = resInv.reverse();
 
-                const inCount = Array.isArray(resIn) ? resIn.length : 0;
-                const outCount = Array.isArray(resOut) ? resOut.length : 0;
-                const invCount = Array.isArray(resInv) ? resInv.length : 0;
+                const inCount = globalStockInRecords.length;
+                const outCount = globalStockOutRecords.length;
+                const invCount = globalInventoryRecords.length;
 
                 document.getElementById('dashStockInCount').innerHTML = `${inCount} <span class="text-sm font-normal text-pink-600">รายการ</span>`;
                 document.getElementById('dashStockOutCount').innerHTML = `${outCount} <span class="text-sm font-normal text-purple-600">รายการ</span>`;
@@ -757,9 +790,9 @@
         async function loadStockInRecords() {
             showLoading();
             try {
-                const res = await fetch(`${API_URL}?action=getStockIn`);
-                const data = await res.json();
-                globalStockInRecords = Array.isArray(data) ? data : [];
+                const data = await fetchAPI(`${API_URL}?action=getStockIn`);
+                globalStockInRecords = Array.isArray(data) ? data.reverse() : [];
+                currentStockInPage = 1;
                 renderStockInTable(globalStockInRecords);
             } catch (err) {
                 console.error("Load Stock In error", err);
@@ -771,14 +804,23 @@
 
         function renderStockInTable(records) {
             const tbody = document.getElementById('stockInTableBody');
+            const paginationContainer = document.getElementById('stockInPagination');
             tbody.innerHTML = '';
+            paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกรับเข้าในระบบ</td></tr>';
                 return;
             }
 
-            records.forEach(rec => {
+            const totalPages = Math.ceil(records.length / ITEMS_PER_PAGE);
+            if (currentStockInPage > totalPages) currentStockInPage = totalPages || 1;
+
+            const startIndex = (currentStockInPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedRecords = records.slice(startIndex, endIndex);
+
+            paginatedRecords.forEach(rec => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-pink-100 hover:bg-pink-50/35 transition-all";
                 
@@ -807,14 +849,27 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            paginationContainer.innerHTML = `
+                <span class="text-xs text-gray-500">แสดงหน้า ${currentStockInPage} จาก ${totalPages} (ทั้งหมด ${records.length} รายการ)</span>
+                <div class="flex gap-1.5">
+                    <button onclick="changeStockInPage(${currentStockInPage - 1})" ${currentStockInPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium transition-all"'}>ก่อนหน้า</button>
+                    <button onclick="changeStockInPage(${currentStockInPage + 1})" ${currentStockInPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium transition-all"'}>ถัดไป</button>
+                </div>
+            `;
+        }
+
+        function changeStockInPage(page) {
+            currentStockInPage = page;
+            renderStockInTable(globalStockInRecords);
         }
 
         async function loadStockOutRecords() {
             showLoading();
             try {
-                const res = await fetch(`${API_URL}?action=getStockOut`);
-                const data = await res.json();
-                globalStockOutRecords = Array.isArray(data) ? data : [];
+                const data = await fetchAPI(`${API_URL}?action=getStockOut`);
+                globalStockOutRecords = Array.isArray(data) ? data.reverse() : [];
+                currentStockOutPage = 1;
                 renderStockOutTable(globalStockOutRecords);
             } catch (err) {
                 console.error("Load Stock Out error", err);
@@ -826,14 +881,23 @@
 
         function renderStockOutTable(records) {
             const tbody = document.getElementById('stockOutTableBody');
+            const paginationContainer = document.getElementById('stockOutPagination');
             tbody.innerHTML = '';
+            paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกจ่ายออกในระบบ (Inv_Status = Out)</td></tr>';
                 return;
             }
 
-            records.forEach(rec => {
+            const totalPages = Math.ceil(records.length / ITEMS_PER_PAGE);
+            if (currentStockOutPage > totalPages) currentStockOutPage = totalPages || 1;
+
+            const startIndex = (currentStockOutPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedRecords = records.slice(startIndex, endIndex);
+
+            paginatedRecords.forEach(rec => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-purple-100 hover:bg-purple-50/35 transition-all";
                 
@@ -862,14 +926,27 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            paginationContainer.innerHTML = `
+                <span class="text-xs text-gray-500">แสดงหน้า ${currentStockOutPage} จาก ${totalPages} (ทั้งหมด ${records.length} รายการ)</span>
+                <div class="flex gap-1.5">
+                    <button onclick="changeStockOutPage(${currentStockOutPage - 1})" ${currentStockOutPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium transition-all"'}>ก่อนหน้า</button>
+                    <button onclick="changeStockOutPage(${currentStockOutPage + 1})" ${currentStockOutPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium transition-all"'}>ถัดไป</button>
+                </div>
+            `;
+        }
+
+        function changeStockOutPage(page) {
+            currentStockOutPage = page;
+            renderStockOutTable(globalStockOutRecords);
         }
 
         async function loadInventoryRecords() {
             showLoading();
             try {
-                const res = await fetch(`${API_URL}?action=getInventory`);
-                const data = await res.json();
-                globalInventoryRecords = Array.isArray(data) ? data : [];
+                const data = await fetchAPI(`${API_URL}?action=getInventory`);
+                globalInventoryRecords = Array.isArray(data) ? data.reverse() : [];
+                currentInventoryPage = 1;
                 renderInventoryTable(globalInventoryRecords);
             } catch (err) {
                 console.error("Load Inventory error", err);
@@ -881,14 +958,23 @@
 
         function renderInventoryTable(records) {
             const tbody = document.getElementById('inventoryTableBody');
+            const paginationContainer = document.getElementById('inventoryPagination');
             tbody.innerHTML = '';
+            paginationContainer.innerHTML = '';
 
             if (!records || records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบรายการครุภัณฑ์ในคลัง</td></tr>';
                 return;
             }
 
-            records.forEach(rec => {
+            const totalPages = Math.ceil(records.length / ITEMS_PER_PAGE);
+            if (currentInventoryPage > totalPages) currentInventoryPage = totalPages || 1;
+
+            const startIndex = (currentInventoryPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedRecords = records.slice(startIndex, endIndex);
+
+            paginatedRecords.forEach(rec => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-indigo-100 hover:bg-indigo-50/30 transition-all";
                 
@@ -915,8 +1001,22 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            paginationContainer.innerHTML = `
+                <span class="text-xs text-gray-500">แสดงหน้า ${currentInventoryPage} จาก ${totalPages} (ทั้งหมด ${records.length} รายการ)</span>
+                <div class="flex gap-1.5">
+                    <button onclick="changeInventoryPage(${currentInventoryPage - 1})" ${currentInventoryPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium transition-all"'}>ก่อนหน้า</button>
+                    <button onclick="changeInventoryPage(${currentInventoryPage + 1})" ${currentInventoryPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium transition-all"'}>ถัดไป</button>
+                </div>
+            `;
         }
 
+        function changeInventoryPage(page) {
+            currentInventoryPage = page;
+            renderInventoryTable(globalInventoryRecords);
+        }
+
+        // Helper Function: แปลง Google Drive Link เป็น Image Link สำหรับแสดงผล
         function getDriveImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/(.+?)\//);
@@ -985,7 +1085,7 @@
             if (Array.isArray(record.items) && record.items.length > 0) {
                 html += `
                     <div class="overflow-hidden border border-gray-200 rounded-xl shadow-sm">
-                        <table class="w-full text-left text-xs print:text-[10px]">
+                        <table class="w-full text-left text-xs print:text-[11px]">
                             <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
                                 <tr>
                                     <th class="p-3 text-center w-12 font-bold">ลำดับ</th>
@@ -1173,8 +1273,7 @@
             area.classList.remove('hidden');
 
             try {
-                const res = await fetch(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
-                let data = await res.json();
+                const data = await fetchAPI(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
                 area.innerHTML = '';
                 
                 if (!data || data.length === 0) {
@@ -1462,13 +1561,12 @@
             showLoading();
 
             try {
-                const response = await fetch(API_URL, {
+                const result = await fetchAPI(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payloadObject)
                 });
                 
-                const result = await response.json();
                 if (result.status === 'success') {
                     lastSavedStockInNo = result.stockInNo;
                     document.getElementById('savedStockInInfo').innerText = `เลขที่ Stock In: ${result.stockInNo}`;
@@ -1508,8 +1606,9 @@
             }
 
             const currentUser = getCurrentUser();
-            if (currentUser && currentUser.UserPN) {
-                document.getElementById('itUser').value = currentUser.UserPN;
+            const itUserField = document.getElementById('itUser');
+            if (currentUser && itUserField) {
+                itUserField.value = currentUser.UserName ? `${currentUser.UserName} ${currentUser.UserSname || ''}`.trim() : currentUser.UserPN;
             }
             selectedAssetsList = [];
             updateSelectedAssetsTable();
@@ -1564,13 +1663,12 @@
             showLoading();
 
             try {
-                const response = await fetch(API_URL, {
+                const result = await fetchAPI(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payloadObject)
                 });
                 
-                const result = await response.json();
                 if (result.status === 'success') {
                     showAlert("✅ บันทึกสำเร็จ", `บันทึกข้อมูลและลงลายมือชื่อเรียบร้อยแล้วจ้า ✨\nเลขที่: ${result.stockInNo}`);
                     resetStockInForm();
@@ -1604,14 +1702,13 @@
                         <th class="border border-gray-300 p-2 text-center">สถานะ</th>
                     `;
                     
-                    const res = await fetch(`${API_URL}?action=getStockIn`);
-                    const data = await res.json();
+                    const data = await fetchAPI(`${API_URL}?action=getStockIn`);
                     bodyEl.innerHTML = '';
 
                     if (!Array.isArray(data) || data.length === 0) {
                         bodyEl.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานรับเข้า</td></tr>';
                     } else {
-                        data.forEach((row, idx) => {
+                        data.reverse().forEach((row, idx) => {
                             const tr = document.createElement('tr');
                             const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
                             tr.innerHTML = `
@@ -1637,14 +1734,13 @@
                         <th class="border border-gray-300 p-2 text-center">สถานะ</th>
                     `;
                     
-                    const res = await fetch(`${API_URL}?action=getStockOut`);
-                    const data = await res.json();
+                    const data = await fetchAPI(`${API_URL}?action=getStockOut`);
                     bodyEl.innerHTML = '';
 
                     if (!Array.isArray(data) || data.length === 0) {
                         bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานจ่ายออก (Out)</td></tr>';
                     } else {
-                        data.forEach((row, idx) => {
+                        data.reverse().forEach((row, idx) => {
                             const tr = document.createElement('tr');
                             const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
                             tr.innerHTML = `
