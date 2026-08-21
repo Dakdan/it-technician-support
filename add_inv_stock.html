@@ -78,6 +78,25 @@
             transform: translateY(-2px);
             box-shadow: 0 15px 30px -5px rgba(236, 72, 153, 0.2);
         }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+            
+            /* Specific Modal Print View isolation */
+            #recordDetailModal, #recordDetailModal * { visibility: visible !important; }
+            #recordDetailModal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: white !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="relative min-h-screen pb-12">
@@ -131,7 +150,7 @@
             <div class="flex items-center">
                 <div class="relative">
                     <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                    <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/MOPH_Resized.png/180px-MOPH_Resized.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
@@ -161,14 +180,23 @@
     <!-- Tabs Navigation -->
     <nav class="max-w-6xl mx-auto mt-4 px-4 relative z-10">
         <div class="glass-card rounded-2xl p-1.5 flex gap-1 shadow-sm overflow-x-auto">
-            <button class="flex-1 px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-2" onclick="switchTab('dashboard', event)">
-                📊 สรุปรายการ (Dashboard)
+            <button id="btnTabDashboard" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('dashboard', event)">
+                📊 สรุปรายการ
             </button>
-            <button class="flex-1 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap active flex items-center justify-center gap-2" onclick="switchTab('stockIn', event)">
-                📥 บันทึกรับเข้า (Stock In)
+            <button id="btnTabStockIn" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('stockIn', event)">
+                📥 บันทึกรับเข้า
             </button>
-            <button class="flex-1 px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-2" onclick="switchTab('reports', event)">
-                🖨️ ออกใบสลิป (Reports)
+            <button id="btnTabStockInList" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('stockInList', event)">
+                📋 รายการรับเข้า
+            </button>
+            <button id="btnTabStockOutList" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('stockOutList', event)">
+                📤 รายการจ่ายออก
+            </button>
+            <button id="btnTabInventory" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('inventory', event)">
+                📦 คลังครุภัณฑ์
+            </button>
+            <button id="btnTabReports" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('reports', event)">
+                🖨️ ออกใบสลิป
             </button>
         </div>
     </nav>
@@ -177,7 +205,7 @@
     <main class="max-w-6xl mx-auto my-6 px-4 relative z-10">
         
         <!-- Tab 1: Dashboard -->
-        <div id="tab-dashboard" class="tab-content hidden">
+        <div id="tab-dashboard" class="tab-content">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
                     📊 สรุปรายการคลังครุภัณฑ์ (Dashboard)
@@ -185,24 +213,23 @@
                 <p class="text-gray-500 text-xs md:text-sm mb-6">ภาพรวมสถิติการรับเข้าและจ่ายออกของระบบคลังคอมพิวเตอร์โรงพยาบาลอุดรธานี ✨</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-2xl text-center shadow-sm border border-pink-200">
-                        <h4 class="text-pink-700 font-medium mb-2 text-xs uppercase tracking-wider">รับเข้าเดือนนี้</h4>
-                        <h2 class="text-3xl font-extrabold text-pink-900">0 <span class="text-sm font-normal text-pink-600">รายการ</span></h2>
+                        <h4 class="text-pink-700 font-medium mb-2 text-xs uppercase tracking-wider">รับเข้าทั้งหมด</h4>
+                        <h2 id="dashStockInCount" class="text-3xl font-extrabold text-pink-900">0 <span class="text-sm font-normal text-pink-600">รายการ</span></h2>
                     </div>
                     <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center shadow-sm border border-purple-200">
-                        <h4 class="text-purple-700 font-medium mb-2 text-xs uppercase tracking-wider">จ่ายออกเดือนนี้</h4>
-                        <h2 class="text-3xl font-extrabold text-purple-900">0 <span class="text-sm font-normal text-purple-600">รายการ</span></h2>
+                        <h4 class="text-purple-700 font-medium mb-2 text-xs uppercase tracking-wider">จ่ายออกทั้งหมด (Out)</h4>
+                        <h2 id="dashStockOutCount" class="text-3xl font-extrabold text-purple-900">0 <span class="text-sm font-normal text-purple-600">รายการ</span></h2>
                     </div>
                     <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-2xl text-center shadow-sm border border-indigo-200">
-                        <h4 class="text-indigo-700 font-medium mb-2 text-xs uppercase tracking-wider">รายการเบิกรวม</h4>
-                        <h2 class="text-3xl font-extrabold text-indigo-900">0 <span class="text-sm font-normal text-indigo-600">รายการ</span></h2>
+                        <h4 class="text-indigo-700 font-medium mb-2 text-xs uppercase tracking-wider">ครุภัณฑ์ในคลัง</h4>
+                        <h2 id="dashInventoryCount" class="text-3xl font-extrabold text-indigo-900">0 <span class="text-sm font-normal text-indigo-600">รายการ</span></h2>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 2: Stock In -->
-        <div id="tab-stockIn" class="tab-content">
-            <!-- Card 1: ฟอร์มรับเข้า -->
+        <!-- Tab 2: Stock In Form -->
+        <div id="tab-stockIn" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8 mb-6">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
                     📥 บันทึกรับเข้าครุภัณฑ์ (Asset Stock In)
@@ -214,7 +241,6 @@
                             <input type="text" id="itUser" required placeholder="เช่น IT001" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm">
                         </div>
                         
-                        <!-- Searchable Dropdown for Department -->
                         <div class="form-group relative">
                             <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="depInput">หน่วยงาน (Department) <span class="text-pink-500">*</span></label>
                             <div class="relative w-full">
@@ -241,7 +267,6 @@
                 </form>
             </div>
 
-            <!-- Card 2: ค้นหาและเลือกรายการครุภัณฑ์ -->
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
                     🔍 ค้นหาและเลือกรายการครุภัณฑ์ (Inventory Asset)
@@ -254,10 +279,8 @@
                     </button>
                 </div>
 
-                <!-- ผลลัพธ์การค้นหา -->
                 <div id="resultsArea" class="max-h-64 overflow-y-auto border border-pink-200 rounded-2xl bg-white/80 p-3 hidden mb-6 shadow-inner space-y-2"></div>
 
-                <!-- ตารางรายการครุภัณฑ์ที่เลือก -->
                 <div class="flex justify-between items-center mt-6 mb-3">
                     <h4 class="text-pink-600 font-bold text-sm flex items-center gap-1.5">
                         🌸 รายการครุภัณฑ์ที่เลือกรับเข้า (<span id="selectedCount" class="text-pink-700">0</span> รายการ)
@@ -294,22 +317,154 @@
             </div>
         </div>
 
-        <!-- Tab 3: Reports -->
+        <!-- Tab 3: Stock In Records List -->
+        <div id="tab-stockInList" class="tab-content hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4 border-b border-dashed border-pink-200 pb-3">
+                    <h3 class="text-pink-600 font-bold text-base md:text-lg flex items-center gap-2">
+                        📋 รายการบันทึกรับเข้าทั้งหมด (Asset Stock In & Inventory Sub-items)
+                    </h3>
+                    <button onclick="loadStockInRecords()" class="bg-pink-100 hover:bg-pink-200 text-pink-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
+                    </button>
+                </div>
+                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-pink-100/70 text-pink-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5">เลขที่ Stock In</th>
+                                <th class="p-3.5">วันที่ / เวลา</th>
+                                <th class="p-3.5">หน่วยงาน</th>
+                                <th class="p-3.5">ผู้ส่งมอบ</th>
+                                <th class="p-3.5 text-center">จำนวนครุภัณฑ์ย่อย</th>
+                                <th class="p-3.5 text-center">สถานะลายเซ็น</th>
+                                <th class="p-3.5 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockInTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Stock Out Records List -->
+        <div id="tab-stockOutList" class="tab-content hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4 border-b border-dashed border-purple-200 pb-3">
+                    <h3 class="text-purple-600 font-bold text-base md:text-lg flex items-center gap-2">
+                        📤 รายการบันทึกจ่ายออก (Stock Out & Inventory Out Sub-items)
+                    </h3>
+                    <button onclick="loadStockOutRecords()" class="bg-purple-100 hover:bg-purple-200 text-purple-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
+                    </button>
+                </div>
+                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-purple-100/70 text-purple-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5">เลขที่ Stock Out</th>
+                                <th class="p-3.5">วันที่ / เวลา</th>
+                                <th class="p-3.5">หน่วยงาน</th>
+                                <th class="p-3.5">ผู้ใช้งาน IT</th>
+                                <th class="p-3.5 text-center">จำนวน (Out)</th>
+                                <th class="p-3.5 text-center">สถานะลายเซ็น</th>
+                                <th class="p-3.5 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockOutTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Inventory List -->
+        <div id="tab-inventory" class="tab-content hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4 border-b border-dashed border-indigo-200 pb-3">
+                    <h3 class="text-indigo-600 font-bold text-base md:text-lg flex items-center gap-2">
+                        📦 รายการครุภัณฑ์ทั้งหมดในคลัง (Inventory Asset)
+                    </h3>
+                    <button onclick="loadInventoryRecords()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
+                    </button>
+                </div>
+                <div class="overflow-x-auto border border-indigo-200 rounded-2xl shadow-sm bg-white/60">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-indigo-100/70 text-indigo-700 font-semibold text-xs uppercase tracking-wider">
+                                <th class="p-3.5">Inv No</th>
+                                <th class="p-3.5">Asset ID</th>
+                                <th class="p-3.5">รายละเอียด</th>
+                                <th class="p-3.5">สถานะ</th>
+                                <th class="p-3.5 text-center">รูปภาพ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center text-gray-400 p-8 text-xs font-light">กำลังโหลดข้อมูลจาก Google Sheets...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 6: Reports & Print -->
         <div id="tab-reports" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
                     🖨️ ออกใบสลิปและเอกสารรายงาน (Landscape Print)
                 </h3>
-                <p class="text-gray-500 text-xs md:text-sm mb-4">ค้นหาหมายเลข Stock In เพื่อดูและสั่งพิมพ์สลิปเอกสารรับเข้า ✨</p>
-                <div class="flex gap-2.5 max-w-md">
-                    <input type="text" placeholder="ระบุเลขที่ Stock In (เช่น SIN0001)" class="flex-grow px-4 py-3 border border-pink-200 rounded-2xl text-sm outline-none focus:border-pink-400 shadow-sm bg-white/70">
-                    <button type="button" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-2xl text-sm font-medium shadow-md whitespace-nowrap" onclick="showAlert('กำลังพัฒนา', 'ระบบพิมพ์สลิปกำลังจะเปิดให้บริการในเฟสถัดไปจ้า ✨')">ค้นหาและพิมพ์</button>
+                <p class="text-gray-500 text-xs md:text-sm mb-4">พิมพ์รายงานสรุปรายการรับเข้าและจ่ายออกในรูปแบบแนวนอนอย่างเป็นทางการ ✨</p>
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <button onclick="generatePrintReport('stockIn')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานรับเข้า (Stock In Report)
+                    </button>
+                    <button onclick="generatePrintReport('stockOut')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-2xl text-xs font-semibold shadow-md flex items-center gap-2 transition-all">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงานจ่ายออก (Stock Out Report)
+                    </button>
+                </div>
+                
+                <!-- Print Preview Area -->
+                <div id="printArea" class="bg-white p-6 rounded-2xl border border-gray-200 shadow-inner">
+                    <div class="text-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-800">โรงพยาบาลอุดรธานี - กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</h2>
+                        <p id="printTitle" class="text-sm text-pink-600 font-medium">รายงานสรุปข้อมูลคลังครุภัณฑ์คอมพิวเตอร์</p>
+                        <p class="text-[11px] text-gray-400" id="printTimestamp">-</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse border border-gray-300">
+                            <thead>
+                                <tr id="printTableHeader" class="bg-gray-100 text-gray-700">
+                                    <th class="border border-gray-300 p-2">ลำดับ</th>
+                                    <th class="border border-gray-300 p-2">เลขที่เอกสาร</th>
+                                    <th class="border border-gray-300 p-2">วันที่</th>
+                                    <th class="border border-gray-300 p-2">หน่วยงาน</th>
+                                    <th class="border border-gray-300 p-2">ผู้เกี่ยวข้อง</th>
+                                    <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="printTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-6 text-gray-400">กรุณาเลือกประเภทรายงานด้านบนเพื่อแสดงข้อมูล</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal 1: Audit Item Details (Inv_Status & Photo Capture) -->
+    <!-- Modal 1: Audit Item Details -->
     <div id="auditModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
             <h3 class="text-pink-600 font-bold text-base border-b border-dashed border-pink-200 pb-3 mb-4 flex items-center gap-2">
@@ -321,7 +476,6 @@
                 <p id="auditAssetTitle" class="font-bold text-pink-600 text-sm bg-pink-50 p-2.5 rounded-xl border border-pink-100"></p>
             </div>
 
-            <!-- Inv_Status Selection -->
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-gray-700 mb-1.5" for="auditStatus">สถานะครุภัณฑ์ (Inv_Status) <span class="text-pink-500">*</span></label>
                 <select id="auditStatus" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-xl text-sm bg-white outline-none focus:border-pink-400 shadow-sm">
@@ -332,7 +486,6 @@
                 </select>
             </div>
 
-            <!-- Photo Capture / Upload -->
             <div class="mb-6">
                 <label class="block text-xs font-semibold text-gray-700 mb-1.5">ภาพถ่ายครุภัณฑ์ (Inv_Image)</label>
                 <div class="flex items-center gap-3">
@@ -398,7 +551,35 @@
         </div>
     </div>
 
-    <!-- Modal 3: Scanner Modal -->
+    <!-- Modal 3: Record Detail Modal -->
+    <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-dashed border-pink-200 pb-3 mb-4">
+                <h3 class="text-pink-600 font-bold text-base flex items-center gap-2">
+                    📄 รายละเอียดเอกสาร <span id="detailDocNo" class="text-gray-800"></span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="printDetailModal()" class="no-print bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-sm flex items-center gap-1 transition-all">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> พิมพ์เอกสาร
+                    </button>
+                    <button onclick="closeModal('recordDetailModal')" class="no-print text-gray-400 hover:text-gray-600 font-bold p-1">✕</button>
+                </div>
+            </div>
+            
+            <div id="detailContent" class="space-y-4 text-xs text-gray-700 mb-6">
+                <!-- Dynamic Content with Sub-items table -->
+            </div>
+
+            <div id="detailSignatureAction" class="no-print pt-4 border-t border-dashed border-pink-200 hidden">
+                <p class="text-xs font-bold text-pink-600 mb-2">เอกสารนี้ยังไม่มีลายเซ็น คุณต้องการเซ็นชื่อยืนยันตอนนี้หรือไม่?</p>
+                <button onclick="openUpdateSignatureFromDetail()" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white w-full py-2.5 rounded-xl text-xs font-semibold shadow-md">
+                    ✍️ ไปยังหน้าลงลายมือชื่อ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Scanner Modal -->
     <div id="scannerModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-md w-full p-6 shadow-2xl text-center">
             <h3 class="text-pink-600 font-bold text-base mb-3 flex items-center justify-center gap-2">
@@ -410,7 +591,7 @@
         </div>
     </div>
 
-    <!-- Modal 4: Alert Custom Modal -->
+    <!-- Modal 5: Alert Custom Modal -->
     <div id="alertModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center">
             <h3 id="alertTitle" class="text-pink-600 font-bold text-base mb-2">แจ้งเตือน ✨</h3>
@@ -422,7 +603,7 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
         <div class="spinner"></div>
-        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังประมวลผลระบบด้วยความฟรุ้งฟริ้ง ✨...</p>
+        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังสื่อสารกับฐานข้อมูล Google Sheets...</p>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
@@ -431,12 +612,15 @@
 
         let selectedAssetsList = [];
         let globalDepartments = [];
+        let globalStockInRecords = [];
+        let globalStockOutRecords = [];
+        let globalInventoryRecords = [];
         let pendingAuditItem = null;
         let base64PhotoData = "";
         let html5QrCode = null;
         let lastSavedStockInNo = "";
+        let activeDetailRecord = null;
         let canvas, ctx, isDrawing = false;
-        let lastSavedItemCount = 0; // เพิ่มตัวแปรสำหรับเก็บจำนวนที่บันทึก
 
         window.onload = function() {
             const currentUser = getCurrentUser();
@@ -453,6 +637,7 @@
             }
 
             loadDepartments();
+            loadDashboardStats();
             initSignatureCanvas();
             initHtml5QrCode();
 
@@ -486,40 +671,328 @@
 
         function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-gradient-to-r', 'from-pink-500', 'to-pink-400', 'text-white', 'font-semibold', 'shadow-sm');
-                btn.classList.add('text-gray-600', 'font-medium');
+            ['dashboard', 'stockIn', 'stockInList', 'stockOutList', 'inventory', 'reports'].forEach(id => {
+                const btn = document.getElementById('btnTab' + id.charAt(0).toUpperCase() + id.slice(1));
+                if (btn) {
+                    btn.className = "flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5";
+                }
             });
             
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+
             if (event && event.currentTarget) {
-                event.currentTarget.classList.add('bg-gradient-to-r', 'from-pink-500', 'to-pink-400', 'text-white', 'font-semibold', 'shadow-sm');
-                event.currentTarget.classList.remove('text-gray-600', 'font-medium');
+                event.currentTarget.className = "flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5";
             }
+
+            if (tabId === 'stockInList') loadStockInRecords();
+            if (tabId === 'stockOutList') loadStockOutRecords();
+            if (tabId === 'inventory') loadInventoryRecords();
+            if (tabId === 'dashboard') loadDashboardStats();
         }
 
         async function loadDepartments() {
             showLoading();
             try {
                 const res = await fetch(`${API_URL}?action=getDepartments`);
-                const text = await res.text(); // อ่านแบบ text ก่อนกันพัง
-                
-                try {
-                    const result = JSON.parse(text);
-                    if (result.status === 'error') {
-                        throw new Error(result.message);
-                    }
-                    globalDepartments = Array.isArray(result) ? result : (result.data || []);
-                    document.getElementById('depInput').placeholder = "พิมพ์เพื่อค้นหาหน่วยงาน...";
-                } catch (e) {
-                    throw new Error("ลิงก์ Web App อาจหมดอายุ หรือยังไม่ได้ Deploy เป็นเวอร์ชันล่าสุด (ไม่ได้รับข้อมูล JSON)");
-                }
+                const result = await res.json();
+                globalDepartments = Array.isArray(result) ? result : (result.data || []);
             } catch (err) {
                 console.error("Load Dept Error:", err);
-                showAlert("เกิดข้อผิดพลาดในการโหลดข้อมูล", err.message + "\n\n💡 วิธีแก้: เข้าไปที่ Apps Script กด การทำให้ใช้งานได้ (Deploy) -> การจัดการทำให้ใช้งานได้ (Manage deployments) -> กดรูปดินสอแก้ไข -> เลือกเวอร์ชัน 'ใหม่' แล้วบันทึกครับ");
             } finally {
                 hideLoading();
             }
+        }
+
+        async function loadDashboardStats() {
+            try {
+                const [resIn, resOut, resInv] = await Promise.all([
+                    fetch(`${API_URL}?action=getStockIn`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}?action=getStockOut`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}?action=getInventory`).then(r => r.json()).catch(() => [])
+                ]);
+
+                const inCount = Array.isArray(resIn) ? resIn.length : 0;
+                const outCount = Array.isArray(resOut) ? resOut.length : 0;
+                const invCount = Array.isArray(resInv) ? resInv.length : 0;
+
+                document.getElementById('dashStockInCount').innerHTML = `${inCount} <span class="text-sm font-normal text-pink-600">รายการ</span>`;
+                document.getElementById('dashStockOutCount').innerHTML = `${outCount} <span class="text-sm font-normal text-purple-600">รายการ</span>`;
+                document.getElementById('dashInventoryCount').innerHTML = `${invCount} <span class="text-sm font-normal text-indigo-600">รายการ</span>`;
+            } catch (err) {
+                console.error("Dashboard stats error", err);
+            }
+        }
+
+        async function loadStockInRecords() {
+            showLoading();
+            try {
+                const res = await fetch(`${API_URL}?action=getStockIn`);
+                const data = await res.json();
+                globalStockInRecords = Array.isArray(data) ? data : [];
+                renderStockInTable(globalStockInRecords);
+            } catch (err) {
+                console.error("Load Stock In error", err);
+                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลรายการรับเข้าได้");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderStockInTable(records) {
+            const tbody = document.getElementById('stockInTableBody');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกรับเข้าในระบบ</td></tr>';
+                return;
+            }
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-pink-100 hover:bg-pink-50/35 transition-all";
+                
+                const stockInNo = rec.Stock_In_No || "-";
+                const timestamp = rec.Timestamp || "-";
+                const deptName = rec.DEPT_ID || "-";
+                const userName = rec.User_Name || "-";
+                const signatureUrl = rec.User_Confirm || "";
+                const itemsCount = Array.isArray(rec.items) ? rec.items.length : 0;
+
+                const hasSigned = signatureUrl && String(signatureUrl).trim().length > 5;
+                const badge = hasSigned ? 
+                    `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-semibold">ลงชื่อแล้ว</span>` : 
+                    `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-semibold">รอลงชื่อ</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-pink-600">${stockInNo}</td>
+                    <td class="p-3.5 text-gray-600">${timestamp}</td>
+                    <td class="p-3.5 text-gray-700 font-medium">${deptName}</td>
+                    <td class="p-3.5 text-gray-700">${userName}</td>
+                    <td class="p-3.5 text-center font-semibold text-pink-600">${itemsCount} รายการ</td>
+                    <td class="p-3.5 text-center">${badge}</td>
+                    <td class="p-3.5 text-center">
+                        <button type="button" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-xl text-xs font-medium transition-all shadow-sm" onclick="openRecordDetail('stockIn', '${stockInNo}')">ดูรายละเอียด</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function loadStockOutRecords() {
+            showLoading();
+            try {
+                const res = await fetch(`${API_URL}?action=getStockOut`);
+                const data = await res.json();
+                globalStockOutRecords = Array.isArray(data) ? data : [];
+                renderStockOutTable(globalStockOutRecords);
+            } catch (err) {
+                console.error("Load Stock Out error", err);
+                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลรายการจ่ายออกได้");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderStockOutTable(records) {
+            const tbody = document.getElementById('stockOutTableBody');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบข้อมูลบันทึกจ่ายออกในระบบ (Inv_Status = Out)</td></tr>';
+                return;
+            }
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-purple-100 hover:bg-purple-50/35 transition-all";
+                
+                const stockOutNo = rec.Stock_Out_No || "-";
+                const timestamp = rec.Timestamp || "-";
+                const deptId = rec.DEPT_ID || "-";
+                const itUser = rec.IT_User || "-";
+                const signatureUrl = rec.User_Confirm || "";
+                const itemsCount = Array.isArray(rec.items) ? rec.items.length : 0;
+
+                const hasSigned = signatureUrl && String(signatureUrl).trim().length > 5;
+                const badge = hasSigned ? 
+                    `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-semibold">ลงชื่อแล้ว</span>` : 
+                    `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-semibold">รอลงชื่อ</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-purple-600">${stockOutNo}</td>
+                    <td class="p-3.5 text-gray-600">${timestamp}</td>
+                    <td class="p-3.5 text-gray-700 font-medium">${deptId}</td>
+                    <td class="p-3.5 text-gray-700">${itUser}</td>
+                    <td class="p-3.5 text-center font-semibold text-purple-600">${itemsCount} รายการ</td>
+                    <td class="p-3.5 text-center">${badge}</td>
+                    <td class="p-3.5 text-center">
+                        <button type="button" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5 rounded-xl text-xs font-medium transition-all shadow-sm" onclick="openRecordDetail('stockOut', '${stockOutNo}')">ดูรายละเอียด</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function loadInventoryRecords() {
+            showLoading();
+            try {
+                const res = await fetch(`${API_URL}?action=getInventory`);
+                const data = await res.json();
+                globalInventoryRecords = Array.isArray(data) ? data : [];
+                renderInventoryTable(globalInventoryRecords);
+            } catch (err) {
+                console.error("Load Inventory error", err);
+                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลคลังครุภัณฑ์ได้");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderInventoryTable(records) {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 p-8 text-xs font-light">ไม่พบรายการครุภัณฑ์ในคลัง</td></tr>';
+                return;
+            }
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-indigo-100 hover:bg-indigo-50/30 transition-all";
+                
+                const invNo = rec.Inv_No || "-";
+                const assetId = rec.Asset_ID || "-";
+                const detail = rec.Spec_Detai || "-";
+                const status = rec.Inv_Status || "รอตรวจสอบ";
+                const imgUrl = rec.Inv_Image || "";
+
+                let imgEl = imgUrl ? `<img src="${imgUrl}" class="w-10 h-10 object-cover rounded-xl border border-indigo-200 mx-auto" onerror="this.style.display='none'">` : `<span class="text-gray-300 text-xs">ไม่มีรูป</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-indigo-600">${invNo}</td>
+                    <td class="p-3.5 font-semibold text-gray-800">${assetId}</td>
+                    <td class="p-3.5 text-gray-600">${detail}</td>
+                    <td class="p-3.5"><span class="bg-indigo-100 text-indigo-700 text-[10px] px-2.5 py-0.5 rounded-full font-medium">${status}</span></td>
+                    <td class="p-3.5 text-center">${imgEl}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openRecordDetail(type, docNo) {
+            let record = null;
+            if (type === 'stockIn') {
+                record = globalStockInRecords.find(r => r.Stock_In_No === docNo);
+            } else {
+                record = globalStockOutRecords.find(r => r.Stock_Out_No === docNo);
+            }
+
+            if (!record) return;
+            activeDetailRecord = { type, record };
+
+            document.getElementById('detailDocNo').innerText = docNo;
+            const content = document.getElementById('detailContent');
+            const signAction = document.getElementById('detailSignatureAction');
+
+            let html = '';
+            let signatureUrl = '';
+            
+            if (type === 'stockIn') {
+                signatureUrl = record.User_Confirm || '';
+                const uName = record.User_Name || '-';
+                html = `
+                    <div class="grid grid-cols-2 gap-2 bg-pink-50/60 p-3 rounded-xl border border-pink-100">
+                        <p><b>เลขที่ Stock In:</b> ${record.Stock_In_No || '-'}</p>
+                        <p><b>รหัส Stock In ID:</b> ${record.Stock_In_ID || '-'}</p>
+                        <p><b>วันที่เวลา:</b> ${record.Timestamp || '-'}</p>
+                        <p><b>หน่วยงาน:</b> ${record.DEPT_ID || '-'}</p>
+                        <p><b>ประเภทรับเข้า:</b> ${record.sourceType || '-'}</p>
+                        <p><b>เลขอ้างอิง:</b> ${record.referenceNo || '-'}</p>
+                        <p><b>ผู้ใช้งาน IT:</b> ${record.itUser || '-'}</p>
+                        <p><b>ชื่อผู้ส่งมอบ:</b> ${uName}</p>
+                    </div>
+                `;
+            } else {
+                signatureUrl = record.User_Confirm || '';
+                html = `
+                    <div class="grid grid-cols-2 gap-2 bg-purple-50/60 p-3 rounded-xl border border-purple-100">
+                        <p><b>เลขที่ Stock Out:</b> ${record.Stock_Out_No || '-'}</p>
+                        <p><b>รหัส Stock Out ID:</b> ${record.Stock_Out_ID || '-'}</p>
+                        <p><b>วันที่เวลา:</b> ${record.Timestamp || '-'}</p>
+                        <p><b>หน่วยงาน:</b> ${record.DEPT_ID || '-'}</p>
+                        <p><b>ผู้ใช้งาน IT:</b> ${record.IT_User || '-'}</p>
+                    </div>
+                `;
+            }
+
+            // Render Inventory Sub-items table mapping with Code.gs exact keys
+            html += `<h4 class="font-bold text-xs mt-4 mb-2 text-gray-700">📋 รายการครุภัณฑ์ย่อย (Inventory_Asset Sub-items):</h4>`;
+            if (Array.isArray(record.items) && record.items.length > 0) {
+                html += `
+                    <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-gray-100 text-gray-600">
+                                <tr>
+                                    <th class="p-2">Inv No</th>
+                                    <th class="p-2">Asset ID</th>
+                                    <th class="p-2">รายละเอียด</th>
+                                    <th class="p-2">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                record.items.forEach(item => {
+                    const iNo = item.Inv_No || '-';
+                    const aId = item.Asset_ID || '-';
+                    const desc = item.Spec_Detai || '-';
+                    const stat = item.Inv_Status || '-';
+                    html += `
+                        <tr class="border-t border-gray-100">
+                            <td class="p-2 font-bold">${iNo}</td>
+                            <td class="p-2 text-pink-600">${aId}</td>
+                            <td class="p-2">${desc}</td>
+                            <td class="p-2"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">${stat}</span></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
+            } else {
+                html += `<p class="text-gray-400 italic text-[11px]">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p>`;
+            }
+
+            if (signatureUrl && String(signatureUrl).trim().length > 5) {
+                html += `<div class="mt-4"><p class="font-bold mb-1">ลายเซ็นยืนยัน:</p><img src="${signatureUrl}" class="h-20 border rounded-xl object-contain bg-white"></div>`;
+                signAction.classList.add('hidden');
+            } else {
+                html += `<p class="text-amber-600 font-bold mt-4">⚠️ เอกสารนี้ยังไม่มีลายเซ็นผู้ส่งมอบ</p>`;
+                if (type === 'stockIn') {
+                    signAction.classList.remove('hidden');
+                } else {
+                    signAction.classList.add('hidden');
+                }
+            }
+
+            content.innerHTML = html;
+            showModal('recordDetailModal');
+        }
+
+        function printDetailModal() {
+            window.print();
+        }
+
+        function openUpdateSignatureFromDetail() {
+            if (!activeDetailRecord || activeDetailRecord.type !== 'stockIn') return;
+            const record = activeDetailRecord.record;
+            lastSavedStockInNo = record.Stock_In_No;
+            
+            closeModal('recordDetailModal');
+            showModal('signatureModal');
+            setTimeout(() => {
+                resizeCanvas();
+                clearSignature();
+            }, 100);
         }
 
         function populateDepList(deps) {
@@ -580,54 +1053,13 @@
 
             try {
                 const res = await fetch(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
-                const text = await res.text();
-                
-                let data;
-                try {
-                    data = JSON.parse(text);
-                    if (data.status === 'error') {
-                        area.innerHTML = `<p class="text-center text-red-500 text-xs p-4">${data.message}</p>`;
-                        return;
-                    }
-                } catch (e) {
-                     area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">การตั้งค่า API ขัดข้อง (CORS หรือไม่ได้ Deploy)</p>';
-                     return;
-                }
-                
+                let data = await res.json();
                 area.innerHTML = '';
                 
                 if (!data || data.length === 0) {
                     area.innerHTML = '<p class="text-center p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">ไม่พบรหัสครุภัณฑ์นี้</p>';
                     return;
                 }
-
-                const cleanQ = normalizeText(q);
-
-                data.sort((a, b) => {
-                    const idA = normalizeText(a.AssetID);
-                    const serialA = normalizeText(a.Serial);
-                    const idB = normalizeText(b.AssetID);
-                    const serialB = normalizeText(b.Serial);
-
-                    const getSuffix = (str, query) => {
-                        let count = 0;
-                        const revStr = str.split('').reverse();
-                        const revQ = query.split('').reverse();
-                        for (let i = 0; i < Math.min(revStr.length, revQ.length); i++) {
-                            if (revStr[i] === revQ[i]) count++; else break;
-                        }
-                        return count;
-                    };
-
-                    const scoreA = Math.max(getSuffix(idA, cleanQ), getSuffix(serialA, cleanQ));
-                    const scoreB = Math.max(getSuffix(idB, cleanQ), getSuffix(serialB, cleanQ));
-
-                    if (scoreB !== scoreA) return scoreB - scoreA;
-                    
-                    const lenA = scoreA === getSuffix(idA, cleanQ) ? idA.length : serialA.length;
-                    const lenB = scoreB === getSuffix(idB, cleanQ) ? idB.length : serialB.length;
-                    return lenA - lenB;
-                });
 
                 data.forEach(item => {
                     const d = document.createElement('div');
@@ -770,7 +1202,7 @@
                     <td class="p-3.5 font-bold text-pink-600">${item.AssetID}</td>
                     <td class="p-3.5">
                         <p class="font-semibold text-gray-800">${item.FullDescription}</p>
-                        <span class="inline-block bg-pink-100 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full mt-1 font-medium shadow-2xs">${item.InvStatus || 'รอตรวจสอบ'}</span>
+                        <span class="inline-block bg-pink-100 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full mt-1 font-medium">${item.InvStatus || 'รอตรวจสอบ'}</span>
                     </td>
                     <td class="p-3.5 text-gray-600 font-medium">${item.Serial || '-'}</td>
                     <td class="p-3.5">
@@ -918,7 +1350,6 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     lastSavedStockInNo = result.stockInNo;
-                    lastSavedItemCount = result.itemCount || selectedAssetsList.length; // เก็บจำนวนเพื่ออัปเดต UI
                     document.getElementById('savedStockInInfo').innerText = `เลขที่ Stock In: ${result.stockInNo}`;
                     showModal('confirmSignModal');
                 } else {
@@ -948,7 +1379,6 @@
             document.getElementById('depId').value = "";
             document.getElementById('userName').value = "";
             
-            // เคลียร์ช่องค้นหาและซ่อนผลลัพธ์
             document.getElementById('assetQuery').value = "";
             const resultsArea = document.getElementById('resultsArea');
             if (resultsArea) {
@@ -963,9 +1393,8 @@
             selectedAssetsList = [];
             updateSelectedAssetsTable();
             clearSignature();
-            
-            // อัปเดตข้อมูลบนหน้า Dashboard
-            refreshDashboardData();
+            lastSavedStockInNo = "";
+            loadDashboardStats();
         }
 
         async function submitStockIn() {
@@ -984,17 +1413,30 @@
             }
 
             const signatureBase64 = canvas.toDataURL('image/png');
-            const payloadObject = {
-                action: 'saveStockIn',
-                payload: {
-                    itUser: document.getElementById('itUser').value,
-                    depId: document.getElementById('depId').value,
-                    sourceType: document.getElementById('sourceType').value,
-                    referenceNo: document.getElementById('referenceNo').value,
+            
+            let actionName = 'saveStockIn';
+            let payloadData = {
+                itUser: document.getElementById('itUser').value,
+                depId: document.getElementById('depId').value,
+                sourceType: document.getElementById('sourceType').value,
+                referenceNo: document.getElementById('referenceNo').value,
+                userName: userName,
+                signatureBase64: signatureBase64,
+                items: selectedAssetsList
+            };
+
+            if (lastSavedStockInNo) {
+                actionName = 'updateSignature';
+                payloadData = {
+                    stockInNo: lastSavedStockInNo,
                     userName: userName,
-                    signatureBase64: signatureBase64,
-                    items: selectedAssetsList
-                }
+                    signatureBase64: signatureBase64
+                };
+            }
+
+            const payloadObject = {
+                action: actionName,
+                payload: payloadData
             };
 
             closeModal('signatureModal');
@@ -1009,8 +1451,7 @@
                 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    lastSavedItemCount = result.itemCount || selectedAssetsList.length;
-                    showAlert("✅ บันทึกสำเร็จ", `บันทึกข้อมูลและลงลายมือชื่อเรียบร้อยแล้วจ้า ✨\nเลขที่ Stock In: ${result.stockInNo}\nจำนวนรายการ: ${result.itemCount} รายการ`);
+                    showAlert("✅ บันทึกสำเร็จ", `บันทึกข้อมูลและลงลายมือชื่อเรียบร้อยแล้วจ้า ✨\nเลขที่: ${result.stockInNo}`);
                     resetStockInForm();
                 } else {
                     showAlert("❌ เกิดข้อผิดพลาด", result.message || "ไม่สามารถบันทึกข้อมูลได้");
@@ -1022,15 +1463,89 @@
             }
         }
 
-        // ฟังก์ชันอัปเดต UI หน้า Dashboard ทันที (Real-time update)
-        function refreshDashboardData() {
-            const stockInElement = document.querySelector('#tab-dashboard .from-pink-50 h2.text-pink-900');
-            if (stockInElement && lastSavedItemCount > 0) {
-                let currentValue = parseInt(stockInElement.innerText) || 0;
-                let newValue = currentValue + lastSavedItemCount;
-                stockInElement.innerHTML = `${newValue} <span class="text-sm font-normal text-pink-600">รายการ</span>`;
+        async function generatePrintReport(type) {
+            showLoading();
+            const titleEl = document.getElementById('printTitle');
+            const headerEl = document.getElementById('printTableHeader');
+            const bodyEl = document.getElementById('printTableBody');
+            document.getElementById('printTimestamp').innerText = `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')}`;
+
+            try {
+                if (type === 'stockIn') {
+                    titleEl.innerText = "รายงานสรุปรายการรับเข้าครุภัณฑ์ (Asset Stock In Report)";
+                    headerEl.innerHTML = `
+                        <th class="border border-gray-300 p-2">ลำดับ</th>
+                        <th class="border border-gray-300 p-2">เลขที่ Stock In</th>
+                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
+                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
+                        <th class="border border-gray-300 p-2">ประเภทรับเข้า</th>
+                        <th class="border border-gray-300 p-2">ผู้ส่งมอบ</th>
+                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                    `;
+                    
+                    const res = await fetch(`${API_URL}?action=getStockIn`);
+                    const data = await res.json();
+                    bodyEl.innerHTML = '';
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        bodyEl.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานรับเข้า</td></tr>';
+                    } else {
+                        data.forEach((row, idx) => {
+                            const tr = document.createElement('tr');
+                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
+                            tr.innerHTML = `
+                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
+                                <td class="border border-gray-300 p-2 font-bold">${row.Stock_In_No || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.Timestamp || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.sourceType || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.User_Name || '-'}</td>
+                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
+                            `;
+                            bodyEl.appendChild(tr);
+                        });
+                    }
+                } else {
+                    titleEl.innerText = "รายงานสรุปรายการจ่ายออกครุภัณฑ์ (Asset Stock Out Report)";
+                    headerEl.innerHTML = `
+                        <th class="border border-gray-300 p-2">ลำดับ</th>
+                        <th class="border border-gray-300 p-2">เลขที่ Stock Out</th>
+                        <th class="border border-gray-300 p-2">วันที่เวลา</th>
+                        <th class="border border-gray-300 p-2">หน่วยงาน</th>
+                        <th class="border border-gray-300 p-2">ผู้ใช้งาน IT</th>
+                        <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                    `;
+                    
+                    const res = await fetch(`${API_URL}?action=getStockOut`);
+                    const data = await res.json();
+                    bodyEl.innerHTML = '';
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        bodyEl.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">ไม่พบข้อมูลรายงานจ่ายออก (Out)</td></tr>';
+                    } else {
+                        data.forEach((row, idx) => {
+                            const tr = document.createElement('tr');
+                            const signed = (row.User_Confirm) ? 'ลงชื่อแล้ว' : 'รอลงชื่อ';
+                            tr.innerHTML = `
+                                <td class="border border-gray-300 p-2 text-center">${idx + 1}</td>
+                                <td class="border border-gray-300 p-2 font-bold">${row.Stock_Out_No || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.Timestamp || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.DEPT_ID || '-'}</td>
+                                <td class="border border-gray-300 p-2">${row.IT_User || '-'}</td>
+                                <td class="border border-gray-300 p-2 text-center">${signed}</td>
+                            `;
+                            bodyEl.appendChild(tr);
+                        });
+                    }
+                }
+
+                window.print();
+            } catch (err) {
+                console.error("Print report error", err);
+                showAlert("เกิดข้อผิดพลาด", "ไม่สามารถสร้างรายงานเพื่อพิมพ์ได้");
+            } finally {
+                hideLoading();
             }
-            lastSavedItemCount = 0;
         }
 
         function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
