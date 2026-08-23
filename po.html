@@ -1,244 +1,375 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-slate-50">
 <head>
+    <link rel="icon" type="image/png" href="logo005v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบรับเข้าครุภัณฑ์ (PO)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
-        .hidden { display: none !important; }
-    </style>
-</head>
-       <script>
-        (function () {
-            try {
-                const userData = localStorage.getItem('currentUser');
-                if (!userData) {
-                    window.user = null;
-                    return;
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                        }
+                    }
                 }
-                const user = JSON.parse(userData);
-                if (!user || !user.UserPN) {
-                    localStorage.removeItem('currentUser');
-                    window.user = null;
-                    return;
-                }
-                window.user = user;
-            } catch (err) {
-                console.error("Auth-Check error: ", err);
-                localStorage.removeItem('currentUser');
-                window.user = null;
             }
-        })();
-
-        function getCurrentUser() { return window.user || null; }
-        function hasRole(role) {
-            if (!window.user) return false;
-            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
-        }
-        function getDisplayName() {
-            if (!window.user) return "ผู้ใช้งานทั่วไป (Guest)";
-            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
-        }
-        function logout() {
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
-            try { window.location.replace("index.html"); } 
-            catch(e) { window.location.href = "index.html"; }
         }
     </script>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
 
-    <!-- Header -->
-    <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-semibold">ระบบรับเข้าครุภัณฑ์ (PO)</h1>
-            <span class="text-sm bg-indigo-800 px-3 py-1 rounded-full">งาน IT</span>
+<script>
+    (function () {
+        try {
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                window.user = JSON.parse(userData);
+            } else {
+                window.user = { UserPN: 'EMP-001', UserName: 'ผู้ใช้งาน', UserSname: 'ระบบ', UserTypeID: 'ADMIN', Department: 'งานเทคโนโลยีสารสนเทศ' };
+            }
+        } catch (err) {
+            console.error("Auth-Check error: ", err);
+            window.user = { UserPN: 'EMP-001', UserName: 'ผู้ใช้งาน', UserSname: 'ระบบ', UserTypeID: 'ADMIN', Department: 'งานเทคโนโลยีสารสนเทศ' };
+        }
+    })();
+
+    function getCurrentUser() { return window.user || null; }
+    function getDisplayName() {
+        if (!window.user) return "ผู้ใช้งานทั่วไป (Guest)";
+        return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+    }
+</script>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col bg-slate-50">
+
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-inner overflow-hidden">
+                    <img src="./logo005v1.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight leading-none">ระบบรับเข้าครุภัณฑ์ (PO)</h1>
+                    <p class="text-xs text-indigo-200 mt-0.5">Asset Purchasing & Intake Management System</p>
+                </div>
+            </div>
+
+            <!-- User Info Badge -->
+            <div class="flex items-center gap-3 text-sm">
+                <div class="flex items-center gap-2 bg-indigo-800/60 px-3.5 py-1.5 rounded-lg border border-indigo-500/30">
+                    <div class="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold uppercase">
+                        <i class="fa-solid fa-user text-xs"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-medium text-white leading-tight" id="lblUserName">ผู้ใช้งาน</div>
+                        <div class="text-[10px] text-indigo-200" id="lblUserRole">งานเทคโนโลยีสารสนเทศ</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
-        
-        <!-- ========================================== -->
-        <!-- TAB MENU (รายการรับเข้าเป็น Tab 1) -->
-        <!-- ========================================== -->
-        <div class="mb-6 flex space-x-4 border-b border-gray-200">
-            <button id="tabList" class="py-2 px-6 border-b-2 border-indigo-600 font-medium text-indigo-600 transition-colors">รายการรับเข้าทั้งหมด</button>
-            <button id="tabAdd" class="py-2 px-6 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">บันทึกข้อมูล PO</button>
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
+
+        <!-- Quick Stats Dashboard -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500">จำนวน PO ทั้งหมด</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalPO">0</h3>
+                    <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-sync text-[10px]"></i> ข้อมูลจากฐานข้อมูล</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500">รวมงบประมาณสั่งซื้อ</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalBudget">฿0</h3>
+                    <p class="text-[11px] text-indigo-600 font-medium mt-1">ยอดรวมตามรายการรับเข้า</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500">จำนวนครุภัณฑ์ย่อย</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalAssets">0</h3>
+                    <p class="text-[11px] text-blue-600 font-medium mt-1">รหัสครุภัณฑ์ที่ถูกลงทะเบียน</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-barcode"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500">หมวดหมู่ครุภัณฑ์</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statCategories">0</h3>
+                    <p class="text-[11px] text-amber-600 font-medium mt-1">จาก Asset_Type_DB</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+            </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SECTION 1: รายการรับเข้า (PO List) - กลายเป็นหน้าแรก -->
-        <!-- ========================================== -->
-        <section id="poListSection" class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <div class="border-b pb-4 mb-6 flex justify-between items-end">
+        <!-- Tab Navigation Bar -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 flex flex-wrap gap-2 no-print">
+            <button id="tabList" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+                <i class="fa-solid fa-list-check"></i>
+                <span>รายการรับเข้าทั้งหมด</span>
+                <span id="badgePoCount" class="ml-1 bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+            </button>
+            <button id="tabAdd" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>บันทึกข้อมูล PO ใหม่</span>
+            </button>
+        </div>
+
+        <!-- SECTION 1: PO List Section -->
+        <section id="poListSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 transition-all">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-100">
                 <div>
-                    <h2 class="text-2xl font-medium text-gray-800">รายการรับเข้าครุภัณฑ์ (PO)</h2>
-                    <p class="text-gray-500 text-sm mt-1">จัดกลุ่มตามปีที่รับเข้า สามารถกดแก้ไขข้อมูลได้</p>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span>รายการรับเข้าครุภัณฑ์ (PO)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">จัดกลุ่มตามปีที่รับเข้า สามารถค้นหา และกดแก้ไขข้อมูลย้อนหลังได้</p>
                 </div>
-                <button id="btnRefreshList" class="text-sm bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
-                    🔄 รีเฟรชข้อมูล
-                </button>
+
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-grow md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" onkeyup="filterPOList()" placeholder="ค้นหาเลข PO, ชื่อรายการ, บริษัท..." class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                    </div>
+
+                    <!-- Year Filter -->
+                    <select id="filterYear" onchange="filterPOList()" class="py-1.5 px-3 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                        <option value="">-- ทุกปีรับเข้า --</option>
+                    </select>
+
+                    <!-- Refresh Button -->
+                    <button id="btnRefreshList" class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 px-3 py-2 rounded-lg font-semibold transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>รีเฟรชข้อมูล</span>
+                    </button>
+                </div>
             </div>
             
-            <div id="poListContainer" class="space-y-6">
-                <!-- ข้อมูลจะถูก Render ที่นี่ -->
-                <div class="text-center py-10 text-gray-500 flex flex-col items-center">
-                    <svg class="animate-spin h-8 w-8 text-indigo-500 mb-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    กำลังโหลดข้อมูล...
+            <!-- List Container -->
+            <div id="poListContainer" class="mt-6 space-y-6">
+                <div class="text-center py-12 text-slate-400 flex flex-col items-center justify-center">
+                    <svg class="animate-spin h-8 w-8 text-indigo-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="text-sm font-medium">กำลังโหลดข้อมูลรายการ PO จากระบบ...</p>
                 </div>
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- SECTION 2: ฟอร์มรับเข้า PO -->
-        <!-- ========================================== -->
-        <section id="poFormSection" class="hidden bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <div class="border-b pb-4 mb-6 flex justify-between items-end">
+        <!-- SECTION 2: PO Entry Form -->
+        <section id="poFormSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-8 transition-all">
+            <div class="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-2xl font-medium text-gray-800">บันทึกข้อมูล Purchase Order (PO)</h2>
-                    <p class="text-gray-500 text-sm mt-1">กรุณากรอกข้อมูลให้ครบถ้วน ตัวแปรจะถูกส่งไปประมวลผลที่ฐานข้อมูลโดยตรง</p>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-file-pen text-indigo-600"></i>
+                        <span>บันทึกข้อมูล Purchase Order (PO)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">กรุณากรอกข้อมูลให้ครบถ้วน ข้อมูลจะถูกบันทึกและรันรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล</p>
                 </div>
-                <!-- ตัวบอกสถานะการโหลดข้อมูล Dropdown -->
-                <div id="dbStatus" class="text-sm px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md border border-yellow-300">
-                    กำลังเชื่อมต่อฐานข้อมูล...
+
+                <!-- Database status indicator -->
+                <div id="dbStatus" class="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/80 font-medium flex items-center gap-1.5 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    <span>กำลังเชื่อมต่อฐานข้อมูล...</span>
                 </div>
             </div>
 
-            <!-- แจ้งเตือนเลขซ้ำ (สำหรับ Po_No) -->
-            <div id="duplicateAlert" class="hidden mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm flex items-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <!-- Duplicate PO Alert Box -->
+            <div id="duplicateAlert" class="hidden mb-6 bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 rounded-xl shadow-sm flex items-start gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-rose-500 text-lg mt-0.5"></i>
                 <div>
-                    <p class="font-bold">ตรวจสอบพบข้อมูลซ้ำ!</p>
-                    <p class="text-sm">เลขที่ PO หรือเอกสาร นี้มีในระบบแล้ว ระบบได้ทำการล็อคปุ่มบันทึก</p>
+                    <p class="font-bold text-sm">ตรวจสอบพบข้อมูลซ้ำ!</p>
+                    <p class="text-xs mt-0.5">เลขที่ PO หรือไฟล์เอกสารนี้มีในระบบแล้ว ระบบได้ทำการล็อคปุ่มบันทึกเพื่อป้องกันข้อมูลซ้ำซ้อน</p>
                 </div>
             </div>
 
             <form id="poForm" class="space-y-6">
-                <!-- Group 1: ข้อมูลเอกสาร -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h3 class="font-medium text-indigo-700 mb-4 border-b pb-2">ข้อมูลเอกสารสั่งซื้อ</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <!-- Group 1: Document Details -->
+                <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                        <i class="fa-solid fa-file-lines text-indigo-600 text-sm"></i>
+                        <h3 class="font-bold text-slate-800 text-sm">1. ข้อมูลเอกสารสั่งซื้อ</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Po_No <span class="text-red-500">*</span></label>
-                            <input type="text" id="Po_No" name="Po_No" required readonly placeholder="กำลังสร้างเลข PO..." class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100 font-bold text-indigo-700">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">แนบไฟล์เอกสาร (Doc_ID) <span class="text-red-500">*</span></label>
-                            <input type="file" id="Doc_ID_File" accept=".pdf,.jpg,.jpeg,.png" required class="w-full px-3 py-1.5 border rounded-md bg-white text-sm">
-                            <input type="hidden" id="Doc_ID" name="Doc_ID"> <!-- ซ่อนไว้รับค่า Base64 -->
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Po_No <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="Po_No" name="Po_No" required readonly placeholder="กำลังสร้างเลข PO..." class="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-indigo-50/50 font-bold text-indigo-700">
+                                <button type="button" onclick="fetchAutoPoNo()" title="รีเฟรชรหัส PO" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-indigo-600 hover:text-indigo-800 p-1">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่รับเข้า (Po_Datetime_Received)</label>
-                            <input type="date" name="Po_Datetime_Received" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเข้า (Po_Datetime_Received)</label>
+                            <input type="date" id="Po_Datetime_Received" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
-                        
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Po_ID</label>
-                            <input type="text" id="Po_ID" name="Po_ID" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                            <!-- ข้อความแจ้งเตือนซ้ำ จะโชว์เมื่อพิมพ์ Po_ID ซ้ำกับในระบบ -->
-                            <p id="poIdWarning" class="hidden text-xs text-yellow-600 mt-1 font-medium">⚠️ พบข้อมูลซ้ำ (ระบบจะถามยืนยันตอนบันทึก)</p>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Po_ID (อ้างอิงภายใน)</label>
+                            <input type="text" id="Po_ID" name="Po_ID" placeholder="เช่น PO-2569-001" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <p id="poIdWarning" class="hidden text-[11px] text-amber-600 mt-1 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i> พบข้อมูล Po_ID ซ้ำในระบบ
+                            </p>
                         </div>
                         
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">บริษัทคู่สัญญา (Contracting_Company)</label>
-                            <input type="text" name="Contracting_Company" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">บริษัทคู่สัญญา (Contracting_Company)</label>
+                            <input type="text" name="Contracting_Company" placeholder="ระบุบริษัท/ห้างหุ้นส่วนจำกัด ผู้จัดจำหน่าย" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">แนบไฟล์เอกสาร PO (Doc_ID) <span class="text-rose-500">*</span></label>
+                            <input type="file" id="Doc_ID_File" accept=".pdf,.jpg,.jpeg,.png" required class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                            <input type="hidden" id="Doc_ID" name="Doc_ID">
                         </div>
                     </div>
                 </div>
 
-                <!-- Group 2: รายละเอียดครุภัณฑ์ -->
-                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h3 class="font-medium text-indigo-700 mb-4 border-b border-blue-200 pb-2">รายละเอียดครุภัณฑ์ (ผูกกับฐานข้อมูล Asset_Type_DB)</h3>
+                <!-- Group 2: Asset Categories & Specifications -->
+                <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 space-y-4">
+                    <div class="flex items-center gap-2 border-b border-indigo-100 pb-2.5">
+                        <i class="fa-solid fa-boxes-stacked text-indigo-600 text-sm"></i>
+                        <h3 class="font-bold text-slate-800 text-sm">2. รายละเอียดครุภัณฑ์ (ผูกกับฐานข้อมูล Asset_Type_DB)</h3>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        
                         <div class="md:col-span-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อรายการ (Po_Name) <span class="text-red-500">*</span></label>
-                            <input type="text" name="Po_Name" required class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อรายการสั่งซื้อ (Po_Name) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="Po_Name" required placeholder="เช่น เครื่องคอมพิวเตอร์ประมวลผลสูง พร้อมจอภาพ" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
 
-                        <!-- Dropdown 1: หมวดครุภัณฑ์ -->
+                        <!-- Cascading Dropdowns -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">หมวดครุภัณฑ์ (Asset_Type_Name)</label>
-                            <select name="Asset_Type_Name" id="Asset_Type_Name" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white" disabled>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดครุภัณฑ์ (Asset_Type_Name)</label>
+                            <select name="Asset_Type_Name" id="Asset_Type_Name" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white" disabled>
                                 <option value="">-- กำลังโหลดข้อมูล... --</option>
                             </select>
                         </div>
                         
-                        <!-- Dropdown 2: ประเภทที่ 2 -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทที่ 2 (Asset_Type_ID)</label>
-                            <select name="Asset_Type_ID" id="Asset_Type_ID" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100" readonly>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสหมวด (Asset_Type_ID)</label>
+                            <select name="Asset_Type_ID" id="Asset_Type_ID" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-slate-100" readonly>
                                 <option value="">-- รอเลือกหมวดครุภัณฑ์ --</option>
                             </select>
                         </div>
                         
-                        <!-- Dropdown 3: Type_ID -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ชนิดครุภัณฑ์ย่อย (Type_ID)</label>
-                            <select name="Type_ID" id="Type_ID" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชนิดครุภัณฑ์ย่อย (Type_ID)</label>
+                            <select name="Type_ID" id="Type_ID" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                                 <option value="">-- รอเลือกหมวดครุภัณฑ์ --</option>
                             </select>
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
-                            <input type="text" name="Asset_Desc" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
+                            <input type="text" name="Asset_Desc" placeholder="รายละเอียดคุณลักษณะเฉพาะ เช่น CPU Core i7, RAM 16GB, SSD 512GB" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">แหล่งเงิน (Po_Budget)</label>
-                            <input type="text" name="Po_Budget" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">แหล่งเงิน (Po_Budget)</label>
+                            <input type="text" name="Po_Budget" placeholder="เช่น เงินงบประมาณแผ่นดิน ปี 2569" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         
-                        <!-- ซ่อนฟิลด์ที่ไม่ได้ใช้โชว์ -->
                         <div class="hidden">
-                            <input type="text" name="Po_Type_Name"> 
-                            <input type="text" name="Po_Type_ID">
+                            <input type="text" name="Po_Type_Name" id="Po_Type_Name"> 
+                            <input type="text" name="Po_Type_ID" id="Po_Type_ID">
                             <input type="text" name="Po_Purchasing">
                         </div>
                     </div>
                 </div>
 
-                <!-- Group 3: การเงิน & การรับประกัน -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h3 class="font-medium text-indigo-700 mb-4 border-b pb-2">การเงิน และ การรับประกัน</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Group 3: Financial & Warranty Info -->
+                <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                        <i class="fa-solid fa-calculator text-indigo-600 text-sm"></i>
+                        <h3 class="font-bold text-slate-800 text-sm">3. การเงิน และ การรับประกัน</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">จำนวน (Po_Amount)</label>
-                            <input type="number" name="Po_Amount" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวนหน่วย (Po_Amount)</label>
+                            <input type="number" min="1" id="Po_Amount" name="Po_Amount" oninput="calculateTotal()" placeholder="0" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคาต่อหน่วย (Unit_Price)</label>
-                            <input type="number" step="0.01" name="Unit_Price" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคาต่อหน่วย (Unit_Price)</label>
+                            <input type="number" step="0.01" min="0" id="Unit_Price" name="Unit_Price" oninput="calculateTotal()" placeholder="0.00" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคารวม (Total_Price)</label>
-                            <input type="number" step="0.01" name="Total_Price" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
+                            <input type="number" step="0.01" min="0" id="Total_Price" name="Total_Price" placeholder="0.00" class="w-full px-3 py-2 text-sm border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-emerald-50/30 font-bold text-emerald-700">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">อายุใช้งาน (Specified_Age)</label>
-                            <input type="text" name="Specified_Age" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">อายุใช้งาน/ปี (Specified_Age)</label>
+                            <input type="text" name="Specified_Age" placeholder="เช่น 5 ปี" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ระยะประกัน (Insurance_Period)</label>
-                            <input type="text" name="Insurance_Period" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ระยะประกัน (Insurance_Period)</label>
+                            <input type="text" name="Insurance_Period" placeholder="เช่น 3 ปี Onsite" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">เริ่มประกัน (Warranty_Start)</label>
-                            <input type="date" name="Warranty_Start" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">เริ่มประกัน (Warranty_Start)</label>
+                            <input type="date" name="Warranty_Start" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">สิ้นสุดประกัน (Warranty_End)</label>
-                            <input type="date" name="Warranty_End" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">สิ้นสุดประกัน (Warranty_End)</label>
+                            <input type="date" name="Warranty_End" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">อัตราเสื่อม (Depreciation_Rate)</label>
-                            <input type="text" name="Depreciation_Rate" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">อัตราค่าเสื่อม % (Depreciation)</label>
+                            <input type="text" name="Depreciation_Rate" placeholder="เช่น 20%" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <input type="hidden" name="Annual_Depreciation">
                         <input type="hidden" name="Accumulated_Depreciation">
@@ -246,27 +377,45 @@
                     </div>
                 </div>
 
-                <!-- Group 4: การสร้างรหัสครุภัณฑ์ & รูปภาพ -->
-                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                    <h3 class="font-medium text-indigo-800 mb-4 border-b border-indigo-200 pb-2">ระบบรันรหัสครุภัณฑ์อัตโนมัติ</h3>
+                <!-- Group 4: Automatic Asset ID Running & Image Upload -->
+                <div class="bg-emerald-50/40 p-5 rounded-xl border border-emerald-200/80 space-y-4">
+                    <div class="flex items-center justify-between border-b border-emerald-200/80 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-barcode text-emerald-600 text-sm"></i>
+                            <h3 class="font-bold text-slate-800 text-sm">4. ระบบรันรหัสครุภัณฑ์อัตโนมัติ</h3>
+                        </div>
+                        <span id="tagCountBadge" class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                            คาดการณ์: 0 รายการ
+                        </span>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">กลุ่มรหัส (Asset_ID_Groups) <span class="text-red-500">*</span></label>
-                            <input type="text" name="Asset_ID_Groups" placeholder="เช่น 2-08-003-010-66-" required class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">กลุ่มรหัส (Asset_ID_Groups) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_Groups" name="Asset_ID_Groups" oninput="updateTagPreview()" placeholder="เช่น 2-08-003-010-69-" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รหัสเริ่ม (Asset_ID_Start) <span class="text-red-500">*</span></label>
-                            <input type="text" name="Asset_ID_Start" placeholder="เช่น 001" required pattern="[0-9]+" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสเริ่ม (Start) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_Start" name="Asset_ID_Start" oninput="updateTagPreview()" placeholder="001" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รหัสสิ้นสุด (Asset_ID_End) <span class="text-red-500">*</span></label>
-                            <input type="text" name="Asset_ID_End" placeholder="เช่น 050" required pattern="[0-9]+" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสสิ้นสุด (End) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_End" name="Asset_ID_End" oninput="updateTagPreview()" placeholder="005" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
+                        </div>
+
+                        <!-- Tag Format Live Preview -->
+                        <div class="md:col-span-4 bg-white p-3 rounded-lg border border-emerald-200/60 text-xs text-slate-600 flex items-center justify-between">
+                            <div>
+                                <span class="font-medium text-slate-500">ตัวอย่างรหัสที่จะสร้าง: </span>
+                                <span id="tagSampleText" class="font-mono font-bold text-emerald-700 ml-1">ยังไม่ได้กำหนดกลุ่มรหัส</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400">ระบบจะสร้างเรียงตามลำดับตัวเลข</span>
                         </div>
                         
                         <div class="md:col-span-4 mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">แนบรูปภาพครุภัณฑ์ (Asset_Po_Image)</label>
-                            <input type="file" id="Asset_Po_Image_File" accept="image/*" class="w-full px-3 py-1.5 border rounded-md bg-white text-sm focus:ring-indigo-500">
-                            <input type="hidden" id="Asset_Po_Image" name="Asset_Po_Image"> <!-- ซ่อนไว้รับค่า Base64 -->
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">แนบรูปภาพครุภัณฑ์ (Asset_Po_Image)</label>
+                            <input type="file" id="Asset_Po_Image_File" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                            <input type="hidden" id="Asset_Po_Image" name="Asset_Po_Image">
                         </div>
                         
                         <input type="hidden" name="Note1">
@@ -275,71 +424,80 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-4">
-                    <button type="submit" id="btnSavePO" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-10 rounded-lg shadow-md transition-all">
-                        บันทึกข้อมูล PO
+                <div class="flex justify-end pt-2">
+                    <button type="submit" id="btnSavePO" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>บันทึกข้อมูล PO</span>
                     </button>
                 </div>
             </form>
         </section>
 
-        <!-- ========================================== -->
-        <!-- SECTION 3: หน้าจอเตรียมสร้างรหัสครุภัณฑ์ -->
-        <!-- ========================================== -->
-        <section id="generateSection" class="hidden flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-lg p-8">
-            <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <!-- SECTION 3: Asset Tag Generation Step -->
+        <section id="generateSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center max-w-2xl mx-auto">
+            <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-6 text-3xl shadow-inner animate-bounce">
+                <i class="fa-solid fa-check"></i>
             </div>
-            <h2 class="text-3xl font-medium text-gray-800 mb-2">บันทึกข้อมูล PO สำเร็จแล้ว!</h2>
-            <p class="text-gray-500 text-lg mb-10" id="generateDesc">พร้อมดำเนินการสร้างรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล Asset_DB</p>
-            <button id="btnGenerateAssets" class="bg-green-600 hover:bg-green-700 text-white text-xl font-medium py-4 px-12 rounded-full shadow-lg transition-all transform hover:scale-105">
-                สร้างรายการครุภัณฑ์เดี๋ยวนี้
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">บันทึกข้อมูล PO สำเร็จแล้ว!</h2>
+            <p class="text-slate-500 text-sm mb-8" id="generateDesc">พร้อมดำเนินการสร้างรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล Asset_DB</p>
+            
+            <button id="btnGenerateAssets" class="bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold py-3.5 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>สร้างรายการครุภัณฑ์เดี๋ยวนี้</span>
             </button>
         </section>
 
-        <!-- ========================================== -->
-        <!-- SECTION 4: หน้าจอแสดงผลสำเร็จ -->
-        <!-- ========================================== -->
-        <section id="successSection" class="hidden flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-lg p-8">
-            <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-6">
-                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        <!-- SECTION 4: Final Success Screen -->
+        <section id="successSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center max-w-2xl mx-auto">
+            <div class="w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-6 text-3xl shadow-inner">
+                <i class="fa-solid fa-shield-check"></i>
             </div>
-            <h2 class="text-3xl font-medium text-gray-800 mb-4">ดำเนินการเสร็จสมบูรณ์</h2>
-            <p class="text-gray-600 text-lg mb-8" id="successDesc"></p>
-            <button onclick="window.location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-10 rounded-lg shadow transition-all">
-                กลับหน้าแรก / สร้างรายการใหม่
-            </button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">ดำเนินการเสร็จสมบูรณ์</h2>
+            <p class="text-slate-600 text-sm mb-8" id="successDesc"></p>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="switchTab('list')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition-all flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>ดูรายการ PO ทั้งหมด</span>
+                </button>
+                <button onclick="resetAndNewPO()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 text-sm border border-slate-300">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>สร้างรายการ PO ใหม่</span>
+                </button>
+            </div>
         </section>
 
     </main>
 
-    <!-- ========================================== -->
-    <!-- FULL SCREEN OVERLAY MODAL -->
-    <!-- ========================================== -->
-    <div id="loadingModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex flex-col items-center justify-center backdrop-blur-sm">
-        <svg class="animate-spin h-14 w-14 text-white mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <h3 id="loadingText" class="text-white text-2xl font-medium tracking-wide">กำลังประมวลผล...</h3>
-        
-        <!-- Progress Bar -->
-        <div id="progressWrapper" class="w-3/4 max-w-md bg-gray-700 rounded-full h-3 mt-8 hidden overflow-hidden">
-            <div id="progressBar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+    <!-- Loading Overlay Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-white/10 border border-white/20 p-8 rounded-2xl flex flex-col items-center max-w-md w-full shadow-2xl">
+            <svg class="animate-spin h-12 w-12 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h3 id="loadingText" class="text-white text-lg font-bold tracking-wide text-center">กำลังประมวลผล...</h3>
+            
+            <!-- Progress Bar -->
+            <div id="progressWrapper" class="w-full bg-white/20 rounded-full h-3 mt-6 hidden overflow-hidden border border-white/30">
+                <div id="progressBar" class="bg-emerald-400 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- EDIT PO MODAL (ฟอร์มแก้ไข) -->
-    <!-- ========================================== -->
-    <div id="editPoModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
-                <h3 class="text-xl font-medium text-gray-800">แก้ไขข้อมูล: <span id="editPoTitle" class="text-indigo-600 font-bold"></span></h3>
-                <button id="btnCloseEditModal" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <!-- EDIT PO MODAL -->
+    <div id="editPoModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col border border-slate-200">
+            <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center z-10">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">แก้ไขข้อมูล: <span id="editPoTitle" class="text-indigo-600"></span></h3>
+                    <p class="text-xs text-slate-400">อัปเดตรายละเอียดเอกสารสั่งซื้อ</p>
+                </div>
+                <button id="btnCloseEditModal" class="text-slate-400 hover:text-rose-500 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
+
             <div class="p-6">
                 <form id="editPoForm" class="space-y-4">
                     <input type="hidden" id="editRowIndex" name="RowIndex">
@@ -347,40 +505,46 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อรายการ (Po_Name)</label>
-                            <input type="text" id="editPoName" name="Po_Name" required class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อรายการ (Po_Name)</label>
+                            <input type="text" id="editPoName" name="Po_Name" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">บริษัทคู่สัญญา</label>
-                            <input type="text" id="editContracting" name="Contracting_Company" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">บริษัทคู่สัญญา</label>
+                            <input type="text" id="editContracting" name="Contracting_Company" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่รับเข้า (เช่น '27/07/2569)</label>
-                            <input type="text" id="editDate" name="Po_Datetime_Received" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเข้า (เช่น '27/07/2569)</label>
+                            <input type="text" id="editDate" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
-                            <input type="text" id="editDesc" name="Asset_Desc" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
+                            <input type="text" id="editDesc" name="Asset_Desc" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">จำนวน (Po_Amount)</label>
-                            <input type="number" id="editAmount" name="Po_Amount" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวน (Po_Amount)</label>
+                            <input type="number" id="editAmount" name="Po_Amount" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคารวม (Total_Price)</label>
-                            <input type="number" step="0.01" id="editTotal" name="Total_Price" class="w-full px-3 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
+                            <input type="number" step="0.01" id="editTotal" name="Total_Price" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
                         </div>
                         
-                        <!-- แก้ไขรูปภาพครุภัณฑ์ -->
-                        <div class="md:col-span-2 mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">แก้ไขรูปภาพครุภัณฑ์ (เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</label>
-                            <input type="file" id="editAssetImageFile" accept="image/*" class="w-full px-3 py-1.5 border rounded-md bg-white text-sm focus:ring-indigo-500">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">แก้ไขรูปภาพครุภัณฑ์ (เว้นว่างหากไม่เปลี่ยน)</label>
+                            <input type="file" id="editAssetImageFile" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 cursor-pointer border border-slate-300 rounded-lg bg-white">
                             <input type="hidden" id="editAssetImage" name="Asset_Po_Image">
+                            <div id="editImgPreviewContainer" class="mt-2 hidden flex items-center gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                <img id="editImgPreview" src="" alt="Current Asset Image" class="h-16 w-16 object-cover rounded-lg border border-slate-300 shadow-sm">
+                                <span class="text-xs text-slate-500">รูปภาพปัจจุบันที่บันทึกในระบบ</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-6 flex justify-end">
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg shadow-md transition-all">
-                            บันทึกการแก้ไข
+
+                    <div class="mt-6 flex justify-end gap-2 border-t pt-4">
+                        <button type="button" onclick="document.getElementById('editPoModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-all">ยกเลิก</button>
+                        <button type="submit" id="btnSaveEditPO" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-xs shadow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>บันทึกการแก้ไข</span>
                         </button>
                     </div>
                 </form>
@@ -388,21 +552,46 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- JAVASCRIPT LOGIC -->
-    <!-- ========================================== -->
+    <!-- FULLSCREEN IMAGE LIGHTBOX MODAL -->
+    <div id="imageLightboxModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-4" onclick="closeImageLightbox()">
+        <button onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white hover:text-rose-400 text-2xl w-10 h-10 rounded-full bg-white/10 flex items-center justify-center transition-all">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="max-w-4xl max-h-[85vh] p-2 flex flex-col items-center" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" alt="Full Preview" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10">
+            <p id="lightboxTitle" class="text-white text-sm font-semibold mt-4 bg-white/10 px-4 py-1.5 rounded-full border border-white/20"></p>
+        </div>
+    </div>
+
+    <!-- Custom Confirm / Alert Modal -->
+    <div id="customDialogModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center border border-slate-100">
+            <div id="dialogIcon" class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-2xl mb-4">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="dialogTitle" class="text-lg font-bold text-slate-800 mb-2">แจ้งเตือน</h3>
+            <p id="dialogMessage" class="text-sm text-slate-600 mb-6 whitespace-pre-line"></p>
+            <div class="flex justify-center gap-3" id="dialogButtons">
+                <!-- Action buttons generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
     <script>
         // ---------------------------------------------------------
-        // 1. CONFIGURATION
+        // 1. CONFIGURATION & STATE MANAGEMENT
         // ---------------------------------------------------------
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxuAgUyUv9iKKzdXcd3-3KsvCdDrSYmcR_tXEXyd19UxogjGb4plWc30g1wfoNiLLTq/exec"; 
         
         let currentPOData = null; 
         let assetTypeDatabase = []; 
         let isPoIdDuplicate = false; 
+        let allPOList = [];
 
         // ---------------------------------------------------------
-        // 2. DOM Elements
+        // 2. DOM ELEMENTS
         // ---------------------------------------------------------
         const inputPoNo = document.getElementById('Po_No');
         const fileDocId = document.getElementById('Doc_ID_File');
@@ -425,84 +614,93 @@
         const selectTypeID = document.getElementById('Type_ID');
 
         // ---------------------------------------------------------
-        // 3. Initialization & Event Listeners
+        // 3. INITIALIZATION
         // ---------------------------------------------------------
-        
         window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lblUserName').innerText = getDisplayName();
+
+            // Set Today Date in Form
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('Po_Datetime_Received').value = today;
+
+            // Load data from live Google Apps Script endpoint
+            initializeData();
+        });
+
+        function initializeData() {
             fetchAssetTypeDB();
             fetchAutoPoNo();
-            fetchPOList(); // โหลดรายการเข้ามารอไว้เลย
-        });
+            fetchPOList();
+        }
 
-        // จัดการการดึงไฟล์เป็น Base64
+        // File Convert Handlers
         fileDocId.addEventListener('change', (e) => handleFileConvert(e, hiddenDocId, true));
         document.getElementById('Asset_Po_Image_File').addEventListener('change', (e) => handleFileConvert(e, document.getElementById('Asset_Po_Image'), false));
-        
-        // แปลงไฟล์รูปภาพในหน้าจอแก้ไข (Modal)
         document.getElementById('editAssetImageFile').addEventListener('change', (e) => handleFileConvert(e, document.getElementById('editAssetImage'), false));
         
-        // เช็คการซ้ำซ้อน
+        // Input Listeners
         inputPoNo.addEventListener('blur', checkDuplicatePO);
         inputPoId.addEventListener('blur', checkDuplicatePoID); 
-        
         selectAssetTypeName.addEventListener('change', populateSubCategories);
 
-        poForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await submitPO();
-        });
-
-        document.getElementById('btnGenerateAssets').addEventListener('click', async () => {
-            await generateAssetsInLoop();
-        });
-
         // ---------------------------------------------------------
-        // 4. Core Functions
+        // 4. CORE DATA FUNCTIONS (MAPPED TO CODE.GS)
         // ---------------------------------------------------------
 
         async function fetchAssetTypeDB() {
+            const statusEl = document.getElementById('dbStatus');
+            statusEl.className = "text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+            statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> <span>กำลังโหลด Asset_Type_DB...</span>`;
+
             try {
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "getAssetTypes" }) });
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "getAssetTypes" }) 
+                });
                 const result = await response.json();
-                
-                const statusEl = document.getElementById('dbStatus');
 
-                if (result.success) {
+                if (result.success && Array.isArray(result.data)) {
                     assetTypeDatabase = result.data;
-                    statusEl.classList.replace('bg-yellow-100', 'bg-green-100');
-                    statusEl.classList.replace('text-yellow-700', 'text-green-700');
-                    statusEl.classList.replace('border-yellow-300', 'border-green-300');
-                    statusEl.innerText = "เชื่อมต่อฐานข้อมูลแล้ว ✓";
-
-                    const uniqueNames = [...new Set(assetTypeDatabase.map(item => item.Asset_Type_Name))];
-                    selectAssetTypeName.innerHTML = '<option value="">-- เลือกหมวดครุภัณฑ์ --</option>';
-                    uniqueNames.forEach(name => {
-                        if(name) selectAssetTypeName.innerHTML += `<option value="${name}">${name}</option>`;
-                    });
-                    
-                    selectAssetTypeName.disabled = false;
+                    statusEl.className = "text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+                    statusEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> <span>เชื่อมต่อ Asset_Type_DB แล้ว ✓</span>`;
+                    populateCategoryDropdowns(assetTypeDatabase);
                 } else {
-                    statusEl.innerText = "โหลดข้อมูลล้มเหลว!";
-                    console.error("DB Fetch Error:", result.message);
+                    throw new Error(result.message || "ไม่สามารถดึงข้อมูล Asset_Type_DB ได้");
                 }
             } catch (error) {
-                console.error("Network Error fetching DB:", error);
-                document.getElementById('dbStatus').innerText = "Network Error!";
+                console.error("DB Fetch Error:", error);
+                statusEl.className = "text-xs px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg border border-rose-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+                statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500"></i> <span>เชื่อมต่อฐานข้อมูลล้มเหลว</span>`;
+                selectAssetTypeName.innerHTML = '<option value="">-- ไม่สามารถโหลดหมวดครุภัณฑ์ได้ --</option>';
             }
+        }
+
+        function populateCategoryDropdowns(data) {
+            const uniqueNames = [...new Set(data.map(item => item.Asset_Type_Name))];
+            selectAssetTypeName.innerHTML = '<option value="">-- เลือกหมวดครุภัณฑ์ --</option>';
+            uniqueNames.forEach(name => {
+                if(name) selectAssetTypeName.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+            selectAssetTypeName.disabled = false;
         }
 
         async function fetchAutoPoNo() {
             try {
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "getAutoPoNo" }) });
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "getAutoPoNo" }) 
+                });
                 const result = await response.json();
-                
-                if (result.success) {
+                if (result.success && result.poNo) {
                     inputPoNo.value = result.poNo;
                 } else {
                     inputPoNo.readOnly = false;
                     inputPoNo.placeholder = "กรุณาระบุเลข PO ด้วยตนเอง";
                 }
             } catch (error) {
+                console.error("Auto PO fetch error:", error);
                 inputPoNo.readOnly = false; 
                 inputPoNo.placeholder = "กรุณาระบุเลข PO ด้วยตนเอง";
             }
@@ -515,17 +713,64 @@
 
             if (!selectedName) return;
 
+            document.getElementById('Po_Type_Name').value = selectedName;
+
             const filteredData = assetTypeDatabase.filter(item => item.Asset_Type_Name === selectedName);
             const uniqueIDs = [...new Set(filteredData.map(item => item.Asset_Type_ID))];
             
             uniqueIDs.forEach(id => { if(id) selectAssetTypeID.innerHTML += `<option value="${id}">${id}</option>`; });
-            if (uniqueIDs.length === 1) selectAssetTypeID.value = uniqueIDs[0];
+            if (uniqueIDs.length === 1) {
+                selectAssetTypeID.value = uniqueIDs[0];
+                document.getElementById('Po_Type_ID').value = uniqueIDs[0];
+            }
 
             filteredData.forEach(item => {
                 if(item.Type_ID) {
-                    selectTypeID.innerHTML += `<option value="${item.Type_ID}">${item.Type_ID} : ${item.Type_Name}</option>`;
+                    selectTypeID.innerHTML += `<option value="${item.Type_ID}">${item.Type_ID} : ${item.Type_Name || item.Asset_Type_Name}</option>`;
                 }
             });
+        }
+
+        function calculateTotal() {
+            const qty = parseFloat(document.getElementById('Po_Amount').value) || 0;
+            const price = parseFloat(document.getElementById('Unit_Price').value) || 0;
+            document.getElementById('Total_Price').value = (qty * price).toFixed(2);
+        }
+
+        function updateTagPreview() {
+            const group = document.getElementById('Asset_ID_Groups').value.trim();
+            const startStr = document.getElementById('Asset_ID_Start').value.trim();
+            const endStr = document.getElementById('Asset_ID_End').value.trim();
+            const sampleEl = document.getElementById('tagSampleText');
+            const badgeEl = document.getElementById('tagCountBadge');
+
+            if (!group || !startStr || !endStr) {
+                sampleEl.innerText = "ยังไม่ได้กำหนดกลุ่มรหัส";
+                badgeEl.innerText = "คาดการณ์: 0 รายการ";
+                return;
+            }
+
+            const startNum = parseInt(startStr, 10);
+            const endNum = parseInt(endStr, 10);
+
+            if (isNaN(startNum) || isNaN(endNum) || endNum < startNum) {
+                sampleEl.innerText = "รูปแบบรหัสไม่ถูกต้อง";
+                badgeEl.innerText = "คาดการณ์: 0 รายการ";
+                return;
+            }
+
+            const total = (endNum - startNum) + 1;
+            const padLen = startStr.length;
+            const pStart = String(startNum).padStart(padLen, '0');
+            const pEnd = String(endNum).padStart(padLen, '0');
+
+            if (total === 1) {
+                sampleEl.innerText = `${group}${pStart}`;
+            } else {
+                sampleEl.innerText = `${group}${pStart}  ถึง  ${group}${pEnd}`;
+            }
+
+            badgeEl.innerText = `คาดการณ์: ${total} รายการ`;
         }
 
         function handleFileConvert(event, hiddenInputElement, triggerCheck = false) {
@@ -544,31 +789,31 @@
 
         async function checkDuplicatePO() {
             const poNo = inputPoNo.value.trim();
-            const docId = hiddenDocId.value; 
             
-            if (!poNo || !docId) {
+            if (!poNo) {
                 duplicateAlert.classList.add('hidden');
                 btnSavePO.disabled = false;
-                btnSavePO.classList.replace('bg-gray-400', 'bg-indigo-600');
-                btnSavePO.classList.add('hover:bg-indigo-700');
+                btnSavePO.classList.remove('opacity-50', 'cursor-not-allowed');
                 return;
             }
 
             try {
-                const payload = { action: "checkDuplicatePO", data: { Po_No: poNo, Doc_ID: docId } };
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const payload = { action: "checkDuplicatePO", data: { Po_No: poNo } };
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
 
                 if (result.isDuplicate) {
                     duplicateAlert.classList.remove('hidden');
                     btnSavePO.disabled = true;
-                    btnSavePO.classList.replace('bg-indigo-600', 'bg-gray-400');
-                    btnSavePO.classList.remove('hover:bg-indigo-700');
+                    btnSavePO.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
                     duplicateAlert.classList.add('hidden');
                     btnSavePO.disabled = false;
-                    btnSavePO.classList.replace('bg-gray-400', 'bg-indigo-600');
-                    btnSavePO.classList.add('hover:bg-indigo-700');
+                    btnSavePO.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             } catch (error) {
                 console.error("Check Duplicate Error:", error);
@@ -582,9 +827,14 @@
                 poIdWarning.classList.add('hidden');
                 return;
             }
+
             try {
                 const payload = { action: "checkDuplicatePoID", data: { Po_ID: poId } };
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
                 
                 if (result.isDuplicate) {
@@ -610,12 +860,93 @@
             return dateString;
         }
 
+        // ดึง File ID จาก Google Drive URL หรือข้อความใดๆ
+        function extractGoogleDriveFileId(imgVal) {
+            if (!imgVal || typeof imgVal !== 'string') return '';
+            imgVal = imgVal.trim();
+            if (!imgVal) return '';
+
+            if (imgVal.startsWith('data:image')) return '';
+
+            let match = imgVal.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) return match[1];
+
+            match = imgVal.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) return match[1];
+
+            match = imgVal.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) return match[1];
+
+            // หากเป็น FileID เพียวๆ (ยาวเกิน 15 ตัวอักษร ไม่มีเครื่องหมาย / หรือ :)
+            if (!imgVal.includes('/') && !imgVal.includes(':') && imgVal.length > 15) {
+                return imgVal;
+            }
+
+            return '';
+        }
+
+        // แปลง FileID หรือ Drive URL ให้เป็น Direct Image Source ที่แท็ก <img> ดึงไปแสดงได้แน่นอน
+        function getGoogleDriveImageUrl(imgVal) {
+            if (!imgVal || typeof imgVal !== 'string') return '';
+            imgVal = imgVal.trim();
+            if (!imgVal) return '';
+
+            if (imgVal.startsWith('data:image')) {
+                return imgVal;
+            }
+
+            const fileId = extractGoogleDriveFileId(imgVal);
+            if (fileId) {
+                return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            }
+
+            if (imgVal.startsWith('http://') || imgVal.startsWith('https://')) {
+                return imgVal;
+            }
+
+            return '';
+        }
+
+        // ระบบสำรองกรณีภาพโหลดจาก Thumbnail ไม่ขึ้น ให้สลับไปใช้ CDN ตัวเลือกที่ 2
+        window.handleImgError = function(imgEl, fileId) {
+            if (!imgEl.dataset.retried && fileId) {
+                imgEl.dataset.retried = "true";
+                imgEl.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+            } else {
+                imgEl.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23f1f5f9%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%2394a3b8%22%20font-size%3D%2212%22%20font-family%3D%22sans-serif%22%3Eไม่มีรูปภาพ%3C%2Ftext%3E%3C%2Fsvg%3E';
+            }
+        };
+
+        // แสดงรูปภาพขนาดใหญ่ (Lightbox)
+        window.previewFullImage = function(imgSrc, title) {
+            if (!imgSrc || imgSrc.includes('data:image/svg+xml')) return;
+            const modal = document.getElementById('imageLightboxModal');
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxTitle').innerText = title ? `เอกสาร PO: ${title}` : 'รูปภาพครุภัณฑ์';
+            modal.classList.remove('hidden');
+        };
+
+        window.closeImageLightbox = function() {
+            document.getElementById('imageLightboxModal').classList.add('hidden');
+        };
+
+        // ---------------------------------------------------------
+        // 5. SUBMIT PO & GENERATE ASSETS
+        // ---------------------------------------------------------
+        poForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitPO();
+        });
+
         async function submitPO() {
             const formData = new FormData(poForm);
             const poData = Object.fromEntries(formData.entries());
             
             if (isPoIdDuplicate) {
-                const confirmSave = confirm(`ตรวจพบข้อมูล Po_ID: ${poData.Po_ID} ซ้ำในระบบ!\n\nคุณต้องการยืนยันที่จะบันทึกข้อมูลนี้ต่อไปหรือไม่?`);
+                const confirmSave = await showConfirmModal(
+                    "พบข้อมูล Po_ID ซ้ำ",
+                    `ตรวจพบข้อมูล Po_ID: ${poData.Po_ID} ซ้ำในระบบ!\nคุณต้องการยืนยันที่จะบันทึกข้อมูลนี้ต่อไปหรือไม่?`
+                );
                 if (!confirmSave) return; 
             }
             
@@ -625,11 +956,15 @@
 
             currentPOData = poData; 
 
-            showModal("กำลังบันทึกข้อมูล PO และอัปโหลดไฟล์ (อาจใช้เวลาสักครู่)...");
+            showModal("กำลังบันทึกข้อมูล PO และอัปโหลดไฟล์ไปยัง Google Drive...");
 
             try {
                 const payload = { action: "savePO", data: poData };
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
 
                 if (result.success) {
@@ -643,15 +978,21 @@
                     const start = parseInt(poData.Asset_ID_Start, 10);
                     const end = parseInt(poData.Asset_ID_End, 10);
                     const total = (end - start) + 1;
-                    document.getElementById('generateDesc').innerText = `ระบบพร้อมสร้างรหัสครุภัณฑ์จำนวน ${total} รายการ`;
+                    document.getElementById('generateDesc').innerText = `ระบบบันทึก PO สำเร็จแล้ว พร้อมสร้างรหัสครุภัณฑ์จำนวน ${total} รายการ (${poData.Asset_ID_Groups}${poData.Asset_ID_Start} ถึง ${poData.Asset_ID_Groups}${poData.Asset_ID_End})`;
+                    
+                    fetchPOList(); // Refresh PO list
                 } else {
-                    throw new Error(result.message);
+                    throw new Error(result.message || "บันทึกข้อมูล PO ล้มเหลว");
                 }
             } catch (error) {
                 hideModal();
-                alert(`เกิดข้อผิดพลาดในการบันทึก PO: ${error.message}`);
+                showAlertModal("เกิดข้อผิดพลาด", `ไม่สามารถบันทึก PO ได้: ${error.message}`);
             }
         }
+
+        document.getElementById('btnGenerateAssets').addEventListener('click', async () => {
+            await generateAssetsInLoop();
+        });
 
         async function generateAssetsInLoop() {
             if (!currentPOData) return;
@@ -665,8 +1006,8 @@
             const endNum = parseInt(endStr, 10);
             const totalAssets = (endNum - startNum) + 1;
 
-            if (totalAssets <= 0) {
-                alert("จำนวนรหัสไม่ถูกต้อง (รหัสเริ่มต้นต้องน้อยกว่าหรือเท่ากับรหัสสิ้นสุด)");
+            if (totalAssets <= 0 || isNaN(totalAssets)) {
+                showAlertModal("ข้อผิดพลาด", "จำนวนรหัสไม่ถูกต้อง (รหัสเริ่มต้นต้องน้อยกว่าหรือเท่ากับรหัสสิ้นสุด)");
                 return;
             }
 
@@ -680,17 +1021,34 @@
                 const fullAssetID = groups + paddedNum;
                 const currentItem = (i - startNum) + 1;
 
-                loadingText.innerText = `กำลังสร้างรายการที่ ${currentItem}/${totalAssets}...`;
+                loadingText.innerText = `กำลังสร้างรายการที่ ${currentItem}/${totalAssets}\n[ ${fullAssetID} ]`;
                 progressBar.style.width = `${(currentItem / totalAssets) * 100}%`;
 
-                const assetData = { ...currentPOData };
-                delete assetData.Asset_Po_Image; 
-                assetData.AssetID = fullAssetID;
+                // Prepare mapped asset payload matching saveSingleAssetToDB in code.gs
+                const assetData = {
+                    AssetID: fullAssetID,
+                    Po_Name: currentPOData.Po_Name,
+                    Asset_Type_Name: currentPOData.Asset_Type_Name,
+                    Asset_Desc: currentPOData.Asset_Desc,
+                    Po_Datetime_Received: currentPOData.Po_Datetime_Received,
+                    Po_Budget: currentPOData.Po_Budget,
+                    Unit_Price: currentPOData.Unit_Price,
+                    Specified_Age: currentPOData.Specified_Age,
+                    Note2: currentPOData.Note2 || "",
+                    Note3: currentPOData.Note3 || "",
+                    Insurance_Period: currentPOData.Insurance_Period,
+                    Asset_Type_ID: currentPOData.Asset_Type_ID,
+                    Type_ID: currentPOData.Type_ID
+                };
 
                 const assetPayload = { action: "saveAsset", data: assetData };
 
                 try {
-                    const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(assetPayload) });
+                    const response = await fetch(GAS_API_URL, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(assetPayload) 
+                    });
                     const result = await response.json();
                     if(result.success) successCount++;
                 } catch (error) {
@@ -704,84 +1062,128 @@
             document.getElementById('generateSection').classList.add('hidden');
             document.getElementById('successSection').classList.remove('hidden');
             document.getElementById('successDesc').innerText = `ระบบบันทึกครุภัณฑ์ลงฐานข้อมูลสำเร็จ ${successCount} จากทั้งหมด ${totalAssets} รายการ`;
+            showToast("ลงทะเบียนครุภัณฑ์สำเร็จแล้ว!", "success");
+            fetchPOList();
         }
 
         // ---------------------------------------------------------
-        // 5. Utility Functions
+        // 6. TAB NAVIGATION & PO LISTING
         // ---------------------------------------------------------
-        function showModal(text) {
-            loadingText.innerText = text;
-            loadingModal.classList.remove('hidden');
-        }
-
-        function hideModal() {
-            loadingModal.classList.add('hidden');
-        }
-        
-        // ==========================================
-        // 6. ส่วนจัดการ TAB และ รายการ PO
-        // ==========================================
         const tabAdd = document.getElementById('tabAdd');
         const tabList = document.getElementById('tabList');
         const poListSection = document.getElementById('poListSection');
         const poFormSection = document.getElementById('poFormSection');
         const poListContainer = document.getElementById('poListContainer');
         const btnRefreshList = document.getElementById('btnRefreshList');
-        
         const editPoModal = document.getElementById('editPoModal');
         const editPoForm = document.getElementById('editPoForm');
 
-        // สลับ Tab ให้ tabList เป็นหลัก
-        tabList.addEventListener('click', () => {
-            tabList.classList.replace('border-transparent', 'border-indigo-600');
-            tabList.classList.replace('text-gray-500', 'text-indigo-600');
-            tabAdd.classList.replace('border-indigo-600', 'border-transparent');
-            tabAdd.classList.replace('text-indigo-600', 'text-gray-500');
-            
-            poFormSection.classList.add('hidden');
-            poListSection.classList.remove('hidden');
-            document.getElementById('generateSection').classList.add('hidden');
-            document.getElementById('successSection').classList.add('hidden');
-            
-            fetchPOList();
-        });
-
-        tabAdd.addEventListener('click', () => {
-            tabAdd.classList.replace('border-transparent', 'border-indigo-600');
-            tabAdd.classList.replace('text-gray-500', 'text-indigo-600');
-            tabList.classList.replace('border-indigo-600', 'border-transparent');
-            tabList.classList.replace('text-indigo-600', 'text-gray-500');
-            
-            poFormSection.classList.remove('hidden');
-            poListSection.classList.add('hidden');
-            document.getElementById('generateSection').classList.add('hidden');
-            document.getElementById('successSection').classList.add('hidden');
-        });
-        
-        btnRefreshList.addEventListener('click', fetchPOList);
-        document.getElementById('btnCloseEditModal').addEventListener('click', () => editPoModal.classList.add('hidden'));
-
-        // ดึงรายการจาก Server
-        async function fetchPOList() {
-            poListContainer.innerHTML = '<div class="text-center py-10 text-gray-500 flex flex-col items-center"><svg class="animate-spin h-8 w-8 text-indigo-500 mb-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังโหลดข้อมูล...</div>';
-            try {
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "getPOList" }) });
-                const result = await response.json();
+        function switchTab(type) {
+            if (type === 'list') {
+                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
+                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
                 
-                if (result.success) {
-                    renderPOList(result.data);
-                } else {
-                    poListContainer.innerHTML = `<div class="text-center py-10 text-red-500">เกิดข้อผิดพลาด: ${result.message}</div>`;
-                }
-            } catch (error) {
-                poListContainer.innerHTML = '<div class="text-center py-10 text-red-500">เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว</div>';
+                poFormSection.classList.add('hidden');
+                poListSection.classList.remove('hidden');
+                document.getElementById('generateSection').classList.add('hidden');
+                document.getElementById('successSection').classList.add('hidden');
+                
+                fetchPOList();
+            } else {
+                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
+                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                
+                poFormSection.classList.remove('hidden');
+                poListSection.classList.add('hidden');
+                document.getElementById('generateSection').classList.add('hidden');
+                document.getElementById('successSection').classList.add('hidden');
+
+                fetchAutoPoNo();
             }
         }
 
-        // Render ข้อมูลจัดกลุ่มตามปี และมีรูปภาพ
+        tabList.addEventListener('click', () => switchTab('list'));
+        tabAdd.addEventListener('click', () => switchTab('add'));
+        btnRefreshList.addEventListener('click', fetchPOList);
+        document.getElementById('btnCloseEditModal').addEventListener('click', () => editPoModal.classList.add('hidden'));
+
+        async function fetchPOList() {
+            poListContainer.innerHTML = `
+                <div class="text-center py-12 text-slate-400 flex flex-col items-center justify-center">
+                    <svg class="animate-spin h-8 w-8 text-indigo-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="text-sm font-medium">กำลังโหลดข้อมูลจากฐานข้อมูล...</p>
+                </div>`;
+
+            try {
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "getPOList" }) 
+                });
+                const result = await response.json();
+                
+                if (result.success && Array.isArray(result.data)) {
+                    allPOList = result.data;
+                    renderPOList(allPOList);
+                    populateYearFilter(allPOList);
+                    updateDashboardStats();
+                } else {
+                    poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-medium">เกิดข้อผิดพลาด: ${result.message || 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
+                }
+            } catch (error) {
+                console.error("API Fetch List Error:", error);
+                poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-medium">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (${error.message})</div>`;
+            }
+        }
+
+        function populateYearFilter(data) {
+            const selectYear = document.getElementById('filterYear');
+            const years = new Set();
+            
+            data.forEach(po => {
+                if (po.Po_Datetime_Received) {
+                    const cleanDate = String(po.Po_Datetime_Received).replace("'", "");
+                    if (cleanDate.includes('/')) years.add(cleanDate.split('/')[2]);
+                    else if (cleanDate.includes('-')) years.add(cleanDate.split('-')[0]);
+                }
+            });
+
+            const sorted = Array.from(years).sort((a,b) => b.localeCompare(a));
+            selectYear.innerHTML = '<option value="">-- ทุกปีรับเข้า --</option>';
+            sorted.forEach(y => {
+                if(y) selectYear.innerHTML += `<option value="${y}">ปี ${y}</option>`;
+            });
+        }
+
+        function filterPOList() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedYear = document.getElementById('filterYear').value;
+
+            const filtered = allPOList.filter(po => {
+                const matchesQuery = !query || 
+                    (po.Po_No && po.Po_No.toLowerCase().includes(query)) ||
+                    (po.Po_Name && po.Po_Name.toLowerCase().includes(query)) ||
+                    (po.Contracting_Company && po.Contracting_Company.toLowerCase().includes(query));
+
+                let matchesYear = true;
+                if (selectedYear && po.Po_Datetime_Received) {
+                    const cleanDate = String(po.Po_Datetime_Received).replace("'", "");
+                    matchesYear = cleanDate.includes(selectedYear);
+                }
+
+                return matchesQuery && matchesYear;
+            });
+
+            renderPOList(filtered);
+        }
+
         function renderPOList(data) {
-            if (data.length === 0) {
-                poListContainer.innerHTML = '<div class="text-center py-10 text-gray-500">ไม่มีข้อมูลรายการรับเข้า</div>';
+            if (!data || data.length === 0) {
+                poListContainer.innerHTML = `
+                    <div class="text-center py-12 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                        <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-sm font-medium">ไม่พบข้อมูลรายการรับเข้า PO ในระบบ</p>
+                    </div>`;
                 return;
             }
 
@@ -797,51 +1199,61 @@
                 grouped[year].push(po);
             });
 
-            // เรียงปีจากใหม่ไปเก่า
             const sortedYears = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
             
             let html = '';
             sortedYears.forEach(year => {
                 html += `
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden mb-6 shadow-sm">
-                        <div class="bg-indigo-50 text-indigo-800 font-bold px-5 py-3 border-b border-indigo-100 flex justify-between">
-                            <span>ปีที่รับเข้า: ${year}</span>
-                            <span class="text-sm font-normal bg-white px-2 py-0.5 rounded-full shadow-sm text-indigo-600">${grouped[year].length} รายการ</span>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-50 text-slate-800 font-bold px-5 py-3 border-b border-slate-200 flex justify-between items-center text-sm">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-regular fa-calendar-check text-indigo-600"></i>
+                                <span>ปีที่รับเข้า: ${year}</span>
+                            </span>
+                            <span class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-0.5 rounded-full border border-indigo-100">${grouped[year].length} รายการ</span>
                         </div>
-                        <div class="divide-y divide-gray-200">
+                        <div class="divide-y divide-slate-100">
                 `;
                 
                 grouped[year].forEach(po => {
                     const poJson = encodeURIComponent(JSON.stringify(po));
                     
-                    // เช็คว่ามีรูปไหม ถ้าไม่มีใช้ Placeholder สีเทา
-                    const imgSrc = po.Asset_Po_Image ? po.Asset_Po_Image : 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_18a2d1d0c44%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_18a2d1d0c44%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23eee%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2274.5%22%20y%3D%22104.5%22%3Eไม่มีรูปภาพ%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                    const fileId = extractGoogleDriveFileId(po.Asset_Po_Image);
+                    let imgSrc = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23f1f5f9%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%2394a3b8%22%20font-size%3D%2212%22%20font-family%3D%22sans-serif%22%3Eไม่มีรูปภาพ%3C%2Ftext%3E%3C%2Fsvg%3E';
+                    
+                    if (po.Asset_Po_Image) {
+                        imgSrc = getGoogleDriveImageUrl(po.Asset_Po_Image);
+                    }
+
+                    const formattedTotal = po.Total_Price ? Number(po.Total_Price).toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '0.00';
 
                     html += `
-                        <div class="p-5 hover:bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
-                            <div class="flex items-start gap-4 flex-grow">
-                                <!-- ส่วนแสดงรูปภาพ -->
-                                <div class="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border border-gray-200 bg-gray-100">
-                                    <img src="${imgSrc}" alt="PO Image" class="w-full h-full object-cover">
+                        <div class="p-4 sm:p-5 hover:bg-indigo-50/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
+                            <div class="flex items-start gap-4 flex-grow w-full md:w-auto">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm relative group cursor-pointer" onclick="previewFullImage('${imgSrc}', '${po.Po_No}')">
+                                    <img src="${imgSrc}" alt="PO Image" onerror="handleImgError(this, '${fileId}')" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                    </div>
                                 </div>
                                 
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1.5">
-                                        <span class="font-bold text-gray-800 text-lg">${po.Po_No}</span>
-                                        <span class="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">${po.Po_Type_Name || 'ไม่มีหมวด'}</span>
+                                <div class="flex-grow">
+                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                        <span class="font-bold text-slate-800 text-base sm:text-lg">${po.Po_No}</span>
+                                        <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-md border border-indigo-100">${po.Po_Type_Name || 'ทั่วไป'}</span>
                                     </div>
-                                    <div class="text-sm text-gray-700 font-medium">${po.Po_Name}</div>
-                                    <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
-                                        <span>🏢 ${po.Contracting_Company || '-'}</span>
-                                        <span>📦 จำนวน: ${po.Po_Amount || 0}</span>
-                                        <span class="font-medium text-green-600">💰 ฿${po.Total_Price || 0}</span>
+                                    <div class="text-sm font-semibold text-slate-700">${po.Po_Name}</div>
+                                    <div class="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+                                        <span><i class="fa-solid fa-building text-slate-400 mr-1"></i>${po.Contracting_Company || '-'}</span>
+                                        <span><i class="fa-solid fa-cubes text-slate-400 mr-1"></i>จำนวน: ${po.Po_Amount || 1} หน่วย</span>
+                                        <span class="font-bold text-emerald-600"><i class="fa-solid fa-tag text-emerald-500 mr-1"></i>฿${formattedTotal}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <button onclick="openEditModal('${poJson}')" class="bg-white border border-gray-300 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center mt-2 md:mt-0">
-                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    แก้ไข
+                            <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                                <button onclick="openEditModal('${poJson}')" class="bg-white border border-slate-300 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>แก้ไข</span>
                                 </button>
                             </div>
                         </div>
@@ -854,12 +1266,12 @@
             poListContainer.innerHTML = html;
         }
 
-        // นำข้อมูลเข้า Modal เตรียมแก้ไข
         window.openEditModal = function(poJsonEncoded) {
             const po = JSON.parse(decodeURIComponent(poJsonEncoded));
+            currentPOData = po;
             
             document.getElementById('editPoTitle').innerText = po.Po_No;
-            document.getElementById('editRowIndex').value = po._rowIndex; 
+            document.getElementById('editRowIndex').value = po._rowIndex || ''; 
             document.getElementById('editPoNo').value = po.Po_No;
             document.getElementById('editPoName').value = po.Po_Name || '';
             document.getElementById('editContracting').value = po.Contracting_Company || '';
@@ -868,37 +1280,179 @@
             document.getElementById('editAmount').value = po.Po_Amount || '';
             document.getElementById('editTotal').value = po.Total_Price || '';
             
-            // ล้างค่ารูปภาพเดิมในหน้าต่างแก้ไขทุกครั้งที่กดเปิด (เพื่อรอรับรูปใหม่)
             document.getElementById('editAssetImageFile').value = '';
-            document.getElementById('editAssetImage').value = '';
+            document.getElementById('editAssetImage').value = po.Asset_Po_Image || '';
+            
+            const previewContainer = document.getElementById('editImgPreviewContainer');
+            const previewImg = document.getElementById('editImgPreview');
+
+            if (po.Asset_Po_Image) {
+                const previewSrc = getGoogleDriveImageUrl(po.Asset_Po_Image);
+                const fileId = extractGoogleDriveFileId(po.Asset_Po_Image);
+                previewImg.src = previewSrc;
+                previewImg.onerror = function() { handleImgError(this, fileId); };
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+            }
             
             editPoModal.classList.remove('hidden');
         };
 
-        // ยืนยันการแก้ไขข้อมูล
         editPoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(editPoForm);
             const data = Object.fromEntries(formData.entries());
             
-            showModal("กำลังบันทึกการแก้ไข...");
-            
+            const btnSaveEdit = document.getElementById('btnSaveEditPO');
+            const originalBtnHtml = btnSaveEdit ? btnSaveEdit.innerHTML : '';
+
+            // แสดงสถานะที่ปุ่มบันทึก
+            if (btnSaveEdit) {
+                btnSaveEdit.disabled = true;
+                btnSaveEdit.classList.add('opacity-60', 'cursor-not-allowed');
+                btnSaveEdit.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>กำลังบันทึก...</span>`;
+            }
+
+            // แสดง Overlay หน้าจอขนาดใหญ่
+            showModal("กำลังบันทึกการแก้ไขข้อมูล PO เข้าสู่ระบบ...");
+
             try {
-                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "updatePO", data: data }) });
+                const response = await fetch(GAS_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "updatePO", data: data }) 
+                });
                 const result = await response.json();
                 
                 if (result.success) {
                     hideModal();
                     editPoModal.classList.add('hidden');
-                    fetchPOList(); // โหลดตารางใหม่หลังแก้เสร็จ
+                    fetchPOList();
+                    showToast("อัปเดตข้อมูล PO เรียบร้อยแล้ว ✓", "success");
                 } else {
-                    throw new Error(result.message);
+                    throw new Error(result.message || "อัปเดตข้อมูลไม่สำเร็จ");
                 }
             } catch (error) {
                 hideModal();
-                alert(`เกิดข้อผิดพลาด: ${error.message}`);
+                showAlertModal("เกิดข้อผิดพลาดในการแก้ไข", error.message);
+            } finally {
+                // คืนค่าปุ่มเดิม
+                if (btnSaveEdit) {
+                    btnSaveEdit.disabled = false;
+                    btnSaveEdit.classList.remove('opacity-60', 'cursor-not-allowed');
+                    btnSaveEdit.innerHTML = originalBtnHtml;
+                }
             }
         });
+
+        function updateDashboardStats() {
+            const totalCount = allPOList.length;
+            let totalBudget = 0;
+            let totalAssets = 0;
+
+            allPOList.forEach(po => {
+                totalBudget += parseFloat(po.Total_Price) || 0;
+                totalAssets += parseInt(po.Po_Amount) || 1;
+            });
+
+            document.getElementById('statTotalPO').innerText = totalCount;
+            document.getElementById('badgePoCount').innerText = totalCount;
+            document.getElementById('statTotalBudget').innerText = `฿${totalBudget.toLocaleString('th-TH', { minimumFractionDigits: 0 })}`;
+            document.getElementById('statTotalAssets').innerText = totalAssets;
+            document.getElementById('statCategories').innerText = new Set(assetTypeDatabase.map(a => a.Asset_Type_Name)).size;
+        }
+
+        function resetAndNewPO() {
+            poForm.reset();
+            document.getElementById('Asset_Po_Image').value = '';
+            document.getElementById('Doc_ID').value = '';
+            document.getElementById('successSection').classList.add('hidden');
+            switchTab('add');
+        }
+
+        // ---------------------------------------------------------
+        // 7. UTILITIES, MODALS & TOAST NOTIFICATIONS
+        // ---------------------------------------------------------
+        function showModal(text) {
+            loadingText.innerText = text;
+            loadingModal.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            loadingModal.classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bg = 'bg-slate-800 text-white';
+            if (type === 'success') bg = 'bg-emerald-600 text-white';
+            if (type === 'error') bg = 'bg-rose-600 text-white';
+
+            toast.className = `px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs flex items-center gap-2 transform transition-all duration-300 pointer-events-auto ${bg}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showAlertModal(title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customDialogModal');
+                document.getElementById('dialogTitle').innerText = title;
+                document.getElementById('dialogMessage').innerText = message;
+                
+                const btnContainer = document.getElementById('dialogButtons');
+                btnContainer.innerHTML = `
+                    <button id="btnDialogOk" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-xs transition-all shadow">
+                        ตกลง
+                    </button>
+                `;
+
+                modal.classList.remove('hidden');
+                document.getElementById('btnDialogOk').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+            });
+        }
+
+        function showConfirmModal(title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customDialogModal');
+                document.getElementById('dialogTitle').innerText = title;
+                document.getElementById('dialogMessage').innerText = message;
+                
+                const btnContainer = document.getElementById('dialogButtons');
+                btnContainer.innerHTML = `
+                    <button id="btnDialogCancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-semibold text-xs transition-all border border-slate-300">
+                        ยกเลิก
+                    </button>
+                    <button id="btnDialogConfirm" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-xs transition-all shadow">
+                        ยืนยันบันทึก
+                    </button>
+                `;
+
+                modal.classList.remove('hidden');
+                
+                document.getElementById('btnDialogCancel').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(false);
+                };
+                document.getElementById('btnDialogConfirm').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+            });
+        }
     </script>
 </body>
 </html>
