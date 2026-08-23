@@ -12,6 +12,44 @@
         .hidden { display: none !important; }
     </style>
 </head>
+       <script>
+        (function () {
+            try {
+                const userData = localStorage.getItem('currentUser');
+                if (!userData) {
+                    window.user = null;
+                    return;
+                }
+                const user = JSON.parse(userData);
+                if (!user || !user.UserPN) {
+                    localStorage.removeItem('currentUser');
+                    window.user = null;
+                    return;
+                }
+                window.user = user;
+            } catch (err) {
+                console.error("Auth-Check error: ", err);
+                localStorage.removeItem('currentUser');
+                window.user = null;
+            }
+        })();
+
+        function getCurrentUser() { return window.user || null; }
+        function hasRole(role) {
+            if (!window.user) return false;
+            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
+        }
+        function getDisplayName() {
+            if (!window.user) return "ผู้ใช้งานทั่วไป (Guest)";
+            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+        }
+        function logout() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.clear();
+            try { window.location.replace("index.html"); } 
+            catch(e) { window.location.href = "index.html"; }
+        }
+    </script>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
     <!-- Header -->
