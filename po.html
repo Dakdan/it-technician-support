@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full bg-slate-50">
+<html lang="th" class="h-full bg-slate-100">
 <head>
     <link rel="icon" type="image/png" href="logo005v1.png">
     <meta charset="UTF-8">
@@ -19,12 +19,11 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
                         }
                     }
                 }
@@ -76,29 +75,30 @@
     }
 </script>
 
-<body class="text-slate-800 antialiased min-h-screen flex flex-col bg-slate-50">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col bg-slate-100">
 
-    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-30 no-print">
+    <!-- Diagonal Pink Gradient Header: White at top-left fading down diagonally to vibrant pink -->
+    <header class="bg-gradient-to-br from-white via-pink-300 to-pink-600 text-slate-900 border-b-2 border-pink-400 shadow-md sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-inner overflow-hidden">
-                    <img src="./logo005v1.png" alt="Logo" class="w-full h-full object-cover">
+                <div class="w-11 h-11 rounded-xl bg-white/90 backdrop-blur-md border-2 border-pink-300 flex items-center justify-center text-slate-800 shadow-md overflow-hidden p-1">
+                    <img src="./logo005v1.png" alt="Logo" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23be185d%22%3E%3Cpath%20d%3D%22M20%206h-4V4c0-1.11-.89-2-2-2h-4c-1.11%200-2%20.89-2%202v2H4c-1.11%200-1.99.89-1.99%202L2%2019c0%201.11.89%202%202%202h16c1.11%200%202-.89%202-2V8c0-1.11-.89-2-2-2zm-6%200h-4V4h4v2z%22%2F%3E%3C%2Fsvg%3E';">
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight leading-none">ระบบรับเข้าครุภัณฑ์ (PO)</h1>
-                    <p class="text-xs text-indigo-200 mt-0.5">Asset Purchasing & Intake Management System</p>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-none drop-shadow-sm">ระบบรับเข้าครุภัณฑ์ (PO)</h1>
+                    <p class="text-xs text-pink-900 font-semibold mt-1">Asset Purchasing & Intake Management System</p>
                 </div>
             </div>
 
             <!-- User Info Badge -->
             <div class="flex items-center gap-3 text-sm">
-                <div class="flex items-center gap-2 bg-indigo-800/60 px-3.5 py-1.5 rounded-lg border border-indigo-500/30">
-                    <div class="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold uppercase">
+                <div class="flex items-center gap-2 bg-white/90 px-3.5 py-1.5 rounded-xl border-2 border-pink-300 shadow-sm text-slate-800">
+                    <div class="w-7 h-7 rounded-full bg-pink-600 flex items-center justify-center text-xs font-bold text-white uppercase shadow-sm">
                         <i class="fa-solid fa-user text-xs"></i>
                     </div>
                     <div class="text-left">
-                        <div class="text-xs font-medium text-white leading-tight" id="lblUserName">ผู้ใช้งาน</div>
-                        <div class="text-[10px] text-indigo-200" id="lblUserRole">งานเทคโนโลยีสารสนเทศ</div>
+                        <div class="text-xs font-bold text-slate-900 leading-tight" id="lblUserName">ผู้ใช้งาน</div>
+                        <div class="text-[10px] text-pink-700 font-semibold" id="lblUserRole">งานเทคโนโลยีสารสนเทศ</div>
                     </div>
                 </div>
             </div>
@@ -107,90 +107,91 @@
 
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
 
-        <!-- Quick Stats Dashboard -->
+        <!-- Quick Stats Dashboard with Crisp Borders -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow-sm border-2 border-slate-300 p-4 flex items-center justify-between hover:border-pink-400 transition-all">
                 <div>
-                    <p class="text-xs font-medium text-slate-500">จำนวน PO ทั้งหมด</p>
+                    <p class="text-xs font-bold text-slate-500">จำนวน PO ทั้งหมด</p>
                     <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalPO">0</h3>
-                    <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-sync text-[10px]"></i> ข้อมูลจากฐานข้อมูล</p>
+                    <p class="text-[11px] text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-sync text-[10px]"></i> ข้อมูลจากฐานข้อมูล</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-pink-50 text-pink-600 border border-pink-200 flex items-center justify-center text-xl shadow-inner">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow-sm border-2 border-slate-300 p-4 flex items-center justify-between hover:border-pink-400 transition-all">
                 <div>
-                    <p class="text-xs font-medium text-slate-500">รวมงบประมาณสั่งซื้อ</p>
+                    <p class="text-xs font-bold text-slate-500">รวมงบประมาณสั่งซื้อ</p>
                     <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalBudget">฿0</h3>
-                    <p class="text-[11px] text-indigo-600 font-medium mt-1">ยอดรวมตามรายการรับเข้า</p>
+                    <p class="text-[11px] text-pink-600 font-semibold mt-1">ยอดรวมตามรายการรับเข้า</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xl shadow-inner">
                     <i class="fa-solid fa-coins"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow-sm border-2 border-slate-300 p-4 flex items-center justify-between hover:border-pink-400 transition-all">
                 <div>
-                    <p class="text-xs font-medium text-slate-500">จำนวนครุภัณฑ์ย่อย</p>
+                    <p class="text-xs font-bold text-slate-500">จำนวนครุภัณฑ์ย่อย</p>
                     <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalAssets">0</h3>
-                    <p class="text-[11px] text-blue-600 font-medium mt-1">รหัสครุภัณฑ์ที่ถูกลงทะเบียน</p>
+                    <p class="text-[11px] text-blue-600 font-semibold mt-1">รหัสครุภัณฑ์ที่ถูกลงทะเบียน</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center text-xl shadow-inner">
                     <i class="fa-solid fa-barcode"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow-sm border-2 border-slate-300 p-4 flex items-center justify-between hover:border-pink-400 transition-all">
                 <div>
-                    <p class="text-xs font-medium text-slate-500">หมวดหมู่ครุภัณฑ์</p>
+                    <p class="text-xs font-bold text-slate-500">หมวดหมู่ครุภัณฑ์</p>
                     <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statCategories">0</h3>
-                    <p class="text-[11px] text-amber-600 font-medium mt-1">จาก Asset_Type_DB</p>
+                    <p class="text-[11px] text-amber-600 font-semibold mt-1">จาก Asset_Type_DB</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xl shadow-inner">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Tab Navigation Bar -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 flex flex-wrap gap-2 no-print">
-            <button id="tabList" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+        <!-- Tab Navigation Bar with Clear Borders -->
+        <div class="bg-white rounded-xl shadow-sm border-2 border-slate-300 p-1.5 flex flex-wrap gap-2 no-print">
+            <button id="tabList" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 bg-pink-600 text-white shadow-sm border border-pink-700">
                 <i class="fa-solid fa-list-check"></i>
                 <span>รายการรับเข้าทั้งหมด</span>
-                <span id="badgePoCount" class="ml-1 bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                <span id="badgePoCount" class="ml-1 bg-white/20 text-white text-xs px-2 py-0.5 rounded-full font-mono">0</span>
             </button>
-            <button id="tabAdd" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+            <button id="tabAdd" class="flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 text-slate-700 hover:text-pink-700 hover:bg-pink-50 border border-transparent hover:border-pink-200">
                 <i class="fa-solid fa-plus-circle"></i>
                 <span>บันทึกข้อมูล PO ใหม่</span>
             </button>
         </div>
 
         <!-- SECTION 1: PO List Section -->
-        <section id="poListSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 transition-all">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-100">
+        <section id="poListSection" class="bg-white rounded-2xl shadow-sm border-2 border-slate-300 p-5 md:p-6 transition-all">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b-2 border-slate-200">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-pink-600"></i>
                         <span>รายการรับเข้าครุภัณฑ์ (PO)</span>
                     </h2>
-                    <p class="text-xs text-slate-500 mt-1">จัดกลุ่มตามปีที่รับเข้า สามารถค้นหา และกดแก้ไขข้อมูลย้อนหลังได้</p>
+                    <p class="text-xs text-slate-500 mt-1 font-medium">จัดกลุ่มตามปีที่รับเข้า สามารถค้นหา กดดูรายละเอียด หรือแก้ไขข้อมูลย้อนหลังได้</p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <!-- Search Input -->
                     <div class="relative flex-grow md:w-64">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" onkeyup="filterPOList()" placeholder="ค้นหาเลข PO, ชื่อรายการ, บริษัท..." class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                        <input type="text" id="searchInput" onkeyup="filterPOList()" placeholder="ค้นหาเลข PO, ชื่อรายการ, บริษัท..." class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-all font-medium">
                     </div>
 
                     <!-- Year Filter -->
-                    <select id="filterYear" onchange="filterPOList()" class="py-1.5 px-3 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                    <select id="filterYear" onchange="filterPOList()" class="py-1.5 px-3 text-xs rounded-lg border-2 border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-semibold">
                         <option value="">-- ทุกปีรับเข้า --</option>
                     </select>
 
                     <!-- Refresh Button -->
-                    <button id="btnRefreshList" class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 px-3 py-2 rounded-lg font-semibold transition-all shadow-sm flex items-center gap-1.5">
+                    <button id="btnRefreshList" class="text-xs bg-slate-50 hover:bg-pink-50 text-slate-700 hover:text-pink-700 border-2 border-slate-300 hover:border-pink-300 px-3.5 py-2 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1.5">
                         <i class="fa-solid fa-rotate"></i>
                         <span>รีเฟรชข้อมูล</span>
                     </button>
@@ -200,127 +201,127 @@
             <!-- List Container -->
             <div id="poListContainer" class="mt-6 space-y-6">
                 <div class="text-center py-12 text-slate-400 flex flex-col items-center justify-center">
-                    <svg class="animate-spin h-8 w-8 text-indigo-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <p class="text-sm font-medium">กำลังโหลดข้อมูลรายการ PO จากระบบ...</p>
+                    <svg class="animate-spin h-8 w-8 text-pink-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="text-sm font-semibold">กำลังโหลดข้อมูลรายการ PO จากระบบ...</p>
                 </div>
             </div>
         </section>
 
         <!-- SECTION 2: PO Entry Form -->
-        <section id="poFormSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-8 transition-all">
-            <div class="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <section id="poFormSection" class="hidden bg-white rounded-2xl shadow-sm border-2 border-slate-300 p-5 md:p-8 transition-all">
+            <div class="border-b-2 border-slate-200 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-file-pen text-indigo-600"></i>
+                        <i class="fa-solid fa-file-pen text-pink-600"></i>
                         <span>บันทึกข้อมูล Purchase Order (PO)</span>
                     </h2>
-                    <p class="text-xs text-slate-500 mt-1">กรุณากรอกข้อมูลให้ครบถ้วน ข้อมูลจะถูกบันทึกและรันรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล</p>
+                    <p class="text-xs text-slate-500 mt-1 font-medium">กรุณากรอกข้อมูลให้ครบถ้วน ข้อมูลจะถูกบันทึกและรันรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล</p>
                 </div>
 
                 <!-- Database status indicator -->
-                <div id="dbStatus" class="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/80 font-medium flex items-center gap-1.5 shadow-sm">
+                <div id="dbStatus" class="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border-2 border-amber-300 font-semibold flex items-center gap-1.5 shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                     <span>กำลังเชื่อมต่อฐานข้อมูล...</span>
                 </div>
             </div>
 
             <!-- Duplicate PO Alert Box -->
-            <div id="duplicateAlert" class="hidden mb-6 bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 rounded-xl shadow-sm flex items-start gap-3">
+            <div id="duplicateAlert" class="hidden mb-6 bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 rounded-xl shadow-sm border-2 border-rose-200 flex items-start gap-3">
                 <i class="fa-solid fa-triangle-exclamation text-rose-500 text-lg mt-0.5"></i>
                 <div>
                     <p class="font-bold text-sm">ตรวจสอบพบข้อมูลซ้ำ!</p>
-                    <p class="text-xs mt-0.5">เลขที่ PO หรือไฟล์เอกสารนี้มีในระบบแล้ว ระบบได้ทำการล็อคปุ่มบันทึกเพื่อป้องกันข้อมูลซ้ำซ้อน</p>
+                    <p class="text-xs mt-0.5 font-medium">เลขที่ PO หรือไฟล์เอกสารนี้มีในระบบแล้ว ระบบได้ทำการล็อคปุ่มบันทึกเพื่อป้องกันข้อมูลซ้ำซ้อน</p>
                 </div>
             </div>
 
             <form id="poForm" class="space-y-6">
                 <!-- Group 1: Document Details -->
-                <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
-                    <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                        <i class="fa-solid fa-file-lines text-indigo-600 text-sm"></i>
+                <div class="bg-slate-50 p-5 rounded-xl border-2 border-slate-300 space-y-4">
+                    <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2.5">
+                        <i class="fa-solid fa-file-lines text-pink-600 text-sm"></i>
                         <h3 class="font-bold text-slate-800 text-sm">1. ข้อมูลเอกสารสั่งซื้อ</h3>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Po_No <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Po_No <span class="text-rose-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="Po_No" name="Po_No" required readonly placeholder="กำลังสร้างเลข PO..." class="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-indigo-50/50 font-bold text-indigo-700">
-                                <button type="button" onclick="fetchAutoPoNo()" title="รีเฟรชรหัส PO" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-indigo-600 hover:text-indigo-800 p-1">
+                                <input type="text" id="Po_No" name="Po_No" required readonly placeholder="กำลังสร้างเลข PO..." class="w-full px-3 py-2 text-sm border-2 border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-pink-50/50 font-bold text-pink-700 font-mono">
+                                <button type="button" onclick="fetchAutoPoNo()" title="รีเฟรชรหัส PO" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-pink-600 hover:text-pink-800 p-1">
                                     <i class="fa-solid fa-arrows-rotate"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเข้า (Po_Datetime_Received)</label>
-                            <input type="date" id="Po_Datetime_Received" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">วันที่รับเข้า (Po_Datetime_Received)</label>
+                            <input type="date" id="Po_Datetime_Received" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Po_ID (อ้างอิงภายใน)</label>
-                            <input type="text" id="Po_ID" name="Po_ID" placeholder="เช่น PO-2569-001" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
-                            <p id="poIdWarning" class="hidden text-[11px] text-amber-600 mt-1 font-semibold flex items-center gap-1">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Po_ID (อ้างอิงภายใน)</label>
+                            <input type="text" id="Po_ID" name="Po_ID" placeholder="เช่น PO-2569-001" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
+                            <p id="poIdWarning" class="hidden text-[11px] text-amber-600 mt-1 font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-circle-exclamation"></i> พบข้อมูล Po_ID ซ้ำในระบบ
                             </p>
                         </div>
                         
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">บริษัทคู่สัญญา (Contracting_Company)</label>
-                            <input type="text" name="Contracting_Company" placeholder="ระบุบริษัท/ห้างหุ้นส่วนจำกัด ผู้จัดจำหน่าย" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">บริษัทคู่สัญญา (Contracting_Company)</label>
+                            <input type="text" name="Contracting_Company" placeholder="ระบุบริษัท/ห้างหุ้นส่วนจำกัด ผู้จัดจำหน่าย" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">แนบไฟล์เอกสาร PO (Doc_ID) <span class="text-rose-500">*</span></label>
-                            <input type="file" id="Doc_ID_File" accept=".pdf,.jpg,.jpeg,.png" required class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">แนบไฟล์เอกสาร PO (Doc_ID) <span class="text-rose-500">*</span></label>
+                            <input type="file" id="Doc_ID_File" accept=".pdf,.jpg,.jpeg,.png" required class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-pink-100 file:text-pink-800 hover:file:bg-pink-200 cursor-pointer border-2 border-slate-300 rounded-lg bg-white">
                             <input type="hidden" id="Doc_ID" name="Doc_ID">
                         </div>
                     </div>
                 </div>
 
                 <!-- Group 2: Asset Categories & Specifications -->
-                <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 space-y-4">
-                    <div class="flex items-center gap-2 border-b border-indigo-100 pb-2.5">
-                        <i class="fa-solid fa-boxes-stacked text-indigo-600 text-sm"></i>
+                <div class="bg-pink-50/40 p-5 rounded-xl border-2 border-pink-200 space-y-4">
+                    <div class="flex items-center gap-2 border-b-2 border-pink-200 pb-2.5">
+                        <i class="fa-solid fa-boxes-stacked text-pink-600 text-sm"></i>
                         <h3 class="font-bold text-slate-800 text-sm">2. รายละเอียดครุภัณฑ์ (ผูกกับฐานข้อมูล Asset_Type_DB)</h3>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-3">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อรายการสั่งซื้อ (Po_Name) <span class="text-rose-500">*</span></label>
-                            <input type="text" name="Po_Name" required placeholder="เช่น เครื่องคอมพิวเตอร์ประมวลผลสูง พร้อมจอภาพ" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อรายการสั่งซื้อ (Po_Name) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="Po_Name" required placeholder="เช่น เครื่องคอมพิวเตอร์ประมวลผลสูง พร้อมจอภาพ" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
 
                         <!-- Cascading Dropdowns -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดครุภัณฑ์ (Asset_Type_Name)</label>
-                            <select name="Asset_Type_Name" id="Asset_Type_Name" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white" disabled>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">หมวดครุภัณฑ์ (Asset_Type_Name)</label>
+                            <select name="Asset_Type_Name" id="Asset_Type_Name" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium" disabled>
                                 <option value="">-- กำลังโหลดข้อมูล... --</option>
                             </select>
                         </div>
                         
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสหมวด (Asset_Type_ID)</label>
-                            <select name="Asset_Type_ID" id="Asset_Type_ID" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-slate-100" readonly>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">รหัสหมวด (Asset_Type_ID)</label>
+                            <select name="Asset_Type_ID" id="Asset_Type_ID" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-slate-100 font-mono font-bold" readonly>
                                 <option value="">-- รอเลือกหมวดครุภัณฑ์ --</option>
                             </select>
                         </div>
                         
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชนิดครุภัณฑ์ย่อย (Type_ID)</label>
-                            <select name="Type_ID" id="Type_ID" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ชนิดครุภัณฑ์ย่อย (Type_ID)</label>
+                            <select name="Type_ID" id="Type_ID" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                                 <option value="">-- รอเลือกหมวดครุภัณฑ์ --</option>
                             </select>
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
-                            <input type="text" name="Asset_Desc" placeholder="รายละเอียดคุณลักษณะเฉพาะ เช่น CPU Core i7, RAM 16GB, SSD 512GB" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
+                            <input type="text" name="Asset_Desc" placeholder="รายละเอียดคุณลักษณะเฉพาะ เช่น CPU Core i7, RAM 16GB, SSD 512GB" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">แหล่งเงิน (Po_Budget)</label>
-                            <input type="text" name="Po_Budget" placeholder="เช่น เงินงบประมาณแผ่นดิน ปี 2569" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">แหล่งเงิน (Po_Budget)</label>
+                            <input type="text" name="Po_Budget" placeholder="เช่น เงินงบประมาณแผ่นดิน ปี 2569" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         
                         <div class="hidden">
@@ -332,44 +333,44 @@
                 </div>
 
                 <!-- Group 3: Financial & Warranty Info -->
-                <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
-                    <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                        <i class="fa-solid fa-calculator text-indigo-600 text-sm"></i>
+                <div class="bg-slate-50 p-5 rounded-xl border-2 border-slate-300 space-y-4">
+                    <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2.5">
+                        <i class="fa-solid fa-calculator text-pink-600 text-sm"></i>
                         <h3 class="font-bold text-slate-800 text-sm">3. การเงิน และ การรับประกัน</h3>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวนหน่วย (Po_Amount)</label>
-                            <input type="number" min="1" id="Po_Amount" name="Po_Amount" oninput="calculateTotal()" placeholder="0" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">จำนวนหน่วย (Po_Amount)</label>
+                            <input type="number" min="1" id="Po_Amount" name="Po_Amount" oninput="calculateTotal()" placeholder="0" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคาต่อหน่วย (Unit_Price)</label>
-                            <input type="number" step="0.01" min="0" id="Unit_Price" name="Unit_Price" oninput="calculateTotal()" placeholder="0.00" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ราคาต่อหน่วย (Unit_Price)</label>
+                            <input type="number" step="0.01" min="0" id="Unit_Price" name="Unit_Price" oninput="calculateTotal()" placeholder="0.00" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
-                            <input type="number" step="0.01" min="0" id="Total_Price" name="Total_Price" placeholder="0.00" class="w-full px-3 py-2 text-sm border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-emerald-50/30 font-bold text-emerald-700">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
+                            <input type="number" step="0.01" min="0" id="Total_Price" name="Total_Price" placeholder="0.00" class="w-full px-3 py-2 text-sm border-2 border-emerald-400 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-emerald-50/50 font-bold text-emerald-700">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">อายุใช้งาน/ปี (Specified_Age)</label>
-                            <input type="text" name="Specified_Age" placeholder="เช่น 5 ปี" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">อายุใช้งาน/ปี (Specified_Age)</label>
+                            <input type="text" name="Specified_Age" placeholder="เช่น 5 ปี" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ระยะประกัน (Insurance_Period)</label>
-                            <input type="text" name="Insurance_Period" placeholder="เช่น 3 ปี Onsite" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ระยะประกัน (Insurance_Period)</label>
+                            <input type="text" name="Insurance_Period" placeholder="เช่น 3 ปี Onsite" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">เริ่มประกัน (Warranty_Start)</label>
-                            <input type="date" name="Warranty_Start" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">เริ่มประกัน (Warranty_Start)</label>
+                            <input type="date" name="Warranty_Start" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">สิ้นสุดประกัน (Warranty_End)</label>
-                            <input type="date" name="Warranty_End" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">สิ้นสุดประกัน (Warranty_End)</label>
+                            <input type="date" name="Warranty_End" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">อัตราค่าเสื่อม % (Depreciation)</label>
-                            <input type="text" name="Depreciation_Rate" placeholder="เช่น 20%" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">อัตราค่าเสื่อม % (Depreciation)</label>
+                            <input type="text" name="Depreciation_Rate" placeholder="เช่น 20%" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <input type="hidden" name="Annual_Depreciation">
                         <input type="hidden" name="Accumulated_Depreciation">
@@ -378,43 +379,43 @@
                 </div>
 
                 <!-- Group 4: Automatic Asset ID Running & Image Upload -->
-                <div class="bg-emerald-50/40 p-5 rounded-xl border border-emerald-200/80 space-y-4">
-                    <div class="flex items-center justify-between border-b border-emerald-200/80 pb-2.5">
+                <div class="bg-emerald-50/50 p-5 rounded-xl border-2 border-emerald-300 space-y-4">
+                    <div class="flex items-center justify-between border-b-2 border-emerald-200 pb-2.5">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-barcode text-emerald-600 text-sm"></i>
                             <h3 class="font-bold text-slate-800 text-sm">4. ระบบรันรหัสครุภัณฑ์อัตโนมัติ</h3>
                         </div>
-                        <span id="tagCountBadge" class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                        <span id="tagCountBadge" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-0.5 rounded-full border border-emerald-300">
                             คาดการณ์: 0 รายการ
                         </span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">กลุ่มรหัส (Asset_ID_Groups) <span class="text-rose-500">*</span></label>
-                            <input type="text" id="Asset_ID_Groups" name="Asset_ID_Groups" oninput="updateTagPreview()" placeholder="เช่น 2-08-003-010-69-" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">กลุ่มรหัส (Asset_ID_Groups) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_Groups" name="Asset_ID_Groups" oninput="updateTagPreview()" placeholder="เช่น 2-08-003-010-69-" required class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสเริ่ม (Start) <span class="text-rose-500">*</span></label>
-                            <input type="text" id="Asset_ID_Start" name="Asset_ID_Start" oninput="updateTagPreview()" placeholder="001" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">รหัสเริ่ม (Start) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_Start" name="Asset_ID_Start" oninput="updateTagPreview()" placeholder="001" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสสิ้นสุด (End) <span class="text-rose-500">*</span></label>
-                            <input type="text" id="Asset_ID_End" name="Asset_ID_End" oninput="updateTagPreview()" placeholder="005" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">รหัสสิ้นสุด (End) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="Asset_ID_End" name="Asset_ID_End" oninput="updateTagPreview()" placeholder="005" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 bg-white font-mono font-bold">
                         </div>
 
                         <!-- Tag Format Live Preview -->
-                        <div class="md:col-span-4 bg-white p-3 rounded-lg border border-emerald-200/60 text-xs text-slate-600 flex items-center justify-between">
+                        <div class="md:col-span-4 bg-white p-3 rounded-lg border-2 border-emerald-300 text-xs text-slate-700 flex items-center justify-between">
                             <div>
-                                <span class="font-medium text-slate-500">ตัวอย่างรหัสที่จะสร้าง: </span>
+                                <span class="font-bold text-slate-600">ตัวอย่างรหัสที่จะสร้าง: </span>
                                 <span id="tagSampleText" class="font-mono font-bold text-emerald-700 ml-1">ยังไม่ได้กำหนดกลุ่มรหัส</span>
                             </div>
-                            <span class="text-[11px] text-slate-400">ระบบจะสร้างเรียงตามลำดับตัวเลข</span>
+                            <span class="text-[11px] font-semibold text-slate-400">ระบบจะสร้างเรียงตามลำดับตัวเลข</span>
                         </div>
                         
                         <div class="md:col-span-4 mt-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">แนบรูปภาพครุภัณฑ์ (Asset_Po_Image)</label>
-                            <input type="file" id="Asset_Po_Image_File" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">แนบรูปภาพครุภัณฑ์ (Asset_Po_Image)</label>
+                            <input type="file" id="Asset_Po_Image_File" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer border-2 border-slate-300 rounded-lg bg-white">
                             <input type="hidden" id="Asset_Po_Image" name="Asset_Po_Image">
                         </div>
                         
@@ -425,7 +426,7 @@
                 </div>
 
                 <div class="flex justify-end pt-2">
-                    <button type="submit" id="btnSavePO" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                    <button type="submit" id="btnSavePO" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-xl shadow-md border border-pink-700 transition-all flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span>บันทึกข้อมูล PO</span>
                     </button>
@@ -434,33 +435,33 @@
         </section>
 
         <!-- SECTION 3: Asset Tag Generation Step -->
-        <section id="generateSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center max-w-2xl mx-auto">
-            <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-6 text-3xl shadow-inner animate-bounce">
+        <section id="generateSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border-2 border-slate-300 p-8 text-center max-w-2xl mx-auto">
+            <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 border-2 border-emerald-300 flex items-center justify-center mb-6 text-3xl shadow-inner animate-bounce">
                 <i class="fa-solid fa-check"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-800 mb-2">บันทึกข้อมูล PO สำเร็จแล้ว!</h2>
-            <p class="text-slate-500 text-sm mb-8" id="generateDesc">พร้อมดำเนินการสร้างรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล Asset_DB</p>
+            <p class="text-slate-600 text-sm mb-8 font-medium" id="generateDesc">พร้อมดำเนินการสร้างรหัสครุภัณฑ์เข้าสู่ฐานข้อมูล Asset_DB</p>
             
-            <button id="btnGenerateAssets" class="bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold py-3.5 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2">
+            <button id="btnGenerateAssets" class="bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold py-3.5 px-10 rounded-full shadow-lg border border-emerald-700 transition-all transform hover:scale-105 flex items-center gap-2">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
                 <span>สร้างรายการครุภัณฑ์เดี๋ยวนี้</span>
             </button>
         </section>
 
         <!-- SECTION 4: Final Success Screen -->
-        <section id="successSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center max-w-2xl mx-auto">
-            <div class="w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-6 text-3xl shadow-inner">
+        <section id="successSection" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm border-2 border-slate-300 p-8 text-center max-w-2xl mx-auto">
+            <div class="w-20 h-20 rounded-full bg-pink-100 text-pink-600 border-2 border-pink-300 flex items-center justify-center mb-6 text-3xl shadow-inner">
                 <i class="fa-solid fa-shield-check"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-800 mb-2">ดำเนินการเสร็จสมบูรณ์</h2>
-            <p class="text-slate-600 text-sm mb-8" id="successDesc"></p>
+            <p class="text-slate-600 text-sm mb-8 font-medium" id="successDesc"></p>
 
             <div class="flex flex-wrap gap-3 justify-center">
-                <button onclick="switchTab('list')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition-all flex items-center gap-2 text-sm">
+                <button onclick="switchTab('list')" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition-all flex items-center gap-2 text-sm border border-pink-700">
                     <i class="fa-solid fa-list-check"></i>
                     <span>ดูรายการ PO ทั้งหมด</span>
                 </button>
-                <button onclick="resetAndNewPO()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 text-sm border border-slate-300">
+                <button onclick="resetAndNewPO()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 text-sm border-2 border-slate-300">
                     <i class="fa-solid fa-plus"></i>
                     <span>สร้างรายการ PO ใหม่</span>
                 </button>
@@ -471,27 +472,157 @@
 
     <!-- Loading Overlay Modal -->
     <div id="loadingModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden flex flex-col items-center justify-center p-4">
-        <div class="bg-white/10 border border-white/20 p-8 rounded-2xl flex flex-col items-center max-w-md w-full shadow-2xl">
-            <svg class="animate-spin h-12 w-12 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div class="bg-white border-2 border-slate-300 p-8 rounded-2xl flex flex-col items-center max-w-md w-full shadow-2xl">
+            <svg class="animate-spin h-12 w-12 text-pink-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <h3 id="loadingText" class="text-white text-lg font-bold tracking-wide text-center">กำลังประมวลผล...</h3>
+            <h3 id="loadingText" class="text-slate-800 text-base font-bold tracking-wide text-center">กำลังประมวลผล...</h3>
             
             <!-- Progress Bar -->
-            <div id="progressWrapper" class="w-full bg-white/20 rounded-full h-3 mt-6 hidden overflow-hidden border border-white/30">
-                <div id="progressBar" class="bg-emerald-400 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <div id="progressWrapper" class="w-full bg-slate-100 rounded-full h-3 mt-6 hidden overflow-hidden border-2 border-slate-300">
+                <div id="progressBar" class="bg-emerald-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PO DETAIL MODAL (รายละเอียดข้อมูลครุภัณฑ์ครบถ้วน) -->
+    <div id="detailPoModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col border-2 border-slate-300">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white border-b-2 border-slate-200 px-6 py-4 flex justify-between items-center z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-pink-50 border-2 border-pink-200 text-pink-600 flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="detailPoNo" class="text-lg font-bold text-slate-800 font-mono">PONO-XXXXXX</h3>
+                            <span id="detailAssetTypeName" class="text-[11px] font-bold bg-pink-50 text-pink-700 px-2.5 py-0.5 rounded-md border border-pink-200">หมวดครุภัณฑ์</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">รายละเอียดข้อมูลรับเข้าครุภัณฑ์และใบสั่งซื้อ</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="detailDocBtn" href="#" target="_blank" class="hidden text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-2 border-emerald-300 px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf text-emerald-600"></i>
+                        <span>เปิดเอกสารสั่งซื้อ</span>
+                    </a>
+                    <button onclick="document.getElementById('detailPoModal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 w-8 h-8 rounded-full flex items-center justify-center transition-colors border border-transparent hover:border-rose-200">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                <!-- Title & Image Banner -->
+                <div class="flex flex-col md:flex-row gap-5 items-start bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                    <div id="detailImgContainer" class="w-full md:w-36 h-36 flex-shrink-0 rounded-xl overflow-hidden border-2 border-slate-300 bg-white relative group cursor-pointer shadow-sm">
+                        <img id="detailImgPreview" src="" alt="Asset Image" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
+                            <i class="fa-solid fa-magnifying-glass-plus mr-1"></i> ขยายดูรูป
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 flex-grow">
+                        <h4 id="detailPoName" class="text-lg font-bold text-slate-800 leading-snug">ชื่อรายการครุภัณฑ์</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-1">
+                            <div><span class="text-slate-500 font-bold">บริษัทคู่สัญญา:</span> <span id="detailContractingCompany" class="font-bold text-slate-800"></span></div>
+                            <div><span class="text-slate-500 font-bold">วันที่รับเข้า:</span> <span id="detailPoDatetimeReceived" class="font-bold text-slate-800"></span></div>
+                            <div><span class="text-slate-500 font-bold">Po_ID (อ้างอิง):</span> <span id="detailPoId" class="font-bold text-slate-800"></span></div>
+                            <div><span class="text-slate-500 font-bold">แหล่งเงินงบประมาณ:</span> <span id="detailPoBudget" class="font-bold text-slate-800"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical & Categorization Details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border-2 border-slate-200 text-xs">
+                    <div>
+                        <span class="text-slate-500 font-bold block mb-0.5">รหัสหมวด (Asset_Type_ID)</span>
+                        <span id="detailAssetTypeId" class="font-mono font-bold text-slate-800 text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 font-bold block mb-0.5">ชนิดครุภัณฑ์ย่อย (Type_ID)</span>
+                        <span id="detailTypeId" class="font-mono font-bold text-slate-800 text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 font-bold block mb-0.5">ช่วงรหัสที่รันเข้าฐานข้อมูล</span>
+                        <span id="detailAssetIdRange" class="font-mono font-bold text-emerald-700 text-xs"></span>
+                    </div>
+                    <div class="md:col-span-3 pt-2 border-t-2 border-slate-100">
+                        <span class="text-slate-500 font-bold block mb-0.5">รายละเอียด / คุณลักษณะเฉพาะ (Asset_Desc)</span>
+                        <p id="detailAssetDesc" class="text-slate-800 leading-relaxed font-medium bg-slate-50 p-2.5 rounded-lg border border-slate-200 mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <div class="bg-pink-50/40 p-4 rounded-xl border-2 border-pink-200">
+                    <h5 class="text-xs font-bold text-pink-900 mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-coins text-pink-600"></i>
+                        <span>สรุปมูลค่าทางการเงิน</span>
+                    </h5>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-white p-3 rounded-lg border-2 border-slate-200 shadow-sm">
+                            <span class="text-[11px] text-slate-500 font-bold block">จำนวนหน่วย</span>
+                            <span id="detailPoAmount" class="text-base font-bold text-slate-800 mt-0.5 block"></span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border-2 border-slate-200 shadow-sm">
+                            <span class="text-[11px] text-slate-500 font-bold block">ราคาต่อหน่วย</span>
+                            <span id="detailUnitPrice" class="text-base font-bold text-slate-800 mt-0.5 block"></span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border-2 border-emerald-300 shadow-sm">
+                            <span class="text-[11px] text-emerald-700 font-bold block">ราคารวมทั้งหมด</span>
+                            <span id="detailTotalPrice" class="text-base font-bold text-emerald-700 mt-0.5 block"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warranty & Depreciation Details -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-xs bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                    <div>
+                        <span class="text-slate-500 block font-bold">ระยะประกัน</span>
+                        <span id="detailInsurancePeriod" class="font-bold text-slate-800 mt-0.5 block"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">เริ่มประกัน</span>
+                        <span id="detailWarrantyStart" class="font-bold text-slate-800 mt-0.5 block"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">สิ้นสุดประกัน</span>
+                        <span id="detailWarrantyEnd" class="font-bold text-slate-800 mt-0.5 block"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">อายุใช้งาน</span>
+                        <span id="detailSpecifiedAge" class="font-bold text-slate-800 mt-0.5 block"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">อัตราค่าเสื่อม</span>
+                        <span id="detailDepreciationRate" class="font-bold text-slate-800 mt-0.5 block"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="sticky bottom-0 bg-slate-50 border-t-2 border-slate-200 px-6 py-3.5 flex justify-end gap-2.5 z-10">
+                <button type="button" onclick="document.getElementById('detailPoModal').classList.add('hidden')" class="px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 bg-white border-2 border-slate-300 rounded-lg transition-all">
+                    ปิดหน้าต่าง
+                </button>
+                <button type="button" id="btnEditFromDetail" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-5 rounded-lg text-xs shadow border border-pink-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>แก้ไขข้อมูล PO นี้</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- EDIT PO MODAL -->
     <div id="editPoModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col border border-slate-200">
-            <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center z-10">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col border-2 border-slate-300">
+            <div class="sticky top-0 bg-white border-b-2 border-slate-200 px-6 py-4 flex justify-between items-center z-10">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">แก้ไขข้อมูล: <span id="editPoTitle" class="text-indigo-600"></span></h3>
-                    <p class="text-xs text-slate-400">อัปเดตรายละเอียดเอกสารสั่งซื้อ</p>
+                    <h3 class="text-lg font-bold text-slate-800">แก้ไขข้อมูล: <span id="editPoTitle" class="text-pink-600 font-mono"></span></h3>
+                    <p class="text-xs text-slate-500 font-medium">อัปเดตรายละเอียดเอกสารสั่งซื้อ</p>
                 </div>
                 <button id="btnCloseEditModal" class="text-slate-400 hover:text-rose-500 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -505,44 +636,44 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อรายการ (Po_Name)</label>
-                            <input type="text" id="editPoName" name="Po_Name" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อรายการ (Po_Name)</label>
+                            <input type="text" id="editPoName" name="Po_Name" required class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 bg-white font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">บริษัทคู่สัญญา</label>
-                            <input type="text" id="editContracting" name="Contracting_Company" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">บริษัทคู่สัญญา</label>
+                            <input type="text" id="editContracting" name="Contracting_Company" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเข้า (เช่น '27/07/2569)</label>
-                            <input type="text" id="editDate" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">วันที่รับเข้า (เช่น '27/07/2569)</label>
+                            <input type="text" id="editDate" name="Po_Datetime_Received" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-medium">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
-                            <input type="text" id="editDesc" name="Asset_Desc" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">รายละเอียด/สเปค (Asset_Desc)</label>
+                            <input type="text" id="editDesc" name="Asset_Desc" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวน (Po_Amount)</label>
-                            <input type="number" id="editAmount" name="Po_Amount" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">จำนวน (Po_Amount)</label>
+                            <input type="number" id="editAmount" name="Po_Amount" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
-                            <input type="number" step="0.01" id="editTotal" name="Total_Price" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ราคารวม (Total_Price)</label>
+                            <input type="number" step="0.01" id="editTotal" name="Total_Price" class="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 font-bold">
                         </div>
                         
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">แก้ไขรูปภาพครุภัณฑ์ (เว้นว่างหากไม่เปลี่ยน)</label>
-                            <input type="file" id="editAssetImageFile" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">แก้ไขรูปภาพครุภัณฑ์ (เว้นว่างหากไม่เปลี่ยน)</label>
+                            <input type="file" id="editAssetImageFile" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-pink-100 file:text-pink-800 cursor-pointer border-2 border-slate-300 rounded-lg bg-white">
                             <input type="hidden" id="editAssetImage" name="Asset_Po_Image">
-                            <div id="editImgPreviewContainer" class="mt-2 hidden flex items-center gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                                <img id="editImgPreview" src="" alt="Current Asset Image" class="h-16 w-16 object-cover rounded-lg border border-slate-300 shadow-sm">
-                                <span class="text-xs text-slate-500">รูปภาพปัจจุบันที่บันทึกในระบบ</span>
+                            <div id="editImgPreviewContainer" class="mt-2 hidden flex items-center gap-3 bg-slate-50 p-2.5 rounded-lg border-2 border-slate-200">
+                                <img id="editImgPreview" src="" alt="Current Asset Image" class="h-16 w-16 object-cover rounded-lg border-2 border-slate-300 shadow-sm">
+                                <span class="text-xs text-slate-500 font-semibold">รูปภาพปัจจุบันที่บันทึกในระบบ</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 flex justify-end gap-2 border-t pt-4">
-                        <button type="button" onclick="document.getElementById('editPoModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-all">ยกเลิก</button>
-                        <button type="submit" id="btnSaveEditPO" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-xs shadow transition-all flex items-center gap-2">
+                    <div class="mt-6 flex justify-end gap-2 border-t-2 border-slate-200 pt-4">
+                        <button type="button" onclick="document.getElementById('editPoModal').classList.add('hidden')" class="px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-lg transition-all border border-slate-300">ยกเลิก</button>
+                        <button type="submit" id="btnSaveEditPO" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg text-xs shadow border border-pink-700 transition-all flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span>บันทึกการแก้ไข</span>
                         </button>
@@ -553,24 +684,24 @@
     </div>
 
     <!-- FULLSCREEN IMAGE LIGHTBOX MODAL -->
-    <div id="imageLightboxModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-4" onclick="closeImageLightbox()">
-        <button onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white hover:text-rose-400 text-2xl w-10 h-10 rounded-full bg-white/10 flex items-center justify-center transition-all">
+    <div id="imageLightboxModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] hidden flex flex-col items-center justify-center p-4" onclick="closeImageLightbox()">
+        <button onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white hover:text-rose-400 text-2xl w-10 h-10 rounded-full bg-white/10 flex items-center justify-center transition-all border border-white/20">
             <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="max-w-4xl max-h-[85vh] p-2 flex flex-col items-center" onclick="event.stopPropagation()">
-            <img id="lightboxImg" src="" alt="Full Preview" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10">
-            <p id="lightboxTitle" class="text-white text-sm font-semibold mt-4 bg-white/10 px-4 py-1.5 rounded-full border border-white/20"></p>
+            <img id="lightboxImg" src="" alt="Full Preview" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border-2 border-white/20">
+            <p id="lightboxTitle" class="text-white text-sm font-bold mt-4 bg-white/10 px-4 py-1.5 rounded-full border border-white/20"></p>
         </div>
     </div>
 
     <!-- Custom Confirm / Alert Modal -->
     <div id="customDialogModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center border border-slate-100">
-            <div id="dialogIcon" class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-2xl mb-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center border-2 border-slate-300">
+            <div id="dialogIcon" class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-2xl mb-4 border-2 border-amber-300">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <h3 id="dialogTitle" class="text-lg font-bold text-slate-800 mb-2">แจ้งเตือน</h3>
-            <p id="dialogMessage" class="text-sm text-slate-600 mb-6 whitespace-pre-line"></p>
+            <p id="dialogMessage" class="text-sm text-slate-600 mb-6 font-medium whitespace-pre-line"></p>
             <div class="flex justify-center gap-3" id="dialogButtons">
                 <!-- Action buttons generated dynamically -->
             </div>
@@ -649,7 +780,7 @@
 
         async function fetchAssetTypeDB() {
             const statusEl = document.getElementById('dbStatus');
-            statusEl.className = "text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+            statusEl.className = "text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border-2 border-amber-300 font-bold flex items-center gap-1.5 shadow-sm";
             statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> <span>กำลังโหลด Asset_Type_DB...</span>`;
 
             try {
@@ -662,7 +793,7 @@
 
                 if (result.success && Array.isArray(result.data)) {
                     assetTypeDatabase = result.data;
-                    statusEl.className = "text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+                    statusEl.className = "text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg border-2 border-emerald-300 font-bold flex items-center gap-1.5 shadow-sm";
                     statusEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> <span>เชื่อมต่อ Asset_Type_DB แล้ว ✓</span>`;
                     populateCategoryDropdowns(assetTypeDatabase);
                 } else {
@@ -670,7 +801,7 @@
                 }
             } catch (error) {
                 console.error("DB Fetch Error:", error);
-                statusEl.className = "text-xs px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg border border-rose-200/80 font-medium flex items-center gap-1.5 shadow-sm";
+                statusEl.className = "text-xs px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg border-2 border-rose-300 font-bold flex items-center gap-1.5 shadow-sm";
                 statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500"></i> <span>เชื่อมต่อฐานข้อมูลล้มเหลว</span>`;
                 selectAssetTypeName.innerHTML = '<option value="">-- ไม่สามารถโหลดหมวดครุภัณฑ์ได้ --</option>';
             }
@@ -860,7 +991,6 @@
             return dateString;
         }
 
-        // ดึง File ID จาก Google Drive URL หรือข้อความใดๆ
         function extractGoogleDriveFileId(imgVal) {
             if (!imgVal || typeof imgVal !== 'string') return '';
             imgVal = imgVal.trim();
@@ -877,7 +1007,6 @@
             match = imgVal.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) return match[1];
 
-            // หากเป็น FileID เพียวๆ (ยาวเกิน 15 ตัวอักษร ไม่มีเครื่องหมาย / หรือ :)
             if (!imgVal.includes('/') && !imgVal.includes(':') && imgVal.length > 15) {
                 return imgVal;
             }
@@ -885,7 +1014,6 @@
             return '';
         }
 
-        // แปลง FileID หรือ Drive URL ให้เป็น Direct Image Source ที่แท็ก <img> ดึงไปแสดงได้แน่นอน
         function getGoogleDriveImageUrl(imgVal) {
             if (!imgVal || typeof imgVal !== 'string') return '';
             imgVal = imgVal.trim();
@@ -907,7 +1035,6 @@
             return '';
         }
 
-        // ระบบสำรองกรณีภาพโหลดจาก Thumbnail ไม่ขึ้น ให้สลับไปใช้ CDN ตัวเลือกที่ 2
         window.handleImgError = function(imgEl, fileId) {
             if (!imgEl.dataset.retried && fileId) {
                 imgEl.dataset.retried = "true";
@@ -917,7 +1044,6 @@
             }
         };
 
-        // แสดงรูปภาพขนาดใหญ่ (Lightbox)
         window.previewFullImage = function(imgSrc, title) {
             if (!imgSrc || imgSrc.includes('data:image/svg+xml')) return;
             const modal = document.getElementById('imageLightboxModal');
@@ -928,6 +1054,88 @@
 
         window.closeImageLightbox = function() {
             document.getElementById('imageLightboxModal').classList.add('hidden');
+        };
+
+        // OPEN PO DETAIL MODAL
+        window.openDetailModal = function(poJsonEncoded) {
+            try {
+                const po = JSON.parse(decodeURIComponent(poJsonEncoded));
+                currentPOData = po;
+
+                document.getElementById('detailPoNo').innerText = po.Po_No || '-';
+                document.getElementById('detailPoName').innerText = po.Po_Name || '-';
+                document.getElementById('detailContractingCompany').innerText = po.Contracting_Company || '-';
+                document.getElementById('detailPoDatetimeReceived').innerText = po.Po_Datetime_Received || '-';
+                document.getElementById('detailPoId').innerText = po.Po_ID || '-';
+                
+                // Document Link Button
+                const docBtn = document.getElementById('detailDocBtn');
+                if (po.Doc_ID && (po.Doc_ID.startsWith('http://') || po.Doc_ID.startsWith('https://'))) {
+                    docBtn.href = po.Doc_ID;
+                    docBtn.classList.remove('hidden');
+                } else {
+                    docBtn.classList.add('hidden');
+                }
+
+                // Specs & Categorization
+                document.getElementById('detailAssetTypeName').innerText = po.Po_Type_Name || po.Asset_Type_Name || 'ทั่วไป';
+                document.getElementById('detailAssetTypeId').innerText = po.Asset_Type_ID || '-';
+                document.getElementById('detailTypeId').innerText = po.Type_ID || '-';
+                document.getElementById('detailAssetDesc').innerText = po.Asset_Desc || '-';
+                document.getElementById('detailPoBudget').innerText = po.Po_Budget || '-';
+
+                // Financial Overview
+                const qty = parseInt(po.Po_Amount, 10) || 1;
+                const unitPrice = parseFloat(po.Unit_Price) || 0;
+                const totalPrice = parseFloat(po.Total_Price) || (qty * unitPrice);
+
+                document.getElementById('detailPoAmount').innerText = `${qty} หน่วย`;
+                document.getElementById('detailUnitPrice').innerText = `฿${unitPrice.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+                document.getElementById('detailTotalPrice').innerText = `฿${totalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+
+                // Asset ID Running Range
+                const groups = po.Asset_ID_Groups || '';
+                const start = po.Asset_ID_Start || '';
+                const end = po.Asset_ID_End || '';
+                if (groups || start || end) {
+                    document.getElementById('detailAssetIdRange').innerText = `${groups}${start} ถึง ${groups}${end}`;
+                } else {
+                    document.getElementById('detailAssetIdRange').innerText = '-';
+                }
+
+                // Warranty & Depreciation
+                document.getElementById('detailInsurancePeriod').innerText = po.Insurance_Period || '-';
+                document.getElementById('detailWarrantyStart').innerText = po.Warranty_Start || '-';
+                document.getElementById('detailWarrantyEnd').innerText = po.Warranty_End || '-';
+                document.getElementById('detailSpecifiedAge').innerText = po.Specified_Age || '-';
+                document.getElementById('detailDepreciationRate').innerText = po.Depreciation_Rate || '-';
+
+                // Image Preview
+                const imgEl = document.getElementById('detailImgPreview');
+                const imgContainer = document.getElementById('detailImgContainer');
+
+                if (po.Asset_Po_Image) {
+                    const imgSrc = getGoogleDriveImageUrl(po.Asset_Po_Image);
+                    const fileId = extractGoogleDriveFileId(po.Asset_Po_Image);
+                    imgEl.src = imgSrc;
+                    imgEl.onerror = function() { handleImgError(this, fileId); };
+                    imgEl.onclick = function() { previewFullImage(imgSrc, po.Po_No); };
+                    imgContainer.classList.remove('hidden');
+                } else {
+                    imgContainer.classList.add('hidden');
+                }
+
+                // Bind Edit Action from Detail Modal
+                document.getElementById('btnEditFromDetail').onclick = function() {
+                    document.getElementById('detailPoModal').classList.add('hidden');
+                    openEditModal(poJsonEncoded);
+                };
+
+                document.getElementById('detailPoModal').classList.remove('hidden');
+            } catch (err) {
+                console.error("Error opening detail modal:", err);
+                showToast("ไม่สามารถเปิดดูรายละเอียดได้", "error");
+            }
         };
 
         // ---------------------------------------------------------
@@ -980,7 +1188,7 @@
                     const total = (end - start) + 1;
                     document.getElementById('generateDesc').innerText = `ระบบบันทึก PO สำเร็จแล้ว พร้อมสร้างรหัสครุภัณฑ์จำนวน ${total} รายการ (${poData.Asset_ID_Groups}${poData.Asset_ID_Start} ถึง ${poData.Asset_ID_Groups}${poData.Asset_ID_End})`;
                     
-                    fetchPOList(); // Refresh PO list
+                    fetchPOList();
                 } else {
                     throw new Error(result.message || "บันทึกข้อมูล PO ล้มเหลว");
                 }
@@ -1024,7 +1232,6 @@
                 loadingText.innerText = `กำลังสร้างรายการที่ ${currentItem}/${totalAssets}\n[ ${fullAssetID} ]`;
                 progressBar.style.width = `${(currentItem / totalAssets) * 100}%`;
 
-                // Prepare mapped asset payload matching saveSingleAssetToDB in code.gs
                 const assetData = {
                     AssetID: fullAssetID,
                     Po_Name: currentPOData.Po_Name,
@@ -1080,8 +1287,8 @@
 
         function switchTab(type) {
             if (type === 'list') {
-                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
-                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 bg-pink-600 text-white shadow-sm border border-pink-700";
+                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 text-slate-700 hover:text-pink-700 hover:bg-pink-50 border border-transparent hover:border-pink-200";
                 
                 poFormSection.classList.add('hidden');
                 poListSection.classList.remove('hidden');
@@ -1090,8 +1297,8 @@
                 
                 fetchPOList();
             } else {
-                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
-                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                tabAdd.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 bg-pink-600 text-white shadow-sm border border-pink-700";
+                tabList.className = "flex-1 min-w-[160px] py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 text-slate-700 hover:text-pink-700 hover:bg-pink-50 border border-transparent hover:border-pink-200";
                 
                 poFormSection.classList.remove('hidden');
                 poListSection.classList.add('hidden');
@@ -1110,8 +1317,8 @@
         async function fetchPOList() {
             poListContainer.innerHTML = `
                 <div class="text-center py-12 text-slate-400 flex flex-col items-center justify-center">
-                    <svg class="animate-spin h-8 w-8 text-indigo-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <p class="text-sm font-medium">กำลังโหลดข้อมูลจากฐานข้อมูล...</p>
+                    <svg class="animate-spin h-8 w-8 text-pink-500 mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="text-sm font-semibold">กำลังโหลดข้อมูลจากฐานข้อมูล...</p>
                 </div>`;
 
             try {
@@ -1128,11 +1335,11 @@
                     populateYearFilter(allPOList);
                     updateDashboardStats();
                 } else {
-                    poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-medium">เกิดข้อผิดพลาด: ${result.message || 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
+                    poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-bold">เกิดข้อผิดพลาด: ${result.message || 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
                 }
             } catch (error) {
                 console.error("API Fetch List Error:", error);
-                poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-medium">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (${error.message})</div>`;
+                poListContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-bold">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (${error.message})</div>`;
             }
         }
 
@@ -1180,9 +1387,9 @@
         function renderPOList(data) {
             if (!data || data.length === 0) {
                 poListContainer.innerHTML = `
-                    <div class="text-center py-12 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    <div class="text-center py-12 text-slate-400 bg-slate-50/50 rounded-xl border-2 border-dashed border-slate-300">
                         <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
-                        <p class="text-sm font-medium">ไม่พบข้อมูลรายการรับเข้า PO ในระบบ</p>
+                        <p class="text-sm font-bold">ไม่พบข้อมูลรายการรับเข้า PO ในระบบ</p>
                     </div>`;
                 return;
             }
@@ -1204,20 +1411,19 @@
             let html = '';
             sortedYears.forEach(year => {
                 html += `
-                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                        <div class="bg-slate-50 text-slate-800 font-bold px-5 py-3 border-b border-slate-200 flex justify-between items-center text-sm">
+                    <div class="bg-white border-2 border-slate-300 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-50 text-slate-800 font-bold px-5 py-3 border-b-2 border-slate-200 flex justify-between items-center text-sm">
                             <span class="flex items-center gap-2">
-                                <i class="fa-regular fa-calendar-check text-indigo-600"></i>
+                                <i class="fa-regular fa-calendar-check text-pink-600"></i>
                                 <span>ปีที่รับเข้า: ${year}</span>
                             </span>
-                            <span class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-0.5 rounded-full border border-indigo-100">${grouped[year].length} รายการ</span>
+                            <span class="text-xs font-bold bg-pink-50 text-pink-700 px-3 py-0.5 rounded-full border border-pink-200">${grouped[year].length} รายการ</span>
                         </div>
-                        <div class="divide-y divide-slate-100">
+                        <div class="divide-y-2 divide-slate-100">
                 `;
                 
                 grouped[year].forEach(po => {
                     const poJson = encodeURIComponent(JSON.stringify(po));
-                    
                     const fileId = extractGoogleDriveFileId(po.Asset_Po_Image);
                     let imgSrc = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23f1f5f9%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%2394a3b8%22%20font-size%3D%2212%22%20font-family%3D%22sans-serif%22%3Eไม่มีรูปภาพ%3C%2Ftext%3E%3C%2Fsvg%3E';
                     
@@ -1228,9 +1434,10 @@
                     const formattedTotal = po.Total_Price ? Number(po.Total_Price).toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '0.00';
 
                     html += `
-                        <div class="p-4 sm:p-5 hover:bg-indigo-50/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
-                            <div class="flex items-start gap-4 flex-grow w-full md:w-auto">
-                                <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm relative group cursor-pointer" onclick="previewFullImage('${imgSrc}', '${po.Po_No}')">
+                        <div class="p-4 sm:p-5 hover:bg-pink-50/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
+                            <!-- Clickable Card Body Opens Detail Modal -->
+                            <div class="flex items-start gap-4 flex-grow w-full md:w-auto cursor-pointer group" onclick="openDetailModal('${poJson}')">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-slate-300 bg-slate-100 shadow-sm relative group cursor-pointer" onclick="event.stopPropagation(); previewFullImage('${imgSrc}', '${po.Po_No}')">
                                     <img src="${imgSrc}" alt="PO Image" onerror="handleImgError(this, '${fileId}')" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs">
                                         <i class="fa-solid fa-magnifying-glass-plus"></i>
@@ -1239,19 +1446,25 @@
                                 
                                 <div class="flex-grow">
                                     <div class="flex flex-wrap items-center gap-2 mb-1">
-                                        <span class="font-bold text-slate-800 text-base sm:text-lg">${po.Po_No}</span>
-                                        <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-md border border-indigo-100">${po.Po_Type_Name || 'ทั่วไป'}</span>
+                                        <span class="font-bold text-slate-800 text-base sm:text-lg font-mono group-hover:text-pink-600 transition-colors">${po.Po_No}</span>
+                                        <span class="text-[11px] font-bold bg-pink-50 text-pink-700 px-2.5 py-0.5 rounded-md border border-pink-200">${po.Po_Type_Name || 'ทั่วไป'}</span>
                                     </div>
-                                    <div class="text-sm font-semibold text-slate-700">${po.Po_Name}</div>
-                                    <div class="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+                                    <div class="text-sm font-bold text-slate-800 group-hover:text-pink-700 transition-colors">${po.Po_Name}</div>
+                                    <div class="text-xs text-slate-600 mt-1.5 flex flex-wrap gap-x-4 gap-y-1 font-medium">
                                         <span><i class="fa-solid fa-building text-slate-400 mr-1"></i>${po.Contracting_Company || '-'}</span>
                                         <span><i class="fa-solid fa-cubes text-slate-400 mr-1"></i>จำนวน: ${po.Po_Amount || 1} หน่วย</span>
                                         <span class="font-bold text-emerald-600"><i class="fa-solid fa-tag text-emerald-500 mr-1"></i>฿${formattedTotal}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0">
-                                <button onclick="openEditModal('${poJson}')" class="bg-white border border-slate-300 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5">
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t-2 md:border-t-0 pt-3 md:pt-0">
+                                <button onclick="openDetailModal('${poJson}')" class="bg-pink-50 hover:bg-pink-100 text-pink-700 border-2 border-pink-300 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>รายละเอียด</span>
+                                </button>
+                                <button onclick="openEditModal('${poJson}')" class="bg-white border-2 border-slate-300 hover:border-pink-300 text-slate-700 hover:text-pink-700 hover:bg-pink-50 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                     <span>แก้ไข</span>
                                 </button>
@@ -1307,14 +1520,12 @@
             const btnSaveEdit = document.getElementById('btnSaveEditPO');
             const originalBtnHtml = btnSaveEdit ? btnSaveEdit.innerHTML : '';
 
-            // แสดงสถานะที่ปุ่มบันทึก
             if (btnSaveEdit) {
                 btnSaveEdit.disabled = true;
                 btnSaveEdit.classList.add('opacity-60', 'cursor-not-allowed');
                 btnSaveEdit.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>กำลังบันทึก...</span>`;
             }
 
-            // แสดง Overlay หน้าจอขนาดใหญ่
             showModal("กำลังบันทึกการแก้ไขข้อมูล PO เข้าสู่ระบบ...");
 
             try {
@@ -1337,7 +1548,6 @@
                 hideModal();
                 showAlertModal("เกิดข้อผิดพลาดในการแก้ไข", error.message);
             } finally {
-                // คืนค่าปุ่มเดิม
                 if (btnSaveEdit) {
                     btnSaveEdit.disabled = false;
                     btnSaveEdit.classList.remove('opacity-60', 'cursor-not-allowed');
@@ -1353,7 +1563,7 @@
 
             allPOList.forEach(po => {
                 totalBudget += parseFloat(po.Total_Price) || 0;
-                totalAssets += parseInt(po.Po_Amount) || 1;
+                totalAssets += parseInt(po.Po_Amount, 10) || 1;
             });
 
             document.getElementById('statTotalPO').innerText = totalCount;
@@ -1391,7 +1601,7 @@
             if (type === 'success') bg = 'bg-emerald-600 text-white';
             if (type === 'error') bg = 'bg-rose-600 text-white';
 
-            toast.className = `px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs flex items-center gap-2 transform transition-all duration-300 pointer-events-auto ${bg}`;
+            toast.className = `px-4 py-2.5 rounded-xl shadow-lg font-bold text-xs flex items-center gap-2 transform transition-all duration-300 pointer-events-auto ${bg}`;
             toast.innerHTML = `
                 <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i>
                 <span>${message}</span>
@@ -1412,7 +1622,7 @@
                 
                 const btnContainer = document.getElementById('dialogButtons');
                 btnContainer.innerHTML = `
-                    <button id="btnDialogOk" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-xs transition-all shadow">
+                    <button id="btnDialogOk" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-bold text-xs transition-all shadow">
                         ตกลง
                     </button>
                 `;
@@ -1433,10 +1643,10 @@
                 
                 const btnContainer = document.getElementById('dialogButtons');
                 btnContainer.innerHTML = `
-                    <button id="btnDialogCancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-semibold text-xs transition-all border border-slate-300">
+                    <button id="btnDialogCancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-bold text-xs transition-all border border-slate-300">
                         ยกเลิก
                     </button>
-                    <button id="btnDialogConfirm" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-xs transition-all shadow">
+                    <button id="btnDialogConfirm" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-bold text-xs transition-all shadow">
                         ยืนยันบันทึก
                     </button>
                 `;
