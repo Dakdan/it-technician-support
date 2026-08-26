@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="auth-check.js"></script>
     
     <style>
         :root {
@@ -133,44 +134,7 @@
 </head>
 <body class="relative min-h-screen pb-12">
 
-    <script>
-        (function () {
-            try {
-                const userData = localStorage.getItem('currentUser');
-                if (!userData) {
-                    window.user = null;
-                    return;
-                }
-                const user = JSON.parse(userData);
-                if (!user || !user.UserPN) {
-                    localStorage.removeItem('currentUser');
-                    window.user = null;
-                    return;
-                }
-                window.user = user;
-            } catch (err) {
-                console.error("Auth-Check error: ", err);
-                localStorage.removeItem('currentUser');
-                window.user = null;
-            }
-        })();
-
-        function getCurrentUser() { return window.user || null; }
-        function hasRole(role) {
-            if (!window.user) return false;
-            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
-        }
-        function getDisplayName() {
-            if (!window.user) return "ผู้ใช้งานทั่วไป (Guest)";
-            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
-        }
-        function logout() {
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
-            try { window.location.replace("index.html"); } 
-            catch(e) { window.location.href = "index.html"; }
-        }
-    </script>
+  
 
     <!-- Watermark -->
     <div class="watermark">IT UDON HOSP ✨</div>
