@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="auth-check.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Anuphan:wght@400;500;600;700&display=swap');
         
@@ -46,51 +47,7 @@
         @media print { body * { visibility: hidden; } #successModal, #successModal * { visibility: visible; } #successModal { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none !important; } }
     </style>
 
-    <script>
-        
-        /*
-         * ============================================================================
-         * ไฟล์: auth-check.js
-         * วัตถุประสงค์: ตรวจสอบและจัดการสถานะการเข้าสู่ระบบ (Authentication) จาก LocalStorage
-         * ============================================================================
-         */
-        (function () {
-            try {
-                const userData = localStorage.getItem('currentUser');
-                if (!userData) {
-                    window.user = null;
-                    return;
-                }
-                const user = JSON.parse(userData);
-                if (!user || !user.UserPN) {
-                    localStorage.removeItem('currentUser');
-                    window.user = null;
-                    return;
-                }
-                window.user = user;
-            } catch (err) {
-                console.error("Auth-Check error: ", err);
-                localStorage.removeItem('currentUser');
-                window.user = null;
-            }
-        })();
-
-        function getCurrentUser() { return window.user || null; }
-        function hasRole(role) {
-            if (!window.user) return false;
-            return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
-        }
-        function getDisplayName() {
-            if (!window.user) return "ผู้ใช้งานทั่วไป";
-            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
-        }
-        function logout() {
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
-            try { window.location.replace("index.html"); } 
-            catch(e) { window.location.href = "index.html"; }
-        }
-    </script>
+   
 </head>
 <body class="pb-10">
 
