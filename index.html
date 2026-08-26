@@ -538,7 +538,7 @@
         });
     });
 
-    // ==================== FLOW 3: CHANGE PASSWORD PROCESS ====================
+   // ==================== FLOW 3: CHANGE PASSWORD PROCESS ====================
     changeForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -552,12 +552,22 @@
             return;
         }
 
+        // --- เพิ่มการตรวจสอบและดึง Token ---
+        // ดึงข้อมูลจาก forceResetUser (กรณีถูกบังคับเปลี่ยนตอนล็อกอิน) หรือ getCurrentUser() (กรณีมากดเปลี่ยนเอง)
+        const currentUser = forceResetUser || getCurrentUser();
+        if (!currentUser || !currentUser.Token) {
+            showAlert('ข้อผิดพลาด', 'ไม่พบ Token สิทธิ์การใช้งาน กรุณาเข้าสู่ระบบใหม่อีกครั้ง', 'error');
+            return;
+        }
+        // -----------------------------
+
         showLoading('กำลังอัปเดตรหัสผ่านใหม่ลงในระบบคอมพิวเตอร์...');
 
         const payload = {
             action: 'changePassword',
             userpn: userpn,
-            newPassword: newPassword
+            newPassword: newPassword,
+            token: currentUser.Token // <-- แนบ Token ส่งไปให้ Backend ตรวจสอบ
         };
 
         fetch(API_URL, {
@@ -579,7 +589,7 @@
                     if (modal) modal.hide();
 
                     if (forceResetUser) {
-                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
+                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main_menu.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
                         safeRedirect('main_menu.html');
                     } else {
                         // สลับสเตทกลับหน้าปกติ
@@ -596,7 +606,6 @@
             showAlert('ข้อผิดพลาด', 'ระบบปลายทางปฏิเสธการเซ็ตติ้งรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
         });
     });
-
     // ==================== FLOW 4: REGISTER PROCESS ====================
     registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
