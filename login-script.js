@@ -1,6 +1,7 @@
 /**
  * login-script.js
  * ใช้วางบนทุกหน้าที่ต้อง Login ก่อนเข้าใช้งาน
+ * รองรับการแยกบันทึกข้อมูลตามประเภทอุปกรณ์ (PC / Smartphone) พร้อมระบบ TTL
  */
 const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
@@ -13,7 +14,7 @@ loginForm.addEventListener('submit', async function(e) {
     const username = document.getElementById('userpn').value.trim();
     const password = document.getElementById('userpw').value;
 
-    loading.style.display = 'flex';
+    if (loading) loading.style.display = 'flex';
 
     try {
         const response = await fetch(API_URL, {
@@ -29,16 +30,27 @@ loginForm.addEventListener('submit', async function(e) {
         });
 
         const result = await response.json();
-        loading.style.display = 'none';
+        if (loading) loading.style.display = 'none';
 
         if (!result.success) {
             showAlert('เข้าสู่ระบบไม่สำเร็จ', result.message, 'error');
             return;
         }
 
-        // 🟢 Token จาก Backend จะถูกบันทึกรวมอยู่ใน result.data ลง LocalStorage อัตโนมัติแล้ว!
-        localStorage.setItem('currentUser', JSON.stringify(result.data));
+        // 🟢 ตรวจสอบประเภทอุปกรณ์เพื่อเลือกที่จัดเก็บ Session ให้สอดคล้องกับ auth-check.js
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const targetStorage = isMobile ? sessionStorage : localStorage;
 
+        // บันทึกข้อมูลพร้อมพารามิเตอร์ควบคุมเวลาหมดอายุเฉพาะบน PC (8 ชั่วโมง)
+        const sessionData = {
+            ...result.data,
+            loginTime: new Date().getTime(),
+            expiresIn: 8 * 60 * 60 * 1000 
+        };
+
+        targetStorage.setItem('currentUser', JSON.stringify(sessionData));
+
+        // ตรวจสอบเงื่อนไขการบังคับเปลี่ยนรหัสผ่าน
         if (result.resetRequired === true) {
             if (typeof forceResetUser !== 'undefined') {
                 forceResetUser = result.data;
@@ -67,6 +79,7 @@ loginForm.addEventListener('submit', async function(e) {
             return;
         }
 
+        // เปลี่ยนหน้าเข้าสู่ระบบหลัก
         if (typeof safeRedirect === 'function') {
             safeRedirect('main_menu.html');
         } else {
@@ -74,9 +87,7 @@ loginForm.addEventListener('submit', async function(e) {
         }
 
     } catch (error) {
-        // 🔴 ปิดบล็อก try...catch ที่หายไปตรงนี้ เพื่อป้องกันสคริปต์พังเวลาเน็ตหลุด
-        loading.style.display = 'none';
+        if (loading) loading.style.display = 'none';
         showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้: ' + error.message, 'error');
     }
-}); 
-// สิ้นสุด Event Listener
+});
