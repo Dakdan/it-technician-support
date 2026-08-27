@@ -83,7 +83,7 @@ loginForm.addEventListener('submit', async function(e) {
         if (typeof safeRedirect === 'function') {
             safeRedirect('main_menu.html');
         } else {
-            window.location.href = 'main_menu.html';
+            window.location.href = 'main_menu1.html';
         }
 
     } catch (error) {
