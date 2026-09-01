@@ -39,7 +39,13 @@
         // - Smartphone ใช้ sessionStorage (ปิดเบราว์เซอร์/แท็บ ข้อมูลหายทันที)
         // - PC ใช้ localStorage (จำค่าไว้ แต่มีระบบกำหนดอายุ TTL และ Idle Timeout ควบคุม)
         const storage = isMobile ? sessionStorage : localStorage;
-        const userData = storage.getItem('currentUser');
+        let userData = storage.getItem('currentUser');
+        
+        // 🟢 ส่วนที่เพิ่มใหม่: Fallback เช็ค Storage อีกฝั่งเผื่อผู้ใช้สลับโหมด Desktop/Mobile View
+        if (!userData) {
+            const fallbackStorage = isMobile ? localStorage : sessionStorage;
+            userData = fallbackStorage.getItem('currentUser');
+        }
         
         if (!userData) {
             window.user = null;
@@ -50,7 +56,8 @@
         
         // ตรวจสอบโครงสร้างข้อมูลเบื้องต้น
         if (!user || !user.UserPN) {
-            storage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
             window.user = null;
             return;
         }
@@ -91,12 +98,11 @@
 
     } catch (err) {
         console.error("Auth-Check error: ", err);
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        (isMobile ? sessionStorage : localStorage).removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.user = null;
     }
 })();
-
 function getCurrentUser() {
     return window.user || null;
 }
