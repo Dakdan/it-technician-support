@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คลังครุภัณฑ์คอมพิวเตอร์ | โรงพยาบาลอุดรธานี</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    
+    <style>
+        :root { --primary-pink: #ff85a2; --soft-pink: #ffe6eb; --dark-pink: #e04a70; --text-dark: #333333; }
+        body { font-family: 'Kanit', sans-serif; background: linear-gradient(135deg, #ffe6f2 0%, #ffffff 100%); min-height: 100vh; color: var(--text-dark); }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 10vw; color: rgba(255, 133, 162, 0.05); white-space: nowrap; z-index: 0; pointer-events: none; user-select: none; font-weight: 800; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px 0 rgba(255, 133, 162, 0.15); border-radius: 1.5rem; position: relative; z-index: 10; }
+        .tab-btn { padding: 0.75rem 1.5rem; color: #6b7280; font-weight: 500; white-space: nowrap; transition: all 0.3s; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { color: var(--primary-pink); }
+        .tab-btn.active { border-bottom: 3px solid var(--primary-pink); color: var(--dark-pink); font-weight: 600; }
+        .input-soft { border: 1px solid #fbcfe8; border-radius: 0.75rem; transition: all 0.3s; background: rgba(255, 255, 255, 0.9); }
+        .input-soft:focus { outline: none; border-color: var(--primary-pink); box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2); }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 4px solid rgba(255, 133, 162, 0.3); border-top: 4px solid var(--primary-pink); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .ts-control { border: 1px solid #fbcfe8 !important; border-radius: 0.75rem !important; padding: 0.75rem !important; background: rgba(255, 255, 255, 0.9) !important; font-family: 'Kanit' !important; }
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            body { background: white; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="watermark">IT UDON HOSP</div>
+
+    <div id="loadingOverlay">
+        <div class="spinner mb-4"></div>
+        <p id="loadingMsg" class="text-pink-600 font-medium text-lg animate-pulse">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-8 relative z-10 no-print flex flex-col md:flex-row items-center gap-4 bg-white/60 p-6 rounded-3xl shadow-sm border border-white">
+        <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center border-4 border-white shadow-md text-pink-500 text-3xl">
+            <i class="fa-solid fa-desktop"></i>
+        </div>
+        <div class="text-center md:text-left">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">คลังครุภัณฑ์คอมพิวเตอร์</h1>
+            <h2 class="text-lg md:text-xl font-medium text-gray-700">โรงพยาบาลอุดรธานี</h2>
+            <p class="text-sm text-pink-600 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto glass-card p-4 md:p-8 no-print">
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-pink-100 mb-6 overflow-x-auto">
+            <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn"><i class="fa-solid fa-chart-pie mr-2"></i> สรุปรายการ</button>
+            <button onclick="switchTab('stockin')" id="tab-stockin" class="tab-btn active"><i class="fa-solid fa-boxes-packing mr-2"></i> บันทึกรับเข้า (Stock In)</button>
+            <button onclick="switchTab('history')" id="tab-history" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติรับเข้า</button>
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn"><i class="fa-solid fa-warehouse mr-2"></i> คลังครุภัณฑ์</button>
+        </div>
+
+        <!-- Tab: Summary -->
+        <div id="content-summary" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-pink-50 p-6 rounded-2xl text-center shadow-sm border border-pink-100">
+                    <i class="fa-solid fa-box-open text-4xl text-pink-400 mb-2"></i><h3 class="text-gray-600">รับเข้าทั้งหมด</h3><p id="summaryTotalCount" class="text-3xl font-bold text-pink-600">0</p>
+                </div>
+            </div>
+            <p class="text-center text-gray-400 mt-8">* แดชบอร์ดสรุปยอดครุภัณฑ์ประจำคลัง</p>
+        </div>
+
+        <!-- Tab: Stock In (ฟอร์มบันทึก) -->
+        <div id="content-stockin" class="block">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-pink-600 border-l-4 border-pink-400 pl-3">สร้างเอกสารรับเข้า (Stock In)</h3>
+                <span id="sessionStockInBadge" class="hidden bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
+                    เลขที่อ้างอิง: <span id="sessionStockInText"></span>
+                </span>
+            </div>
+
+            <!-- Header Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 bg-pink-50/50 p-5 rounded-2xl border border-pink-100">
+                <div>
+                    <label class="block mb-1.5 font-semibold text-sm text-gray-700">ประเภทการรับเข้า (Source Type) <span class="text-pink-500">*</span></label>
+                    <select id="Source_Type" class="input-soft w-full p-2.5 header-input">
+                        <option value="">-- เลือกประเภทการรับเข้า --</option>
+                        <option value="หน่วยงานส่งคืน">หน่วยงานส่งคืน</option>
+                        <option value="รับเข้าจากการทดแทน">รับเข้าจากการทดแทน</option>
+                        <option value="รับเข้าจากงานซ่อม(ชำรุด)">รับเข้าจากงานซ่อม(ชำรุด)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1.5 font-semibold text-sm text-gray-700">หน่วยงาน (Department) <span class="text-pink-500">*</span></label>
+                    <select id="DEP_ID" class="input-soft w-full p-2.5 header-input"><option value="">โหลดข้อมูล...</option></select>
+                </div>
+                <div>
+                    <label class="block mb-1.5 font-semibold text-sm text-gray-700">ชื่อผู้นำส่ง / ผู้ติดต่อ <span class="text-red-500">*</span></label>
+                    <input type="text" id="User_Name" class="input-soft w-full px-4 py-2.5 header-input" placeholder="ชื่อ-สกุล">
+                </div>
+            </div>
+
+            <!-- Search Area -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 border-b border-gray-100 pb-2 gap-4">
+                <h3 class="text-lg font-semibold text-pink-600 border-l-4 border-pink-400 pl-3">ค้นหาและเพิ่มรายการ</h3>
+                <div class="relative w-full md:w-96">
+                    <div class="relative w-full">
+                        <input type="text" id="assetQuery" onkeyup="debouncedSearch()" class="input-soft w-full pl-9 pr-10 py-2.5 text-sm" placeholder="พิมพ์ Asset ID หรือ Serial...">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <button onclick="openScanner('assetQuery')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-pink-500 hover:text-pink-700 p-1">
+                            <i class="fa-solid fa-qrcode text-lg"></i>
+                        </button>
+                    </div>
+                    <!-- Live Search Dropdown -->
+                    <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-50 max-h-80 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto mb-8 border border-pink-100 rounded-xl">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-pink-100/50 text-pink-800">
+                            <th class="p-3 text-center w-12">#</th>
+                            <th class="p-3 w-40">รหัสครุภัณฑ์</th>
+                            <th class="p-3">รายละเอียด</th>
+                            <th class="p-3 w-32 text-center">สถานะ</th>
+                            <th class="p-3 w-20 text-center">รูปแนบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetTableBody" class="text-gray-700 bg-white">
+                        <tr id="emptyRow"><td colspan="5" class="p-8 text-center text-gray-400">ยังไม่มีรายการในบิลนี้<br><span class="text-xs">พิมพ์ค้นหาด้านบนเพื่อเพิ่มรายการ (ระบบจะบันทึกทันทีที่เพิ่ม)</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row justify-end gap-3 border-t border-gray-200 pt-6">
+                <button type="button" onclick="resetFormSession()" class="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-all shadow-sm">
+                    <i class="fa-solid fa-broom mr-2"></i> บันทึกโดยไม่ลงชื่อรับ (เริ่มบิลใหม่)
+                </button>
+                <button type="button" onclick="validateAndSign()" id="btnSign" disabled class="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-medium rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    <i class="fa-solid fa-signature mr-2"></i> ตรวจสอบและลงชื่อ (Print)
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab: History -->
+        <div id="content-history" class="hidden">
+            <h3 class="text-lg font-semibold text-pink-600 mb-4 border-l-4 border-pink-400 pl-3">ประวัติเอกสารรับเข้า</h3>
+            <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="p-3 text-center w-16">ลำดับ</th>
+                            <th class="p-3">วันที่</th>
+                            <th class="p-3">หน่วยงาน (Department)</th>
+                            <th class="p-3">ประเภทการรับเข้า</th>
+                            <th class="p-3 text-center">จำนวน/รายการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody"><tr><td colspan="5" class="text-center p-4">กำลังโหลด...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Inventory -->
+        <div id="content-inventory" class="hidden">
+            <h3 class="text-lg font-semibold text-pink-600 mb-4 border-l-4 border-pink-400 pl-3">คลังครุภัณฑ์ทั้งหมด</h3>
+            <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-50">
+                        <tr><th class="p-3">Asset ID</th><th class="p-3">เลขบิลอ้างอิง</th><th class="p-3">รายละเอียด</th><th class="p-3 text-center">สถานะ</th></tr>
+                    </thead>
+                    <tbody id="inventoryTableBody"><tr><td colspan="4" class="text-center p-4">กำลังโหลด...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: ยืนยันก่อนเพิ่มลงตาราง (และบันทึก) -->
+    <div id="assetConfirmModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-pink-100">
+            <div class="bg-pink-50 p-5 border-b border-pink-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-pink-700">ตรวจสอบและเพิ่มรายการ</h3>
+                <button onclick="closeModal('assetConfirmModal')" class="text-pink-400 hover:text-red-500 text-xl"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 text-sm text-gray-700 space-y-4">
+                <div class="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-100">
+                    <p class="flex justify-between"><span class="text-gray-500">Asset ID:</span> <span id="modalAssetID" class="font-bold text-pink-600"></span></p>
+                    <p class="flex justify-between"><span class="text-gray-500">อายุ:</span> <span id="modalAge" class="font-medium text-gray-700"></span></p>
+                    <p class="flex justify-between border-t border-gray-200 pt-2"><span class="text-gray-500">สเปค:</span> <span id="modalSpec" class="font-medium text-right w-2/3 leading-tight"></span></p>
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-bold text-gray-700">ระบุสถานะ <span class="text-red-500">*</span></label>
+                    <select id="modalStatus" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 outline-none">
+                        <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+                        <option value="Spar">Spar (สำรอง)</option>
+                        <option value="รอส่งคืน">รอส่งคืน</option>
+                        <option value="ใช้งานปกติ">ใช้งานปกติ</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-bold text-gray-700">ถ่ายรูป/แนบรูป (ทางเลือก)</label>
+                    <input type="file" id="modalImgUpload" accept="image/*" capture="environment" class="w-full text-xs file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer">
+                    <img id="modalImgPreview" class="hidden mt-3 w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm">
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                <button onclick="closeModal('assetConfirmModal')" class="px-5 py-2.5 bg-white border border-gray-300 rounded-xl hover:bg-gray-100 font-medium">ยกเลิก</button>
+                <button onclick="saveSingleItem()" class="px-5 py-2.5 bg-pink-500 text-white rounded-xl hover:bg-pink-600 font-medium shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกรายการนี้
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: ลงลายมือชื่อ -->
+    <div id="signatureModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">ลงลายมือชื่อยืนยัน</h3>
+            <p class="text-sm text-gray-500 mb-4">บิลอ้างอิง: <span id="sigStockNo" class="font-bold text-pink-600"></span></p>
+            <div class="border-2 border-dashed border-pink-300 rounded-xl bg-pink-50/30 mb-4 overflow-hidden touch-none">
+                <canvas id="signatureCanvas" width="400" height="200" class="w-full h-auto cursor-crosshair"></canvas>
+            </div>
+            <div class="flex justify-between items-center">
+                <button type="button" onclick="signaturePad.clear()" class="text-sm text-gray-500 hover:text-red-500 underline">ล้าง</button>
+                <button type="button" onclick="submitSignature()" class="px-6 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 font-medium">ยืนยันและพิมพ์</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: สแกนเนอร์ -->
+    <div id="scannerModal" class="hidden fixed inset-0 bg-black/90 z-[9999] flex flex-col justify-center items-center p-4">
+        <h3 class="text-white text-xl font-bold mb-4">สแกน QR Code</h3>
+        <div id="reader" class="w-full max-w-sm bg-black rounded-xl overflow-hidden mb-4 border-2 border-pink-500"></div>
+        <button onclick="closeScanner()" class="px-6 py-3 bg-gray-200 rounded-xl font-medium">ยกเลิกสแกน</button>
+    </div>
+
+    <!-- Area สำหรับสั่ง Print (แนวนอน) -->
+    <div class="print-only p-8 text-black bg-white" id="printArea">
+        <div class="text-center mb-6 border-b-2 border-black pb-4">
+            <h1 class="text-2xl font-bold">ใบบันทึกรับเข้าครุภัณฑ์คอมพิวเตอร์</h1>
+            <h2 class="text-lg">โรงพยาบาลอุดรธานี</h2>
+            <p class="text-sm">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+            <div><span class="font-bold">เลขที่บิล:</span> <span id="p-bill"></span></div>
+            <div><span class="font-bold">วันที่:</span> <span id="p-date"></span></div>
+            <div><span class="font-bold">ประเภท:</span> <span id="p-type"></span></div>
+            <div><span class="font-bold">หน่วยงาน:</span> <span id="p-dept"></span></div>
+        </div>
+        <table class="w-full text-left text-sm border-collapse border border-black mb-12">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-black p-2 w-12 text-center">ลำดับ</th>
+                    <th class="border border-black p-2">Asset ID</th>
+                    <th class="border border-black p-2">รายละเอียด</th>
+                    <th class="border border-black p-2 text-center">สถานะ</th>
+                </tr>
+            </thead>
+            <tbody id="printTableBody"></tbody>
+        </table>
+        <div class="flex justify-around text-center text-sm">
+            <div>
+                <p>ลงชื่อ.........................................................ผู้ส่งมอบ</p>
+                <p class="mt-2">( <span id="p-user" class="inline-block w-40 border-b border-dotted border-black text-center"></span> )</p>
+            </div>
+            <div>
+                <p>ลงชื่อ.........................................................ผู้รับ (IT)</p>
+                <p class="mt-2">(.........................................................)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // !! สำคัญ !! เปลี่ยน URL นี้เป็นของ Web App ตัวใหม่ที่คุณเพิ่ง Deploy
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyglGUZ6drcbT-3VuygEJ1FIJ3C_9_NSWU1BaeDyo0ra6gf0mA_bDptY5er1Ey6Tck7-w/exec'; 
+
+        let tomSelectDept = null;
+        let html5QrCode = null;
+        let signaturePad = null;
+        let departmentMap = {}; // เก็บแมปชื่อแผนกจาก DEP_ID
+        
+        let tempSelectedAsset = null;
+        let currentSessionStockInNo = null; 
+        let currentSessionStockInId = null;
+        let savedItemsList = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDepartments();
+            initSignaturePad();
+            setupImagePreview();
+        });
+
+        /* --- UI & Tabs --- */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            ['summary', 'stockin', 'history', 'inventory'].forEach(id => {
+                document.getElementById(`content-${id}`).classList.add('hidden');
+            });
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+
+            if (tabId === 'history') loadHistoryData();
+            if (tabId === 'inventory') loadInventoryData();
+        }
+
+        function showLoading(show, text = 'กำลังประมวลผล...') {
+            document.getElementById('loadingMsg').innerText = text;
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        /* --- API Fetchers --- */
+        async function fetchDepartments() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getDepartments`);
+                const result = await res.json();
+                if(result.status === 'success') {
+                    const select = document.getElementById('DEP_ID');
+                    select.innerHTML = '<option value="">-- พิมพ์ชื่อเพื่อค้นหาหน่วยงาน --</option>';
+                    result.data.forEach(d => {
+                        const deptName = d.DEPNAME || d.DEPT || d.DEP_ID;
+                        departmentMap[d.DEP_ID] = deptName;
+                        select.innerHTML += `<option value="${d.DEP_ID}">${deptName} (${d.DEP_ID})</option>`;
+                    });
+                    tomSelectDept = new TomSelect("#DEP_ID", { sortField: {field: "text"} });
+                }
+            } catch(e) { Swal.fire('Error', 'โหลดข้อมูลหน่วยงานไม่ได้ กรุณาเช็ค URL', 'error'); }
+        }
+
+        async function loadHistoryData() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4"><div class="spinner mx-auto mb-2 w-6 h-6 border-2"></div>โหลดข้อมูล...</td></tr>';
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getStockInList`);
+                const {data} = await res.json();
+                tbody.innerHTML = '';
+                if(!data || data.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">ไม่มีประวัติ</td></tr>';
+                
+                data.reverse().forEach((row, index) => {
+                    const dateStr = row.Date_Time ? new Date(row.Date_Time).toLocaleString('th-TH') : '-';
+                    const deptDisplay = departmentMap[row.DEP_ID] || row.DEP_ID || '-';
+                    const sourceType = row.Source_Type || '-';
+                    
+                    tbody.innerHTML += `
+                        <tr class="border-b hover:bg-pink-50/50">
+                            <td class="p-3 text-center font-bold text-gray-500">${index + 1}</td>
+                            <td class="p-3 text-xs">${dateStr}</td>
+                            <td class="p-3 font-medium text-gray-800">${deptDisplay}</td>
+                            <td class="p-3 text-pink-600 font-medium">${sourceType}</td>
+                            <td class="p-3 text-center"><span class="bg-pink-100 text-pink-700 px-2.5 py-1 rounded-full text-xs font-bold">${row.Stock_In_No}</span></td>
+                        </tr>`;
+                });
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">เกิดข้อผิดพลาดในการโหลดประวัติ</td></tr>'; }
+        }
+
+        async function loadInventoryData() {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner mx-auto mb-2 w-6 h-6 border-2"></div>โหลดข้อมูล...</td></tr>';
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getInventoryAsset`);
+                const {data} = await res.json();
+                tbody.innerHTML = '';
+                if(!data || data.length === 0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">คลังว่างเปล่า</td></tr>';
+                
+                document.getElementById('summaryTotalCount').innerText = data.length;
+                data.forEach(row => {
+                    const statusColor = row.Inv_Status === 'ใช้งานปกติ' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700';
+                    tbody.innerHTML += `<tr class="border-b"><td class="p-3 font-bold text-pink-600">${row.AssetID || row.NOID}</td><td class="p-3 text-xs text-gray-500">${row.Stock_ID}</td><td class="p-3 text-xs truncate max-w-xs">${row.Asset_FullDescription}</td><td class="p-3 text-center"><span class="px-2 py-1 rounded text-xs ${statusColor}">${row.Inv_Status}</span></td></tr>`;
+                });
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-red-500">เกิดข้อผิดพลาด</td></tr>'; }
+        }
+
+        /* --- Search & Select & Helpers --- */
+        function normalizeText(str) {
+            if (!str) return "";
+            return String(str).replace(/[-/_\s]/g, "").toUpperCase();
+        }
+
+        function highlightText(fullText, query) {
+            if (!query || !fullText) return fullText || "";
+            const cleanQuery = normalizeText(query);
+            if (!cleanQuery) return fullText;
+            try {
+                const regex = new RegExp(`(${query})`, 'gi');
+                return String(fullText).replace(regex, '<span class="text-emerald-600 font-bold bg-emerald-50 px-1 rounded">$1</span>');
+            } catch(err) {
+                return fullText;
+            }
+        }
+
+        function debouncedSearch() {
+            clearTimeout(window.sTimeout);
+            const q = document.getElementById('assetQuery').value.trim();
+            if (q.length >= 1) {
+                window.sTimeout = setTimeout(searchAsset, 300);
+            } else {
+                const area = document.getElementById('resultsArea');
+                if (area) {
+                    area.classList.add('hidden');
+                    area.innerHTML = '';
+                }
+            }
+        }
+
+        async function searchAsset() {
+            let q = document.getElementById('assetQuery').value.trim();
+            const area = document.getElementById('resultsArea');
+            if (!area) return;
+            
+            area.innerHTML = '<div class="p-6 text-center"><div class="spinner mx-auto"></div><p class="text-xs text-gray-400 mt-2">กำลังค้นหาฐานข้อมูล...</p></div>';
+            area.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=searchAsset&query=${encodeURIComponent(q)}`);
+                const result = await res.json();
+                const data = result.data || result; // รองรับทั้งโครงสร้างแบบ {status:success, data:[]} และ []
+                
+                area.innerHTML = '';
+                if (!data || data.length === 0) {
+                    area.innerHTML = '<p class="text-center p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">ไม่พบรหัสครุภัณฑ์นี้</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const d = document.createElement('div');
+                    d.className = "p-3.5 bg-white rounded-2xl border border-pink-100 flex justify-between items-center cursor-pointer shadow-sm hover:border-pink-300 transition-all mb-2";
+                    
+                    const displayAssetID = item.AssetID || item.NoID || '-';
+                    const highlightedID = highlightText(displayAssetID, q);
+                    const serialText = item.Serial ? String(item.Serial) : "-";
+                    const highlightedSerial = serialText !== "-" ? highlightText(serialText, q) : serialText;
+                    
+                    d.innerHTML = `
+                        <div class="flex-grow pr-4">
+                            <p class="text-[13px] font-bold text-pink-500 uppercase tracking-tight mb-0.5">${highlightedID}</p>
+                            <p class="text-xs font-bold text-gray-700 leading-tight">${item.FullDescription || '-'}</p>
+                            <p class="text-[11px] font-medium text-gray-500 mt-1">S/N: ${highlightedSerial} | ${item.AgeInfo || ''}</p>
+                        </div>
+                        <div>
+                            <span class="bg-pink-100 text-pink-600 px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1 shadow-sm">+ เลือก</span>
+                        </div>
+                    `;
+                    d.onclick = () => openAssetModal(item);
+                    area.appendChild(d);
+                });
+            } catch(e) { 
+                area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">เกิดข้อผิดพลาดในการเชื่อมต่อค้นหา</p>'; 
+            }
+        }
+
+        /* --- Modal & Single Save Workflow --- */
+        function openAssetModal(item) {
+            const type = document.getElementById('Source_Type').value;
+            const dept = document.getElementById('DEP_ID').value;
+            const user = document.getElementById('User_Name').value;
+            
+            if(!type || !dept || !user) {
+                Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกประเภทการรับเข้า, แผนก และชื่อผู้ติดต่อ ก่อนเพิ่มครุภัณฑ์', 'warning');
+                return;
+            }
+
+            tempSelectedAsset = item;
+            tempSelectedAsset.imageBase64 = null;
+
+            document.getElementById('modalAssetID').innerText = item.AssetID || item.NoID || '-';
+            document.getElementById('modalAge').innerText = item.AgeInfo || '-';
+            document.getElementById('modalSpec').innerText = item.FullDescription || '-';
+            document.getElementById('modalStatus').value = 'รอตรวจสอบ';
+            
+            document.getElementById('modalImgUpload').value = '';
+            document.getElementById('modalImgPreview').classList.add('hidden');
+            
+            document.getElementById('resultsArea').classList.add('hidden');
+            document.getElementById('assetQuery').value = '';
+            
+            document.getElementById('assetConfirmModal').classList.remove('hidden');
+        }
+
+        function setupImagePreview() {
+            document.getElementById('modalImgUpload').onchange = function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        tempSelectedAsset.imageBase64 = e.target.result;
+                        const preview = document.getElementById('modalImgPreview');
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+        }
+
+        async function saveSingleItem() {
+            if(!tempSelectedAsset) return;
+            tempSelectedAsset.Inv_Status = document.getElementById('modalStatus').value;
+
+            closeModal('assetConfirmModal');
+            showLoading(true, 'กำลังบันทึกข้อมูลและอัปโหลดรูปลงระบบ...');
+
+            const payload = {
+                action: 'saveSingleItem',
+                stockInData: {
+                    Stock_In_No: currentSessionStockInNo,
+                    Stock_In_ID: currentSessionStockInId,
+                    Source_Type: document.getElementById('Source_Type').value,
+                    DEP_ID: document.getElementById('DEP_ID').value,
+                    User_Name: document.getElementById('User_Name').value,
+                },
+                assetData: tempSelectedAsset
+            };
+
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+                
+                showLoading(false);
+
+                if(result.status === 'success') {
+                    currentSessionStockInNo = result.stockInNo;
+                    currentSessionStockInId = result.stockInId;
+                    
+                    document.querySelectorAll('.header-input').forEach(el => el.disabled = true);
+                    if(tomSelectDept) tomSelectDept.lock();
+                    
+                    document.getElementById('sessionStockInBadge').classList.remove('hidden');
+                    document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
+                    document.getElementById('btnSign').disabled = false;
+
+                    savedItemsList.push(tempSelectedAsset);
+                    renderSavedTable();
+                    
+                    Swal.fire({icon: 'success', title: 'บันทึกรายการสำเร็จ', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', result.message || 'บันทึกไม่สำเร็จ', 'error');
+                }
+            } catch(e) {
+                showLoading(false);
+                Swal.fire('เชื่อมต่อล้มเหลว', e.message, 'error');
+            }
+        }
+
+        function renderSavedTable() {
+            const tbody = document.getElementById('assetTableBody');
+            if (savedItemsList.length === 0) {
+                tbody.innerHTML = '<tr id="emptyRow"><td colspan="5" class="p-8 text-center text-gray-400">ยังไม่มีรายการในบิลนี้<br><span class="text-xs">พิมพ์ค้นหาด้านบนเพื่อเพิ่มรายการ (ระบบจะบันทึกทันทีที่เพิ่ม)</span></td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            savedItemsList.forEach((item, index) => {
+                const hasImg = item.imageBase64 ? '<i class="fa-solid fa-image text-pink-500"></i>' : '-';
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-pink-50/50">
+                        <td class="p-3 text-center text-pink-400">${index + 1}</td>
+                        <td class="p-3 font-bold">${item.AssetID || item.NoID || '-'}</td>
+                        <td class="p-3 text-xs truncate max-w-[200px]">${item.FullDescription || '-'}</td>
+                        <td class="p-3 text-center"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${item.Inv_Status}</span></td>
+                        <td class="p-3 text-center">${hasImg}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        /* --- Reset & Signature --- */
+        function resetFormSession() {
+            currentSessionStockInNo = null;
+            currentSessionStockInId = null;
+            savedItemsList = [];
+            tempSelectedAsset = null;
+            
+            document.querySelectorAll('.header-input').forEach(el => {
+                el.disabled = false;
+                if(el.tagName === 'INPUT') el.value = '';
+                if(el.tagName === 'SELECT' && el.id !== 'DEP_ID') el.value = '';
+            });
+            if(tomSelectDept) { tomSelectDept.unlock(); tomSelectDept.clear(); }
+            
+            document.getElementById('sessionStockInBadge').classList.add('hidden');
+            document.getElementById('btnSign').disabled = true;
+            document.getElementById('assetQuery').value = '';
+            renderSavedTable();
+            
+            Swal.fire({icon: 'success', title: 'เริ่มบิลใหม่เรียบร้อยแล้ว', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
+        }
+
+        function validateAndSign() {
+            document.getElementById('sigStockNo').innerText = currentSessionStockInNo;
+            document.getElementById('signatureModal').classList.remove('hidden');
+            const canvas = document.getElementById('signatureCanvas');
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear();
+        }
+
+        function initSignaturePad() {
+            const canvas = document.getElementById('signatureCanvas');
+            signaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)', backgroundColor: 'rgba(0,0,0,0)' });
+        }
+
+        async function submitSignature() {
+            if (signaturePad.isEmpty()) return Swal.fire('แจ้งเตือน', 'กรุณาลงลายมือชื่อก่อนยืนยัน', 'warning');
+            
+            closeModal('signatureModal');
+            showLoading(true, 'กำลังบันทึกลายเซ็นและสร้างเอกสาร...');
+
+            const b64 = signaturePad.toDataURL();
+            const payload = { action: 'updateSignature', stockInNo: currentSessionStockInNo, signatureBase64: b64 };
+
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+                showLoading(false);
+
+                if(result.status === 'success') {
+                    preparePrintData();
+                    Swal.fire({
+                        icon: 'success', title: 'สมบูรณ์!', text: 'บันทึกและลงชื่อสำเร็จ กำลังเปิดหน้าต่างพิมพ์', timer: 2000, showConfirmButton: false
+                    }).then(() => {
+                        window.print();
+                        resetFormSession();
+                    });
+                } else { Swal.fire('Error', result.message || 'บันทึกลายเซ็นไม่สำเร็จ', 'error'); }
+            } catch(e) { showLoading(false); Swal.fire('Error', e.message, 'error'); }
+        }
+
+        function preparePrintData() {
+            document.getElementById('p-bill').innerText = currentSessionStockInNo;
+            document.getElementById('p-date').innerText = new Date().toLocaleString('th-TH');
+            document.getElementById('p-type').innerText = document.getElementById('Source_Type').value;
+            
+            const dept = document.getElementById('DEP_ID');
+            document.getElementById('p-dept').innerText = dept.options[dept.selectedIndex] ? dept.options[dept.selectedIndex].text : '-';
+            document.getElementById('p-user').innerText = document.getElementById('User_Name').value;
+
+            const ptbody = document.getElementById('printTableBody');
+            ptbody.innerHTML = '';
+            savedItemsList.forEach((item, idx) => {
+                ptbody.innerHTML += `<tr>
+                    <td class="border border-black p-2 text-center">${idx + 1}</td>
+                    <td class="border border-black p-2 font-bold">${item.AssetID || item.NoID || '-'}</td>
+                    <td class="border border-black p-2">${item.FullDescription || '-'}</td>
+                    <td class="border border-black p-2 text-center">${item.Inv_Status}</td>
+                </tr>`;
+            });
+        }
+
+        /* --- Scanner --- */
+        function initHtml5QrCode() {
+            if (typeof Html5Qrcode !== 'undefined' && !html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+        }
+
+        async function openScanner(id) {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            try {
+                initHtml5QrCode();
+                if (html5QrCode) {
+                    await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, async (text) => {
+                        let processedText = text; 
+                        if (processedText.includes("IcmAssetDetail/")) {
+                            const match = processedText.match(/IcmAssetDetail\/([^\/]+)/);
+                            if (match && match[1]) processedText = match[1];
+                        }
+                        document.getElementById(id).value = processedText;
+                        await closeScanner(); 
+                        if (id === 'assetQuery') { searchAsset(); }
+                    });
+                }
+            } catch (err) {
+                Swal.fire('กล้องขัดข้อง', 'ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบสิทธิ์', 'error');
+                closeScanner();
+            }
+        }
+
+        async function closeScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                try { await html5QrCode.stop(); } catch(e) {}
+            }
+            closeModal('scannerModal');
+        }
+    </script>
+</body>
+</html>
