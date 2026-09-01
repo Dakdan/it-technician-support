@@ -1636,20 +1636,45 @@
             showModal('auditModal');
         }
 
-        function handlePhotoCapture(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            document.getElementById('photoFileName').innerText = file.name;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                base64PhotoData = e.target.result;
-                const preview = document.getElementById('photoPreview');
-                preview.src = base64PhotoData;
-                document.getElementById('photoPreviewContainer').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
+        // โค้ดที่ปรับปรุงแล้ว: บีบอัดรูปภาพก่อนส่ง
+          function handlePhotoCapture(event) {
+              const file = event.target.files[0];
+              if (!file) return;
+          
+              document.getElementById('photoFileName').innerText = file.name;
+              const reader = new FileReader();
+              
+              reader.onload = function(e) {
+                  const img = new Image();
+                  img.onload = function() {
+                      // สร้าง Canvas เพื่อบีบอัดรูป
+                      const canvas = document.createElement('canvas');
+                      const MAX_WIDTH = 800; // กำหนดความกว้างสูงสุด 800px ก็พอสำหรับดูรายละเอียด
+                      
+                      let width = img.width;
+                      let height = img.height;
+                      
+                      if (width > MAX_WIDTH) {
+                          height = Math.round((height * MAX_WIDTH) / width);
+                          width = MAX_WIDTH;
+                      }
+                      
+                      canvas.width = width;
+                      canvas.height = height;
+                      const ctx = canvas.getContext("2d");
+                      ctx.drawImage(img, 0, 0, width, height);
+                      
+                      // แปลงเป็น Base64 แบบ JPG คุณภาพ 70% (ช่วยลดขนาดไฟล์จาก 5MB เหลือไม่ถึง 200KB)
+                      base64PhotoData = canvas.toDataURL("image/jpeg", 0.7); 
+          
+                      const preview = document.getElementById('photoPreview');
+                      preview.src = base64PhotoData;
+                      document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                  };
+                  img.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+          }
 
         function confirmAuditItem() {
             if (!pendingAuditItem) return;
