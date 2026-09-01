@@ -1,4 +1,4 @@
- <script>
+
         (function () {
             try {
                 // ดึงข้อมูลจาก LocalStorage ด้วย Key: 'currentUser'
@@ -52,4 +52,4 @@
                 window.location.href = "index.html"; // Fallback กรณี Browser ไม่รองรับ replace
             }
         }
-    </script> 
+
