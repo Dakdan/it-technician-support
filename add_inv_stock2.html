@@ -6,21 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ | โรงพยาบาลอุดรธานี</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     
     <style>
         :root { --primary-pink: #ff85a2; --soft-pink: #ffe6eb; --dark-pink: #e04a70; --text-dark: #333333; }
         body { font-family: 'Kanit', sans-serif; background: linear-gradient(135deg, #ffe6f2 0%, #ffffff 100%); min-height: 100vh; color: var(--text-dark); overflow-x: hidden; padding-bottom: 90px; }
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8vw; color: rgba(255, 133, 162, 0.05); white-space: nowrap; z-index: 0; pointer-events: none; user-select: none; font-weight: 800; }
+        
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8vw; color: rgba(255, 133, 162, 0.04); white-space: nowrap; z-index: 0; pointer-events: none; user-select: none; font-weight: 800; }
         .glass-card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 40px -10px rgba(255, 133, 162, 0.2); border-radius: 1.75rem; position: relative; z-index: 10; overflow: hidden; }
+        
         .tab-btn { padding: 0.75rem 1.5rem; color: #9ca3af; font-weight: 500; white-space: nowrap; transition: all 0.3s; border-bottom: 3px solid transparent; cursor: pointer; border-radius: 0.5rem 0.5rem 0 0; }
         .tab-btn:hover { color: var(--primary-pink); background: rgba(255, 230, 235, 0.3); }
         .tab-btn.active { border-bottom: 3px solid var(--primary-pink); color: var(--dark-pink); font-weight: 600; background: linear-gradient(to top, rgba(255, 133, 162, 0.1), transparent); }
@@ -29,10 +30,9 @@
         .spinner { border: 4px solid rgba(255, 133, 162, 0.2); border-top: 4px solid var(--primary-pink); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(255, 133, 162, 0.3); }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .ts-control { border: 1px solid #fbcfe8 !important; border-radius: 1rem !important; padding: 0.875rem !important; background: rgba(255, 255, 255, 0.9) !important; font-family: 'Kanit' !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .ts-control.focus { border-color: var(--primary-pink) !important; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2) !important; }
+        .ts-control { border: 1px solid #fbcfe8 !important; border-radius: 1rem !important; padding: 0.875rem !important; background: rgba(255, 255, 255, 0.7) !important; font-family: 'Kanit' !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .ts-control.focus { border-color: var(--primary-pink) !important; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2) !important; background: #ffffff !important; }
         
-        /* Mobile Bottom Nav - ฟรุ้งฟริ้ง น่ารัก */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-top: 2px solid rgba(255, 133, 162, 0.25); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 50; box-shadow: 0 -8px 25px rgba(255, 133, 162, 0.15); border-radius: 24px 24px 0 0; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; color: #b0b7c3; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; padding: 0.4rem; position: relative; }
         .nav-item i { font-size: 1.35rem; margin-bottom: 0.2rem; transition: transform 0.3s; }
@@ -40,30 +40,32 @@
         .nav-item.active { color: var(--dark-pink); }
         .nav-item.active i { transform: translateY(-5px) scale(1.15); color: var(--dark-pink); text-shadow: 0 5px 10px rgba(224, 74, 112, 0.3); }
         .nav-item.active::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: linear-gradient(to right, #ff85a2, #e04a70); border-radius: 4px; }
-        .nav-item:hover { color: var(--primary-pink); }
         
+        .print-only-landscape, .print-only-slip { display: none; }
         @media print {
-            @page { size: landscape; margin: 10mm; }
             body { background: white; padding: 0; margin: 0; }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
+            .no-print, header, nav, #loadingOverlay { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            body.print-mode-landscape @page { size: landscape; margin: 10mm; }
+            body.print-mode-landscape .print-only-landscape { display: block !important; }
+            body.print-mode-landscape main { display: none !important; }
+            
+            body.print-mode-slip @page { size: 80mm auto; margin: 0; }
+            body.print-mode-slip .print-only-slip { display: block !important; width: 100%; font-family: 'Kanit', sans-serif; font-size: 12px; padding: 10px; color: black; }
+            body.print-mode-slip main { display: none !important; }
         }
-        .print-only { display: none; }
-        .pulse-pink { animation: pulse-border 2s infinite; }
-        @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(255, 133, 162, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 133, 162, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 133, 162, 0); } }
     </style>
 </head>
 <body class="p-2 sm:p-4 md:p-8">
-
     <div class="watermark">IT UDON HOSP</div>
 
+    <!-- Loading Overlay -->
     <div id="loadingOverlay">
         <div class="spinner mb-4"></div>
         <p id="loadingMsg" class="text-pink-600 font-bold text-lg bg-white/90 px-6 py-2 rounded-full shadow-md border border-pink-100">กำลังประมวลผล...</p>
     </div>
 
-    <!-- Header -->
     <header class="max-w-7xl mx-auto mb-4 md:mb-8 relative z-10 no-print flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 p-4 md:p-6 rounded-3xl shadow-sm border border-pink-100/60 backdrop-blur-md">
         <div class="flex items-center gap-3.5 w-full md:w-auto">
             <div class="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-pink-100 via-pink-50 to-white rounded-2xl flex items-center justify-center border border-pink-200 shadow-md text-pink-500 text-2xl md:text-3xl flex-shrink-0">
@@ -79,7 +81,7 @@
         <div class="bg-gradient-to-r from-pink-50 to-white border border-pink-200 px-4 py-2.5 rounded-2xl flex items-center gap-3 shadow-sm w-full md:w-auto justify-between md:justify-start">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 font-bold shadow-inner">
-                    <i class="fa-solid fa-user-shield"></i>
+                    <i class="fa-solid fa-user-check"></i>
                 </div>
                 <div class="text-left">
                     <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">ผู้ใช้งานระบบ (IT_User)</p>
@@ -89,9 +91,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto glass-card p-3 sm:p-6 md:p-8 no-print mb-6">
-        
-        <!-- Desktop Tabs -->
+    <main class="max-w-7xl mx-auto glass-card p-3 sm:p-6 md:p-8 no-print mb-6 min-h-[60vh]">
         <div class="hidden sm:flex border-b border-pink-100 mb-6 overflow-x-auto hide-scrollbar">
             <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn"><i class="fa-solid fa-chart-pie mr-2"></i> สรุปรายการ</button>
             <button onclick="switchTab('stockin')" id="tab-stockin" class="tab-btn active"><i class="fa-solid fa-boxes-packing mr-2"></i> บันทึกรับเข้า (Stock In)</button>
@@ -106,7 +106,7 @@
                     <div class="w-16 h-16 mx-auto bg-pink-100 rounded-2xl flex items-center justify-center mb-3 text-pink-500 text-3xl">
                         <i class="fa-solid fa-box-open"></i>
                     </div>
-                    <h3 class="text-gray-600 font-medium text-sm">รับเข้าทั้งหมด (รายการ)</h3>
+                    <h3 class="text-gray-600 font-medium text-sm">รับเข้าทั้งหมด (บิล)</h3>
                     <p id="summaryTotalStockIn" class="text-4xl font-bold text-pink-600 mt-1">-</p>
                 </div>
                 <div class="bg-gradient-to-br from-purple-50 to-white p-6 rounded-3xl text-center shadow-sm border border-purple-100">
@@ -121,7 +121,7 @@
                         <i class="fa-solid fa-wifi"></i>
                     </div>
                     <h3 class="text-gray-600 font-medium text-sm">สถานะระบบ</h3>
-                    <p class="text-xl font-bold text-emerald-600 mt-2">ออนไลน์ (Connected)</p>
+                    <p class="text-xl font-bold text-emerald-600 mt-2">ออนไลน์ (Ready)</p>
                 </div>
             </div>
         </div>
@@ -130,43 +130,37 @@
         <div id="content-stockin" class="block animate-fade-in">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                    <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center"><i class="fa-solid fa-file-invoice"></i></div>
                     <h3 class="text-lg md:text-xl font-bold text-gray-800">สร้างเอกสารรับเข้า</h3>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <span id="sessionStockInNoBadge" class="hidden bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-xs font-bold border border-purple-200 shadow-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-barcode"></i> ID: <span id="sessionStockInNoText" class="font-mono"></span>
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-bold border border-indigo-200 shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-hashtag"></i> เลขที่รับ (Stock_In_ID): <span id="displayStockInId" class="font-mono text-pink-600">รอดำเนินการ...</span>
                     </span>
                     <span id="sessionStockInBadge" class="hidden bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-xs font-bold border border-emerald-200 shadow-sm flex items-center gap-2">
-                        <i class="fa-solid fa-receipt"></i> บิล: <span id="sessionStockInText" class="text-emerald-700"></span>
+                        <i class="fa-solid fa-check-circle"></i> บิล: <span id="sessionStockInText" class="text-emerald-700"></span>
                     </span>
                 </div>
             </div>
 
             <!-- Header Form Info -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-white/70 p-4 md:p-6 rounded-3xl border border-pink-100 shadow-sm">
-                <!-- Date_Time Display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 bg-white/70 p-4 md:p-6 rounded-3xl border border-pink-100 shadow-sm">
+                <!-- Date_Time -->
                 <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700">
-                        <i class="fa-solid fa-calendar-days text-pink-400 w-5"></i> วันที่/เวลา (Date_Time)
-                    </label>
-                    <input type="text" id="displayDateTime" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-medium" value="ระบบจะบันทึกอัตโนมัติ">
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-calendar-days text-pink-400 w-5"></i> วันที่/เวลา (Date_Time)</label>
+                    <input type="text" id="displayDateTime" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-medium">
                 </div>
 
-                <!-- IT_User Display -->
+                <!-- IT_User -->
                 <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700">
-                        <i class="fa-solid fa-user-gear text-pink-400 w-5"></i> ผู้รับ (IT_User)
-                    </label>
-                    <input type="text" id="displayItUser" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-bold" value="-">
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-user-gear text-pink-400 w-5"></i> ผู้รับ (IT_User)</label>
+                    <input type="text" id="displayItUser" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-bold text-pink-600">
                 </div>
 
                 <!-- Source_Type -->
                 <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type">
-                        <i class="fa-solid fa-turn-down text-pink-400 w-5"></i> ประเภทการรับเข้า <span class="text-pink-500">*</span>
-                    </label>
-                    <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm header-input">
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type"><i class="fa-solid fa-turn-down text-pink-400 w-5"></i> ประเภทการรับเข้า (Source Type) <span class="text-pink-500">*</span></label>
+                    <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none transition-all shadow-sm header-input">
                         <option value="">-- เลือกประเภทการรับเข้า --</option>
                         <option value="หน่วยงานส่งคืน">หน่วยงานส่งคืน</option>
                         <option value="รับเข้าจากการทดแทน">รับเข้าจากการทดแทน</option>
@@ -175,67 +169,58 @@
                 </div>
 
                 <!-- Department -->
-                <div class="form-group md:col-span-2">
-                    <label class="block mb-2 font-semibold text-sm text-gray-700">
-                        <i class="fa-solid fa-hospital-user text-pink-400 w-5"></i> หน่วยงาน (Department) <span class="text-pink-500">*</span>
-                    </label>
+                <div class="form-group">
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-hospital-user text-pink-400 w-5"></i> หน่วยงาน (Department) <span class="text-pink-500">*</span></label>
                     <select id="DEP_ID" class="w-full header-input"><option value="">โหลดข้อมูล...</option></select>
                 </div>
 
-                <!-- Doc_ID File Upload -->
+                <!-- Doc_ID File -->
                 <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Doc_ID_File">
-                        <i class="fa-solid fa-file-arrow-up text-pink-400 w-5"></i> ไฟล์เอกสารอ้างอิง (Doc_ID)
-                    </label>
-                    <input type="file" id="Doc_ID_File" class="w-full px-4 py-2 border border-pink-200 rounded-2xl text-xs bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm header-input file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
-                    <span id="docFileNameDisplay" class="text-[11px] text-gray-400 mt-1 block">ยังไม่ได้เลือกไฟล์เอกสาร</span>
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Doc_ID_File"><i class="fa-solid fa-file-arrow-up text-pink-400 w-5"></i> แนบเอกสารอ้างอิง (Doc_ID)</label>
+                    <input type="file" id="Doc_ID_File" class="w-full px-4 py-2 border border-pink-200 rounded-2xl text-xs bg-white/70 header-input file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
+                    <span id="docFileNameDisplay" class="text-[10px] text-gray-400 mt-1 block px-1 truncate">ยังไม่ได้เลือกไฟล์...</span>
                 </div>
 
                 <!-- Reference_No -->
-                <div class="form-group md:col-span-3">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No">
-                        <i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/เลขอ้างอิงอื่น (Reference_No)
-                    </label>
-                    <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm header-input" placeholder="ระบุเลขอ้างอิงเพิ่มเติม (ถ้ามี)">
+                <div class="form-group">
+                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No"><i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/อ้างอิง (Reference_No)</label>
+                    <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
                 </div>
             </div>
 
-            <!-- Search Area -->
+            <!-- Search Bar -->
             <div class="mb-6 relative z-20">
                 <div class="flex items-center gap-2 mb-2">
                     <i class="fa-solid fa-magnifying-glass text-pink-500"></i>
-                    <h3 class="font-bold text-gray-800">ค้นหาครุภัณฑ์</h3>
+                    <h3 class="font-bold text-gray-800">ค้นหาครุภัณฑ์เพื่อเพิ่มลงรายการ</h3>
                 </div>
                 <div class="relative w-full">
-                    <input type="text" id="assetQuery" onkeyup="debouncedSearch()" class="w-full pl-12 pr-12 py-3.5 border-2 border-pink-100 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm" placeholder="พิมพ์ Asset ID, S/N หรือชื่อ เพื่อค้นหา...">
+                    <input type="text" id="assetQuery" onkeyup="debouncedSearch()" class="w-full pl-12 pr-12 py-3.5 border-2 border-pink-100 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm" placeholder="พิมพ์ Asset ID, S/N หรือชื่อ เพื่อค้นหา... (Live Search)">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-300 text-lg"></i>
-                    <button onclick="openScanner('assetQuery')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-pink-500 hover:bg-pink-600 p-2 rounded-xl transition-colors shadow-sm pulse-pink">
+                    <button onclick="openScanner('assetQuery')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 p-2 rounded-xl transition-all shadow-sm">
                         <i class="fa-solid fa-qrcode"></i>
                     </button>
                 </div>
-                <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-pink-100 z-50 max-h-[60vh] overflow-y-auto"></div>
+                <div id="searchError" class="text-red-500 text-xs mt-1 px-2 font-medium"></div>
+                <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-200 z-50 max-h-[50vh] overflow-y-auto p-2"></div>
             </div>
 
-            <!-- Table -->
             <div class="bg-white rounded-2xl border border-pink-100 overflow-hidden mb-6 shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm min-w-[600px]">
+                    <table class="w-full text-left border-collapse text-sm min-w-[850px]">
                         <thead>
                             <tr class="bg-gradient-to-r from-pink-50 to-white text-pink-800 border-b border-pink-100">
                                 <th class="p-4 text-center w-12 font-semibold">#</th>
-                                <th class="p-4 w-32 font-semibold">Asset ID / NOID</th>
-                                <th class="p-4 font-semibold">รายละเอียด</th>
-                                <th class="p-4 w-32 text-center font-semibold">สถานะ</th>
-                                <th class="p-4 w-20 text-center font-semibold"><i class="fa-solid fa-camera"></i></th>
+                                <th class="p-4 w-20 text-center font-semibold">รูปภาพ</th>
+                                <th class="p-4 w-36 font-semibold">Asset / NOID</th>
+                                <th class="p-4 font-semibold">รายละเอียดสเปค</th>
+                                <th class="p-4 w-28 text-center font-semibold">สถานะ</th>
+                                <th class="p-4 w-44 text-center font-semibold">อุปกรณ์ต่อพ่วง</th>
+                                <th class="p-4 w-28 text-center font-semibold">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="assetTableBody" class="text-gray-700 divide-y divide-pink-50">
-                            <tr id="emptyRow"><td colspan="5" class="p-10 text-center text-gray-400">
-                                <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fa-solid fa-clipboard-list text-2xl text-gray-300"></i>
-                                </div>
-                                ค้นหาและเลือกครุภัณฑ์ด้านบน<br><span class="text-xs text-gray-400 mt-1 block">ระบบจะบันทึกทันทีที่เพิ่มลงรายการ</span>
-                            </td></tr>
+                            <!-- Populated by JS renderSavedTable() -->
                         </tbody>
                     </table>
                 </div>
@@ -243,11 +228,11 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onclick="resetFormSession()" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 font-medium transition-all shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-rotate-right"></i> บันทึกโดยไม่ลงชื่อรับ
+                <button type="button" onclick="saveWithoutSign()" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-receipt"></i> บันทึกโดยไม่ลงชื่อรับ (พิมพ์สลิป)
                 </button>
                 <button type="button" onclick="validateAndSign()" id="btnSign" disabled class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl hover:shadow-lg hover:from-pink-600 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-signature"></i> ตรวจสอบและลงชื่อรับ
+                    <i class="fa-solid fa-signature"></i> ตรวจสอบและลงชื่อรับ (A4)
                 </button>
             </div>
         </div>
@@ -256,11 +241,11 @@
         <div id="content-history" class="hidden animate-fade-in">
             <div class="flex items-center gap-2 mb-5">
                 <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                <h3 class="text-lg md:text-xl font-bold text-gray-800">ประวัติรับเข้า (Stock In)</h3>
+                <h3 class="text-lg md:text-xl font-bold text-gray-800">ประวัติรับเข้า</h3>
             </div>
             <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                         <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
                             <tr>
                                 <th class="p-4 text-center w-16 font-semibold">ลำดับ</th>
@@ -286,11 +271,11 @@
             </div>
             <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                         <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
                             <tr>
-                                <th class="p-4 font-semibold">Asset ID / NOID</th>
-                                <th class="p-4 font-semibold">อ้างอิงรับเข้า</th>
+                                <th class="p-4 font-semibold">Asset / NOID</th>
+                                <th class="p-4 font-semibold">อ้างอิงรับเข้า (Stock_ID)</th>
                                 <th class="p-4 font-semibold">รายละเอียด</th>
                                 <th class="p-4 text-center font-semibold">สถานะปัจจุบัน</th>
                             </tr>
@@ -304,42 +289,35 @@
         </div>
     </main>
 
-    <nav class="bottom-nav sm:hidden">
-        <div onclick="switchTab('summary')" class="nav-item" id="nav-summary">
-            <i class="fa-solid fa-chart-pie"></i><span>สรุป</span>
-        </div>
-        <div onclick="switchTab('stockin')" class="nav-item active" id="nav-stockin">
-            <i class="fa-solid fa-boxes-packing text-xl"></i><span>รับเข้า</span>
-        </div>
-        <div onclick="switchTab('history')" class="nav-item" id="nav-history">
-            <i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span>
-        </div>
-        <div onclick="switchTab('inventory')" class="nav-item" id="nav-inventory">
-            <i class="fa-solid fa-warehouse"></i><span>คลัง</span>
-        </div>
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav sm:hidden no-print">
+        <div onclick="switchTab('summary')" class="nav-item" id="nav-summary"><i class="fa-solid fa-chart-pie"></i><span>สรุป</span></div>
+        <div onclick="switchTab('stockin')" class="nav-item active" id="nav-stockin"><i class="fa-solid fa-boxes-packing text-xl"></i><span>รับเข้า</span></div>
+        <div onclick="switchTab('history')" class="nav-item" id="nav-history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></div>
+        <div onclick="switchTab('inventory')" class="nav-item" id="nav-inventory"><i class="fa-solid fa-warehouse"></i><span>คลัง</span></div>
     </nav>
 
-    <!-- Modal: ตรวจสอบและเพิ่มรายการ -->
-    <div id="assetConfirmModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+    <!-- Modal: CRUD ครุภัณฑ์ ( assetConfirmModal ) -->
+    <div id="assetConfirmModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-pink-100 flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-pink-50 to-white p-5 border-b border-pink-100 flex justify-between items-center sticky top-0 z-10">
-                <h3 class="text-lg font-bold text-pink-700 flex items-center gap-2"><i class="fa-solid fa-clipboard-check"></i> ยืนยันข้อมูลครุภัณฑ์</h3>
+                <h3 id="modalTitleText" class="text-lg font-bold text-pink-700 flex items-center gap-2"><i class="fa-solid fa-clipboard-check"></i> ข้อมูลครุภัณฑ์</h3>
                 <button onclick="closeModal('assetConfirmModal')" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-times"></i></button>
             </div>
             
-            <div class="p-6 text-sm text-gray-700 space-y-5 overflow-y-auto">
-                <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 shadow-sm relative overflow-hidden">
+            <div class="p-6 text-sm text-gray-700 space-y-4 overflow-y-auto hide-scrollbar">
+                <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 shadow-sm">
                     <p class="flex justify-between items-center mb-2"><span class="text-gray-500 text-xs">Asset ID / NOID</span> <span id="modalAssetID" class="font-bold text-pink-600 bg-white px-2 py-1 rounded-lg border border-pink-200"></span></p>
-                    <p class="flex justify-between items-center mb-2"><span class="text-gray-500 text-xs">อายุการใช้งาน</span> <span id="modalAge" class="font-medium text-gray-700"></span></p>
-                    <div class="border-t border-pink-100 pt-3 mt-1">
-                        <span class="text-gray-500 text-xs block mb-1">รายละเอียด / สเปค</span>
-                        <span id="modalSpec" class="font-medium text-gray-800 leading-tight block"></span>
+                    <p class="flex justify-between items-center mb-2"><span class="text-gray-500 text-xs">อายุ</span> <span id="modalAge" class="font-medium text-gray-700"></span></p>
+                    <div class="border-t border-pink-100 pt-2 mt-1">
+                        <span class="text-gray-500 text-xs block mb-1">รายละเอียด</span>
+                        <textarea id="modalSpec" rows="2" class="w-full p-2 border border-pink-200 rounded-lg text-sm bg-white focus:border-pink-400 outline-none resize-none"></textarea>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                    <label class="block mb-2 font-bold text-gray-700 text-xs uppercase tracking-wider">ระบุสถานะรับเข้า <span class="text-red-500">*</span></label>
-                    <select id="modalStatus" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all">
+                <div>
+                    <label class="block mb-1.5 font-bold text-gray-700 text-xs uppercase">สถานะ <span class="text-red-500">*</span></label>
+                    <select id="modalStatus" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 outline-none">
                         <option value="รอตรวจสอบ">รอตรวจสอบ</option>
                         <option value="Spar">Spar (สำรอง)</option>
                         <option value="รอส่งคืน">รอส่งคืน</option>
@@ -347,39 +325,103 @@
                     </select>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                    <label class="block mb-2 font-bold text-gray-700 text-xs flex justify-between items-center">
-                        <span><i class="fa-solid fa-camera text-pink-400 mr-1"></i> ถ่ายรูป/แนบรูป (บังคับ)</span>
+                <!-- Checkbox มีอุปกรณ์ต่อพ่วง (Peripherals = 1 or 0) -->
+                <div class="flex items-center gap-2 bg-purple-50 p-3 rounded-xl border border-purple-100">
+                    <input type="checkbox" id="modalPeripherals" class="w-5 h-5 text-purple-600 border-purple-300 rounded focus:ring-purple-400 cursor-pointer">
+                    <label for="modalPeripherals" class="font-bold text-purple-900 text-xs sm:text-sm cursor-pointer select-none flex items-center gap-1.5">
+                        <i class="fa-solid fa-plug text-purple-500"></i> มีอุปกรณ์ต่อพ่วง (Peripherals)
                     </label>
-                    <div class="relative mt-2">
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 font-bold text-gray-700 text-xs"><i class="fa-solid fa-camera text-pink-400 mr-1"></i> ถ่ายรูป/แนบรูป</label>
+                    <div class="relative">
                         <input type="file" id="modalImgUpload" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <div class="w-full border-2 border-dashed border-pink-200 rounded-xl p-6 flex flex-col items-center justify-center bg-pink-50/30 text-pink-500 hover:bg-pink-50 transition-colors">
-                            <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2"></i>
-                            <span class="font-medium text-sm">คลิกเพื่อถ่ายรูปหรือเลือกไฟล์</span>
+                        <div class="w-full border-2 border-dashed border-pink-200 rounded-xl p-4 flex flex-col items-center justify-center bg-pink-50/30 text-pink-500 hover:bg-pink-50">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl mb-1"></i>
+                            <span class="font-medium text-xs">คลิกเลือกรูป</span>
                         </div>
                     </div>
-                    <div id="previewContainer" class="hidden mt-3 relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                        <img id="modalImgPreview" class="w-full h-40 object-cover">
-                        <button onclick="clearImage()" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md"><i class="fa-solid fa-trash-can"></i></button>
+                    <div id="previewContainer" class="hidden mt-2 relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                        <img id="modalImgPreview" class="w-full h-32 object-cover">
+                        <button onclick="clearImage()" class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-gray-50/80 sticky bottom-0">
-                <button onclick="closeModal('assetConfirmModal')" class="w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 rounded-xl hover:bg-gray-100 font-medium text-gray-600 transition-colors">ยกเลิก</button>
-                <button onclick="saveSingleItem()" id="btnSaveItem" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-xl hover:shadow-lg font-bold flex items-center justify-center gap-2 transition-all">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกและเพิ่มรายการ
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/80 sticky bottom-0">
+                <button onclick="closeModal('assetConfirmModal')" class="px-5 py-2.5 bg-white border border-gray-300 rounded-xl font-medium text-gray-600">ยกเลิก</button>
+                <button onclick="saveSingleItem()" id="btnSaveItem" class="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกรายการ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: เพิ่มอุปกรณ์ต่อพ่วง (Peripherals_Device) -->
+    <div id="peripheralModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[65] flex justify-center items-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-purple-200 flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-5 border-b border-purple-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-purple-700 flex items-center gap-2"><i class="fa-solid fa-plug"></i> เพิ่มอุปกรณ์ต่อพ่วง (Peripherals)</h3>
+                <button onclick="closeModal('peripheralModal')" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-red-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 text-sm text-gray-700 space-y-4 overflow-y-auto">
+                <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 text-xs">
+                    <p class="font-bold text-purple-800">อ้างอิงครุภัณฑ์หลัก:</p>
+                    <p class="text-gray-600" id="periAssetRef">-</p>
+                    <p class="text-[11px] font-mono text-purple-600 mt-1">Inv_ID: <span id="periInvIdRef">-</span></p>
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 font-bold text-gray-700 text-xs uppercase">เลือกอุปกรณ์ต่อพ่วง (Item_ID) <span class="text-red-500">*</span></label>
+                    <select id="periItemID" class="w-full p-3 border-2 border-purple-100 rounded-xl bg-white focus:border-purple-400 outline-none text-sm">
+                        <option value="CAT-0002-00001" data-name="Keyboard">CAT-0002-00001 : Keyboard</option>
+                        <option value="CAT-0002-00002" data-name="Mouse">CAT-0002-00002 : Mouse</option>
+                        <option value="CAT-0002-00003" data-name="Webcam">CAT-0002-00003 : Webcam</option>
+                        <option value="CAT-0002-00004" data-name="Speaker">CAT-0002-00004 : Speaker</option>
+                        <option value="CAT-0002-00005" data-name="Headset">CAT-0002-00005 : Headset</option>
+                        <option value="CAT-0002-00006" data-name="Microphone">CAT-0002-00006 : Microphone</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block mb-1 font-bold text-gray-700 text-xs">จำนวน (Quantity)</label>
+                        <input type="number" id="periQty" value="1" min="1" class="w-full p-2.5 border border-purple-200 rounded-xl text-sm focus:border-purple-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold text-gray-700 text-xs">หน่วยนับ (Unit)</label>
+                        <input type="text" id="periUnit" value="ตัว" class="w-full p-2.5 border border-purple-200 rounded-xl text-sm focus:border-purple-400 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-bold text-gray-700 text-xs"><i class="fa-solid fa-barcode text-purple-500 mr-1"></i> รหัสอุปกรณ์ (Item_Code)</label>
+                    <div class="relative w-full">
+                        <input type="text" id="periItemCode" placeholder="ระบุหรือสแกน Item_Code..." class="w-full pr-10 p-2.5 border border-purple-200 rounded-xl text-sm focus:border-purple-400 outline-none">
+                        <button type="button" onclick="openScanner('periItemCode')" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-purple-600 text-white p-1.5 rounded-lg hover:bg-purple-700 transition-colors shadow-sm">
+                            <i class="fa-solid fa-qrcode text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                <button onclick="closeModal('peripheralModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-xl font-medium text-gray-600 text-xs">ยกเลิก</button>
+                <button onclick="savePeripheral()" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-save"></i> บันทึกอุปกรณ์ต่อพ่วง
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Modal: ลงลายมือชื่อ -->
-    <div id="signatureModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+    <div id="signatureModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 border border-pink-200">
             <div class="text-center mb-2">
                 <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-3"><i class="fa-solid fa-file-signature"></i></div>
-                <h3 class="text-xl font-bold text-gray-800">สรุปและยืนยันรับมอบ</h3>
+                <h3 class="text-xl font-bold text-gray-800">ยืนยันการรับมอบ</h3>
                 <p class="text-sm text-gray-500 mt-1">บิลอ้างอิง: <span id="sigStockNo" class="font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded"></span></p>
             </div>
             
@@ -387,14 +429,13 @@
                 <label class="block mb-2 font-bold text-gray-700 text-sm">
                     <i class="fa-solid fa-user-pen text-pink-400 w-5"></i> ชื่อผู้นำส่ง / ผู้ติดต่อ <span class="text-pink-500">*</span>
                 </label>
-                <input type="text" id="modalUserName" class="w-full px-4 py-3 border-2 border-pink-100 rounded-xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all" placeholder="ระบุชื่อ-นามสกุลผู้ส่งมอบ">
-                <p class="text-[10px] text-gray-400 mt-1.5 ml-1">* บันทึกชื่อพร้อมลายเซ็น</p>
+                <input type="text" id="modalUserName" class="w-full px-4 py-3 border-2 border-pink-100 rounded-xl text-sm bg-white focus:border-pink-400 outline-none" placeholder="ระบุชื่อ-นามสกุล">
             </div>
 
             <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <label class="flex justify-between items-center mb-2 font-bold text-gray-700 text-sm">
-                    <span><i class="fa-solid fa-pen-nib text-pink-400 w-5"></i> ลายเซ็นผู้นำส่ง <span class="text-pink-500">*</span></span>
-                    <button type="button" onclick="signaturePad.clear()" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 transition-colors">ล้างลายเซ็น</button>
+                    <span><i class="fa-solid fa-pen-nib text-pink-400 w-5"></i> ลายเซ็นผู้นำส่ง</span>
+                    <button type="button" onclick="signaturePad.clear()" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded">ล้าง</button>
                 </label>
                 <div class="border-2 border-dashed border-pink-300 rounded-xl bg-white overflow-hidden touch-none h-40 shadow-inner">
                     <canvas id="signatureCanvas" class="w-full h-full cursor-crosshair"></canvas>
@@ -402,51 +443,60 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="closeModal('signatureModal')" class="flex-1 py-3 bg-gray-100 rounded-xl font-medium text-gray-600 hover:bg-gray-200 transition-colors">ยกเลิก</button>
-                <button type="button" onclick="submitSignature()" class="flex-[2] py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-print"></i> ยืนยันและพิมพ์
+                <button type="button" onclick="closeModal('signatureModal')" class="flex-1 py-3 bg-gray-100 rounded-xl font-medium text-gray-600">ยกเลิก</button>
+                <button type="button" onclick="submitSignature()" class="flex-[2] py-3 bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-print"></i> ยืนยันและพิมพ์ (A4)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: สแกนเนอร์ -->
-    <div id="scannerModal" class="hidden fixed inset-0 bg-black/95 z-[9999] flex flex-col justify-center items-center p-4 backdrop-blur-md">
-        <h3 class="text-white text-xl font-bold mb-2"><i class="fa-solid fa-qrcode text-pink-500 mr-2"></i> สแกน QR Code</h3>
-        <p class="text-gray-400 text-sm mb-6">นำกล้องส่องไปที่ QR Code ของครุภัณฑ์</p>
-        <div id="reader" class="w-full max-w-sm bg-black rounded-2xl overflow-hidden mb-6 border-4 border-pink-500 shadow-[0_0_30px_rgba(255,133,162,0.3)]"></div>
-        <p id="searchError" class="text-red-400 text-sm mb-4 text-center px-4"></p>
-        <button onclick="closeScanner()" class="px-8 py-3 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors border border-white/20">ยกเลิกการสแกน</button>
+    <!-- Modal: Detail Viewer -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
+            <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 id="detailTitle" class="font-bold text-gray-700"><i class="fa-solid fa-circle-info mr-2"></i> รายละเอียด</h3>
+                <button onclick="closeModal('detailModal')" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 flex items-center justify-center shadow-sm"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div id="detailContent" class="p-5 overflow-y-auto text-sm text-gray-700 space-y-4"></div>
+        </div>
     </div>
 
-    <!-- Print Landscape Area -->
-    <div class="print-only p-8 text-black bg-white" id="printArea">
+    <!-- Modal: Scanner -->
+    <div id="scannerModal" class="hidden fixed inset-0 bg-black/95 z-[9999] flex flex-col justify-center items-center p-4 backdrop-blur-md">
+        <h3 class="text-white text-xl font-bold mb-2"><i class="fa-solid fa-qrcode text-pink-500 mr-2"></i> สแกนบาร์โค้ด / QR Code</h3>
+        <div id="reader" class="w-full max-w-sm bg-black rounded-2xl overflow-hidden mb-6 border-4 border-pink-500"></div>
+        <button onclick="closeScanner()" class="px-8 py-3 bg-white/10 text-white rounded-full font-medium border border-white/20">ยกเลิก</button>
+    </div>
+
+    <!-- Print Area: Landscape A4 -->
+    <div class="print-only-landscape p-8 text-black bg-white" id="printAreaLandscape">
         <div class="text-center mb-6 border-b-2 border-black pb-4 relative">
             <h1 class="text-2xl font-bold mb-1">ใบบันทึกรับเข้าครุภัณฑ์คอมพิวเตอร์</h1>
             <h2 class="text-lg">โรงพยาบาลอุดรธานี</h2>
             <p class="text-sm">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
             <div class="absolute top-0 right-0 border-2 border-black p-2 text-xl font-bold">
-                <span id="p-bill"></span>
+                <span id="p-bill-ls"></span>
             </div>
         </div>
         
-        <div class="grid grid-cols-4 gap-4 mb-6 text-sm bg-gray-100 p-4 border border-black rounded-lg">
-            <div><span class="font-bold">วันที่:</span> <span id="p-date" class="border-b border-dotted border-black px-2"></span></div>
-            <div><span class="font-bold">ประเภท:</span> <span id="p-type" class="border-b border-dotted border-black px-2"></span></div>
-            <div><span class="font-bold">หน่วยงาน:</span> <span id="p-dept" class="border-b border-dotted border-black px-2"></span></div>
-            <div><span class="font-bold">ผู้รับ (IT):</span> <span id="p-it-user-print" class="border-b border-dotted border-black px-2"></span></div>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm bg-gray-100 p-4 border border-black rounded-lg">
+            <div><span class="font-bold">วันที่:</span> <span id="p-date-ls" class="border-b border-dotted border-black px-2"></span></div>
+            <div><span class="font-bold">ประเภท:</span> <span id="p-type-ls" class="border-b border-dotted border-black px-2"></span></div>
+            <div><span class="font-bold">หน่วยงาน:</span> <span id="p-dept-ls" class="border-b border-dotted border-black px-2"></span></div>
+            <div><span class="font-bold">อ้างอิง:</span> <span id="p-ref-ls" class="border-b border-dotted border-black px-2"></span></div>
         </div>
         
         <table class="w-full text-left text-sm border-collapse border border-black mb-12">
             <thead>
                 <tr class="bg-gray-200">
-                    <th class="border border-black p-2 w-12 text-center">ลำดับ</th>
-                    <th class="border border-black p-2 w-40">Asset ID / NOID</th>
-                    <th class="border border-black p-2">รายละเอียดครุภัณฑ์</th>
+                    <th class="border border-black p-2 w-12 text-center">#</th>
+                    <th class="border border-black p-2 w-40">Asset / NOID</th>
+                    <th class="border border-black p-2">รายละเอียด</th>
                     <th class="border border-black p-2 text-center w-32">สถานะ</th>
                 </tr>
             </thead>
-            <tbody id="printTableBody"></tbody>
+            <tbody id="printTableBodyLandscape"></tbody>
         </table>
         
         <div class="flex justify-around text-center text-sm pt-8 mt-8">
@@ -454,31 +504,46 @@
                 <div class="h-20 mb-2 flex items-end justify-center border-b border-black">
                     <img id="p-sig-img" class="h-16 object-contain hidden">
                 </div>
-                <p class="mt-2">( <span id="p-user" class="font-bold"></span> )</p>
+                <p class="mt-2">( <span id="p-user-ls" class="font-bold"></span> )</p>
                 <p class="mt-1 text-xs text-gray-600">ผู้นำส่ง / ผู้ติดต่อ</p>
             </div>
             <div class="w-64">
                 <div class="h-20 mb-2 flex items-end justify-center border-b border-black"></div>
-                <p class="mt-2">( <span id="p-it-user" class="font-bold"></span> )</p>
+                <p class="mt-2">( <span id="p-it-user-ls" class="font-bold"></span> )</p>
                 <p class="mt-1 text-xs text-gray-600">ผู้รับ (เจ้าหน้าที่ IT)</p>
             </div>
         </div>
     </div>
 
+    <!-- Print Area: Thermal Slip (80mm) -->
+    <div class="print-only-slip" id="printAreaSlip">
+        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+            <h2 style="margin: 0; font-size: 16px; font-weight: bold;">สลิปรับเข้าครุภัณฑ์</h2>
+            <h3 style="margin: 2px 0 0; font-size: 12px;">รพ.อุดรธานี (IT)</h3>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <p style="margin: 2px 0;"><strong>บิล:</strong> <span id="p-bill-sl"></span></p>
+            <p style="margin: 2px 0;"><strong>วันที่:</strong> <span id="p-date-sl"></span></p>
+            <p style="margin: 2px 0;"><strong>ผู้รับ (IT):</strong> <span id="p-it-sl"></span></p>
+            <p style="margin: 2px 0;"><strong>ผู้นำส่ง:</strong> <span id="p-user-sl"></span></p>
+        </div>
+        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0; margin-bottom: 10px;">
+            <table style="width: 100%; text-align: left; font-size: 11px;">
+                <thead>
+                    <tr><th>รหัส</th><th style="text-align:right;">สถานะ</th></tr>
+                </thead>
+                <tbody id="printTableBodySlip"></tbody>
+            </table>
+        </div>
+        <div style="text-align: center; font-size: 10px;">
+            <p>*** ขอบคุณครับ ***</p>
+            <p id="p-id-sl" style="font-family: monospace; letter-spacing: 1px;"></p>
+        </div>
+    </div>
+
     <script>
-        // -------------------------------------------------------------
-        // URL ของ Google Apps Script (ยึดตามค่าที่คุณตั้งค่าไว้)
-        // -------------------------------------------------------------
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyglGUZ6drcbT-3VuygEJ1FIJ3C_9_NSWU1BaeDyo0ra6gf0mA_bDptY5er1Ey6Tck7-w/exec'; 
-
-        if (!window.user) {
-            window.user = {
-                IT_User: "IT_ADMIN",
-                UserName: "เจ้าหน้าที่",
-                UserSname: "ไอที"
-            };
-        }
-
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec'; 
+        
         let tomSelectDept = null;
         let html5QrCode = null;
         let signaturePad = null;
@@ -487,9 +552,11 @@
         let tempSelectedAsset = null;
         let currentSessionStockInNo = null; 
         let currentSessionStockInId = null;
-        let savedItemsList = [];
+        let savedItemsList = []; 
         let uploadedDocFileBase64 = null;
         let uploadedDocFileName = "";
+        let editingItemIndex = -1;
+        let activePeripheralItemIndex = -1;
 
         document.addEventListener('DOMContentLoaded', () => {
             initUserDisplay();
@@ -498,17 +565,29 @@
             setupImagePreview();
             setupDocFileHandler();
             loadSummaryCounts();
+            renderSavedTable();
         });
 
-        function getDisplayName() {
-            if (!window.user) return "ผู้ใช้งานทั่วไป";
-            return (window.user.UserName || "") + " " + (window.user.UserSname || "");
+        function getSafeDisplayName() {
+            try {
+                if (window.user && typeof window.user === 'object') {
+                    const uName = window.user.UserName || window.user.name || "";
+                    const uSname = window.user.UserSname || window.user.surname || "";
+                    const full = (uName + " " + uSname).trim();
+                    if (full.length > 0) return full;
+                }
+            } catch (e) {
+                console.warn("User name resolve error:", e);
+            }
+            return "ผู้ใช้งานทั่วไป";
         }
 
         function initUserDisplay() {
-            const loginName = window.user ? (window.user.IT_User || getDisplayName()) : "IT_ADMIN";
-            document.getElementById('displayUserLogin').innerText = loginName;
-            document.getElementById('displayItUser').value = loginName;
+            const displayName = getSafeDisplayName();
+            const el = document.getElementById('displayUserLogin');
+            const elIt = document.getElementById('displayItUser');
+            if(el) el.innerText = displayName;
+            if(elIt) elIt.value = displayName;
             document.getElementById('displayDateTime').value = new Date().toLocaleString('th-TH');
         }
 
@@ -523,10 +602,7 @@
 
             ['summary', 'stockin', 'history', 'inventory'].forEach(id => {
                 const el = document.getElementById(`content-${id}`);
-                if(el) {
-                    el.classList.add('hidden');
-                    el.classList.remove('animate-fade-in');
-                }
+                if(el) { el.classList.add('hidden'); el.classList.remove('animate-fade-in'); }
             });
             
             const content = document.getElementById(`content-${tabId}`);
@@ -546,60 +622,51 @@
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
 
-        function closeModal(id) { 
-            document.getElementById(id).classList.add('hidden'); 
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function fetchAPI(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                const data = await response.json();
+                if (data && data.status === 'error') throw new Error(data.message);
+                return data;
+            } catch (error) {
+                console.error("API Error:", error);
+                throw error;
+            }
         }
 
         async function loadSummaryCounts() {
             try {
-                const resStock = await fetch(`${SCRIPT_URL}?action=getStockInList`);
-                if(resStock.ok) {
-                    const jsonStock = await resStock.json();
-                    if (jsonStock.status === 'success') {
-                        document.getElementById('summaryTotalStockIn').innerText = jsonStock.data.length || 0;
-                    }
-                }
-
-                const resInv = await fetch(`${SCRIPT_URL}?action=getInventoryAsset`);
-                if(resInv.ok) {
-                    const jsonInv = await resInv.json();
-                    if (jsonInv.status === 'success') {
-                        document.getElementById('summaryTotalInventory').innerText = jsonInv.data.length || 0;
-                    }
-                }
-            } catch(e) {
-                console.warn("Summary load warning:", e);
-            }
+                const stockRes = await fetchAPI(`${SCRIPT_URL}?action=getStockIn`);
+                const invRes = await fetchAPI(`${SCRIPT_URL}?action=getInventory`);
+                const stockList = Array.isArray(stockRes) ? stockRes : (stockRes.data || []);
+                const invList = Array.isArray(invRes) ? invRes : (invRes.data || []);
+                document.getElementById('summaryTotalStockIn').innerText = stockList.length;
+                document.getElementById('summaryTotalInventory').innerText = invList.length;
+            } catch(e) { console.warn("Summary Load Warning:", e); }
         }
 
         async function fetchDepartments() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getDepartments`);
-                if(!res.ok) throw new Error("Network response was not ok");
-                const result = await res.json();
-                
-                if(result.status === 'success') {
-                    const select = document.getElementById('DEP_ID');
-                    select.innerHTML = '<option value="">-- พิมพ์ชื่อเพื่อค้นหาหน่วยงาน --</option>';
-                    result.data.forEach(d => {
-                        const deptName = d.DEPNAME || d.DEPT || d.DEP_NAME_LOC || d.DEP_ID;
-                        departmentMap[d.DEP_ID] = deptName;
-                        select.innerHTML += `<option value="${d.DEP_ID}">${deptName} (${d.DEP_ID})</option>`;
-                    });
-                    
-                    if(tomSelectDept) tomSelectDept.destroy();
-                    tomSelectDept = new TomSelect("#DEP_ID", { 
-                        sortField: {field: "text"},
-                        placeholder: "🔍 พิมพ์ชื่อหน่วยงาน..."
-                    });
-                }
-            } catch(e) { 
-                console.error("Fetch departments error:", e);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เชื่อมต่อฐานข้อมูลล้มเหลว',
-                    text: 'กรุณาตรวจสอบ URL ของ Google Apps Script หรือการตั้งค่าสิทธิ์ Anyone'
+                const res = await fetchAPI(`${SCRIPT_URL}?action=getDepartments`);
+                const deptData = Array.isArray(res) ? res : (res.data || []);
+                const select = document.getElementById('DEP_ID');
+                select.innerHTML = '<option value="">-- พิมพ์ชื่อเพื่อค้นหาหน่วยงาน --</option>';
+                deptData.forEach(d => {
+                    const deptId = d.DEP_ID || d.DEPID || d.id;
+                    const deptName = d.DEP_NAME_LOC || d.DEPNAME || d.DEPT || deptId;
+                    if(deptId) {
+                        departmentMap[deptId] = deptName;
+                        select.innerHTML += `<option value="${deptId}">${deptName} (${deptId})</option>`;
+                    }
                 });
+                
+                if(tomSelectDept) tomSelectDept.destroy();
+                tomSelectDept = new TomSelect("#DEP_ID", { sortField: {field: "text"}, placeholder: "🔍 ค้นหาหน่วยงาน..." });
+            } catch(e) {
+                console.warn('ไม่สามารถโหลดข้อมูลหน่วยงานได้');
             }
         }
 
@@ -607,98 +674,79 @@
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลดข้อมูล...</span></td></tr>';
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getStockInDetails`);
-                if(!res.ok) throw new Error("Network error");
-                const result = await res.json();
-                const data = result.data;
-                
+                const res = await fetchAPI(`${SCRIPT_URL}?action=getStockIn`);
+                const historyData = Array.isArray(res) ? res : (res.data || []);
                 tbody.innerHTML = '';
-                if(!data || data.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">ไม่มีประวัติการรับเข้า</td></tr>';
+                if(!historyData || historyData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">ไม่มีข้อมูลประวัติ</td></tr>';
                 
-                data.reverse().forEach((row, index) => {
-                    const dateStr = row.Date_Time ? new Date(row.Date_Time).toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'}) : '-';
-                    const deptDisplay = departmentMap[row.DEP_ID] || row.DEP_ID || '-';
-                    const sourceType = row.Source_Type || '-';
-                    const countItems = row.assets ? row.assets.length : 0;
+                historyData.slice().reverse().forEach((row, index) => {
+                    const rawDate = row.Date_Time || row.Timestamp || row.date;
+                    const dateStr = rawDate ? new Date(rawDate).toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'}) : '-';
+                    // Note: row.DEPT_ID is already mapped to Department Name by GAS getStockIn()
+                    const deptDisplay = row.DEPT_ID || departmentMap[row.DEPT_ID] || '-';
+                    const itemsList = row.items || row.assets || [];
+                    const countItems = itemsList.length;
                     
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-pink-50/30 transition-colors">
-                            <td class="p-4 text-center font-bold text-gray-500">${index + 1}</td>
-                            <td class="p-4 text-xs text-gray-600">${dateStr}</td>
-                            <td class="p-4 font-medium text-gray-800">${deptDisplay}</td>
-                            <td class="p-4 text-pink-600 font-medium text-sm">${sourceType}</td>
-                            <td class="p-4 text-center"><span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-bold">${countItems} รายการ</span></td>
-                        </tr>`;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50/50 transition-colors cursor-pointer";
+                    tr.onclick = () => showHistoryDetail(row);
+                    tr.innerHTML = `
+                        <td class="p-4 text-center font-bold text-gray-500">${index + 1}</td>
+                        <td class="p-4 text-xs text-gray-600">${dateStr}<br><span class="text-[10px] text-pink-500">${row.Stock_In_No || row.Stock_In_ID}</span></td>
+                        <td class="p-4 font-medium text-gray-800">${deptDisplay}</td>
+                        <td class="p-4 text-pink-600 text-sm">${row.Source_Type || '-'}</td>
+                        <td class="p-4 text-center"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${countItems} รายการ</span></td>
+                    `;
+                    tbody.appendChild(tr);
                 });
-            } catch(e) { 
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-red-500">เกิดข้อผิดพลาดในการโหลดประวัติ</td></tr>'; 
-            }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-red-500">Error loading data</td></tr>'; }
         }
 
         async function loadInventoryData() {
             const tbody = document.getElementById('inventoryTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลด...</span></td></tr>';
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getInventoryAsset`);
-                if(!res.ok) throw new Error("Network error");
-                const {data} = await res.json();
-                
+                const res = await fetchAPI(`${SCRIPT_URL}?action=getInventory`);
+                const invData = Array.isArray(res) ? res : (res.data || []);
                 tbody.innerHTML = '';
-                if(!data || data.length === 0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-gray-400">คลังว่างเปล่า</td></tr>';
+                if(!invData || invData.length === 0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-gray-400">คลังว่างเปล่า</td></tr>';
                 
-                data.forEach(row => {
-                    const statusVal = row.Inv_Status || '-';
-                    let statusColor = 'bg-gray-100 text-gray-600';
-                    if(statusVal === 'ใช้งานปกติ') statusColor = 'bg-emerald-100 text-emerald-700';
-                    else if(statusVal === 'รอตรวจสอบ') statusColor = 'bg-orange-100 text-orange-700';
-                    else if(statusVal === 'Spar') statusColor = 'bg-blue-100 text-blue-700';
-                    else if(statusVal === 'รอส่งคืน') statusColor = 'bg-red-100 text-red-700';
-                    
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="p-4 font-bold text-pink-600">${row.Asset_ID || row.NOID || '-'}</td>
-                            <td class="p-4 text-xs text-gray-500 font-medium"><span class="bg-gray-100 px-2 py-1 rounded-md">${row.Stock_ID ? row.Stock_ID.split('-')[0] : '-'}</span></td>
-                            <td class="p-4 text-xs">
-                                <p class="font-bold text-gray-800 truncate max-w-[200px] sm:max-w-xs">${row.Asset_FullDescription || '-'}</p>
-                                <p class="text-gray-500 mt-0.5">S/N: ${row.Asset_Serial || '-'} | ${row.Asset_AgeInfo || ''}</p>
-                            </td>
-                            <td class="p-4 text-center"><span class="px-3 py-1 rounded-lg text-[11px] font-bold tracking-wider ${statusColor}">${statusVal}</span></td>
-                        </tr>`;
+                invData.slice().reverse().forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-purple-50/50 transition-colors cursor-pointer";
+                    tr.onclick = () => showInventoryDetail(row);
+                    tr.innerHTML = `
+                        <td class="p-4 font-bold text-pink-600">${row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-'}<br><span class="text-[10px] text-gray-400">${row.Inv_No || row.Inv_ID}</span></td>
+                        <td class="p-4 text-xs text-gray-500 font-medium">${row.Stock_ID ? row.Stock_ID.split('-')[0] : '-'}</td>
+                        <td class="p-4 text-xs">
+                            <p class="font-bold text-gray-800 truncate max-w-[250px]">${row.Asset_FullDescription || row.FullDescription || row.Spec_Detai || '-'}</p>
+                        </td>
+                        <td class="p-4 text-center"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-bold">${row.Inv_Status || '-'}</span></td>
+                    `;
+                    tbody.appendChild(tr);
                 });
-            } catch(e) { 
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-red-500">เกิดข้อผิดพลาดในการโหลดคลัง</td></tr>'; 
-            }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-red-500">Error loading data</td></tr>'; }
         }
 
-        function normalizeText(str) {
-            if (!str) return "";
-            return String(str).replace(/[-/_\s]/g, "").toUpperCase();
-        }
-
+        function normalizeText(str) { return String(str || '').replace(/[-/_\s]/g, "").toUpperCase(); }
         function highlightText(fullText, query) {
             if (!query || !fullText) return fullText || "";
             const cleanQuery = normalizeText(query);
             if (!cleanQuery) return fullText;
             try {
-                const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                return String(fullText).replace(regex, '<span class="text-emerald-600 font-bold bg-emerald-100 px-1 rounded">$1</span>');
-            } catch(e) {
-                return fullText;
-            }
+                const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return String(fullText).replace(new RegExp(`(${escaped})`, 'gi'), '<span class="text-emerald-600 font-bold bg-emerald-50 px-1 rounded">$1</span>');
+            } catch(e) { return fullText; }
         }
 
         function debouncedSearch() {
             clearTimeout(window.sTimeout);
             const q = document.getElementById('assetQuery').value.trim();
+            const area = document.getElementById('resultsArea');
             if (q.length >= 1) {
                 window.sTimeout = setTimeout(searchAsset, 300);
             } else {
-                const area = document.getElementById('resultsArea');
-                if (area) {
-                    area.classList.add('hidden');
-                    area.innerHTML = '';
-                }
+                if (area) { area.classList.add('hidden'); area.innerHTML = ''; }
             }
         }
 
@@ -707,90 +755,52 @@
             const area = document.getElementById('resultsArea');
             if (!area) return;
             
-            area.innerHTML = '<div class="p-6 text-center"><div class="spinner mx-auto"></div><p class="text-xs text-gray-400 mt-2">กำลังค้นหาฐานข้อมูล...</p></div>';
+            area.innerHTML = '<div class="p-6 text-center"><div class="spinner mx-auto border-2 w-8 h-8 mb-2"></div><p class="text-xs text-gray-400">กำลังค้นหาฐานข้อมูล...</p></div>';
             area.classList.remove('hidden');
 
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=searchAsset&query=${encodeURIComponent(q)}`);
-                if(!res.ok) throw new Error("Search network error");
-                const result = await res.json();
-                const data = result.data || result;
-                
+                const res = await fetchAPI(`${SCRIPT_URL}?action=searchAsset&query=${encodeURIComponent(q)}`);
+                const assetResults = Array.isArray(res) ? res : (res.data || []);
                 area.innerHTML = '';
-                if (!data || data.length === 0) {
+                if (!assetResults || assetResults.length === 0) {
                     area.innerHTML = '<p class="text-center p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">ไม่พบรหัสครุภัณฑ์นี้</p>';
                     return;
                 }
 
-                data.forEach(item => {
+                assetResults.forEach(item => {
                     const d = document.createElement('div');
-                    d.className = "p-3.5 bg-white border-b border-pink-50 flex justify-between items-center cursor-pointer hover:bg-pink-50/50 transition-colors group";
+                    d.className = "p-3.5 bg-white rounded-2xl border border-pink-100 flex justify-between items-center cursor-pointer shadow-sm hover:border-pink-300 transition-all mb-2";
                     
-                    const displayAssetID = item.AssetID || item.NoID || item.NOID || '-';
-                    const highlightedID = highlightText(displayAssetID, q);
+                    const itemID = item.AssetID || item.NoID || item.NOID;
+                    const highlightedID = highlightText(itemID, q);
                     const serialText = item.Serial ? String(item.Serial) : "-";
                     const highlightedSerial = serialText !== "-" ? highlightText(serialText, q) : serialText;
-                    
+
                     d.innerHTML = `
                         <div class="flex-grow pr-4">
-                            <p class="text-[13px] font-bold text-pink-600 uppercase tracking-tight mb-0.5">${highlightedID}</p>
+                            <p class="text-[13px] font-bold text-pink-500 uppercase tracking-tight mb-0.5">${highlightedID}</p>
                             <p class="text-xs font-bold text-gray-700 leading-tight">${item.FullDescription || '-'}</p>
-                            <p class="text-[11px] font-medium text-gray-500 mt-1">S/N: ${highlightedSerial} | <span class="text-purple-500">${item.AgeInfo || ''}</span></p>
+                            <p class="text-[11px] font-medium text-gray-500 mt-1">S/N: ${highlightedSerial} | ${item.AgeInfo || '-'}</p>
                         </div>
                         <div>
-                            <span class="bg-pink-100 text-pink-600 px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1 shadow-sm group-hover:bg-pink-500 group-hover:text-white transition-colors">+ เลือก</span>
+                            <span class="bg-pink-100 text-pink-600 px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1 shadow-sm">+ เลือก</span>
                         </div>
                     `;
-                    d.onclick = () => openAssetModal(item);
+                    d.onclick = () => openAssetModal(item, -1);
                     area.appendChild(d);
                 });
-            } catch(e) { 
-                area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">เกิดข้อผิดพลาดในการเชื่อมต่อค้นหาข้อมูล</p>'; 
-            }
-        }
-
-        function openAssetModal(item) {
-            const type = document.getElementById('Source_Type').value;
-            const dept = document.getElementById('DEP_ID').value;
-            
-            if(!type || !dept) {
-                Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกประเภทการรับเข้า และแผนก ก่อนเพิ่มครุภัณฑ์', confirmButtonColor: '#e04a70'});
-                return;
-            }
-
-            tempSelectedAsset = item;
-            tempSelectedAsset.imageBase64 = null;
-
-            document.getElementById('modalAssetID').innerText = item.AssetID || item.NoID || item.NOID || '-';
-            document.getElementById('modalAge').innerText = item.AgeInfo || '-';
-            document.getElementById('modalSpec').innerText = item.FullDescription || '-';
-            
-            document.getElementById('modalStatus').value = 'รอตรวจสอบ';
-            document.getElementById('modalImgUpload').value = '';
-            document.getElementById('modalImgPreview').src = '';
-            document.getElementById('previewContainer').classList.add('hidden');
-            
-            document.getElementById('resultsArea').classList.add('hidden');
-            document.getElementById('assetQuery').value = '';
-            
-            document.getElementById('assetConfirmModal').classList.remove('hidden');
+            } catch(e) { area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">เกิดข้อผิดพลาดในการเชื่อมต่อค้นหาข้อมูล</p>'; }
         }
 
         function setupImagePreview() {
             document.getElementById('modalImgUpload').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if(file) {
-                    if(file.size > 3 * 1024 * 1024) {
-                        Swal.fire('ไฟล์ใหญ่เกินไป', 'กรุณาเลือกรูปภาพขนาดไม่เกิน 3MB', 'warning');
-                        this.value = '';
-                        return;
-                    }
-
+                    if(file.size > 3 * 1024 * 1024) return Swal.fire('Error', 'รูปขนาดเกิน 3MB', 'warning');
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         tempSelectedAsset.imageBase64 = e.target.result;
-                        const preview = document.getElementById('modalImgPreview');
-                        preview.src = e.target.result;
+                        document.getElementById('modalImgPreview').src = e.target.result;
                         document.getElementById('previewContainer').classList.remove('hidden');
                     };
                     reader.readAsDataURL(file);
@@ -802,293 +812,493 @@
             document.getElementById('Doc_ID_File').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if(file) {
-                    if(file.size > 5 * 1024 * 1024) {
-                        Swal.fire('ไฟล์ใหญ่เกินไป', 'กรุณาเลือกไฟล์ขนาดไม่เกิน 5MB', 'warning');
-                        this.value = '';
-                        return;
-                    }
                     uploadedDocFileName = file.name;
-                    document.getElementById('docFileNameDisplay').innerText = "เลือกไฟล์แล้ว: " + file.name;
-                    
+                    document.getElementById('docFileNameDisplay').innerText = file.name;
                     const reader = new FileReader();
-                    reader.onload = (event) => {
-                        uploadedDocFileBase64 = event.target.result;
-                    };
+                    reader.onload = (e) => uploadedDocFileBase64 = e.target.result;
                     reader.readAsDataURL(file);
                 }
             });
         }
-        
+
         function clearImage() {
-            tempSelectedAsset.imageBase64 = null;
+            if(tempSelectedAsset) tempSelectedAsset.imageBase64 = null;
             document.getElementById('modalImgUpload').value = '';
-            document.getElementById('modalImgPreview').src = '';
             document.getElementById('previewContainer').classList.add('hidden');
+        }
+
+        function openAssetModal(item, index = -1) {
+            const type = document.getElementById('Source_Type').value;
+            const dept = document.getElementById('DEP_ID').value;
+            
+            if(!type || !dept) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทรับเข้า และ หน่วยงานก่อน', 'warning');
+
+            editingItemIndex = index;
+            if (index > -1) {
+                tempSelectedAsset = JSON.parse(JSON.stringify(savedItemsList[index]));
+                document.getElementById('modalTitleText').innerHTML = `<i class="fa-solid fa-pen"></i> แก้ไขข้อมูล`;
+                document.getElementById('btnSaveItem').innerHTML = `<i class="fa-solid fa-save"></i> บันทึกการแก้ไข`;
+            } else {
+                tempSelectedAsset = item;
+                tempSelectedAsset.imageBase64 = null;
+                tempSelectedAsset.Peripherals = 0; // Default
+                document.getElementById('modalTitleText').innerHTML = `<i class="fa-solid fa-plus"></i> เพิ่มรายการ`;
+                document.getElementById('btnSaveItem').innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> บันทึกลงรายการ`;
+            }
+
+            document.getElementById('modalAssetID').innerText = tempSelectedAsset.AssetID || tempSelectedAsset.NoID || tempSelectedAsset.NOID || '-';
+            document.getElementById('modalAge').innerText = tempSelectedAsset.AgeInfo || tempSelectedAsset.Asset_AgeInfo || '-';
+            document.getElementById('modalSpec').value = tempSelectedAsset.Spec_Detai || tempSelectedAsset.FullDescription || '-';
+            document.getElementById('modalStatus').value = tempSelectedAsset.InvStatus || tempSelectedAsset.Inv_Status || 'รอตรวจสอบ';
+            
+            // Checkbox logic: Peripherals = 1 (true) or 0 (false)
+            const pCheck = document.getElementById('modalPeripherals');
+            pCheck.checked = (tempSelectedAsset.Peripherals == 1 || tempSelectedAsset.Peripherals === '1');
+
+            if (tempSelectedAsset.imageBase64 || tempSelectedAsset.Image_URL) {
+                document.getElementById('modalImgPreview').src = tempSelectedAsset.imageBase64 || tempSelectedAsset.Image_URL;
+                document.getElementById('previewContainer').classList.remove('hidden');
+            } else clearImage();
+            
+            document.getElementById('resultsArea').classList.add('hidden');
+            document.getElementById('assetConfirmModal').classList.remove('hidden');
         }
 
         async function saveSingleItem() {
             if(!tempSelectedAsset) return;
+            const specVal = document.getElementById('modalSpec').value;
+            const statusVal = document.getElementById('modalStatus').value;
+            const periphVal = document.getElementById('modalPeripherals').checked ? 1 : 0;
+
+            tempSelectedAsset.FullDescription = specVal;
+            tempSelectedAsset.Spec_Detai = specVal;
+            tempSelectedAsset.InvStatus = statusVal;
+            tempSelectedAsset.Inv_Status = statusVal;
+            tempSelectedAsset.Peripherals = periphVal;
             
-            if(!tempSelectedAsset.imageBase64) {
-                Swal.fire({icon: 'warning', title: 'กรุณาแนบรูปภาพ', text: 'จำเป็นต้องถ่ายรูปหรือแนบรูปครุภัณฑ์ก่อนบันทึก', confirmButtonColor: '#e04a70'});
-                return;
-            }
-
-            tempSelectedAsset.Inv_Status = document.getElementById('modalStatus').value;
-            tempSelectedAsset.Spec_Detai = tempSelectedAsset.FullDescription;
-
             closeModal('assetConfirmModal');
-            showLoading(true, 'กำลังบันทึกและอัปโหลดรูป...');
-
-            const itUserLogin = window.user ? (window.user.IT_User || getDisplayName()) : "IT_ADMIN";
-
-            const payload = {
-                action: 'saveSingleItem',
-                stockInData: {
-                    Stock_In_No: currentSessionStockInNo,
-                    Stock_In_ID: currentSessionStockInId,
-                    Source_Type: document.getElementById('Source_Type').value,
-                    DEP_ID: document.getElementById('DEP_ID').value,
-                    IT_User: itUserLogin,
-                    User_Name: "", 
-                    Doc_ID: uploadedDocFileName || document.getElementById('Reference_No').value.trim(),
-                    Doc_ID_Base64: uploadedDocFileBase64 || "",
-                    Reference_No: document.getElementById('Reference_No').value.trim()
-                },
-                assetData: {
-                    Asset_ID: tempSelectedAsset.AssetID || tempSelectedAsset.Asset_ID || "",
-                    NOID: tempSelectedAsset.NOID || tempSelectedAsset.NoID || "",
-                    Spec_Detai: tempSelectedAsset.FullDescription || "",
-                    Inv_Status: tempSelectedAsset.Inv_Status,
-                    imageBase64: tempSelectedAsset.imageBase64
-                }
-            };
+            showLoading(true, 'กำลังบันทึกข้อมูล...');
 
             try {
-                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                if(!res.ok) throw new Error("Network save error");
-                const result = await res.json();
-                
-                showLoading(false);
-
-                if(result.status === 'success') {
-                    currentSessionStockInNo = result.stockInNo;
-                    currentSessionStockInId = result.stockInId;
-                    
-                    document.getElementById('sessionStockInNoText').innerText = currentSessionStockInId;
-                    document.getElementById('sessionStockInNoBadge').classList.remove('hidden');
-
-                    document.querySelectorAll('.header-input').forEach(el => {
-                        el.disabled = true;
-                        el.classList.add('bg-gray-50', 'text-gray-500', 'cursor-not-allowed');
-                    });
-                    if(tomSelectDept) tomSelectDept.lock();
-                    
-                    document.getElementById('sessionStockInBadge').classList.remove('hidden');
-                    document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
-                    
-                    document.getElementById('btnSign').disabled = false;
-                    document.getElementById('btnSign').classList.remove('opacity-50', 'cursor-not-allowed');
-
-                    savedItemsList.push(tempSelectedAsset);
-                    renderSavedTable();
-                    
-                    Swal.fire({icon: 'success', title: 'เพิ่มรายการสำเร็จ', text: 'บันทึกข้อมูลเรียบร้อย', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false});
+                if (editingItemIndex > -1) {
+                    savedItemsList[editingItemIndex] = tempSelectedAsset;
+                    if (tempSelectedAsset.Inv_ID) {
+                        await fetchAPI(SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'updateInventoryItem',
+                                payload: {
+                                    invId: tempSelectedAsset.Inv_ID,
+                                    assetData: {
+                                        Spec_Detai: tempSelectedAsset.Spec_Detai,
+                                        Inv_Status: tempSelectedAsset.Inv_Status,
+                                        imageBase64: tempSelectedAsset.imageBase64 || "",
+                                        Peripherals: tempSelectedAsset.Peripherals
+                                    }
+                                }
+                            })
+                        });
+                    }
+                    Swal.fire({icon: 'success', title: 'อัปเดตรายการสำเร็จ', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
                 } else {
-                    Swal.fire('เกิดข้อผิดพลาด', result.message || 'บันทึกไม่สำเร็จ', 'error');
+                    if (!currentSessionStockInId) {
+                        const stockPayload = {
+                            action: 'saveStockIn',
+                            payload: {
+                                depId: document.getElementById('DEP_ID').value,
+                                docId: uploadedDocFileName || "",
+                                sourceType: document.getElementById('Source_Type').value,
+                                referenceNo: document.getElementById('Reference_No').value,
+                                itUser: getSafeDisplayName(),
+                                userName: "-",
+                                signatureBase64: ""
+                            }
+                        };
+                        const stockRes = await fetchAPI(SCRIPT_URL, { method: 'POST', body: JSON.stringify(stockPayload) });
+                        currentSessionStockInNo = stockRes.stockInNo;
+                        currentSessionStockInId = stockRes.stockInID;
+
+                        document.getElementById('displayStockInId').innerText = currentSessionStockInId;
+                        document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
+                        document.getElementById('sessionStockInBadge').classList.remove('hidden');
+
+                        document.querySelectorAll('.header-input').forEach(el => { el.disabled = true; el.classList.add('bg-gray-100', 'cursor-not-allowed'); });
+                        if(tomSelectDept) tomSelectDept.lock();
+                        document.getElementById('btnSign').disabled = false;
+                    }
+
+                    const itemPayload = {
+                        action: 'saveSingleInventoryItem',
+                        payload: {
+                            stockInID: currentSessionStockInId,
+                            docId: uploadedDocFileName || "",
+                            item: {
+                                NoID: tempSelectedAsset.NoID || tempSelectedAsset.NOID || "",
+                                AssetID: tempSelectedAsset.AssetID || "",
+                                FullDescription: tempSelectedAsset.FullDescription || "",
+                                InvStatus: tempSelectedAsset.InvStatus || "รอตรวจสอบ",
+                                imageBase64: tempSelectedAsset.imageBase64 || "",
+                                Peripherals: tempSelectedAsset.Peripherals
+                            }
+                        }
+                    };
+
+                    const itemRes = await fetchAPI(SCRIPT_URL, { method: 'POST', body: JSON.stringify(itemPayload) });
+                    if (itemRes.savedItem) {
+                        tempSelectedAsset.Inv_No = itemRes.savedItem.Inv_No;
+                        tempSelectedAsset.Inv_ID = itemRes.savedItem.Inv_ID;
+                        tempSelectedAsset.Image_URL = itemRes.savedItem.Image_URL;
+                    }
+                    
+                    savedItemsList.push(tempSelectedAsset);
                 }
+                
+                renderSavedTable();
+                showLoading(false);
             } catch(e) {
                 showLoading(false);
-                Swal.fire('เชื่อมต่อล้มเหลว', e.message, 'error');
+                Swal.fire('Error', e.message, 'error');
             }
+        }
+
+        async function deleteSavedItem(index) {
+            Swal.fire({ 
+                title: 'ลบรายการนี้?', 
+                text: "ครุภัณฑ์ชิ้นนี้จะถูกลบออกจากรายการ",
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#e04a70', 
+                confirmButtonText: 'ใช่, ลบเลย' 
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const item = savedItemsList[index];
+                    if (item && item.Inv_ID) {
+                        showLoading(true, 'กำลังลบข้อมูล...');
+                        try {
+                            await fetchAPI(SCRIPT_URL, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    action: 'deleteRecord',
+                                    payload: { sheetName: 'Inventory_Asset', colIndex: 1, targetId: item.Inv_ID }
+                                })
+                            });
+                        } catch(e) { console.warn("Delete remote warning:", e); }
+                    }
+                    savedItemsList.splice(index, 1);
+                    renderSavedTable();
+                    showLoading(false);
+                }
+            });
         }
 
         function renderSavedTable() {
             const tbody = document.getElementById('assetTableBody');
+            tbody.innerHTML = '';
+            
             if (savedItemsList.length === 0) {
-                tbody.innerHTML = '<tr id="emptyRow"><td colspan="5" class="p-10 text-center text-gray-400"><div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-clipboard-list text-2xl text-gray-300"></i></div>ค้นหาและเลือกครุภัณฑ์ด้านบน<br><span class="text-xs text-gray-400 mt-1 block">ระบบจะบันทึกทันทีที่เพิ่มลงรายการ</span></td></tr>';
+                tbody.innerHTML = `<tr id="emptyRow"><td colspan="7" class="p-10 text-center text-gray-400">
+                    <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-boxes-stacked text-2xl text-gray-300"></i>
+                    </div>ค้นหาและเลือกครุภัณฑ์ด้านบน<br><span class="text-xs text-gray-400 mt-1 block">ระบบจะบันทึกทันทีที่เพิ่มลงรายการ</span>
+                </td></tr>`;
                 return;
             }
-            tbody.innerHTML = '';
+
             savedItemsList.forEach((item, index) => {
-                const hasImg = item.imageBase64 ? '<i class="fa-solid fa-check-circle text-emerald-500 text-lg"></i>' : '-';
-                const displayID = item.AssetID || item.NoID || item.NOID || '-';
-                tbody.innerHTML += `
-                    <tr class="hover:bg-pink-50/50 transition-colors">
-                        <td class="p-4 text-center font-bold text-gray-400">${index + 1}</td>
-                        <td class="p-4 font-bold text-pink-600">${displayID}</td>
-                        <td class="p-4 text-xs font-medium text-gray-700 truncate max-w-[150px] sm:max-w-sm">${item.FullDescription || '-'}</td>
-                        <td class="p-4 text-center"><span class="bg-gray-100 border border-gray-200 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">${item.Inv_Status}</span></td>
-                        <td class="p-4 text-center">${hasImg}</td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-pink-50 transition-colors border-b border-pink-50";
+                
+                const imgSrc = item.imageBase64 || item.Image_URL || 'https://placehold.co/100x100/ffe6eb/ff85a2?text=No+Img';
+                const hasPeripherals = (item.Peripherals == 1 || item.Peripherals === '1');
+                
+                let peripheralCol = '';
+                if (hasPeripherals) {
+                    const periCount = item.peripheralList ? item.peripheralList.length : 0;
+                    peripheralCol = `
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-plug"></i> มีอุปกรณ์ต่อพ่วง (${periCount})</span>
+                            <button type="button" onclick="openPeripheralModal(${index})" class="px-2.5 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow-sm transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-plus-circle"></i> เพิ่มอุปกรณ์
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    peripheralCol = `<span class="text-gray-300 text-xs">-</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-4 text-center font-bold text-gray-500">${index + 1}</td>
+                    <td class="p-4 text-center">
+                        <img src="${imgSrc}" class="w-12 h-12 rounded-lg object-cover mx-auto border border-pink-100 shadow-sm" onerror="this.src='https://placehold.co/100x100/ffe6eb/ff85a2?text=No+Img'">
+                    </td>
+                    <td class="p-4 font-bold text-pink-600">${item.AssetID || item.NoID || item.NOID || '-'}<br><span class="text-[10px] text-gray-400 font-normal">S/N: ${item.Serial || '-'}</span></td>
+                    <td class="p-4 text-xs text-gray-600">${item.Spec_Detai || item.FullDescription || '-'}</td>
+                    <td class="p-4 text-center"><span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</span></td>
+                    <td class="p-4 text-center">${peripheralCol}</td>
+                    <td class="p-4 text-center space-x-1">
+                        <button type="button" onclick="openAssetModal(null, ${index})" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors shadow-sm"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button type="button" onclick="deleteSavedItem(${index})" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        function resetFormSession() {
-            if(savedItemsList.length > 0) {
-                Swal.fire({
-                    title: 'เริ่มบิลใหม่ (ไม่ลงชื่อรับ)?',
-                    text: "รายการที่สแกนแล้วถูกบันทึกลงฐานข้อมูลไปแล้ว แต่จะไม่มีลายเซ็นในบิลนี้",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e04a70',
-                    cancelButtonColor: '#9ca3af',
-                    confirmButtonText: 'ยืนยัน'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        executeReset();
-                    }
-                });
-            } else {
-                executeReset();
+        function openPeripheralModal(itemIndex) {
+            activePeripheralItemIndex = itemIndex;
+            const item = savedItemsList[itemIndex];
+            if (!item) return;
+
+            document.getElementById('periAssetRef').innerText = `${item.AssetID || item.NoID || 'NOID'} - ${item.FullDescription || ''}`;
+            document.getElementById('periInvIdRef').innerText = item.Inv_ID || 'รอดำเนินการ...';
+            
+            document.getElementById('periQty').value = 1;
+            document.getElementById('periUnit').value = 'ตัว';
+            document.getElementById('periItemCode').value = '';
+
+            document.getElementById('peripheralModal').classList.remove('hidden');
+        }
+
+        async function savePeripheral() {
+            if (activePeripheralItemIndex === -1) return;
+            const item = savedItemsList[activePeripheralItemIndex];
+            if (!item || !item.Inv_ID) {
+                return Swal.fire('แจ้งเตือน', 'กรุณารอให้ระบบออกรหัส Inv_ID ให้สำเร็จก่อน', 'warning');
             }
+
+            const selectEl = document.getElementById('periItemID');
+            const itemId = selectEl.value;
+            const itemName = selectEl.options[selectEl.selectedIndex].getAttribute('data-name') || selectEl.options[selectEl.selectedIndex].text;
+            const qty = document.getElementById('periQty').value || 1;
+            const unit = document.getElementById('periUnit').value || 'ตัว';
+            const itemCode = document.getElementById('periItemCode').value || '';
+
+            closeModal('peripheralModal');
+            showLoading(true, 'กำลังบันทึกอุปกรณ์ต่อพ่วง...');
+
+            try {
+                // Mapping พารามิเตอร์ส่งตรงไปยัง processSinglePeripheral(payload)
+                const payload = {
+                    action: 'saveSinglePeripheral',
+                    payload: {
+                        Inv_ID: item.Inv_ID,                             // 2. StockIn_ID / Inv_ID KeyRef
+                        Item_ID: itemId,                                 // 4. Item_ID
+                        Name: itemName,                                  // 5. Name
+                        Quantity: parseInt(qty, 10),                     // 6. Quantity
+                        Unit: unit,                                      // 7. Unit
+                        Source_Type: document.getElementById('Source_Type').value || "", // 8. Source_Type
+                        Reference_No: document.getElementById('Reference_No').value || "", // 9. Reference_No
+                        Note: itemCode,                                  // 10. Note
+                        User: getSafeDisplayName(),                      // 11. User
+                        Item_Code: itemCode,                             // 12. Item_Code
+                        PO_ID: ""                                        // 13. PO_ID
+                    }
+                };
+
+                await fetchAPI(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+
+                if (!item.peripheralList) item.peripheralList = [];
+                item.peripheralList.push({ itemId, itemName, qty, unit, note: itemCode, itemCode });
+
+                showLoading(false);
+                renderSavedTable();
+                Swal.fire({ icon: 'success', title: 'บันทึกอุปกรณ์ต่อพ่วงสำเร็จ', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+            } catch (e) {
+                showLoading(false);
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+
+        function saveWithoutSign() {
+            if (savedItemsList.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเพิ่มรายการครุภัณฑ์ก่อนบันทึก', 'warning');
+            
+            prepareSlipPrint();
+            Swal.fire({
+                title: 'บันทึกสำเร็จ (ไม่ลงชื่อ)',
+                text: 'กำลังสร้างใบเสร็จรับเข้า...',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1200
+            }).then(() => {
+                document.body.classList.add("print-mode-slip");
+                setTimeout(() => {
+                    window.print();
+                    document.body.classList.remove("print-mode-slip");
+                    executeReset();
+                }, 500);
+            });
         }
 
         function executeReset() {
             currentSessionStockInNo = null;
             currentSessionStockInId = null;
             savedItemsList = [];
-            tempSelectedAsset = null;
-            uploadedDocFileBase64 = null;
-            uploadedDocFileName = "";
-            document.getElementById('docFileNameDisplay').innerText = "ยังไม่ได้เลือกไฟล์เอกสาร";
+            document.getElementById('displayStockInId').innerText = "รอดำเนินการ...";
+            document.getElementById('sessionStockInBadge').classList.add('hidden');
             
             document.querySelectorAll('.header-input').forEach(el => {
                 el.disabled = false;
-                el.classList.remove('bg-gray-50', 'text-gray-500', 'cursor-not-allowed');
+                el.classList.remove('bg-gray-100', 'cursor-not-allowed');
                 if(el.tagName === 'INPUT') el.value = '';
                 if(el.tagName === 'SELECT' && el.id !== 'DEP_ID') el.value = '';
             });
-            if(tomSelectDept) { 
-                tomSelectDept.unlock(); 
-                tomSelectDept.clear(); 
-            }
+            if(tomSelectDept) { tomSelectDept.unlock(); tomSelectDept.clear(); }
             
-            document.getElementById('sessionStockInBadge').classList.add('hidden');
-            document.getElementById('sessionStockInNoBadge').classList.add('hidden');
+            document.getElementById('docFileNameDisplay').innerText = "ยังไม่ได้เลือกไฟล์...";
+            uploadedDocFileName = "";
+            uploadedDocFileBase64 = null;
             
-            const btnSign = document.getElementById('btnSign');
-            btnSign.disabled = true;
-            btnSign.classList.add('opacity-50', 'cursor-not-allowed');
-            
-            document.getElementById('assetQuery').value = '';
-            document.getElementById('displayDateTime').value = new Date().toLocaleString('th-TH');
+            document.getElementById('btnSign').disabled = true;
             renderSavedTable();
-            loadSummaryCounts();
-        }
-
-        function validateAndSign() {
-            document.getElementById('sigStockNo').innerText = currentSessionStockInNo;
-            document.getElementById('modalUserName').value = '';
-            document.getElementById('signatureModal').classList.remove('hidden');
-            
-            setTimeout(() => {
-                const canvas = document.getElementById('signatureCanvas');
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                const rect = canvas.parentElement.getBoundingClientRect();
-                canvas.width = rect.width * ratio;
-                canvas.height = rect.height * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
-                signaturePad.clear();
-            }, 50);
         }
 
         function initSignaturePad() {
             const canvas = document.getElementById('signatureCanvas');
-            signaturePad = new SignaturePad(canvas, { 
-                penColor: 'rgb(0, 0, 0)', 
-                backgroundColor: 'rgba(0,0,0,0)',
-                minWidth: 1.5,
-                maxWidth: 3
-            });
+            signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(0,0,0,0)', minWidth: 1.5, maxWidth: 3 });
+        }
+
+        function validateAndSign() {
+            if (savedItemsList.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเพิ่มรายการครุภัณฑ์ก่อน', 'warning');
+            document.getElementById('sigStockNo').innerText = currentSessionStockInNo || '-';
+            document.getElementById('signatureModal').classList.remove('hidden');
+            setTimeout(() => {
+                const canvas = document.getElementById('signatureCanvas');
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.parentElement.offsetWidth * ratio;
+                canvas.height = canvas.parentElement.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear();
+            }, 100);
         }
 
         async function submitSignature() {
             const senderName = document.getElementById('modalUserName').value.trim();
-            if(!senderName) {
-                Swal.fire({icon: 'warning', title: 'ระบุชื่อ', text: 'กรุณาระบุชื่อผู้นำส่ง / ผู้ติดต่อก่อน', confirmButtonColor: '#e04a70'});
-                return;
-            }
-            if (signaturePad.isEmpty()) {
-                Swal.fire({icon: 'warning', title: 'ลายเซ็นว่างเปล่า', text: 'กรุณาลงลายมือชื่อก่อนยืนยัน', confirmButtonColor: '#e04a70'});
-                return;
-            }
+            if(!senderName || signaturePad.isEmpty()) return Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อและลายเซ็น', 'warning');
             
             closeModal('signatureModal');
-            showLoading(true, 'กำลังบันทึกลายเซ็น และออกเอกสาร...');
-
+            showLoading(true, 'กำลังบันทึกลายเซ็น...');
             const b64 = signaturePad.toDataURL();
-            
-            const payload = { 
-                action: 'updateSignature', 
-                stockInNo: currentSessionStockInNo, 
-                signatureBase64: b64,
-                senderName: senderName
-            };
 
             try {
-                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                if(!res.ok) throw new Error("Network signature save error");
-                const result = await res.json();
+                await fetchAPI(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateSignature',
+                        payload: { stockInNo: currentSessionStockInNo, signatureBase64: b64, userName: senderName }
+                    })
+                });
                 showLoading(false);
-
-                if(result.status === 'success') {
-                    preparePrintData(senderName, b64);
-                    
-                    Swal.fire({
-                        icon: 'success', 
-                        title: 'เสร็จสิ้นสมบูรณ์!', 
-                        text: 'บันทึกเข้าระบบเรียบร้อย กำลังเปิดหน้าต่างพิมพ์...', 
-                        timer: 2000, 
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.print();
-                        executeReset();
-                    });
-                } else { 
-                    Swal.fire('Error', result.message || 'บันทึกไม่สำเร็จ', 'error'); 
-                }
-            } catch(e) { 
-                showLoading(false); 
-                Swal.fire('Error', e.message, 'error'); 
+                
+                prepareLandscapePrint(senderName, b64);
+                document.body.className = "print-mode-landscape";
+                window.print();
+                document.body.className = "p-2 sm:p-4 md:p-8"; 
+                
+                executeReset();
+            } catch(e) {
+                showLoading(false);
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
-        function preparePrintData(senderName, sigBase64) {
-            document.getElementById('p-bill').innerText = currentSessionStockInNo;
-            document.getElementById('p-date').innerText = new Date().toLocaleString('th-TH');
-            document.getElementById('p-type').innerText = document.getElementById('Source_Type').value;
-            
+        function prepareLandscapePrint(senderName, sigBase64) {
+            document.getElementById('p-bill-ls').innerText = currentSessionStockInNo || '-';
+            document.getElementById('p-date-ls').innerText = new Date().toLocaleString('th-TH');
+            document.getElementById('p-type-ls').innerText = document.getElementById('Source_Type').value;
             const deptId = document.getElementById('DEP_ID').value;
-            document.getElementById('p-dept').innerText = departmentMap[deptId] || deptId;
-            document.getElementById('p-it-user-print').innerText = getDisplayName();
+            document.getElementById('p-dept-ls').innerText = departmentMap[deptId] || deptId;
+            document.getElementById('p-ref-ls').innerText = document.getElementById('Reference_No').value || '-';
             
-            document.getElementById('p-user').innerText = senderName; 
-            document.getElementById('p-it-user').innerText = getDisplayName(); 
-            const sigImg = document.getElementById('p-sig-img');
-            sigImg.src = sigBase64;
-            sigImg.classList.remove('hidden');
+            document.getElementById('p-user-ls').innerText = senderName;
+            document.getElementById('p-it-user-ls').innerText = getSafeDisplayName();
+            
+            document.getElementById('p-sig-img').src = sigBase64;
+            document.getElementById('p-sig-img').classList.remove('hidden');
 
-            const ptbody = document.getElementById('printTableBody');
-            ptbody.innerHTML = '';
+            const tbody = document.getElementById('printTableBodyLandscape');
+            tbody.innerHTML = '';
             savedItemsList.forEach((item, idx) => {
-                const displayID = item.AssetID || item.NoID || item.NOID || '-';
-                ptbody.innerHTML += `<tr>
-                    <td class="border border-black p-2 text-center">${idx + 1}</td>
-                    <td class="border border-black p-2 font-bold">${displayID}</td>
-                    <td class="border border-black p-2">${item.FullDescription || '-'}</td>
-                    <td class="border border-black p-2 text-center">${item.Inv_Status}</td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td class="border border-black p-2 text-center">${idx + 1}</td>
+                <td class="border border-black p-2 font-bold">${item.AssetID || item.NoID || item.NOID || '-'}</td>
+                <td class="border border-black p-2">${item.Spec_Detai || item.FullDescription || '-'}</td>
+                <td class="border border-black p-2 text-center">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</td></tr>`;
             });
         }
 
-        function initHtml5QrCode() {
-            if (typeof Html5Qrcode !== 'undefined') {
-                html5QrCode = new Html5Qrcode("reader");
-            }
+        function prepareSlipPrint() {
+            document.getElementById('p-bill-sl').innerText = currentSessionStockInNo || '-';
+            document.getElementById('p-date-sl').innerText = new Date().toLocaleString('th-TH');
+            document.getElementById('p-it-sl').innerText = getSafeDisplayName();
+            document.getElementById('p-user-sl').innerText = "-"; 
+            document.getElementById('p-id-sl').innerText = currentSessionStockInId || '-';
+            
+            const tbody = document.getElementById('printTableBodySlip');
+            tbody.innerHTML = '';
+            savedItemsList.forEach(item => {
+                tbody.innerHTML += `<tr><td style="padding: 2px 0;">${item.AssetID || item.NoID || item.NOID || '-'}<br><span style="color:#666; font-size:9px;">${(item.Spec_Detai || item.FullDescription || '').substring(0, 20)}</span></td>
+                <td style="text-align:right; padding: 2px 0;">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</td></tr>`;
+            });
         }
 
+        function showHistoryDetail(row) {
+            const content = document.getElementById('detailContent');
+            let assetsHTML = '';
+            const items = row.items || row.assets || [];
+            if(items.length > 0) {
+                items.forEach(a => {
+                    let perisHTML = '';
+                    if (a.peripherals && Array.isArray(a.peripherals) && a.peripherals.length > 0) {
+                        perisHTML = `<div class="mt-1 pl-2 border-l-2 border-purple-300 text-[11px] text-purple-700 bg-purple-50/60 p-1.5 rounded-r">
+                            <p class="font-bold text-[10px] text-purple-900 mb-0.5"><i class="fa-solid fa-plug"></i> อุปกรณ์ต่อพ่วง (${a.peripherals.length}):</p>`;
+                        a.peripherals.forEach(p => {
+                            const pName = p.Name || p.Item_ID || 'อุปกรณ์';
+                            const pQty = p.Quantity || 1;
+                            const pUnit = p.Unit || 'ตัว';
+                            const pCode = p.Item_Code || p.Note ? ` [รหัส: ${p.Item_Code || p.Note}]` : '';
+                            perisHTML += `<p class="leading-tight">• ${pName} - ${pQty} ${pUnit}${pCode}</p>`;
+                        });
+                        perisHTML += `</div>`;
+                    }
+
+                    assetsHTML += `<div class="bg-white p-2.5 rounded-xl border border-gray-100 flex flex-col mb-1 text-xs shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-pink-600">${a.AssetID || a.Asset_ID || a.NOID || a.NoID}</span>
+                            <span class="text-gray-500 bg-gray-100 px-2 py-0.5 rounded text-[10px]">${a.Inv_Status || a.InvStatus || '-'}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-600 mt-1">${a.Spec_Detai || a.FullDescription || ''}</p>
+                        ${perisHTML}
+                    </div>`;
+                });
+            } else assetsHTML = '<p class="text-gray-400">ไม่มีรายการ</p>';
+
+            const deptName = row.DEPT_ID || departmentMap[row.DEPT_ID] || '-';
+
+            content.innerHTML = `
+                <p><strong>บิลอ้างอิง:</strong> <span class="text-pink-600 font-mono font-bold">${row.Stock_In_No || row.Stock_In_ID}</span></p>
+                <p><strong>วันที่:</strong> ${new Date(row.Date_Time || row.Timestamp).toLocaleString('th-TH')}</p>
+                <p><strong>หน่วยงาน:</strong> ${deptName}</p>
+                <p><strong>ประเภทการรับเข้า:</strong> ${row.Source_Type || '-'}</p>
+                <p><strong>ผู้รับ (IT):</strong> ${row.IT_User || '-'}</p>
+                <p><strong>ผู้นำส่ง:</strong> ${row.User_Name || '-'}</p>
+                <div class="mt-4 border-t pt-2 bg-gray-50 p-3 rounded-2xl"><p class="font-bold mb-2 text-xs">รายการครุภัณฑ์ (${items.length}):</p>${assetsHTML}</div>
+            `;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function showInventoryDetail(row) {
+            const content = document.getElementById('detailContent');
+            content.innerHTML = `
+                <div class="text-center mb-4"><i class="fa-solid fa-desktop text-4xl text-purple-300"></i></div>
+                <p><strong>Asset / NOID:</strong> <span class="text-pink-600 font-bold">${row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-'}</span></p>
+                <p><strong>Inv_No:</strong> ${row.Inv_No || row.Inv_ID || '-'}</p>
+                <p><strong>อ้างอิงบิล (Stock_ID):</strong> ${row.Stock_ID || '-'}</p>
+                <p><strong>สถานะ:</strong> <span class="px-2 py-1 bg-gray-100 rounded text-xs font-bold">${row.Inv_Status || row.InvStatus || '-'}</span></p>
+                <div class="mt-4 border-t pt-2"><p class="font-bold">รายละเอียด:</p><p class="text-xs text-gray-600 mt-1">${row.Asset_FullDescription || row.FullDescription || row.Spec_Detai || '-'}</p></div>
+            `;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function initHtml5QrCode() { if (typeof Html5Qrcode !== 'undefined') html5QrCode = new Html5Qrcode("reader"); }
         async function openScanner(id) {
             document.getElementById('scannerModal').classList.remove('hidden');
             const errorMsg = document.getElementById('searchError'); 
@@ -1096,29 +1306,25 @@
         
             try {
                 if (!html5QrCode) initHtml5QrCode();
-                await html5QrCode.start(
-                    { facingMode: "environment" }, 
-                    { fps: 15, qrbox: { width: 250, height: 250 } }, 
-                    async (text) => {
-                        let processedText = text; 
-                        if (processedText.includes("http")) {
-                            const match = processedText.match(/IcmAssetDetail\/([^\/]+)/);
-                            if (match && match[1]) processedText = match[1];
-                        }
-                        document.getElementById(id).value = processedText;
-                        await closeScanner(); 
-                        if (id === 'assetQuery') { searchAsset(); }
-                    },
-                    (errorMessage) => {}
-                );
+                await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, async (text) => {
+                    let processedText = text; 
+                    if (processedText.includes("http")) {
+                        const match = processedText.match(/IcmAssetDetail\/([^\/]+)/);
+                        if (match && match[1]) processedText = match[1];
+                    }
+                    document.getElementById(id).value = processedText;
+                    await closeScanner(); 
+                    if (id === 'assetQuery') searchAsset();
+                });
             } catch (e) { 
-                if(errorMsg) errorMsg.innerText = "ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบสิทธิ์การใช้งานเบราว์เซอร์";
+                console.error("Camera error", e);
+                if(errorMsg) errorMsg.innerText = "ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบสิทธิ์";
             }
         }
-
+        
         async function closeScanner() { 
             if (html5QrCode && html5QrCode.isScanning) {
-                try { await html5QrCode.stop(); } catch(err) {}
+                try { await html5QrCode.stop(); } catch(err) { console.error(err); }
             }
             closeModal('scannerModal'); 
         }
