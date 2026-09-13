@@ -634,17 +634,29 @@
                     const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                     const allAlerts = result.alerts || [];
                     
-                    renderAllAlertsOnMainPage(allAlerts);
-
                     myCurrentAlerts = [];
-                    if (activeUser && allAlerts.length > 0) {
-                        const myUid = String(activeUser.USERID || '').trim();
+                    if (allAlerts.length > 0) {
+                        const myUid = activeUser ? String(activeUser.USERID || '').trim() : '';
+                        
+                        // 1. กรองเฉพาะแจ้งเตือนของตัวเอง, ค่าว่าง (ส่วนรวม), หรือ "ALL"
                         myCurrentAlerts = allAlerts.filter(alertItem => {
                             const targetUid = String(alertItem.USER_ID || '').trim();
-                            return targetUid === "" || targetUid === myUid;
+                            const targetUidUpper = targetUid.toUpperCase();
+                            return targetUid === "" || targetUidUpper === "ALL" || (activeUser && targetUid === myUid);
+                        });
+
+                        // 2. จัดเรียงลำดับจากใหม่สุดไปเก่าสุด
+                        myCurrentAlerts.sort((a, b) => {
+                            const dateA = a.ALERT_TIME_START ? new Date(a.ALERT_TIME_START) : new Date(0);
+                            const dateB = b.ALERT_TIME_START ? new Date(b.ALERT_TIME_START) : new Date(0);
+                            return dateB - dateA; // ถ้าผลเป็นบวก b จะมาก่อน a (เรียงใหม่สุดขึ้นก่อน)
                         });
                     }
 
+                    // 3. ส่งรายการที่กรองแล้วเท่านั้น ไปโชว์ในหน้าจอหลัก (ตามที่คุณต้องการให้แสดงเฉพาะที่มีสิทธิ์และเรียงแล้ว)
+                    renderAllAlertsOnMainPage(myCurrentAlerts);
+
+                    // อัปเดตตัวเลขการแจ้งเตือน
                     updateUnreadCounts();
 
                     if (result.menus) {
@@ -714,6 +726,7 @@
                 return;
             }
 
+            // ใน myCurrentAlerts ถูกเรียงไว้แล้วตั้งแต่ตอน Fetch แต่เรียงอีกครั้งกันเหนียวได้
             const sortedAlerts = [...myCurrentAlerts].sort((a, b) => {
                 const dateA = a.ALERT_TIME_START ? new Date(a.ALERT_TIME_START) : new Date(0);
                 const dateB = b.ALERT_TIME_START ? new Date(b.ALERT_TIME_START) : new Date(0);
@@ -737,7 +750,9 @@
                     const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                     const text = alertItem.ALERT_TEXT || '';
                     const time = alertItem.ALERT_TIME_START;
-                    const isPublic = String(alertItem.USER_ID || '').trim() === "";
+                    
+                    const uid = String(alertItem.USER_ID || '').trim().toUpperCase();
+                    const isPublic = (uid === "" || uid === "ALL");
                     
                     const status = String(alertItem.STATUS || '').toUpperCase();
                     const isRead = (status === 'CLOSED');
@@ -749,7 +764,6 @@
                     const textClass = isRead ? 'text-secondary' : 'text-dark';
                     const iconColor = isRead ? 'text-secondary' : 'text-warning';
                     
-                    // ป้ายบอกสถานะ อ่านแล้ว/ยังไม่อ่าน
                     const readStatusBadge = isRead 
                         ? `<span class="badge bg-success ms-1" style="font-size: 0.6rem;"><i class="fa-solid fa-check-double"></i> อ่านแล้ว</span>` 
                         : `<span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;"><i class="fa-solid fa-envelope"></i> ยังไม่อ่าน</span>`;
@@ -778,7 +792,8 @@
             const alertItem = myCurrentAlerts[index];
             
             let iconClass = 'fa-solid fa-circle-info text-primary';
-            if (String(alertItem.USER_ID || '').trim() === "") iconClass = 'fa-solid fa-bullhorn text-info';
+            const uid = String(alertItem.USER_ID || '').trim().toUpperCase();
+            if (uid === "" || uid === "ALL") iconClass = 'fa-solid fa-bullhorn text-info';
             
             document.getElementById('detailAlertTitle').innerHTML = `<i class="${iconClass} me-2"></i>${alertItem.ALERT_TYPE_ID || 'รายละเอียดแจ้งเตือน'}`;
             document.getElementById('detailAlertTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i> ${alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleString('th-TH', {year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'ไม่ระบุเวลา'}`;
@@ -791,6 +806,7 @@
             alertDetailModalInstance.hide();
         }
 
+        // หน้าหลักจะแสดงเฉพาะรายการจาก myCurrentAlerts แล้ว เพื่อให้เรียงลำดับและซ่อนอันที่ไม่มีสิทธิ์
         function renderAllAlertsOnMainPage(alerts) {
             const container = document.getElementById('alertsContainer');
             container.innerHTML = '';
@@ -806,14 +822,16 @@
                 const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || '';
                 const timeStr = alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : 'อัปเดตล่าสุด';
-                const uid = String(alertItem.USER_ID || '').trim();
+                
+                const uid = String(alertItem.USER_ID || '').trim().toUpperCase();
                 
                 let targetLabel = '';
                 let iconClass = 'fa-solid fa-bell';
                 let borderClass = 'border-left: 6px solid var(--pink-neon);';
                 let iconBoxBg = 'background: linear-gradient(135deg, #fff0f5, #ffe4e1); color: var(--pink-neon);';
 
-                if(uid === "") {
+                // ตรวจสอบเงื่อนไข "ALL"
+                if(uid === "" || uid === "ALL") {
                     targetLabel = '<span class="alert-badge-public">ส่วนรวม</span>';
                     iconClass = 'fa-solid fa-bullhorn';
                     borderClass = 'border-left: 5px solid #4facfe;'; 
@@ -896,15 +914,12 @@
             mainContainer.innerHTML = mainHtml;
         }
 
-        // ==========================================
-        // 1. แก้ไขให้ส่งค่า Note3 และ Name ไปยัง openMenu ได้
-        // ==========================================
         function createCardHTML(menu, alertCount = 0) {
             const icon = menu.ICON || 'fa-solid fa-layer-group';
             const name = menu.MENU_NAME || '';
             const desc = menu.DESC || '';
             const url = menu.LINK_URL || '#';
-            const note3 = menu.Note3 || menu.NOTE3 || '-'; // รับค่า Note3 ออกมาใช้งาน
+            const note3 = menu.Note3 || menu.NOTE3 || '-'; 
 
             let iconClass = icon;
             if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
@@ -944,14 +959,10 @@
             `;
         }
 
-        // ==========================================
-        // 2. ปรับแก้ไขลอจิก openMenu ตามเงื่อนไขของคุณทั้งหมด
-        // ==========================================
         function openMenu(url, note3 = '-', menuName = '') {
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             if (!activeUser) { loginModal.show(); return; }
 
-            // หากชื่อเมนูเป็นรายการ "แจ้งเตือน" (หรือมีคำว่าแจ้งเตือน) ให้เปิด Modal เลยแทนที่จะเด้งหน้าใหม่
             if (menuName && menuName.includes('แจ้งเตือน')) {
                 openNotificationsModal();
                 return;
@@ -959,7 +970,6 @@
 
             const actionType = String(note3).trim().toLowerCase();
 
-            // เช็คเงื่อนไขจาก Note3
             if (actionType === 'new') {
                 if (url !== '#' && url.trim() !== '') {
                     window.open(url, '_blank');
@@ -975,7 +985,6 @@
                     showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน อยู่ระหว่างขั้นตอนการพัฒนาครับ', 'fa-solid fa-code');
                 }
             } else {
-                // กรณี Note3 = "-" หรือกรณีไม่มีการระบุค่าที่ชัดเจน
                 showSystemModal('อยู่ระหว่างพัฒนา', 'โมดูลย่อยระบบนี้ยังไม่เปิดให้ใช้งาน อยู่ระหว่างขั้นตอนการพัฒนาครับ', 'fa-solid fa-code');
             }
         }
