@@ -807,10 +807,14 @@
         }
 
         // หน้าหลักจะแสดงเฉพาะรายการจาก myCurrentAlerts แล้ว เพื่อให้เรียงลำดับและซ่อนอันที่ไม่มีสิทธิ์
-        function renderAllAlertsOnMainPage(alerts) {
+       function renderAllAlertsOnMainPage(alerts) {
             const container = document.getElementById('alertsContainer');
             container.innerHTML = '';
             if (!alerts || alerts.length === 0) return;
+
+            // เพิ่มการกรองตรงนี้: เลือกเฉพาะรายการที่สถานะไม่ใช่ CLOSED (ยังไม่อ่าน) เท่านั้น
+            const unreadAlerts = alerts.filter(item => String(item.STATUS || '').toUpperCase() !== 'CLOSED');
+            if (unreadAlerts.length === 0) return; // ถ้าไม่มีรายการที่ยังไม่อ่าน ให้จบการทำงานเลย ไม่ต้องแสดงหัวข้อกระดาน
 
             let html = `
                 <div class="alerts-section-header">
@@ -818,7 +822,8 @@
                 </div>
             `;
             
-            alerts.forEach(alertItem => {
+            // เปลี่ยนจากวนลูป alerts เป็น unreadAlerts แทน
+            unreadAlerts.forEach(alertItem => {
                 const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || '';
                 const timeStr = alertItem.ALERT_TIME_START ? new Date(alertItem.ALERT_TIME_START).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : 'อัปเดตล่าสุด';
