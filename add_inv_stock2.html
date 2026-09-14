@@ -564,15 +564,27 @@
         </div>
     </div>
 
-    <!-- Modal: Detail Viewer พร้อมปุ่มพิมพ์สลิป -->
-    <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
-            <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 id="detailTitle" class="font-bold text-gray-700"><i class="fa-solid fa-circle-info mr-2"></i> รายละเอียด</h3>
-                <button onclick="closeModal('detailModal')" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 flex items-center justify-center shadow-sm"><i class="fa-solid fa-times"></i></button>
+    <!-- Modal แสดงรายละเอียดประวัติ Stock In -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-pink-100 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice text-pink-500"></i> รายละเอียดเอกสารรับเข้า
+                </h3>
+                <button type="button" onclick="closeModal('detailModal')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-            <div id="detailContent" class="p-5 overflow-y-auto text-sm text-gray-700 space-y-4 flex-grow"></div>
-            <div id="detailFooterAction" class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end"></div>
+
+            <!-- รายละเอียดบิลและรายการครุภัณฑ์ -->
+            <div id="detailContent" class="overflow-y-auto space-y-4 pr-1 flex-1">
+                <!-- Render Dynamic Content -->
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div id="detailFooterAction" class="mt-4 pt-3 border-t border-gray-100 flex justify-end gap-2">
+                <!-- Render Dynamic Buttons -->
+            </div>
         </div>
     </div>
 
@@ -1639,21 +1651,187 @@
             document.getElementById('detailModal').classList.remove('hidden');
         }
 
-        function showInventoryDetail(row) {
+        function showHistoryDetail(row) {
             const content = document.getElementById('detailContent');
             const footerAction = document.getElementById('detailFooterAction');
-            footerAction.innerHTML = ''; 
+            let assetsHTML = '';
+            const items = row.items || row.assets || [];
+            
+            if (items.length > 0) {
+                items.forEach((a, idx) => {
+                    let perisHTML = '';
+                    if (a.peripherals && Array.isArray(a.peripherals) && a.peripherals.length > 0) {
+                        perisHTML = `
+                        <div class="mt-1 pl-2 border-l-2 border-purple-300 text-[11px] text-purple-700 bg-purple-50/60 p-1.5 rounded-r">
+                            <p class="font-bold text-[10px] text-purple-900 mb-0.5"><i class="fa-solid fa-plug"></i> อุปกรณ์ต่อพ่วง (${a.peripherals.length}):</p>`;
+                        a.peripherals.forEach(p => {
+                            const pName = p.Name || p.Item_ID || 'อุปกรณ์';
+                            const pQty = p.Quantity || 1;
+                            const pUnit = p.Unit || 'ตัว';
+                            const pCode = (p.Item_Code || p.Note) ? ` [รหัส: ${p.Item_Code || p.Note}]` : '';
+                            perisHTML += `<p class="leading-tight">• ${pName} - ${pQty} ${pUnit}${pCode}</p>`;
+                        });
+                        perisHTML += `</div>`;
+                    }
+
+                    const descText = a.FullDescription || a.Spec_Detai || a.Asset_FullDescription || '-';
+                    const statusText = a.Inv_Status || a.InvStatus || '-';
+
+                    assetsHTML += `
+                    <div class="bg-white p-2.5 rounded-xl border border-gray-100 flex flex-col mb-1.5 text-xs shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-pink-600">
+                                <span class="bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded mr-1 text-[10px]">#${idx + 1}</span> 
+                                ${a.AssetID || a.NOID || a.NoID || '-'}
+                            </span>
+                            <span class="text-gray-500 bg-gray-100 px-2 py-0.5 rounded text-[10px]">${statusText}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-600 mt-1">${descText}</p>
+                        ${perisHTML}
+                    </div>`;
+                });
+            } else {
+                assetsHTML = '<p class="text-gray-400 text-center py-4">ไม่มีรายการครุภัณฑ์</p>';
+            }
+
+            const targetStockInNo = row.Stock_In_No || row.Stock_In_ID || '';
+            const deptName = row.DEPT_ID || (typeof departmentMap !== 'undefined' ? departmentMap[row.DEPT_ID] : '') || '-';
 
             content.innerHTML = `
-                <div class="text-center mb-4"><i class="fa-solid fa-desktop text-4xl text-purple-300"></i></div>
-                <p><strong>Asset / NOID:</strong> <span class="text-pink-600 font-bold">${row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-'}</span></p>
-                <p><strong>Inv_No:</strong> ${row.Inv_No || row.Inv_ID || '-'}</p>
-                <p><strong>อ้างอิงบิล (Stock_ID):</strong> ${row.Stock_ID || '-'}</p>
-                <p><strong>สถานะ:</strong> <span class="px-2 py-1 bg-gray-100 rounded text-xs font-bold">${row.Inv_Status || row.InvStatus || '-'}</span></p>
-                <div class="mt-4 border-t pt-2"><p class="font-bold">รายละเอียด:</p><p class="text-xs text-gray-600 mt-1">${row.Asset_FullDescription || row.FullDescription || row.Spec_Detai || '-'}</p></div>
+                <div class="space-y-1 bg-pink-50/40 p-3 rounded-2xl border border-pink-100 text-xs">
+                    <p><strong>บิลอ้างอิง:</strong> <span class="text-pink-600 font-mono font-bold">${targetStockInNo}</span></p>
+                    <p><strong>วันที่:</strong> ${new Date(row.Date_Time || row.Timestamp || Date.now()).toLocaleString('th-TH')}</p>
+                    <p><strong>หน่วยงาน:</strong> ${deptName}</p>
+                    <p><strong>ประเภทการรับเข้า:</strong> ${row.Source_Type || '-'}</p>
+                    <hr class="border-pink-200 my-1">
+                    <p><strong>ผู้รับเข้า (IT_User):</strong> <span class="text-purple-700 font-bold">${row.IT_User || '-'}</span></p>
+                    <p><strong>ผู้ส่ง (User_Name):</strong> <span class="text-gray-800 font-bold">${row.User_Name || '-'}</span></p>
+                    <p><strong>ผู้ยืนยัน (User_Confirm):</strong> <span class="text-gray-800 font-bold">${row.User_Confirm || '-'}</span></p>
+                </div>
+                <div class="mt-4 border-t pt-2 bg-gray-50 p-3 rounded-2xl">
+                    <p class="font-bold mb-2 text-xs">รายการครุภัณฑ์ (${items.length} รายการ):</p>
+                    ${assetsHTML}
+                </div>
             `;
+
+            // ส่งเฉพาะ String stockInNo ป้องกัน String Escape ของ HTML Attribute เพี้ยน
+            footerAction.innerHTML = `
+                <div class="flex justify-between w-full gap-2">
+                    <button type="button" onclick="loadStockInForEditingByNo('${targetStockInNo}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-pen-to-square"></i> แก้ไขบิลนี้
+                    </button>
+                    <button type="button" onclick="prepareSlipPrintCustom('${targetStockInNo}')" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-receipt"></i> พิมพ์สลิป
+                    </button>
+                </div>
+            `;
+
             document.getElementById('detailModal').classList.remove('hidden');
         }
+
+        // ==========================================
+        // 2. โหลดข้อมูลบิลกลับเข้า Form Stock In
+        // ==========================================
+        function loadStockInForEditingByNo(stockInNo) {
+            // ดึง Object ตัวเต็มจาก Array หลักประวัติรับเข้า (สมมติชื่อ stockInHistoryList หรือดึงผ่าน getStockIn)
+            let row = null;
+            if (typeof stockInHistoryData !== 'undefined' && Array.isArray(stockInHistoryData)) {
+                row = stockInHistoryData.find(item => (item.Stock_In_No === stockInNo || item.Stock_In_ID === stockInNo));
+            }
+            
+            // Fallback: หากหาใน Array หลักไม่เจอ ให้ดึงจากข้อมูลที่เปิดค้างใน Modal หรือ Session
+            if (!row && window.currentOpenedStockInRow && (window.currentOpenedStockInRow.Stock_In_No === stockInNo || window.currentOpenedStockInRow.Stock_In_ID === stockInNo)) {
+                row = window.currentOpenedStockInRow;
+            }
+
+            if (!row) {
+                Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลบิล', text: `ไม่สามารถดึงข้อมูลบิลเลขที่: ${stockInNo}` });
+                return;
+            }
+
+            closeModal('detailModal');
+            if (typeof switchTab === 'function') switchTab('stockin');
+
+            // 1. กำหนดค่าข้อมูลหัวบิล
+            currentSessionStockInNo = row.Stock_In_No || "";
+            currentSessionStockInId = row.Stock_In_ID || "";
+
+            const displayIdEl = document.getElementById('displayStockInId');
+            if (displayIdEl) displayIdEl.innerText = currentSessionStockInId || "รอดำเนินการ...";
+            
+            const sessionTextEl = document.getElementById('sessionStockInText');
+            if (sessionTextEl) sessionTextEl.innerText = currentSessionStockInNo;
+
+            const sessionBadgeEl = document.getElementById('sessionStockInBadge');
+            if (sessionBadgeEl && currentSessionStockInNo) sessionBadgeEl.classList.remove('hidden');
+
+            // 2. เซ็ตค่า Form Control
+            const sourceTypeEl = document.getElementById('Source_Type');
+            if (sourceTypeEl) sourceTypeEl.value = row.Source_Type || "";
+
+            const rawDept = row.DEPT_ID || "";
+            let targetDeptId = rawDept;
+            if (typeof departmentMap !== 'undefined') {
+                for (const [key, val] of Object.entries(departmentMap)) {
+                    if (val === rawDept || key === rawDept) {
+                        targetDeptId = key;
+                        break;
+                    }
+                }
+            }
+            if (typeof tomSelectDept !== 'undefined' && tomSelectDept) {
+                tomSelectDept.setValue(targetDeptId);
+            }
+
+            const refNoEl = document.getElementById('Reference_No');
+            if (refNoEl) refNoEl.value = row.Reference_No || "";
+
+            // 3. แสดงผลสรุป Header
+            const sumSourceEl = document.getElementById('summarySourceTypeBadge');
+            if (sumSourceEl) sumSourceEl.innerText = row.Source_Type || "-";
+
+            const sumStockIdEl = document.getElementById('summaryStockIdDisplay');
+            if (sumStockIdEl) sumStockIdEl.innerText = currentSessionStockInNo || "-";
+
+            const sumDeptEl = document.getElementById('summaryDeptDisplay');
+            if (sumDeptEl) sumDeptEl.innerText = rawDept || "-";
+
+            const sumRefEl = document.getElementById('summaryRefDisplay');
+            if (sumRefEl) sumRefEl.innerText = row.Reference_No ? `หมายเหตุ/อ้างอิง: ${row.Reference_No}` : 'หมายเหตุ/อ้างอิง: -';
+
+            const headerFormContainer = document.getElementById('headerFormContainer');
+            if (headerFormContainer) headerFormContainer.classList.add('hidden');
+
+            const confirmedSummary = document.getElementById('confirmedHeaderSummary');
+            if (confirmedSummary) confirmedSummary.classList.remove('hidden');
+
+            const entrySec = document.getElementById('itemEntrySection');
+            if (entrySec) entrySec.classList.remove('opacity-50', 'pointer-events-none');
+
+            const btnSign = document.getElementById('btnSign');
+            if (btnSign) btnSign.disabled = false;
+
+            // 4. โหลดรายการ items เข้า savedItemsList ตรงๆ
+            savedItemsList = row.items || row.assets || [];
+
+            // 5. เรียกสั่งเรนเดอร์ตารางเดิมของหน้าเว็บ
+            if (typeof renderSavedTable === 'function') {
+                renderSavedTable();
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'พร้อมแก้ไขข้อมูลบิล',
+                text: `กำลังจัดการบิล: ${currentSessionStockInNo}`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+        
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+        }   
 
         function initHtml5QrCode() { if (typeof Html5Qrcode !== 'undefined') html5QrCode = new Html5Qrcode("reader"); }
         async function openScanner(id) {
