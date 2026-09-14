@@ -187,54 +187,64 @@
                     <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No"><i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/อ้างอิง (Reference_No)</label>
                     <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
                 </div>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="mb-6 relative z-20">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fa-solid fa-magnifying-glass text-pink-500"></i>
-                    <h3 class="font-bold text-gray-800">ค้นหาครุภัณฑ์เพื่อเพิ่มลงรายการ</h3>
-                </div>
-                <div class="relative w-full">
-                    <input type="text" id="assetQuery" onkeyup="debouncedSearch()" class="w-full pl-12 pr-12 py-3.5 border-2 border-pink-100 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm" placeholder="พิมพ์ Asset ID, S/N หรือชื่อ เพื่อค้นหา... (Live Search)">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-300 text-lg"></i>
-                    <button onclick="openScanner('assetQuery')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 p-2 rounded-xl transition-all shadow-sm">
-                        <i class="fa-solid fa-qrcode"></i>
+                
+                <!-- ปุ่มบันทึก Header ใหม่ -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end mt-2" id="headerActionBlock">
+                    <button type="button" onclick="createNewStockInHeader()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl shadow hover:shadow-lg transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-save"></i> บันทึกและเริ่มเพิ่มครุภัณฑ์
                     </button>
                 </div>
-                <div id="searchError" class="text-red-500 text-xs mt-1 px-2 font-medium"></div>
-                <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-200 z-50 max-h-[50vh] overflow-y-auto p-2"></div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-pink-100 overflow-hidden mb-6 shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm min-w-[850px]">
-                        <thead>
-                            <tr class="bg-gradient-to-r from-pink-50 to-white text-pink-800 border-b border-pink-100">
-                                <th class="p-4 text-center w-12 font-semibold">#</th>
-                                <th class="p-4 w-20 text-center font-semibold">รูปภาพ</th>
-                                <th class="p-4 w-36 font-semibold">Asset / NOID</th>
-                                <th class="p-4 font-semibold">รายละเอียดสเปค</th>
-                                <th class="p-4 w-28 text-center font-semibold">สถานะ</th>
-                                <th class="p-4 w-44 text-center font-semibold">อุปกรณ์ต่อพ่วง</th>
-                                <th class="p-4 w-28 text-center font-semibold">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="assetTableBody" class="text-gray-700 divide-y divide-pink-50">
-                            <!-- Populated by JS renderSavedTable() -->
-                        </tbody>
-                    </table>
+            <!-- ครอบส่วนค้นหาด้วย opacity ถ้ายังไม่บันทึก Header -->
+            <div id="itemEntrySection" class="opacity-50 pointer-events-none transition-all duration-300">
+                <!-- Search Bar -->
+                <div class="mb-6 relative z-20">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-magnifying-glass text-pink-500"></i>
+                        <h3 class="font-bold text-gray-800">ค้นหาครุภัณฑ์เพื่อเพิ่มลงรายการ</h3>
+                    </div>
+                    <div class="relative w-full">
+                        <input type="text" id="assetQuery" onkeyup="debouncedSearch()" class="w-full pl-12 pr-12 py-3.5 border-2 border-pink-100 rounded-2xl text-sm bg-white focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all shadow-sm" placeholder="พิมพ์ Asset ID, S/N หรือชื่อ เพื่อค้นหา... (Live Search)">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-300 text-lg"></i>
+                        <button onclick="openScanner('assetQuery')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 p-2 rounded-xl transition-all shadow-sm">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </button>
+                    </div>
+                    <div id="searchError" class="text-red-500 text-xs mt-1 px-2 font-medium"></div>
+                    <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-200 z-50 max-h-[50vh] overflow-y-auto p-2"></div>
                 </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onclick="saveWithoutSign()" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-receipt"></i> บันทึกโดยไม่ลงชื่อรับ (พิมพ์สลิป)
-                </button>
-                <button type="button" onclick="validateAndSign()" id="btnSign" disabled class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl hover:shadow-lg hover:from-pink-600 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-signature"></i> ตรวจสอบและลงชื่อรับ (A4)
-                </button>
+                <div class="bg-white rounded-2xl border border-pink-100 overflow-hidden mb-6 shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm min-w-[850px]">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-pink-50 to-white text-pink-800 border-b border-pink-100">
+                                    <th class="p-4 text-center w-12 font-semibold">#</th>
+                                    <th class="p-4 w-20 text-center font-semibold">รูปภาพ</th>
+                                    <th class="p-4 w-36 font-semibold">Asset / NOID</th>
+                                    <th class="p-4 font-semibold">รายละเอียดสเปค</th>
+                                    <th class="p-4 w-28 text-center font-semibold">สถานะ</th>
+                                    <th class="p-4 w-44 text-center font-semibold">อุปกรณ์ต่อพ่วง</th>
+                                    <th class="p-4 w-28 text-center font-semibold">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetTableBody" class="text-gray-700 divide-y divide-pink-50">
+                                <!-- Populated by JS renderSavedTable() -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="saveWithoutSign()" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-receipt"></i> บันทึกโดยไม่ลงชื่อรับ (พิมพ์สลิป)
+                    </button>
+                    <button type="button" onclick="validateAndSign()" id="btnSign" disabled class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl hover:shadow-lg hover:from-pink-600 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-signature"></i> ตรวจสอบและลงชื่อรับ (A4)
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -314,6 +324,14 @@
                         <span class="text-gray-500 text-xs block mb-1">รายละเอียด</span>
                         <textarea id="modalSpec" rows="2" class="w-full p-2 border border-pink-200 rounded-lg text-sm bg-white focus:border-pink-400 outline-none resize-none"></textarea>
                     </div>
+                </div>
+
+                <!-- เพิ่ม Dropdown ประเภทครุภัณฑ์ -->
+                <div>
+                    <label class="block mb-1.5 font-bold text-gray-700 text-xs uppercase">ประเภทครุภัณฑ์ <span class="text-red-500">*</span></label>
+                    <select id="modalAssetType" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 outline-none">
+                        <option value="">-- โหลดข้อมูล... --</option>
+                    </select>
                 </div>
 
                 <div>
@@ -549,6 +567,7 @@
         let html5QrCode = null;
         let signaturePad = null;
         let departmentMap = {};
+        let assetTypeMap = {};
         
         let tempSelectedAsset = null;
         let currentSessionStockInNo = null; 
@@ -562,6 +581,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initUserDisplay();
             fetchDepartments();
+            fetchAssetTypes();
             initSignaturePad();
             setupImagePreview();
             setupDocFileHandler();
@@ -627,6 +647,9 @@
 
         async function fetchAPI(url, options = {}) {
             try {
+                if (options.method === 'POST' && !options.headers) {
+                    options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+                }
                 const response = await fetch(url, options);
                 if (!response.ok) throw new Error("HTTP error " + response.status);
                 const data = await response.json();
@@ -671,6 +694,84 @@
             }
         }
 
+        async function fetchAssetTypes() {
+            try {
+                const res = await fetchAPI(`${SCRIPT_URL}?action=getAssetTypes`);
+                const typeData = Array.isArray(res) ? res : (res.data || []);
+                const select = document.getElementById('modalAssetType');
+                select.innerHTML = '<option value="">-- เลือกประเภทครุภัณฑ์ --</option>';
+                
+                typeData.forEach(t => {
+                    const typeId = t.Type_ID || "";
+                    const typeName = t.Type_Name || "";
+                    if(typeId) {
+                        assetTypeMap[typeId] = typeName;
+                        select.innerHTML += `<option value="${typeId}">${typeName}</option>`;
+                    }
+                });
+            } catch(e) { console.warn('ไม่สามารถโหลดข้อมูลประเภทครุภัณฑ์ได้'); }
+        }
+
+        async function createNewStockInHeader() {
+            const sourceType = document.getElementById('Source_Type').value;
+            const depId = document.getElementById('DEP_ID').value;
+            const refNo = document.getElementById('Reference_No').value;
+            
+            if (!sourceType || !depId) {
+                return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทรับเข้าและหน่วยงานก่อน', 'warning');
+            }
+            
+            showLoading(true, 'กำลังสร้างเอกสารรับเข้า...');
+            try {
+                const stockPayload = {
+                    action: 'saveStockIn',
+                    payload: {
+                        depId: depId,
+                        docId: uploadedDocFileName || "",
+                        sourceType: sourceType,
+                        referenceNo: refNo,
+                        itUser: getSafeDisplayName(),
+                        userName: "-",
+                        signatureBase64: ""
+                    }
+                };
+                
+                const stockRes = await fetchAPI(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(stockPayload) 
+                });
+                
+                currentSessionStockInNo = stockRes.stockInNo;
+                currentSessionStockInId = stockRes.stockInID;
+
+                document.getElementById('displayStockInId').innerText = currentSessionStockInId;
+                document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
+                document.getElementById('sessionStockInBadge').classList.remove('hidden');
+
+                document.querySelectorAll('.header-input').forEach(el => { 
+                    el.disabled = true; 
+                    el.classList.add('bg-gray-100', 'cursor-not-allowed'); 
+                });
+                if(tomSelectDept) tomSelectDept.lock();
+                
+                document.getElementById('headerActionBlock').classList.add('hidden');
+                
+                const entrySec = document.getElementById('itemEntrySection');
+                if(entrySec) {
+                    entrySec.classList.remove('opacity-50', 'pointer-events-none');
+                }
+                
+                document.getElementById('btnSign').disabled = false;
+                
+                showLoading(false);
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: `สร้างเอกสารรับเข้า: ${currentSessionStockInNo}`, timer: 1500, showConfirmButton: false });
+                
+            } catch(e) {
+                showLoading(false);
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+
         async function loadHistoryData() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลดข้อมูล...</span></td></tr>';
@@ -683,7 +784,6 @@
                 historyData.slice().reverse().forEach((row, index) => {
                     const rawDate = row.Date_Time || row.Timestamp || row.date;
                     const dateStr = rawDate ? new Date(rawDate).toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'}) : '-';
-                    // Note: row.DEPT_ID is already mapped to Department Name by GAS getStockIn()
                     const deptDisplay = row.DEPT_ID || departmentMap[row.DEPT_ID] || '-';
                     const itemsList = row.items || row.assets || [];
                     const countItems = itemsList.length;
@@ -829,10 +929,9 @@
         }
 
         function openAssetModal(item, index = -1) {
-            const type = document.getElementById('Source_Type').value;
-            const dept = document.getElementById('DEP_ID').value;
-            
-            if(!type || !dept) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทรับเข้า และ หน่วยงานก่อน', 'warning');
+            if (!currentSessionStockInId) {
+                return Swal.fire('แจ้งเตือน', 'กรุณากดปุ่ม "บันทึกและเริ่มเพิ่มครุภัณฑ์" ก่อน', 'warning');
+            }
 
             editingItemIndex = index;
             if (index > -1) {
@@ -852,6 +951,15 @@
             document.getElementById('modalSpec').value = tempSelectedAsset.Spec_Detai || tempSelectedAsset.FullDescription || '-';
             document.getElementById('modalStatus').value = tempSelectedAsset.InvStatus || tempSelectedAsset.Inv_Status || 'รอตรวจสอบ';
             
+            // Set Asset Type
+            const typeSelect = document.getElementById('modalAssetType');
+            const currentTypeVal = tempSelectedAsset.Asset_Type || tempSelectedAsset.Type_ID || "";
+            if (currentTypeVal) {
+                typeSelect.value = currentTypeVal;
+            } else {
+                typeSelect.selectedIndex = 0;
+            }
+
             // Checkbox logic: Peripherals = 1 (true) or 0 (false)
             const pCheck = document.getElementById('modalPeripherals');
             pCheck.checked = (tempSelectedAsset.Peripherals == 1 || tempSelectedAsset.Peripherals === '1');
@@ -867,15 +975,26 @@
 
         async function saveSingleItem() {
             if(!tempSelectedAsset) return;
+            
             const specVal = document.getElementById('modalSpec').value;
             const statusVal = document.getElementById('modalStatus').value;
             const periphVal = document.getElementById('modalPeripherals').checked ? 1 : 0;
+            
+            const typeSelect = document.getElementById('modalAssetType');
+            const typeVal = typeSelect.value;
+            const typeName = typeSelect.options[typeSelect.selectedIndex]?.text || "";
+            
+            if (!typeVal) {
+                return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทครุภัณฑ์', 'warning');
+            }
 
             tempSelectedAsset.FullDescription = specVal;
             tempSelectedAsset.Spec_Detai = specVal;
             tempSelectedAsset.InvStatus = statusVal;
             tempSelectedAsset.Inv_Status = statusVal;
             tempSelectedAsset.Peripherals = periphVal;
+            tempSelectedAsset.Asset_Type = typeVal;
+            tempSelectedAsset.Asset_Type_Name = typeName;
             
             closeModal('assetConfirmModal');
             showLoading(true, 'กำลังบันทึกข้อมูล...');
@@ -894,7 +1013,9 @@
                                         Spec_Detai: tempSelectedAsset.Spec_Detai,
                                         Inv_Status: tempSelectedAsset.Inv_Status,
                                         imageBase64: tempSelectedAsset.imageBase64 || "",
-                                        Peripherals: tempSelectedAsset.Peripherals
+                                        Peripherals: tempSelectedAsset.Peripherals,
+                                        Asset_Type: tempSelectedAsset.Asset_Type,
+                                        Asset_Type_Name: tempSelectedAsset.Asset_Type_Name
                                     }
                                 }
                             })
@@ -903,29 +1024,7 @@
                     Swal.fire({icon: 'success', title: 'อัปเดตรายการสำเร็จ', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
                 } else {
                     if (!currentSessionStockInId) {
-                        const stockPayload = {
-                            action: 'saveStockIn',
-                            payload: {
-                                depId: document.getElementById('DEP_ID').value,
-                                docId: uploadedDocFileName || "",
-                                sourceType: document.getElementById('Source_Type').value,
-                                referenceNo: document.getElementById('Reference_No').value,
-                                itUser: getSafeDisplayName(),
-                                userName: "-",
-                                signatureBase64: ""
-                            }
-                        };
-                        const stockRes = await fetchAPI(SCRIPT_URL, { method: 'POST', body: JSON.stringify(stockPayload) });
-                        currentSessionStockInNo = stockRes.stockInNo;
-                        currentSessionStockInId = stockRes.stockInID;
-
-                        document.getElementById('displayStockInId').innerText = currentSessionStockInId;
-                        document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
-                        document.getElementById('sessionStockInBadge').classList.remove('hidden');
-
-                        document.querySelectorAll('.header-input').forEach(el => { el.disabled = true; el.classList.add('bg-gray-100', 'cursor-not-allowed'); });
-                        if(tomSelectDept) tomSelectDept.lock();
-                        document.getElementById('btnSign').disabled = false;
+                        return Swal.fire('แจ้งเตือน', 'กรุณาบันทึกและสร้างเอกสารรับเข้าก่อน', 'warning');
                     }
 
                     const itemPayload = {
@@ -939,7 +1038,9 @@
                                 FullDescription: tempSelectedAsset.FullDescription || "",
                                 InvStatus: tempSelectedAsset.InvStatus || "รอตรวจสอบ",
                                 imageBase64: tempSelectedAsset.imageBase64 || "",
-                                Peripherals: tempSelectedAsset.Peripherals
+                                Peripherals: tempSelectedAsset.Peripherals,
+                                Asset_Type: tempSelectedAsset.Asset_Type,
+                                Asset_Type_Name: tempSelectedAsset.Asset_Type_Name
                             }
                         }
                     };
@@ -1148,6 +1249,12 @@
             document.getElementById('docFileNameDisplay').innerText = "ยังไม่ได้เลือกไฟล์...";
             uploadedDocFileName = "";
             uploadedDocFileBase64 = null;
+            
+            document.getElementById('headerActionBlock').classList.remove('hidden');
+            const entrySec = document.getElementById('itemEntrySection');
+            if(entrySec) {
+                entrySec.classList.add('opacity-50', 'pointer-events-none');
+            }
             
             document.getElementById('btnSign').disabled = true;
             renderSavedTable();
