@@ -17,30 +17,103 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     
     <style>
-        :root { --primary-pink: #ff85a2; --soft-pink: #ffe6eb; --dark-pink: #e04a70; --text-dark: #333333; }
-        body { font-family: 'Kanit', sans-serif; background: linear-gradient(135deg, #ffe6f2 0%, #ffffff 100%); min-height: 100vh; color: var(--text-dark); overflow-x: hidden; padding-bottom: 90px; }
+        :root {
+            --pink-soft: #fff0f5;
+            --pink-light: #ffb6c1;
+            --pink-primary: #ff85a2;
+            --pink-dark: #d63384;
+            --pink-neon: #ff1493;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray-text: #444444;
+            --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
+            --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
+        }
+
+        html, body {
+            overscroll-behavior-y: none; 
+            overscroll-behavior-x: none;
+        }
+
+        body {
+            font-family: 'Kanit', 'Sarabun', 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
+            min-height: 100vh;
+            color: var(--gray-text);
+            padding-bottom: 90px;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+        }
+
+        /* ลายน้ำแบบนูน (Embossed Watermark) */
+        body::before {
+            content: "UDH-IT TECHNICIAN MAINTENANCE & SUPPORT ";
+            position: fixed;
+            top: -50%;  
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            transform: rotate(-30deg);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            font-size: 5vw; 
+            font-weight: 900;
+            line-height: 2.5; 
+            z-index: 0;
+            pointer-events: none;
+            color: rgba(240, 240, 240, 0.4); 
+            text-shadow: -1px -1px 1px rgba(255, 255, 255, 0.9), 1px  1px 1px rgba(0, 0, 0, 0.15);
+        }
+
+        /* App Header */
+        .app-header {
+            background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
+            backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            border-bottom: 6px solid var(--pink-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .header-logo { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white); box-shadow: 0 4px 10px rgba(214, 51, 132, 0.12); }
         
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8vw; color: rgba(255, 133, 162, 0.04); white-space: nowrap; z-index: 0; pointer-events: none; user-select: none; font-weight: 800; }
-        .glass-card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 40px -10px rgba(255, 133, 162, 0.2); border-radius: 1.75rem; position: relative; z-index: 10; overflow: hidden; }
+        .org-title { color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); font-weight: 700; line-height: 1.2; }
+        .org-subtitle { color: #f8f9fa; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: 400; line-height: 1.2; }
+        .user-name { font-weight: 700; color: var(--pink-dark); text-shadow: 1px 1px 1px rgba(255,255,255,0.9); }
+
+        .glass-card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md); border-radius: 1.75rem; position: relative; z-index: 10; overflow: hidden; }
         
         .tab-btn { padding: 0.75rem 1.5rem; color: #9ca3af; font-weight: 500; white-space: nowrap; transition: all 0.3s; border-bottom: 3px solid transparent; cursor: pointer; border-radius: 0.5rem 0.5rem 0 0; }
-        .tab-btn:hover { color: var(--primary-pink); background: rgba(255, 230, 235, 0.3); }
-        .tab-btn.active { border-bottom: 3px solid var(--primary-pink); color: var(--dark-pink); font-weight: 600; background: linear-gradient(to top, rgba(255, 133, 162, 0.1), transparent); }
+        .tab-btn:hover { color: var(--pink-primary); background: rgba(255, 230, 235, 0.3); }
+        .tab-btn.active { border-bottom: 3px solid var(--pink-primary); color: var(--pink-dark); font-weight: 600; background: linear-gradient(to top, rgba(255, 133, 162, 0.1), transparent); }
         
         #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { border: 4px solid rgba(255, 133, 162, 0.2); border-top: 4px solid var(--primary-pink); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(255, 133, 162, 0.3); }
+        .spinner { border: 4px solid rgba(255, 133, 162, 0.2); border-top: 4px solid var(--pink-primary); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(255, 133, 162, 0.3); }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .ts-control { border: 1px solid #fbcfe8 !important; border-radius: 1rem !important; padding: 0.875rem !important; background: rgba(255, 255, 255, 0.7) !important; font-family: 'Kanit' !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .ts-control.focus { border-color: var(--primary-pink) !important; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2) !important; background: #ffffff !important; }
+        .ts-control { border: 1px solid var(--pink-light) !important; border-radius: 1rem !important; padding: 0.875rem !important; background: rgba(255, 255, 255, 0.7) !important; font-family: 'Kanit' !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .ts-control.focus { border-color: var(--pink-primary) !important; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2) !important; background: #ffffff !important; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-top: 2px solid rgba(255, 133, 162, 0.25); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 50; box-shadow: 0 -8px 25px rgba(255, 133, 162, 0.15); border-radius: 24px 24px 0 0; }
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); backdrop-filter: blur(15px); border-top: 2px solid rgba(255, 133, 162, 0.25); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 50; box-shadow: 0 -8px 25px rgba(214, 51, 132, 0.12); border-radius: 24px 24px 0 0; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; color: #b0b7c3; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; padding: 0.4rem; position: relative; }
         .nav-item i { font-size: 1.35rem; margin-bottom: 0.2rem; transition: transform 0.3s; }
         .nav-item span { font-size: 0.72rem; font-weight: 500; }
-        .nav-item.active { color: var(--dark-pink); }
-        .nav-item.active i { transform: translateY(-5px) scale(1.15); color: var(--dark-pink); text-shadow: 0 5px 10px rgba(224, 74, 112, 0.3); }
-        .nav-item.active::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: linear-gradient(to right, #ff85a2, #e04a70); border-radius: 4px; }
+        .nav-item.active { color: var(--pink-dark); }
+        .nav-item.active i { transform: translateY(-5px) scale(1.15); color: var(--pink-dark); text-shadow: 0 5px 10px rgba(214, 74, 112, 0.3); }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: linear-gradient(to right, var(--pink-primary), var(--pink-dark)); border-radius: 4px; }
         
         .print-only-landscape, .print-only-slip { display: none; }
         @media print {
@@ -58,8 +131,7 @@
         }
     </style>
 </head>
-<body class="p-2 sm:p-4 md:p-8">
-    <div class="watermark">IT UDON HOSP</div>
+<body>
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
@@ -67,32 +139,28 @@
         <p id="loadingMsg" class="text-pink-600 font-bold text-lg bg-white/90 px-6 py-2 rounded-full shadow-md border border-pink-100">กำลังประมวลผล...</p>
     </div>
 
-    <header class="max-w-7xl mx-auto mb-4 md:mb-8 relative z-10 no-print flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 p-4 md:p-6 rounded-3xl shadow-sm border border-pink-100/60 backdrop-blur-md">
-        <div class="flex items-center gap-3.5 w-full md:w-auto">
-            <div class="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-pink-100 via-pink-50 to-white rounded-2xl flex items-center justify-center border border-pink-200 shadow-md text-pink-500 text-2xl md:text-3xl flex-shrink-0">
-                <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
-            </div>
-            <div class="flex-grow">
-                <h1 class="text-lg md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 leading-tight">คลังครุภัณฑ์คอมพิวเตอร์</h1>
-                <h2 class="text-sm md:text-xl font-medium text-gray-700">โรงพยาบาลอุดรธานี</h2>
-                <p class="text-[10px] md:text-sm text-pink-500 font-light truncate">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+    <!-- App Header (ตามธีมตัวอย่าง) -->
+    <header class="app-header no-print">
+        <div class="flex items-center gap-3">
+            <img src="./logo003v1.png" alt="Logo" class="header-logo" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+            <div>
+                <h1 class="org-title text-base md:text-xl">คลังครุภัณฑ์คอมพิวเตอร์ ✨</h1>
+                <h2 class="org-subtitle text-xs md:text-sm">โรงพยาบาลอุดรธานี</h2>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-pink-50 to-white border border-pink-200 px-4 py-2.5 rounded-2xl flex items-center gap-3 shadow-sm w-full md:w-auto justify-between md:justify-start">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 font-bold shadow-inner">
-                    <i class="fa-solid fa-user-check"></i>
-                </div>
-                <div class="text-left">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">ผู้ใช้งานระบบ (IT_User)</p>
-                    <p id="displayUserLogin" class="text-sm font-bold text-gray-700">กำลังโหลด...</p>
-                </div>
+        <div class="bg-white/80 border border-pink-200 px-3 py-1.5 rounded-2xl flex items-center gap-2 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-user-check text-xs"></i>
+            </div>
+            <div class="text-left hidden sm:block">
+                <p class="text-[9px] text-gray-500 uppercase tracking-wider font-bold">ผู้ใช้งานระบบ</p>
+                <p id="displayUserLogin" class="user-name text-xs">กำลังโหลด...</p>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto glass-card p-3 sm:p-6 md:p-8 no-print mb-6 min-h-[60vh]">
+    <main class="max-w-7xl mx-auto glass-card p-3 sm:p-6 md:p-8 no-print mb-6 min-h-[60vh] mt-4">
         <div class="hidden sm:flex border-b border-pink-100 mb-6 overflow-x-auto hide-scrollbar">
             <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn"><i class="fa-solid fa-chart-pie mr-2"></i> สรุปรายการ</button>
             <button onclick="switchTab('stockin')" id="tab-stockin" class="tab-btn active"><i class="fa-solid fa-boxes-packing mr-2"></i> บันทึกรับเข้า (Stock In)</button>
@@ -144,61 +212,72 @@
                 </div>
             </div>
 
-            <!-- Header Form Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 bg-white/70 p-4 md:p-6 rounded-3xl border border-pink-100 shadow-sm">
-                <!-- Date_Time -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-calendar-days text-pink-400 w-5"></i> วันที่/เวลา (Date_Time)</label>
-                    <input type="text" id="displayDateTime" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-medium">
-                </div>
+            <!-- Header Form Info Container -->
+            <div id="headerFormContainer" class="transition-all duration-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 bg-white/70 p-4 md:p-6 rounded-3xl border border-pink-100 shadow-sm">
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-calendar-days text-pink-400 w-5"></i> วันที่/เวลา (Date_Time)</label>
+                        <input type="text" id="displayDateTime" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-medium">
+                    </div>
 
-                <!-- IT_User -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-user-gear text-pink-400 w-5"></i> ผู้รับ (IT_User)</label>
-                    <input type="text" id="displayItUser" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-bold text-pink-600">
-                </div>
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-user-gear text-pink-400 w-5"></i> ผู้รับ (IT_User)</label>
+                        <input type="text" id="displayItUser" readonly class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-gray-50 text-gray-600 shadow-inner font-bold text-pink-600">
+                    </div>
 
-                <!-- Source_Type -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type"><i class="fa-solid fa-turn-down text-pink-400 w-5"></i> ประเภทการรับเข้า (Source Type) <span class="text-pink-500">*</span></label>
-                    <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none transition-all shadow-sm header-input">
-                        <option value="">-- เลือกประเภทการรับเข้า --</option>
-                        <option value="หน่วยงานส่งคืน">หน่วยงานส่งคืน</option>
-                        <option value="รับเข้าจากการทดแทน">รับเข้าจากการทดแทน</option>
-                        <option value="ชำรุดจากงานซ่อม">ชำรุดจากงานซ่อม</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type"><i class="fa-solid fa-turn-down text-pink-400 w-5"></i> ประเภทการรับเข้า (Source Type) <span class="text-pink-500">*</span></label>
+                        <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none transition-all shadow-sm header-input">
+                            <option value="">-- เลือกประเภทการรับเข้า --</option>
+                            <option value="หน่วยงานส่งคืน">หน่วยงานส่งคืน</option>
+                            <option value="รับเข้าจากการทดแทน">รับเข้าจากการทดแทน</option>
+                            <option value="ชำรุดจากงานซ่อม">ชำรุดจากงานซ่อม</option>
+                        </select>
+                    </div>
 
-                <!-- Department -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-hospital-user text-pink-400 w-5"></i> หน่วยงาน (Department) <span class="text-pink-500">*</span></label>
-                    <select id="DEP_ID" class="w-full header-input"><option value="">โหลดข้อมูล...</option></select>
-                </div>
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700"><i class="fa-solid fa-hospital-user text-pink-400 w-5"></i> หน่วยงาน (Department) <span class="text-pink-500">*</span></label>
+                        <select id="DEP_ID" class="w-full header-input"><option value="">โหลดข้อมูล...</option></select>
+                    </div>
 
-                <!-- Doc_ID File -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Doc_ID_File"><i class="fa-solid fa-file-arrow-up text-pink-400 w-5"></i> แนบเอกสารอ้างอิง (Doc_ID)</label>
-                    <input type="file" id="Doc_ID_File" class="w-full px-4 py-2 border border-pink-200 rounded-2xl text-xs bg-white/70 header-input file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
-                    <span id="docFileNameDisplay" class="text-[10px] text-gray-400 mt-1 block px-1 truncate">ยังไม่ได้เลือกไฟล์...</span>
-                </div>
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Doc_ID_File"><i class="fa-solid fa-file-arrow-up text-pink-400 w-5"></i> แนบเอกสารอ้างอิง (Doc_ID)</label>
+                        <input type="file" id="Doc_ID_File" class="w-full px-4 py-2 border border-pink-200 rounded-2xl text-xs bg-white/70 header-input file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
+                        <span id="docFileNameDisplay" class="text-[10px] text-gray-400 mt-1 block px-1 truncate">ยังไม่ได้เลือกไฟล์...</span>
+                    </div>
 
-                <!-- Reference_No -->
-                <div class="form-group">
-                    <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No"><i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/อ้างอิง (Reference_No)</label>
-                    <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
+                    <div class="form-group">
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No"><i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/อ้างอิง (Reference_No)</label>
+                        <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
+                    </div>
+                    
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end mt-2" id="headerActionBlock">
+                        <button type="button" onclick="createNewStockInHeader()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl shadow hover:shadow-lg transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-save"></i> บันทึกและเริ่มเพิ่มครุภัณฑ์
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- ปุ่มบันทึก Header ใหม่ -->
-                <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end mt-2" id="headerActionBlock">
-                    <button type="button" onclick="createNewStockInHeader()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl shadow hover:shadow-lg transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-save"></i> บันทึกและเริ่มเพิ่มครุภัณฑ์
-                    </button>
+            </div>
+
+            <!-- ส่วนแสดงสรุป Head หลังจากบันทึกแล้ว -->
+            <div id="confirmedHeaderSummary" class="hidden mb-6 bg-gradient-to-r from-pink-50 to-purple-50 p-4 md:p-5 rounded-2xl border border-pink-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-pink-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold" id="summarySourceTypeBadge">-</span>
+                        <span class="text-xs text-gray-500 font-mono" id="summaryStockIdDisplay">-</span>
+                    </div>
+                    <h4 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-building text-pink-500"></i> <span id="summaryDeptDisplay">-</span>
+                    </h4>
+                    <p class="text-xs text-gray-600" id="summaryRefDisplay">หมายเหตุ: -</p>
                 </div>
+                <button type="button" onclick="resetHeaderForm()" class="px-4 py-2 bg-white border border-pink-300 text-pink-600 hover:bg-pink-50 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลหัวบิล
+                </button>
             </div>
 
             <!-- ครอบส่วนค้นหาด้วย opacity ถ้ายังไม่บันทึก Header -->
             <div id="itemEntrySection" class="opacity-50 pointer-events-none transition-all duration-300">
-                <!-- Search Bar -->
                 <div class="mb-6 relative z-20">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="fa-solid fa-magnifying-glass text-pink-500"></i>
@@ -215,7 +294,8 @@
                     <div id="resultsArea" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-200 z-50 max-h-[50vh] overflow-y-auto p-2"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-pink-100 overflow-hidden mb-6 shadow-sm">
+                <!-- Desktop Table View -->
+                <div class="bg-white rounded-2xl border border-pink-100 overflow-hidden mb-6 shadow-sm hidden sm:block">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm min-w-[850px]">
                             <thead>
@@ -229,14 +309,14 @@
                                     <th class="p-4 w-28 text-center font-semibold">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="assetTableBody" class="text-gray-700 divide-y divide-pink-50">
-                                <!-- Populated by JS renderSavedTable() -->
-                            </tbody>
+                            <tbody id="assetTableBody" class="text-gray-700 divide-y divide-pink-50"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
+                <!-- Mobile Card View (Stock In Items) -->
+                <div id="assetCardContainer" class="sm:hidden space-y-3 mb-6"></div>
+
                 <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
                     <button type="button" onclick="saveWithoutSign()" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 font-bold transition-all shadow-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-receipt"></i> บันทึกโดยไม่ลงชื่อรับ (พิมพ์สลิป)
@@ -254,7 +334,8 @@
                 <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <h3 class="text-lg md:text-xl font-bold text-gray-800">ประวัติรับเข้า</h3>
             </div>
-            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+            <!-- Desktop Table View -->
+            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hidden sm:block">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                         <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
@@ -272,6 +353,8 @@
                     </table>
                 </div>
             </div>
+            <!-- Mobile Card View (History) -->
+            <div id="historyCardContainer" class="sm:hidden space-y-3"></div>
         </div>
 
         <!-- Tab: Inventory -->
@@ -280,7 +363,8 @@
                 <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center"><i class="fa-solid fa-warehouse"></i></div>
                 <h3 class="text-lg md:text-xl font-bold text-gray-800">คลังครุภัณฑ์ทั้งหมด</h3>
             </div>
-            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+            <!-- Desktop Table View -->
+            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hidden sm:block">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                         <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
@@ -297,6 +381,8 @@
                     </table>
                 </div>
             </div>
+            <!-- Mobile Card View (Inventory) -->
+            <div id="inventoryCardContainer" class="sm:hidden space-y-3"></div>
         </div>
     </main>
 
@@ -326,7 +412,6 @@
                     </div>
                 </div>
 
-                <!-- เพิ่ม Dropdown ประเภทครุภัณฑ์ -->
                 <div>
                     <label class="block mb-1.5 font-bold text-gray-700 text-xs uppercase">ประเภทครุภัณฑ์ <span class="text-red-500">*</span></label>
                     <select id="modalAssetType" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 outline-none">
@@ -344,7 +429,6 @@
                     </select>
                 </div>
 
-                <!-- Checkbox มีอุปกรณ์ต่อพ่วง (Peripherals = 1 or 0) -->
                 <div class="flex items-center gap-2 bg-purple-50 p-3 rounded-xl border border-purple-100">
                     <input type="checkbox" id="modalPeripherals" class="w-5 h-5 text-purple-600 border-purple-300 rounded focus:ring-purple-400 cursor-pointer">
                     <label for="modalPeripherals" class="font-bold text-purple-900 text-xs sm:text-sm cursor-pointer select-none flex items-center gap-1.5">
@@ -470,14 +554,15 @@
         </div>
     </div>
 
-    <!-- Modal: Detail Viewer -->
+    <!-- Modal: Detail Viewer พร้อมปุ่มพิมพ์สลิป -->
     <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
             <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 id="detailTitle" class="font-bold text-gray-700"><i class="fa-solid fa-circle-info mr-2"></i> รายละเอียด</h3>
                 <button onclick="closeModal('detailModal')" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 flex items-center justify-center shadow-sm"><i class="fa-solid fa-times"></i></button>
             </div>
-            <div id="detailContent" class="p-5 overflow-y-auto text-sm text-gray-700 space-y-4"></div>
+            <div id="detailContent" class="p-5 overflow-y-auto text-sm text-gray-700 space-y-4 flex-grow"></div>
+            <div id="detailFooterAction" class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end"></div>
         </div>
     </div>
 
@@ -748,13 +833,13 @@
                 document.getElementById('sessionStockInText').innerText = currentSessionStockInNo;
                 document.getElementById('sessionStockInBadge').classList.remove('hidden');
 
-                document.querySelectorAll('.header-input').forEach(el => { 
-                    el.disabled = true; 
-                    el.classList.add('bg-gray-100', 'cursor-not-allowed'); 
-                });
-                if(tomSelectDept) tomSelectDept.lock();
-                
-                document.getElementById('headerActionBlock').classList.add('hidden');
+                document.getElementById('summarySourceTypeBadge').innerText = sourceType;
+                document.getElementById('summaryStockIdDisplay').innerText = currentSessionStockInNo;
+                document.getElementById('summaryDeptDisplay').innerText = (departmentMap[depId] || depId);
+                document.getElementById('summaryRefDisplay').innerText = refNo ? `หมายเหตุ/อ้างอิง: ${refNo}` : 'หมายเหตุ/อ้างอิง: -';
+
+                document.getElementById('headerFormContainer').classList.add('hidden');
+                document.getElementById('confirmedHeaderSummary').classList.remove('hidden');
                 
                 const entrySec = document.getElementById('itemEntrySection');
                 if(entrySec) {
@@ -772,14 +857,28 @@
             }
         }
 
+        function resetHeaderForm() {
+            document.getElementById('headerFormContainer').classList.remove('hidden');
+            document.getElementById('confirmedHeaderSummary').classList.add('hidden');
+        }
+
         async function loadHistoryData() {
             const tbody = document.getElementById('historyTableBody');
+            const cardContainer = document.getElementById('historyCardContainer');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลดข้อมูล...</span></td></tr>';
+            cardContainer.innerHTML = '<div class="text-center p-6 text-gray-400"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div>กำลังโหลดข้อมูล...</div>';
+
             try {
                 const res = await fetchAPI(`${SCRIPT_URL}?action=getStockIn`);
                 const historyData = Array.isArray(res) ? res : (res.data || []);
                 tbody.innerHTML = '';
-                if(!historyData || historyData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">ไม่มีข้อมูลประวัติ</td></tr>';
+                cardContainer.innerHTML = '';
+
+                if(!historyData || historyData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">ไม่มีข้อมูลประวัติ</td></tr>';
+                    cardContainer.innerHTML = '<div class="text-center p-6 text-gray-400 bg-white rounded-2xl border border-pink-100">ไม่มีข้อมูลประวัติ</div>';
+                    return;
+                }
                 
                 historyData.slice().reverse().forEach((row, index) => {
                     const rawDate = row.Date_Time || row.Timestamp || row.date;
@@ -799,34 +898,89 @@
                         <td class="p-4 text-center"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${countItems} รายการ</span></td>
                     `;
                     tbody.appendChild(tr);
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl border border-pink-100 shadow-sm cursor-pointer hover:border-pink-300 transition-all space-y-2";
+                    card.onclick = () => showHistoryDetail(row);
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-mono font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded">${row.Stock_In_No || row.Stock_In_ID}</span>
+                            <span class="text-xs text-gray-400">${dateStr}</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">${deptDisplay}</p>
+                            <p class="text-xs text-pink-500 font-medium">${row.Source_Type || '-'}</p>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100 text-xs">
+                            <span class="text-gray-500">จำนวน: <strong class="text-gray-800">${countItems} รายการ</strong></span>
+                            <span class="text-pink-600 font-bold flex items-center gap-1">ดูรายละเอียด <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    `;
+                    cardContainer.appendChild(card);
                 });
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-red-500">Error loading data</td></tr>'; }
+            } catch(e) { 
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-red-500">Error loading data</td></tr>';
+                cardContainer.innerHTML = '<div class="text-center p-6 text-red-500 bg-white rounded-2xl border border-pink-100">Error loading data</div>';
+            }
         }
 
         async function loadInventoryData() {
             const tbody = document.getElementById('inventoryTableBody');
+            const cardContainer = document.getElementById('inventoryCardContainer');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลด...</span></td></tr>';
+            cardContainer.innerHTML = '<div class="text-center p-6 text-gray-400"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div>กำลังโหลด...</div>';
+
             try {
                 const res = await fetchAPI(`${SCRIPT_URL}?action=getInventory`);
                 const invData = Array.isArray(res) ? res : (res.data || []);
                 tbody.innerHTML = '';
-                if(!invData || invData.length === 0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-gray-400">คลังว่างเปล่า</td></tr>';
+                cardContainer.innerHTML = '';
+
+                if(!invData || invData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-gray-400">คลังว่างเปล่า</td></tr>';
+                    cardContainer.innerHTML = '<div class="text-center p-6 text-gray-400 bg-white rounded-2xl border border-pink-100">คลังว่างเปล่า</div>';
+                    return;
+                }
                 
                 invData.slice().reverse().forEach(row => {
+                    const assetId = row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-';
+                    const invNo = row.Inv_No || row.Inv_ID || '-';
+                    const stockId = row.Stock_ID ? row.Stock_ID.split('-')[0] : '-';
+                    const description = row.Asset_FullDescription || row.FullDescription || row.Spec_Detai || '-';
+                    const status = row.Inv_Status || '-';
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-purple-50/50 transition-colors cursor-pointer";
                     tr.onclick = () => showInventoryDetail(row);
                     tr.innerHTML = `
-                        <td class="p-4 font-bold text-pink-600">${row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-'}<br><span class="text-[10px] text-gray-400">${row.Inv_No || row.Inv_ID}</span></td>
-                        <td class="p-4 text-xs text-gray-500 font-medium">${row.Stock_ID ? row.Stock_ID.split('-')[0] : '-'}</td>
+                        <td class="p-4 font-bold text-pink-600">${assetId}<br><span class="text-[10px] text-gray-400">${invNo}</span></td>
+                        <td class="p-4 text-xs text-gray-500 font-medium">${stockId}</td>
                         <td class="p-4 text-xs">
-                            <p class="font-bold text-gray-800 truncate max-w-[250px]">${row.Asset_FullDescription || row.FullDescription || row.Spec_Detai || '-'}</p>
+                            <p class="font-bold text-gray-800 truncate max-w-[250px]">${description}</p>
                         </td>
-                        <td class="p-4 text-center"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-bold">${row.Inv_Status || '-'}</span></td>
+                        <td class="p-4 text-center"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-bold">${status}</span></td>
                     `;
                     tbody.appendChild(tr);
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl border border-purple-100 shadow-sm cursor-pointer hover:border-purple-300 transition-all space-y-2";
+                    card.onclick = () => showInventoryDetail(row);
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-pink-600">${assetId}</span>
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-[10px] font-bold">${status}</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-800 font-bold leading-tight">${description}</p>
+                            <p class="text-[11px] text-gray-400 mt-1 font-mono">Inv: ${invNo} | Stock: ${stockId}</p>
+                        </div>
+                    `;
+                    cardContainer.appendChild(card);
                 });
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-red-500">Error loading data</td></tr>'; }
+            } catch(e) { 
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-red-500">Error loading data</td></tr>';
+                cardContainer.innerHTML = '<div class="text-center p-6 text-red-500 bg-white rounded-2xl border border-pink-100">Error loading data</div>';
+            }
         }
 
         function normalizeText(str) { return String(str || '').replace(/[-/_\s]/g, "").toUpperCase(); }
@@ -941,7 +1095,7 @@
             } else {
                 tempSelectedAsset = item;
                 tempSelectedAsset.imageBase64 = null;
-                tempSelectedAsset.Peripherals = 0; // Default
+                tempSelectedAsset.Peripherals = 0; 
                 document.getElementById('modalTitleText').innerHTML = `<i class="fa-solid fa-plus"></i> เพิ่มรายการ`;
                 document.getElementById('btnSaveItem').innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> บันทึกลงรายการ`;
             }
@@ -951,7 +1105,6 @@
             document.getElementById('modalSpec').value = tempSelectedAsset.Spec_Detai || tempSelectedAsset.FullDescription || '-';
             document.getElementById('modalStatus').value = tempSelectedAsset.InvStatus || tempSelectedAsset.Inv_Status || 'รอตรวจสอบ';
             
-            // Set Asset Type
             const typeSelect = document.getElementById('modalAssetType');
             const currentTypeVal = tempSelectedAsset.Asset_Type || tempSelectedAsset.Type_ID || "";
             if (currentTypeVal) {
@@ -960,7 +1113,6 @@
                 typeSelect.selectedIndex = 0;
             }
 
-            // Checkbox logic: Peripherals = 1 (true) or 0 (false)
             const pCheck = document.getElementById('modalPeripherals');
             pCheck.checked = (tempSelectedAsset.Peripherals == 1 || tempSelectedAsset.Peripherals === '1');
 
@@ -1095,7 +1247,9 @@
 
         function renderSavedTable() {
             const tbody = document.getElementById('assetTableBody');
+            const cardContainer = document.getElementById('assetCardContainer');
             tbody.innerHTML = '';
+            cardContainer.innerHTML = '';
             
             if (savedItemsList.length === 0) {
                 tbody.innerHTML = `<tr id="emptyRow"><td colspan="7" class="p-10 text-center text-gray-400">
@@ -1103,17 +1257,19 @@
                         <i class="fa-solid fa-boxes-stacked text-2xl text-gray-300"></i>
                     </div>ค้นหาและเลือกครุภัณฑ์ด้านบน<br><span class="text-xs text-gray-400 mt-1 block">ระบบจะบันทึกทันทีที่เพิ่มลงรายการ</span>
                 </td></tr>`;
+                cardContainer.innerHTML = `<div class="p-8 text-center text-gray-400 bg-white rounded-2xl border border-pink-100">
+                    <i class="fa-solid fa-boxes-stacked text-2xl text-gray-300 mb-2"></i>
+                    <p class="text-xs">ยังไม่มีรายการครุภัณฑ์ที่เลือก</p>
+                </div>`;
                 return;
             }
 
             savedItemsList.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-pink-50 transition-colors border-b border-pink-50";
-                
                 const imgSrc = item.imageBase64 || item.Image_URL || 'https://placehold.co/100x100/ffe6eb/ff85a2?text=No+Img';
                 const hasPeripherals = (item.Peripherals == 1 || item.Peripherals === '1');
                 
                 let peripheralCol = '';
+                let peripheralCardHTML = '';
                 if (hasPeripherals) {
                     const periCount = item.peripheralList ? item.peripheralList.length : 0;
                     peripheralCol = `
@@ -1124,10 +1280,16 @@
                             </button>
                         </div>
                     `;
+                    peripheralCardHTML = `<div class="mt-2 pt-2 border-t border-purple-100 flex justify-between items-center text-xs">
+                        <span class="text-purple-700 font-bold"><i class="fa-solid fa-plug"></i> อุปกรณ์ต่อพ่วง (${periCount})</span>
+                        <button type="button" onclick="openPeripheralModal(${index})" class="px-2.5 py-1 bg-purple-600 text-white rounded-lg font-bold">เพิ่มอุปกรณ์</button>
+                    </div>`;
                 } else {
                     peripheralCol = `<span class="text-gray-300 text-xs">-</span>`;
                 }
 
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-pink-50 transition-colors border-b border-pink-50";
                 tr.innerHTML = `
                     <td class="p-4 text-center font-bold text-gray-500">${index + 1}</td>
                     <td class="p-4 text-center">
@@ -1143,6 +1305,28 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-pink-100 shadow-sm space-y-2";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex items-center gap-3">
+                            <img src="${imgSrc}" class="w-12 h-12 rounded-lg object-cover border border-pink-100 shadow-sm" onerror="this.src='https://placehold.co/100x100/ffe6eb/ff85a2?text=No+Img'">
+                            <div>
+                                <p class="font-bold text-pink-600 text-xs">${item.AssetID || item.NoID || item.NOID || '-'}</p>
+                                <p class="text-[10px] text-gray-400">S/N: ${item.Serial || '-'}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-700">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</span>
+                    </div>
+                    <p class="text-xs text-gray-600">${item.Spec_Detai || item.FullDescription || '-'}</p>
+                    ${peripheralCardHTML}
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                        <button type="button" onclick="openAssetModal(null, ${index})" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                        <button type="button" onclick="deleteSavedItem(${index})" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-trash"></i> ลบ</button>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
             });
         }
 
@@ -1179,21 +1363,20 @@
             showLoading(true, 'กำลังบันทึกอุปกรณ์ต่อพ่วง...');
 
             try {
-                // Mapping พารามิเตอร์ส่งตรงไปยัง processSinglePeripheral(payload)
                 const payload = {
                     action: 'saveSinglePeripheral',
                     payload: {
-                        Inv_ID: item.Inv_ID,                             // 2. StockIn_ID / Inv_ID KeyRef
-                        Item_ID: itemId,                                 // 4. Item_ID
-                        Name: itemName,                                  // 5. Name
-                        Quantity: parseInt(qty, 10),                     // 6. Quantity
-                        Unit: unit,                                      // 7. Unit
-                        Source_Type: document.getElementById('Source_Type').value || "", // 8. Source_Type
-                        Reference_No: document.getElementById('Reference_No').value || "", // 9. Reference_No
-                        Note: itemCode,                                  // 10. Note
-                        User: getSafeDisplayName(),                      // 11. User
-                        Item_Code: itemCode,                             // 12. Item_Code
-                        PO_ID: ""                                        // 13. PO_ID
+                        Inv_ID: item.Inv_ID,                             
+                        Item_ID: itemId,                                 
+                        Name: itemName,                                  
+                        Quantity: parseInt(qty, 10),                     
+                        Unit: unit,                                      
+                        Source_Type: document.getElementById('Source_Type').value || "", 
+                        Reference_No: document.getElementById('Reference_No').value || "", 
+                        Note: itemCode,                                  
+                        User: getSafeDisplayName(),                      
+                        Item_Code: itemCode,                             
+                        PO_ID: ""                                        
                     }
                 };
 
@@ -1238,6 +1421,9 @@
             document.getElementById('displayStockInId').innerText = "รอดำเนินการ...";
             document.getElementById('sessionStockInBadge').classList.add('hidden');
             
+            document.getElementById('headerFormContainer').classList.remove('hidden');
+            document.getElementById('confirmedHeaderSummary').classList.add('hidden');
+
             document.querySelectorAll('.header-input').forEach(el => {
                 el.disabled = false;
                 el.classList.remove('bg-gray-100', 'cursor-not-allowed');
@@ -1300,7 +1486,7 @@
                 prepareLandscapePrint(senderName, b64);
                 document.body.className = "print-mode-landscape";
                 window.print();
-                document.body.className = "p-2 sm:p-4 md:p-8"; 
+                document.body.className = ""; 
                 
                 executeReset();
             } catch(e) {
@@ -1333,6 +1519,29 @@
             });
         }
 
+        function prepareSlipPrintCustom(row) {
+            document.getElementById('p-bill-sl').innerText = row.Stock_In_No || row.Stock_In_ID || '-';
+            const rawDate = row.Date_Time || row.Timestamp || new Date();
+            document.getElementById('p-date-sl').innerText = new Date(rawDate).toLocaleString('th-TH');
+            document.getElementById('p-it-sl').innerText = row.IT_User || '-';
+            document.getElementById('p-user-sl').innerText = row.User_Name || row.User_Confirm || '-'; 
+            document.getElementById('p-id-sl').innerText = row.Stock_In_ID || '-';
+            
+            const tbody = document.getElementById('printTableBodySlip');
+            tbody.innerHTML = '';
+            const items = row.items || row.assets || [];
+            items.forEach(item => {
+                tbody.innerHTML += `<tr><td style="padding: 2px 0;">${item.AssetID || item.Asset_ID || item.NoID || item.NOID || '-'}<br><span style="color:#666; font-size:9px;">${(item.Spec_Detai || item.FullDescription || '').substring(0, 20)}</span></td>
+                <td style="text-align:right; padding: 2px 0;">${item.Inv_Status || item.InvStatus || 'รอตรวจสอบ'}</td></tr>`;
+            });
+
+            document.body.classList.add("print-mode-slip");
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove("print-mode-slip");
+            }, 300);
+        }
+
         function prepareSlipPrint() {
             document.getElementById('p-bill-sl').innerText = currentSessionStockInNo || '-';
             document.getElementById('p-date-sl').innerText = new Date().toLocaleString('th-TH');
@@ -1350,6 +1559,7 @@
 
         function showHistoryDetail(row) {
             const content = document.getElementById('detailContent');
+            const footerAction = document.getElementById('detailFooterAction');
             let assetsHTML = '';
             const items = row.items || row.assets || [];
             if(items.length > 0) {
@@ -1380,21 +1590,41 @@
             } else assetsHTML = '<p class="text-gray-400">ไม่มีรายการ</p>';
 
             const deptName = row.DEPT_ID || departmentMap[row.DEPT_ID] || '-';
+            const itUser = row.IT_User || '-';
+            const userName = row.User_Name || '-';
+            const userConfirm = row.User_Confirm || '-';
 
             content.innerHTML = `
-                <p><strong>บิลอ้างอิง:</strong> <span class="text-pink-600 font-mono font-bold">${row.Stock_In_No || row.Stock_In_ID}</span></p>
-                <p><strong>วันที่:</strong> ${new Date(row.Date_Time || row.Timestamp).toLocaleString('th-TH')}</p>
-                <p><strong>หน่วยงาน:</strong> ${deptName}</p>
-                <p><strong>ประเภทการรับเข้า:</strong> ${row.Source_Type || '-'}</p>
-                <p><strong>ผู้รับ (IT):</strong> ${row.IT_User || '-'}</p>
-                <p><strong>ผู้นำส่ง:</strong> ${row.User_Name || '-'}</p>
-                <div class="mt-4 border-t pt-2 bg-gray-50 p-3 rounded-2xl"><p class="font-bold mb-2 text-xs">รายการครุภัณฑ์ (${items.length}):</p>${assetsHTML}</div>
+                <div class="space-y-1 bg-pink-50/40 p-3 rounded-2xl border border-pink-100 text-xs">
+                    <p><strong>บิลอ้างอิง:</strong> <span class="text-pink-600 font-mono font-bold">${row.Stock_In_No || row.Stock_In_ID}</span></p>
+                    <p><strong>วันที่:</strong> ${new Date(row.Date_Time || row.Timestamp).toLocaleString('th-TH')}</p>
+                    <p><strong>หน่วยงาน:</strong> ${deptName}</p>
+                    <p><strong>ประเภทการรับเข้า:</strong> ${row.Source_Type || '-'}</p>
+                    <hr class="border-pink-200 my-1">
+                    <p><strong>ผู้รับเข้า (IT_User):</strong> <span class="text-purple-700 font-bold">${itUser}</span></p>
+                    <p><strong>ผู้ส่ง (User_Name):</strong> <span class="text-gray-800 font-bold">${userName}</span></p>
+                    <p><strong>ผู้ยืนยัน (User_Confirm):</strong> <span class="text-gray-800 font-bold">${userConfirm}</span></p>
+                </div>
+                <div class="mt-4 border-t pt-2 bg-gray-50 p-3 rounded-2xl">
+                    <p class="font-bold mb-2 text-xs">รายการครุภัณฑ์ (${items.length}):</p>
+                    ${assetsHTML}
+                </div>
             `;
+
+            footerAction.innerHTML = `
+                <button type="button" onclick="prepareSlipPrintCustom(${JSON.stringify(row).replace(/"/g, '&quot;')})" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-receipt"></i> พิมพ์สลิปรับเข้า
+                </button>
+            `;
+
             document.getElementById('detailModal').classList.remove('hidden');
         }
 
         function showInventoryDetail(row) {
             const content = document.getElementById('detailContent');
+            const footerAction = document.getElementById('detailFooterAction');
+            footerAction.innerHTML = ''; 
+
             content.innerHTML = `
                 <div class="text-center mb-4"><i class="fa-solid fa-desktop text-4xl text-purple-300"></i></div>
                 <p><strong>Asset / NOID:</strong> <span class="text-pink-600 font-bold">${row.AssetID || row.Asset_ID || row.NOID || row.NoID || '-'}</span></p>
