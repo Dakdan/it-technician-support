@@ -125,8 +125,18 @@
             body.print-mode-landscape .print-only-landscape { display: block !important; }
             body.print-mode-landscape main { display: none !important; }
             
-            body.print-mode-slip @page { size: 80mm auto; margin: 0; }
-            body.print-mode-slip .print-only-slip { display: block !important; width: 100%; font-family: 'Kanit', sans-serif; font-size: 12px; padding: 10px; color: black; }
+            /* ตั้งค่าขนาดหน้ากระดาษสลิป 80มม. แบบร้านสะดวกซื้อ */
+            body.print-mode-slip @page { size: 80mm auto; margin: 2mm; }
+            body.print-mode-slip .print-only-slip { 
+                display: block !important; 
+                width: 76mm; 
+                font-family: 'Kanit', sans-serif; 
+                font-size: 11px; 
+                padding: 4px; 
+                color: #000; 
+                background: #fff;
+                line-height: 1.2;
+            }
             body.print-mode-slip main { display: none !important; }
         }
     </style>
@@ -139,7 +149,7 @@
         <p id="loadingMsg" class="text-pink-600 font-bold text-lg bg-white/90 px-6 py-2 rounded-full shadow-md border border-pink-100">กำลังประมวลผล...</p>
     </div>
 
-    <!-- App Header (ตามธีมตัวอย่าง) -->
+    <!-- App Header -->
     <header class="app-header no-print">
         <div class="flex items-center gap-3">
             <img src="./logo003v1.png" alt="Logo" class="header-logo" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
@@ -619,29 +629,34 @@
         </div>
     </div>
 
-    <!-- Print Area: Thermal Slip (80mm) -->
+    <!-- Print Area: Thermal Slip (80mm ร้านสะดวกซื้อ Style) -->
     <div class="print-only-slip" id="printAreaSlip">
-        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-            <h2 style="margin: 0; font-size: 16px; font-weight: bold;">สลิปรับเข้าครุภัณฑ์</h2>
-            <h3 style="margin: 2px 0 0; font-size: 12px;">รพ.อุดรธานี (IT)</h3>
+        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+            <p style="margin: 0; font-size: 13px; font-weight: bold;">โรงพยาบาลอุดรธานี</p>
+            <p style="margin: 0; font-size: 10px;">กลุ่มงานเทคโนโลยีสารสนเทศฯ</p>
+            <p style="margin: 2px 0 0; font-size: 11px; font-weight: bold;">[ สลิปบันทึกรับเข้าครุภัณฑ์ ]</p>
         </div>
-        <div style="margin-bottom: 10px;">
-            <p style="margin: 2px 0;"><strong>บิล:</strong> <span id="p-bill-sl"></span></p>
-            <p style="margin: 2px 0;"><strong>วันที่:</strong> <span id="p-date-sl"></span></p>
-            <p style="margin: 2px 0;"><strong>ผู้รับ (IT):</strong> <span id="p-it-sl"></span></p>
-            <p style="margin: 2px 0;"><strong>ผู้นำส่ง:</strong> <span id="p-user-sl"></span></p>
+        <div style="margin-bottom: 6px; font-size: 10px;">
+            <div style="display: flex; justify-content: space-between;"><span>เลขที่บิล:</span> <span id="p-bill-sl" style="font-weight: bold;"></span></div>
+            <div style="display: flex; justify-content: space-between;"><span>วันที่:</span> <span id="p-date-sl"></span></div>
+            <div style="display: flex; justify-content: space-between;"><span>ผู้รับ (IT):</span> <span id="p-it-sl"></span></div>
+            <div style="display: flex; justify-content: space-between;"><span>ผู้นำส่ง:</span> <span id="p-user-sl"></span></div>
         </div>
-        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0; margin-bottom: 10px;">
-            <table style="width: 100%; text-align: left; font-size: 11px;">
+        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin-bottom: 6px;">
+            <table style="width: 100%; text-align: left; font-size: 10px; border-collapse: collapse;">
                 <thead>
-                    <tr><th>รหัส</th><th style="text-align:right;">สถานะ</th></tr>
+                    <tr style="border-bottom: 1px solid #000;">
+                        <th style="padding-bottom: 2px;">รายการ (Asset / สเปค)</th>
+                        <th style="text-align: right; padding-bottom: 2px;">สถานะ</th>
+                    </tr>
                 </thead>
                 <tbody id="printTableBodySlip"></tbody>
             </table>
         </div>
-        <div style="text-align: center; font-size: 10px;">
-            <p>*** ขอบคุณครับ ***</p>
-            <p id="p-id-sl" style="font-family: monospace; letter-spacing: 1px;"></p>
+        <div style="text-align: center; font-size: 9px; margin-top: 8px;">
+            <p style="margin: 2px 0;">-----------------------------------------</p>
+            <p style="margin: 2px 0;">ขอบคุณที่ใช้บริการระบบสารสนเทศ</p>
+            <p id="p-id-sl" style="font-family: monospace; font-size: 8px; margin-top: 4px;"></p>
         </div>
     </div>
 
@@ -1400,7 +1415,7 @@
             prepareSlipPrint();
             Swal.fire({
                 title: 'บันทึกสำเร็จ (ไม่ลงชื่อ)',
-                text: 'กำลังสร้างใบเสร็จรับเข้า...',
+                text: 'กำลังสร้างสลิปใบเสร็จ...',
                 icon: 'success',
                 showConfirmButton: false,
                 timer: 1200
@@ -1531,8 +1546,10 @@
             tbody.innerHTML = '';
             const items = row.items || row.assets || [];
             items.forEach(item => {
-                tbody.innerHTML += `<tr><td style="padding: 2px 0;">${item.AssetID || item.Asset_ID || item.NoID || item.NOID || '-'}<br><span style="color:#666; font-size:9px;">${(item.Spec_Detai || item.FullDescription || '').substring(0, 20)}</span></td>
-                <td style="text-align:right; padding: 2px 0;">${item.Inv_Status || item.InvStatus || 'รอตรวจสอบ'}</td></tr>`;
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 2px 0;"><strong>${item.AssetID || item.Asset_ID || item.NoID || item.NOID || '-'}</strong><br>${(item.Spec_Detai || item.FullDescription || '').substring(0, 30)}</td>
+                    <td style="text-align: right; vertical-align: top; padding: 2px 0;">${item.Inv_Status || item.InvStatus || 'รอตรวจสอบ'}</td>
+                </tr>`;
             });
 
             document.body.classList.add("print-mode-slip");
@@ -1552,8 +1569,10 @@
             const tbody = document.getElementById('printTableBodySlip');
             tbody.innerHTML = '';
             savedItemsList.forEach(item => {
-                tbody.innerHTML += `<tr><td style="padding: 2px 0;">${item.AssetID || item.NoID || item.NOID || '-'}<br><span style="color:#666; font-size:9px;">${(item.Spec_Detai || item.FullDescription || '').substring(0, 20)}</span></td>
-                <td style="text-align:right; padding: 2px 0;">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</td></tr>`;
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 2px 0;"><strong>${item.AssetID || item.NoID || item.NOID || '-'}</strong><br>${(item.Spec_Detai || item.FullDescription || '').substring(0, 30)}</td>
+                    <td style="text-align: right; vertical-align: top; padding: 2px 0;">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</td>
+                </tr>`;
             });
         }
 
