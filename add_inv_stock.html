@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <script src="./auth-check.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="logo003v1.png">.
-    <script src="./auth-check.js"></script>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -144,44 +145,66 @@
         .print-only-receipt, .print-only-a4 { display: none; }
     </style>
 </head>
-<body class="relative min-h-screen pb-12">
-
-    <div class="watermark">IT UDON HOSP ✨</div>
-
-    <!-- Header Section -->
-    <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
-        <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center">
-                <div class="relative">
-                    <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                    <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+    <body class="relative min-h-screen pb-12">
+    
+        <div class="watermark">IT UDON HOSP ✨</div>
+    
+        <!-- Header Section -->
+        <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
+            <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center">
+                    <div class="relative">
+                        <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
+                        <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
+                            ✨ คลังครุภัณฑ์คอมพิวเตอร์ 💻
+                        </h1>
+                        <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
+                        <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
-                        ✨ คลังครุภัณฑ์คอมพิวเตอร์ 💻
-                    </h1>
-                    <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
-                    <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+    
+                <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
+                        👤
+                    </div>
+                    <div class="text-left">
+                        <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
+                        <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
+                            <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT Department</span>
+                            <span id="headerUserPNText"></span>
+                        </p>
+                    </div>
+                    <!-- ปุ่ม Logout เรียกใช้ฟังก์ชันจาก auth-check.js -->
+                    <button onclick="logout()" title="ออกจากระบบ" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
-
-            <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
-                    👤
-                </div>
-                <div class="text-left">
-                    <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
-                    <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
-                        <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT Department</span>
-                        <span id="headerUserPNText"></span>
-                    </p>
-                </div>
-                <button onclick="logout()" title="ออกจากระบบ" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+        </header>
+    
+        <script>
+            // อัปเดตข้อมูลผู้ใช้ขึ้น UI บน Header เมื่อโหลดหน้าเว็บ
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentUser = getCurrentUser();
+                const displayNameEl = document.getElementById('headerDisplayName');
+                const userPNTextEl = document.getElementById('headerUserPNText');
+    
+                if (currentUser) {
+                    if (displayNameEl) displayNameEl.textContent = getDisplayName();
+                    if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
+                } else {
+                    if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
+                    if (userPNTextEl) userPNTextEl.textContent = "";
+                }
+    
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            });
+        </script>
 
     <!-- Navigation Bar: Sticky Top -->
     <nav class="sticky top-0 z-50 max-w-6xl mx-auto px-4 py-2 my-2 transition-all">
