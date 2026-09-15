@@ -1,51 +1,58 @@
 /*
  * ============================================================================
- * ไฟล์: auth-check.js
- * วัตถุประสงค์: ตรวจสอบและจัดการสถานะการเข้าสู่ระบบ (Authentication) จาก LocalStorage
- * รูปแบบการทำงาน: แบบ Soft Check (ไม่บังคับเด้งออก) เพื่อให้หน้า HTML ปลายทาง 
- *                สามารถจัดการ UI (เช่น สลับปุ่มล็อกอิน/แสดงข้อมูล) ได้เอง
+ * ไฟล์: auth-check.js (Hard Check Version)
+ * วัตถุประสงค์: ตรวจสอบสถานะการเข้าสู่ระบบ หากไม่ผ่านจะ Redirect ไปหน้า login.html ทันที
+ * ============================================================================
  */
 (function () {
+    const LOGIN_PAGE = 'login.html'; // กำหนดปลายทางกรณีไม่ผ่านการยืนยันตัวตน
+
+    // ฟังก์ชันสำหรับเคลียร์ Session และสั่ง Redirect
+    function redirectToLogin() {
+        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
+        window.user = null;
+        
+        // ใช้ replace เพื่อป้องกันไม่ให้ผู้ใช้กดปุ่ม Back กลับเข้ามาที่หน้านี้ได้
+        try {
+            window.location.replace(LOGIN_PAGE);
+        } catch (e) {
+            window.location.href = LOGIN_PAGE;
+        }
+    }
+
     try {
-        // ดึงข้อมูลจาก sessionStorage (สำหรับ Mobile) หรือ localStorage (สำหรับ PC)
+        // ดึงข้อมูลจาก sessionStorage (Mobile) หรือ localStorage (PC)
         const userData = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
 
-        // เงื่อนไข 1: หากไม่มีข้อมูลในระบบ
+        // เงื่อนไข 1: ไม่มีข้อมูลในระบบ
         if (!userData) {
-            window.user = null; // ปรับไม่ให้เด้งหนี เพื่อส่งค่าไปเปลี่ยนสลับปุ่มล็อกอินที่หน้าหลักแทน
+            redirectToLogin();
             return;
         }
 
         const user = JSON.parse(userData);
 
-        // เงื่อนไข 2: หากมีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
+        // เงื่อนไข 2: มีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
         if (!user || !user.UserPN) {
-            sessionStorage.removeItem('currentUser');
-            localStorage.removeItem('currentUser'); // ล้างข้อมูลขยะทิ้งทั้ง 2 จุด
-            window.user = null;
+            redirectToLogin();
             return;
         }
 
-        // เงื่อนไข 3: ตรวจสอบเวลาหมดอายุ (TTL) เฉพาะกรณีที่มีการกำหนด loginTime และ expiresIn
+        // เงื่อนไข 3: ตรวจสอบเวลาหมดอายุ (TTL)
         if (user.loginTime && user.expiresIn) {
             const now = new Date().getTime();
             if (now - user.loginTime > user.expiresIn) {
-                // หากหมดอายุ ให้ล้างข้อมูลทิ้ง
-                sessionStorage.removeItem('currentUser');
-                localStorage.removeItem('currentUser');
-                window.user = null;
+                redirectToLogin();
                 return;
             }
         }
 
-        // เงื่อนไข 4: ข้อมูลถูกต้องและยังไม่หมดอายุ
-        // ผูก Object ผู้ใช้งานเข้ากับ Global Window สำหรับการดึงใช้งานในหน้าเพจได้อย่างอิสระ
+        // เงื่อนไข 4: ผ่านการตรวจสอบ -> ผูก Object เข้ากับ Global Window
         window.user = user;
     } catch (err) {
         console.error("Auth-Check error: ", err);
-        sessionStorage.removeItem('currentUser');
-        localStorage.removeItem('currentUser');
-        window.user = null;
+        redirectToLogin();
     }
 })();
 
@@ -68,8 +75,8 @@ function logout() {
     localStorage.removeItem('currentUser');
     sessionStorage.clear();
     try {
-        window.location.replace("index.html"); // ใช้ replace เพื่อไม่ให้กด Back กลับมาได้
+        window.location.replace("login.html");
     } catch(e) {
-        window.location.href = "index.html"; // Fallback กรณี Browser ไม่รองรับ replace
+        window.location.href = "login.html";
     }
 }
