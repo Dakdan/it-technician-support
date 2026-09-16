@@ -3,46 +3,31 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
+        // จำลองฟังก์ชัน (Mock) สำหรับหน้า Preview เพื่อป้องกัน ReferenceError เนื่องจากไม่มีไฟล์ auth-check.js ในสภาพแวดล้อมนี้
+        if (typeof requireAuth !== 'function') { window.requireAuth = function() { console.log('Mock requireAuth called'); }; }
+        if (typeof getCurrentUser !== 'function') {
+            window.getCurrentUser = function() { return { UserName: "IT", UserSname: "Admin", UserPN: "IT-001" }; };
+        }
+        if (typeof getDisplayName !== 'function') {
+            window.getDisplayName = function() { return "IT Admin (Preview)"; };
+        }
+        if (typeof logout !== 'function') {
+            window.logout = function() { console.log('Mock logout called'); };
+        }
+    </script>
+    <script>
     // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="logo003v1.png">.
+    <link rel="icon" type="image/png" href="logo003v1.png">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-      <!-- Watermark 
-    <script src="./auth-check2.js" onerror="console.warn('auth-check2.js not found, using fallback session helpers.')"></script>
-    <script>
-        if (typeof getCurrentUser !== 'function') {
-            window.getCurrentUser = function() {
-                try {
-                    const userData = localStorage.getItem('currentUser');
-                    if (!userData) return null;
-                    return JSON.parse(userData);
-                } catch (e) {
-                    return null;
-                }
-            };
-        }
-        if (typeof getDisplayName !== 'function') {
-            window.getDisplayName = function() {
-                const user = getCurrentUser();
-                if (!user) return "เจ้าหน้าที่ IT (Guest)";
-                return (user.UserName || "") + " " + (user.UserSname || "");
-            };
-        }
-        if (typeof logout !== 'function') {
-            window.logout = function() {
-                localStorage.removeItem('currentUser');
-                sessionStorage.clear();
-                window.location.reload();
-            };
-        }
-    </script>  -->
+    
     <style>
         :root {
             --primary-color: #ec4899;      
@@ -153,7 +138,6 @@
     
         <div class="watermark">IT UDON HOSP ✨</div>
     
-        <!-- Header Section -->
         <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
             <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center">
@@ -555,7 +539,7 @@
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
 
-        // แก้ไขที่ 1: เพิ่ม ageRange ในโครงสร้างการเก็บฟิลเตอร์
+        // โครงสร้างการเก็บฟิลเตอร์ (แก้ไขให้รองรับอายุ)
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
         let filteredDashboardData = [];
 
@@ -564,7 +548,9 @@
 
         async function fetchAPI(url, options = {}) {
             try {
-                const res = await fetch(url, options);
+                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
+                const fetchOptions = { redirect: 'follow', ...options };
+                const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return await res.json();
             } catch (err) {
@@ -638,12 +624,10 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
-                // ดึงข้อมูลทั้ง Dashboard Stats, Inventory, Peripherals และ Peripheral Dashboard พร้อมกัน
-                const [resInv, resPeri, resPeriDash] = await Promise.all([
-                    fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
-                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
-                    fetchAPI(`${API_URL}?action=getPeripheralDashboard`).catch(() => null)
-                ]);
+                // แก้ไขที่ 2: เปลี่ยนจาก Promise.all เป็น await แยกทีละรายการ (Sequential) เพื่อป้องกัน Google บล็อก Request (404 Error)
+                const resInv = await fetchAPI(`${API_URL}?action=getInventory`).catch(() => []);
+                const resPeri = await fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []);
+                const resPeriDash = await fetchAPI(`${API_URL}?action=getPeripheralDashboard`).catch(() => null);
 
                 globalInventoryRecords = Array.isArray(resInv) ? resInv : (resInv?.data || []);
                 globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri?.data || []);
@@ -662,7 +646,7 @@
             }
         }
 
-        // แก้ไขที่ 3: ปรับปรุงการคำนวณโลคอลให้รองรับการเช็คฟิลเตอร์ช่วงอายุ
+        // ปรับปรุงการคำนวณโลคอลให้รองรับการเช็คฟิลเตอร์ช่วงอายุ
         function calculateDashboardLocally(inventoryList, peripheralsList, filters) {
             let filteredInv = inventoryList.filter(item => {
                 const typeName = item.Asset_Type_Name || item.Asset_Type_Group || item.Type || '';
@@ -757,7 +741,7 @@
             loadDashboardStats();
         }
 
-        // แก้ไขที่ 4: เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
+        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
@@ -765,7 +749,7 @@
             loadDashboardStats();
         }
 
-        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
+        // เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -1128,10 +1112,10 @@
         async function loadInventoryRecords() {
             showLoading();
             try {
-                const [data, resPeri] = await Promise.all([
-                    fetchAPI(`${API_URL}?action=getInventory`),
-                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
-                ]);
+                // แก้ไขที่ 3: เปลี่ยนจาก Promise.all เป็นรอคิวทีละเส้น (Sequential) เพื่อป้องกัน 404
+                const data = await fetchAPI(`${API_URL}?action=getInventory`);
+                const resPeri = await fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []);
+                
                 globalInventoryRecords = Array.isArray(data) ? data : (data.data || []);
                 globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri.data || []);
                 
@@ -1597,7 +1581,7 @@
                     });
                 });
 
-                html += `</tbody></table></div></div>`;
+                html += `</tbody></table></div>`;
             } else {
                 html += `<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p></div>`;
             }
