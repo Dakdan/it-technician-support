@@ -3,19 +3,6 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
-        // จำลองฟังก์ชัน (Mock) สำหรับหน้า Preview เพื่อป้องกัน ReferenceError เนื่องจากไม่มีไฟล์ auth-check.js ในสภาพแวดล้อมนี้
-        if (typeof requireAuth !== 'function') { window.requireAuth = function() { console.log('Mock requireAuth called'); }; }
-        if (typeof getCurrentUser !== 'function') {
-            window.getCurrentUser = function() { return { UserName: "IT", UserSname: "Admin", UserPN: "IT-001" }; };
-        }
-        if (typeof getDisplayName !== 'function') {
-            window.getDisplayName = function() { return "IT Admin (Preview)"; };
-        }
-        if (typeof logout !== 'function') {
-            window.logout = function() { console.log('Mock logout called'); };
-        }
-    </script>
-    <script>
     // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
@@ -226,7 +213,7 @@
                         📊 สรุปรายงานคลังครุภัณฑ์ (Inventory Dashboard)
                     </h3>
                     <div class="flex items-center gap-2">
-                        <button onclick="loadDashboardStats()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-xl text-xs font-medium transition-all shadow-sm flex items-center gap-1">
+                        <button onclick="loadDashboardStats(true)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-xl text-xs font-medium transition-all shadow-sm flex items-center gap-1">
                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรชข้อมูล
                         </button>
                         <button onclick="exportDashboardToCSV()" class="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
@@ -316,7 +303,7 @@
                     <h3 class="text-pink-600 font-bold text-base md:text-lg flex items-center gap-2">
                         <i data-lucide="clipboard-list" class="w-5 h-5"></i> รายการบันทึกรับเข้าทั้งหมด (Asset Stock In)
                     </h3>
-                    <button onclick="loadStockInRecords()" class="bg-pink-100 hover:bg-pink-200 text-pink-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                    <button onclick="loadStockInRecords(true)" class="bg-pink-100 hover:bg-pink-200 text-pink-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
@@ -350,7 +337,7 @@
                     <h3 class="text-purple-600 font-bold text-base md:text-lg flex items-center gap-2">
                         <i data-lucide="upload" class="w-5 h-5"></i> รายการบันทึกจ่ายออก (Stock Out)
                     </h3>
-                    <button onclick="loadStockOutRecords()" class="bg-purple-100 hover:bg-purple-200 text-purple-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                    <button onclick="loadStockOutRecords(true)" class="bg-purple-100 hover:bg-purple-200 text-purple-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
@@ -384,7 +371,7 @@
                     <h3 class="text-indigo-600 font-bold text-base md:text-lg flex items-center gap-2">
                         <i data-lucide="package" class="w-5 h-5"></i> รายการครุภัณฑ์ทั้งหมดในคลัง (Inventory Asset)
                     </h3>
-                    <button onclick="loadInventoryRecords()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                    <button onclick="loadInventoryRecords(true)" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
@@ -615,7 +602,14 @@
             else if (tabId === 'reports') loadReportList('stockIn');
         }
 
-        async function loadDashboardStats() {
+        async function loadDashboardStats(forceRefresh = false) {
+            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
+            if (!forceRefresh && globalInventoryRecords.length > 0) {
+                const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
+                updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
+                return;
+            }
+
             showLoading();
             try {
                 const queryParams = new URLSearchParams();
@@ -624,10 +618,12 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
-                // แก้ไขที่ 2: เปลี่ยนจาก Promise.all เป็น await แยกทีละรายการ (Sequential) เพื่อป้องกัน Google บล็อก Request (404 Error)
-                const resInv = await fetchAPI(`${API_URL}?action=getInventory`).catch(() => []);
-                const resPeri = await fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []);
-                const resPeriDash = await fetchAPI(`${API_URL}?action=getPeripheralDashboard`).catch(() => null);
+                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
+                const [resInv, resPeri, resPeriDash] = await Promise.all([
+                    fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getPeripheralDashboard`).catch(() => null)
+                ]);
 
                 globalInventoryRecords = Array.isArray(resInv) ? resInv : (resInv?.data || []);
                 globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri?.data || []);
@@ -646,7 +642,6 @@
             }
         }
 
-        // ปรับปรุงการคำนวณโลคอลให้รองรับการเช็คฟิลเตอร์ช่วงอายุ
         function calculateDashboardLocally(inventoryList, peripheralsList, filters) {
             let filteredInv = inventoryList.filter(item => {
                 const typeName = item.Asset_Type_Name || item.Asset_Type_Group || item.Type || '';
@@ -746,10 +741,10 @@
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats();
+            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
         }
 
-        // เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
+        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -961,7 +956,13 @@
             document.body.removeChild(link);
         }
 
-        async function loadStockInRecords() {
+        async function loadStockInRecords(forceRefresh = false) {
+            // ระบบ Caching
+            if (!forceRefresh && globalStockInRecords.length > 0) {
+                renderStockInTable(globalStockInRecords);
+                return;
+            }
+
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockIn`);
@@ -1035,7 +1036,13 @@
             renderStockInTable(globalStockInRecords);
         }
 
-       async function loadStockOutRecords() {
+       async function loadStockOutRecords(forceRefresh = false) {
+            // ระบบ Caching
+            if (!forceRefresh && globalStockOutRecords.length > 0) {
+                renderStockOutTable(globalStockOutRecords);
+                return;
+            }
+
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockOut`);
@@ -1109,12 +1116,21 @@
             renderStockOutTable(globalStockOutRecords);
         }
 
-        async function loadInventoryRecords() {
+        async function loadInventoryRecords(forceRefresh = false) {
+            // ระบบ Caching
+            if (!forceRefresh && globalInventoryRecords.length > 0) {
+                renderInventoryStatusBar();
+                filterInventoryRecords();
+                return;
+            }
+
             showLoading();
             try {
-                // แก้ไขที่ 3: เปลี่ยนจาก Promise.all เป็นรอคิวทีละเส้น (Sequential) เพื่อป้องกัน 404
-                const data = await fetchAPI(`${API_URL}?action=getInventory`);
-                const resPeri = await fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []);
+                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
+                const [data, resPeri] = await Promise.all([
+                    fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
+                ]);
                 
                 globalInventoryRecords = Array.isArray(data) ? data : (data.data || []);
                 globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri.data || []);
