@@ -81,7 +81,7 @@
             border-bottom: 6px solid var(--pink-dark);
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 500; /* Adjusted to be below modals (z-index 2000) */
             box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
             display: flex;
             flex-direction: row;
@@ -143,7 +143,6 @@
 </head>
 <body>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay">
         <div class="spinner mb-4"></div>
         <p id="loadingMsg" class="text-pink-600 font-bold text-lg bg-white/90 px-6 py-2 rounded-full shadow-md border border-pink-100">กำลังประมวลผล...</p>
@@ -409,7 +408,7 @@
     </nav>
 
     <!-- Modal: CRUD ครุภัณฑ์ -->
-    <div id="assetConfirmModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
+    <div id="assetConfirmModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-pink-100 flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-pink-50 to-white p-5 border-b border-pink-100 flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modalTitleText" class="text-lg font-bold text-pink-700 flex items-center gap-2"><i class="fa-solid fa-clipboard-check"></i> ข้อมูลครุภัณฑ์</h3>
@@ -476,7 +475,7 @@
     </div>
 
     <!-- Modal: เพิ่มอุปกรณ์ต่อพ่วง -->
-    <div id="peripheralModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[65] flex justify-center items-center p-4">
+    <div id="peripheralModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-purple-200 flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-5 border-b border-purple-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-purple-700 flex items-center gap-2"><i class="fa-solid fa-plug"></i> เพิ่มอุปกรณ์ต่อพ่วง (Peripherals)</h3>
@@ -534,7 +533,7 @@
     </div>
 
     <!-- Modal: ลงลายมือชื่อ -->
-    <div id="signatureModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex justify-center items-center p-4">
+    <div id="signatureModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[2000] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 border border-pink-200">
             <div class="text-center mb-2">
                 <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-3"><i class="fa-solid fa-file-signature"></i></div>
@@ -568,8 +567,8 @@
         </div>
     </div>
 
-    <!-- Modal: Detail Viewer -->
-    <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center p-4">
+    <!-- Modal: Detail Viewer (Z-Index 2000 to sit above app-header) -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
             <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 id="detailTitle" class="font-bold text-gray-700"><i class="fa-solid fa-circle-info mr-2"></i> รายละเอียด</h3>
@@ -682,24 +681,24 @@
         let editingItemIndex = -1;
         let activePeripheralItemIndex = -1;
 
-        // ตัวแปรเก็บประวัติและคลังข้อมูลระดับ Global ป้องกัน String escape พัง
         window.historyDataList = [];
         window.inventoryDataList = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             initUserDisplay();
-            fetchDepartments();
-            fetchAssetTypes();
+            // Optimizing loading performance using Promise.all
+            Promise.all([
+                fetchDepartments(),
+                fetchAssetTypes(),
+                loadSummaryCounts()
+            ]).catch(err => console.warn("Initial load optimization warning:", err));
+            
             initSignaturePad();
             setupImagePreview();
             setupDocFileHandler();
-            loadSummaryCounts();
             renderSavedTable();
         });
 
-        // -------------------------------------------------------------
-        // Helper: แปลงข้อมูลรูปภาพเป็น Thumbnail URL จาก Google Drive
-        // -------------------------------------------------------------
         function getValidImageUrl(item) {
             const driveFileId = item.Inv_Image_ID || item.Image_FileId || item.imageFileId || item.ImageFileId || Object.values(item)[10] || '';
             let rawImgUrl = item.Image_URL || item.ImageUrl || item.imageBase64 || Object.values(item)[9] || '';
@@ -792,8 +791,10 @@
 
         async function loadSummaryCounts() {
             try {
-                const stockRes = await fetchAPI(`${SCRIPT_URL}?action=getStockIn`);
-                const invRes = await fetchAPI(`${SCRIPT_URL}?action=getInventory`);
+                const [stockRes, invRes] = await Promise.all([
+                    fetchAPI(`${SCRIPT_URL}?action=getStockIn`).catch(() => []),
+                    fetchAPI(`${SCRIPT_URL}?action=getInventory`).catch(() => [])
+                ]);
                 const stockList = Array.isArray(stockRes) ? stockRes : (stockRes.data || []);
                 const invList = Array.isArray(invRes) ? invRes : (invRes.data || []);
                 document.getElementById('summaryTotalStockIn').innerText = stockList.length;
@@ -969,7 +970,7 @@
             }
         }
 
-       async function loadInventoryData() {
+        async function loadInventoryData() {
             const tbody = document.getElementById('inventoryTableBody');
             const cardContainer = document.getElementById('inventoryCardContainer');
             tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8"><div class="spinner mx-auto mb-2 w-8 h-8 border-2"></div><span class="text-gray-400">กำลังโหลด...</span></td></tr>';
@@ -1751,7 +1752,7 @@
             const items = row.items || row.assets || [];
             
             items.forEach(item => {
-                const descText = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || "-";
+                const descText = item.Spec_Detai || item.FullDescription || item.Asset_FullDescription || item.Asset_Spec || item.Spec || "-";
                 const statusText = item.Inv_Status || item.InvStatus || "รอตรวจสอบ";
                 const serialText = item.Asset_Serial || item.Serial || "-";
                 const imgUrl = getValidImageUrl(item);
@@ -1759,7 +1760,7 @@
                 savedItemsList.push({
                     Inv_ID: item.Inv_ID || "",
                     Inv_No: item.Inv_No || "",
-                    AssetID: item.AssetID || item.Asset_ID || "",
+                    AssetID: item.AssetID || item.Asset_ID || item.NOID || item.NoID || "",
                     NoID: item.NOID || item.NoID || "",
                     Spec_Detai: descText,
                     FullDescription: descText,
@@ -1917,7 +1918,6 @@
             renderFilteredInventoryTable(filtered);
         }
 
-        // ฟังก์ชันช่วยเรนเดอร์ตารางเฉพาะรายการที่ค้นเจอ
         function renderFilteredInventoryTable(filteredList) {
             const tbody = document.getElementById('inventoryTableBody');
             const cardContainer = document.getElementById('inventoryCardContainer');
@@ -1943,7 +1943,6 @@
                     imgHTML = `<img src="${imgUrl}" class="w-10 h-10 object-cover rounded-lg border border-pink-200 shadow-sm mx-auto" alt="Asset" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-10 h-10 bg-pink-100 text-pink-400 rounded-lg flex items-center justify-center text-[9px] font-bold mx-auto\\'>No Img</div>';">`;
                 }
 
-                // หา Index จริงของ Object ใน window.inventoryDataList เพื่อส่งเข้า Modal
                 const originalIndex = window.inventoryDataList.indexOf(row);
 
                 const tr = document.createElement('tr');
