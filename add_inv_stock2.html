@@ -2,6 +2,10 @@
 <html lang="th">
 <head>
     <script src="./auth-check.js"></script>
+    <script>
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
+    requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
+    </script>
     <link rel="icon" type="image/png" href="logo003v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
