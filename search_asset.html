@@ -542,7 +542,16 @@
                 searchInput.focus();
             });
         });
+            const localData = await getAssetsFromDB();
 
+            if (localData.length > 0) {
+            
+                allAssetsData = localData;
+            
+            }
+            allAssetsData = result.data;
+
+            await saveAssetsToDB(result.data);
         async function fetchAllData() {
             try {
                 const response = await fetch(API_URL, {
