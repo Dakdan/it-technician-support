@@ -542,45 +542,70 @@
                 searchInput.focus();
             });
         });
-            const localData = await getAssetsFromDB();
-
-            if (localData.length > 0) {
-            
-                allAssetsData = localData;
-            
-            }
-            allAssetsData = result.data;
-
-            await saveAssetsToDB(result.data);
+            // 1. ดึงข้อมูล (อัปเกรดเป็น Server -> IndexedDB -> allAssetsData)
         async function fetchAllData() {
             try {
+                // 1.1 เริ่มต้น IndexedDB
+                await idbApp.init();
+
+                // 1.2 โหลดข้อมูลจาก IndexedDB (Local Cache) ก่อนเป็นอันดับแรก (Zero Latency)
+                const localData = await idbApp.getAllAssets();
+                if (localData && localData.length > 0) {
+                    allAssetsData = localData; // <--- โยนเข้าตัวแปรเดิมของคุณโดยไม่แตะ Logic เดิม
+                    resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (โหลดแคชออฟไลน์สำเร็จ)";
+                    
+                    // ปลดล็อกการค้นหาให้ผู้ใช้เริ่มพิมพ์ได้ทันทีที่โหลดข้อมูลจากเครื่องเสร็จ
+                    searchInput.disabled = false; 
+                    initialLoadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        initialLoadingOverlay.style.display = 'none';
+                        searchInput.focus();
+                    }, 300);
+                }
+
+                // 1.3 ยิง Fetch ขอข้อมูลล่าสุดจาก Server แบบ Background ทับอีกชั้น (Silent Sync)
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ mode: 'getAllData' }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                const result = await response.json();
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
+                        
+                        // เอาข้อมูลล่าสุดอัปเดตลง IndexedDB ไว้ใช้รอบหน้า
+                        await idbApp.saveAssets(result.data);
+                        
+                        // อัปเดตตัวแปร allAssetsData แบบ Real-time เพื่อให้กดค้นหาครั้งต่อไปได้ข้อมูลล่าสุดทันที
+                        allAssetsData = result.data;
 
-                if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
-                    allAssetsData = result.data;
-                    resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (โหลดแคชข้อมูลสำเร็จ)";
-                } else {
-                    resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ไม่พบข้อมูลแคช)";
+                        // หากกรณีที่ IndexedDB ว่างเปล่าในตอนแรก (เปิดแอปครั้งแรก) ให้ปลดล็อก UI ตรงนี้
+                        if (localData.length === 0) {
+                            resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (อัปเดตฐานข้อมูลสำเร็จ)";
+                            searchInput.disabled = false; 
+                            initialLoadingOverlay.style.opacity = '0';
+                            setTimeout(() => {
+                                initialLoadingOverlay.style.display = 'none';
+                                searchInput.focus();
+                            }, 300);
+                        }
+                    }
                 }
             } catch (err) {
-                resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ระบบสลับเป็นโหมดออนไลน์)";
-            } finally {
-                searchInput.disabled = false; 
-                initialLoadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    initialLoadingOverlay.style.display = 'none';
-                    searchInput.focus();
-                }, 300);
+                console.error("Fetch/IndexedDB Error:", err);
+                // ระบบ Fallback: กรณีเครื่องใหม่เอี่ยม ไม่มี IndexedDB เดิม และเน็ตมีปัญหา
+                if (allAssetsData.length === 0) {
+                    resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ระบบสลับเป็นโหมดออนไลน์)";
+                    searchInput.disabled = false; 
+                    initialLoadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        initialLoadingOverlay.style.display = 'none';
+                        searchInput.focus();
+                    }, 300);
+                }
             }
         }
-
         async function executeOnlineSearch(keyword) {
             resultsContainer.innerHTML = '';
             emptyState.classList.add('d-none');
