@@ -188,7 +188,7 @@
                 <p class="text-[9px] text-gray-500 uppercase tracking-wider font-bold">ผู้ใช้งานระบบ</p>
                 <p id="displayUserLogin" class="user-name text-xs">กำลังโหลด...</p>
             </div>
-            <button onclick="closeWindow()" title="📲HOME" class="w-4 h-4">
+            <button onclick="backpage()" title="📲HOME" class="w-4 h-4">
                  <i data-lucide="log-out" class="w-4 h-4">📲</i>                   
             </button>
         </div>
@@ -2018,6 +2018,15 @@
             setTimeout(() => {
                 showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
             }, 300);
+        }
+        function backpage() {
+            // ถ้ามีประวัติหน้าก่อนหน้า ให้ย้อนกลับ
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // หากไม่มีประวัติย้อนกลับ (เช่น เปิดมาจากลิ้งก์ภายนอกโดยตรง) ให้แสดงข้อความแจ้งเตือน
+                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
+            }
         }
 
     </script>
