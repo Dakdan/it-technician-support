@@ -1652,6 +1652,13 @@
         }
     }
 
+     function closeWindow() {
+            window.close();
+            setTimeout(() => {
+                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
+            }, 300);
+     }
+
     function clearDashboardFilters() {
         const bSelect = document.getElementById('dashBuilding');
         const fSelect = document.getElementById('dashFloor');
