@@ -1010,23 +1010,7 @@
             }, 800);
         }
 
-        // หน่วงเวลาเล็กน้อยเพื่อให้ประวัติหน้าเว็บพร้อมทำงาน
-          window.history.pushState(null, "", window.location.href);
-        
-          window.addEventListener('popstate', function (event) {
-            // เมื่อกดปุ่ม Back
-            const confirmExit = confirm("คุณต้องการออกจากหน้าเมนูหลักใช่หรือไม่?");
-            
-            if (confirmExit) {
-              // พยายามปิดหน้าต่าง (ใช้ได้ผลถ้าเปิดผ่านลิงก์ที่กำหนด หรือ PWA)
-              window.close();
-              
-              // ถ้าเบราว์เซอร์ไม่อนุญาตให้ปิด ให้เด้งไปหน้าว่างหรือหน้าอื่นแทน
-              // window.location.href = "about:blank"; 
-            } else {
-              // ถ้ากดยกเลิก ให้ดันสถานะกลับเข้าไปใหม่ เพื่อให้ปุ่ม Back ยังใช้งานได้ต่อ
-              window.history.pushState(null, "", window.location.href);
-            }
+      
     </script>
 </body>
 </html>
