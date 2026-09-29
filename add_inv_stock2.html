@@ -175,6 +175,26 @@
     </style>
 </head>
 <body>
+    <script>
+            // อัปเดตข้อมูลผู้ใช้ขึ้น UI บน Header เมื่อโหลดหน้าเว็บ
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentUser = getCurrentUser();
+                const displayNameEl = document.getElementById('headerDisplayName');
+                const userPNTextEl = document.getElementById('headerUserPNText');
+    
+                if (currentUser) {
+                    if (displayNameEl) displayNameEl.textContent = getDisplayName();
+                    if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
+                } else {
+                    if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
+                    if (userPNTextEl) userPNTextEl.textContent = "";
+                }
+    
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            });
+        </script>
 
     <div id="loadingOverlay">
         <div class="spinner mb-4"></div>
