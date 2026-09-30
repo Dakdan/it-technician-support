@@ -4,11 +4,11 @@ const CACHE_NAME = 'invstock-pwa-cache-v1';
 const urlsToCache = [
   '/',
   'main_menu.html', // เปลี่ยนชื่อให้ตรงกับไฟล์ HTML หลักของคุณ
-  'invstock.js',
-  'manifest.json',
-  'js/indexeddb.js',
-  'logo512.png',
-  'logo003v11.png'
+  './invstock.js',
+  './manifest.json',
+  './js/indexeddb.js',
+  './logo512.png',
+  './logo003v11.png'
   // หากมีไฟล์ CSS, JS รูปภาพ หรือไอคอนอื่นๆ ให้เพิ่ม URL ลงที่นี่
 ];
 
