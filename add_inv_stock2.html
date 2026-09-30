@@ -765,15 +765,18 @@
         function getValidImageUrl(item) {
             const driveFileId = item.Inv_Image_ID || item.Image_FileId || item.imageFileId || item.ImageFileId || Object.values(item)[10] || '';
             let rawImgUrl = item.Image_URL || item.ImageUrl || item.imageBase64 || Object.values(item)[9] || '';
-
-            if (rawImgUrl && (rawImgUrl.startsWith('data:') || rawImgUrl.startsWith('http'))) {
-                return rawImgUrl;
+        
+            // แปลงเป็น String และป้องกันกรณีไม่ใช่ข้อความ
+            const rawImgStr = rawImgUrl != null ? String(rawImgUrl) : '';
+        
+            if (rawImgStr && (rawImgStr.startsWith('data:') || rawImgStr.startsWith('http'))) {
+                return rawImgStr;
             }
-
+        
             const targetId = (driveFileId && driveFileId !== 'NO_IMAGE_DATA' && !String(driveFileId).startsWith('ERROR')) 
                              ? driveFileId 
-                             : (rawImgUrl && String(rawImgUrl).length > 20 && rawImgUrl !== 'NO_IMAGE_DATA' ? rawImgUrl : '');
-
+                             : (rawImgStr && rawImgStr.length > 20 && rawImgStr !== 'NO_IMAGE_DATA' ? rawImgStr : '');
+        
             if (targetId) {
                 return `https://drive.google.com/thumbnail?id=${targetId}&sz=w800`;
             }
