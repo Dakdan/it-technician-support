@@ -7,7 +7,8 @@ const urlsToCache = [
   './invstock.js',
   './manifest.json',
   './js/indexeddb.js',
-  './logo005v1.png
+  './logo512.png',
+  './logo003v11.png'
   // หากมีไฟล์ CSS, JS รูปภาพ หรือไอคอนอื่นๆ ให้เพิ่ม URL ลงที่นี่
 ];
 
