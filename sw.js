@@ -1,24 +1,28 @@
-// sw.js
-
 const CACHE_NAME = 'invstock-pwa-cache-v1';
 const urlsToCache = [
   './',
-  './main_menu.html', // เปลี่ยนชื่อให้ตรงกับไฟล์ HTML หลักของคุณ
+  './main_menu.html',
   './invstock.js',
   './manifest.json',
   './indexeddb.js',
   './logo512.png',
   './logo003v11.png'
-  // หากมีไฟล์ CSS, JS รูปภาพ หรือไอคอนอื่นๆ ให้เพิ่ม URL ลงที่นี่
 ];
 
-// ติดตั้ง Service Worker และ Caching ไฟล์ที่กำหนด
+// ติดตั้ง Service Worker แบบปลอดภัย (ถ้าไฟล์ไหนหาไม่เจอ จะเตือนใน Console แต่ไม่ทำให้แอปพัง)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        // ใช้ Promise.all และ catch ทีละไฟล์ เพื่อกัน Error 404 ทำให้ Service Worker ล่ม
+        return Promise.all(
+          urlsToCache.map((url) => {
+            return cache.add(url).catch((error) => {
+              console.warn(`Failed to cache: ${url}`, error);
+            });
+          })
+        );
       })
   );
 });
