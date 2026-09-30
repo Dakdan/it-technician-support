@@ -95,7 +95,7 @@
             border-bottom: 6px solid var(--pink-dark);
             position: sticky;
             top: 0;
-            z-index: 500; /* Adjusted to be below modals (z-index 2000) */
+            z-index: 500;
             box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
             display: flex;
             flex-direction: row;
@@ -117,7 +117,7 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-            margin-left: auto; /* ดันตัวปุ่มไปชิดขวาสุดของ Container */
+            margin-left: auto;
         }
         .btn-back:hover, .btn-back:active {
             background: rgba(255, 255, 255, 0.4);
@@ -179,7 +179,6 @@
 </head>
 <body>
     <script>
-            // อัปเดตข้อมูลผู้ใช้ขึ้น UI บน Header เมื่อโหลดหน้าเว็บ
             document.addEventListener('DOMContentLoaded', function() {
                 const currentUser = getCurrentUser();
                 const displayNameEl = document.getElementById('headerDisplayName');
@@ -319,7 +318,10 @@
                         <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
                     </div>
                     
-                    <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end mt-2" id="headerActionBlock">
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end gap-3 mt-2" id="headerActionBlock">
+                        <button type="button" onclick="executeReset()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl shadow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-ban"></i> ยกเลิก / ล้างข้อมูล
+                        </button>
                         <button type="button" onclick="createNewStockInHeader()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl shadow hover:shadow-lg transition-all flex items-center gap-2">
                             <i class="fa-solid fa-save"></i> บันทึกและเริ่มเพิ่มครุภัณฑ์
                         </button>
@@ -338,9 +340,14 @@
                     </h4>
                     <p class="text-xs text-gray-600" id="summaryRefDisplay">หมายเหตุ: -</p>
                 </div>
-                <button type="button" onclick="resetHeaderForm()" class="px-4 py-2 bg-white border border-pink-300 text-pink-600 hover:bg-pink-50 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
-                    <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลหัวบิล
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="executeReset()" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-ban"></i> ยกเลิกการแก้ไข
+                    </button>
+                    <button type="button" onclick="resetHeaderForm()" class="px-4 py-2 bg-white border border-pink-300 text-pink-600 hover:bg-pink-50 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลหัวบิล
+                    </button>
+                </div>
             </div>
 
             <div id="itemEntrySection" class="opacity-50 pointer-events-none transition-all duration-300">
@@ -427,14 +434,12 @@
                     <h3 class="text-lg md:text-xl font-bold text-gray-800">คลังครุภัณฑ์ทั้งหมด</h3>
                 </div>
 
-                <!-- ช่องค้นหาบนหัวตารางคลังครุภัณฑ์ -->
                 <div class="relative w-full md:w-80">
                     <input type="text" id="inventorySearchInput" onkeyup="filterInventoryTable()" placeholder="🔍 ค้นหาในคลัง (Asset, S/N, สเปค)..." class="w-full pl-9 pr-4 py-2 border border-purple-200 rounded-xl text-xs bg-white focus:outline-none focus:border-purple-500 shadow-sm">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 text-xs"></i>
                 </div>
             </div>
 
-            <!-- Desktop Table View -->
             <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hidden sm:block">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
@@ -626,7 +631,7 @@
         </div>
     </div>
 
-    <!-- Modal: Detail Viewer (Z-Index 2000 to sit above app-header) -->
+    <!-- Modal: Detail Viewer -->
     <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex justify-center items-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
             <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
@@ -745,7 +750,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initUserDisplay();
-            // Optimizing loading performance using Promise.all
             Promise.all([
                 fetchDepartments(),
                 fetchAssetTypes(),
@@ -1260,6 +1264,29 @@
                 return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทครุภัณฑ์', 'warning');
             }
 
+            const currentAssetId = tempSelectedAsset.AssetID || tempSelectedAsset.NoID || tempSelectedAsset.NOID || "";
+
+            // ตรวจสอบค่าซ้ำ (AssetID และ ประเภท)
+            if (editingItemIndex === -1) {
+                const isDuplicate = savedItemsList.some((item, idx) => {
+                    const existingId = item.AssetID || item.NoID || item.NOID || "";
+                    const existingType = item.Asset_Type || item.Type_ID || "";
+                    return existingId === currentAssetId && existingType === typeVal;
+                });
+
+                if (isDuplicate) {
+                    const confirmDup = await Swal.fire({
+                        title: 'พบข้อมูลซ้ำ!',
+                        text: `AssetID: ${currentAssetId} และ ประเภทนี้ มีอยู่ในรายการแล้ว ต้องการยืนยันบันทึกซ้ำหรือไม่?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'ยืนยันบันทึก',
+                        cancelButtonText: 'ยกเลิก'
+                    });
+                    if (!confirmDup.isConfirmed) return;
+                }
+            }
+
             tempSelectedAsset.FullDescription = specVal;
             tempSelectedAsset.Spec_Detai = specVal;
             tempSelectedAsset.InvStatus = statusVal;
@@ -1684,9 +1711,6 @@
             });
         }
 
-        // ==========================================
-        // Modal: แสดงรายละเอียดประวัติรับเข้า (Tab History)
-        // ==========================================
         function showHistoryDetailByIndex(index) {
             const row = window.historyDataList[index];
             if (!row) return;
@@ -1846,9 +1870,6 @@
             });
         }
 
-        // ==========================================
-        // Modal: แสดงรายละเอียดครุภัณฑ์รายตัว (Tab Inventory)
-        // ==========================================
         function showInventoryDetailByIndex(index) {
             const item = window.inventoryDataList[index];
             if (!item) return;
@@ -1950,9 +1971,6 @@
             }
         }
 
-        // -------------------------------------------------------------
-        // ฟังก์ชันค้นหาและกรองข้อมูลในตารางคลังครุภัณฑ์ (Live Filter)
-        // -------------------------------------------------------------
         function filterInventoryTable() {
             const query = normalizeText(document.getElementById('inventorySearchInput').value.trim());
             
@@ -2047,22 +2065,21 @@
             }
             closeModal('scannerModal'); 
         }
-         function closeWindow() {
+
+        function closeWindow() {
             window.close();
             setTimeout(() => {
                 showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
             }, 300);
         }
+
         function backpage() {
-            // ถ้ามีประวัติหน้าก่อนหน้า ให้ย้อนกลับ
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                // หากไม่มีประวัติย้อนกลับ (เช่น เปิดมาจากลิ้งก์ภายนอกโดยตรง) ให้แสดงข้อความแจ้งเตือน
                 showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
             }
         }
-
     </script>
 </body>
 </html>
