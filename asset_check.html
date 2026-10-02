@@ -1435,7 +1435,14 @@
             setTimeout(() => {
                 showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
             }, 300);
-    }        
+    } 
+    function backpage() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
+            }
+        }
 </script>
 <input type="hidden" id="selectedDeptId">
 </body>
