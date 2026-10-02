@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-   
     <link rel="icon" type="image/png" href="./logo003v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Maintenance And Service - รพ.อุดรธานี</title>
     <!-- Google Fonts -->
-   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
@@ -19,10 +18,10 @@
             --pink-light: #ffb6c1;
             --pink-primary: #ff85a2;
             --pink-dark: #d63384;
-            --pink-neon: #ff1493; /* สีชมพูสว่างสะท้อนแสง (Deep Pink / Neon) */
+            --pink-neon: #ff1493;
             --white: #ffffff;
             --gray-light: #f8f9fa;
-            --gray-text: #444444; /* เพิ่มความเข้มเล็กน้อยเพื่อให้อ่านง่ายขึ้น (Accessibility) */
+            --gray-text: #444444;
             --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
             --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
@@ -39,12 +38,11 @@
             overflow-x: hidden;
         }
 
-        /* ลายน้ำ IT UDON HOSP */
         body::before {
             content: "IT UDON HOSP";
             position: absolute;
             font-size: 10vw;
-            color: rgba(255, 20, 147, 0.04); /* ใช้โทน neon โปร่งแสง */
+            color: rgba(255, 20, 147, 0.04);
             font-weight: 800;
             transform: rotate(-25deg);
             white-space: nowrap;
@@ -65,7 +63,6 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* ส่วนหัวและโลโก้วงกลม */
         .header-box {
             margin-bottom: 2rem;
         }
@@ -105,7 +102,6 @@
             line-height: 1.4;
         }
 
-        /* ฟอร์ม */
         .form-label {
             display: block;
             text-align: left;
@@ -176,7 +172,6 @@
             margin: 1.5rem 0;
         }
 
-        /* Loading */
         #loadingOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -212,7 +207,6 @@
 </div>
 
 <div class="login-card">
-    <!-- โลโก้และชื่อระบบหลัก -->
     <div class="header-box">
         <div class="logo-wrapper">
             <img src="./logo005v1.png" alt="UDH Logo" class="logo-img">
@@ -222,7 +216,7 @@
         <div class="title-sub" style="font-size: 0.75rem; color: var(--gray-text);">กลุ่มงาน:เทคโนโลยีสารสนเทศทางการแพทย์</div>
     </div>
 
-    <!-- ==================== STATE 1: ฟอร์ม LOGIN ==================== -->
+    <!-- STATE 1: LOGIN -->
     <div id="loginState" class="form-transition">
         <form id="loginForm">
             <div class="mb-3 text-start">
@@ -240,12 +234,9 @@
             <span class="btn-link-action" onclick="switchState('requestState')"><i class="fa-solid fa-unlock-keyhole me-1"></i>ลืมรหัส / ขอรหัสชั่วคราว</span>
             <span class="btn-link-action" onclick="switchState('changeState')"><i class="fa-solid fa-key me-1"></i>เปลี่ยนรหัสผ่าน</span>
         </div>
-        <div class="d-flex justify-content-center px-1">
-           <!-- <span class="btn-link-action" onclick="switchState('registerState')" style="color: #0d6efd;"><i class="fa-solid fa-user-plus me-1"></i>ลงทะเบียนผู้ใช้งานใหม่ (Register)</span> -->
-        </div>
     </div>
 
-    <!-- ==================== STATE 2: ฟอร์มขอรหัสผ่านใหม่ (REQUEST PASSWORD) ==================== -->
+    <!-- STATE 2: REQUEST PASSWORD -->
     <div id="requestState" class="form-transition d-none">
         <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-unlock-keyhole me-2"></i>ขอรหัสผ่านชั่วคราว</h5>
         <p class="text-muted small mb-4">กรอกข้อมูลส่วนบุคคลที่ตรงกับฐานข้อมูลของโรงพยาบาล เพื่อส่งรหัสผ่านชั่วคราวไปยังอีเมลของคุณ</p>
@@ -261,7 +252,7 @@
             </div>
             <div class="row g-2 mb-3">
                 <div class="col-6 text-start">
-                    <label class="form-label" for="reqName">ชื่อจริง (ไม่ต้องระบุคำนำหน้า)</label>
+                    <label class="form-label" for="reqName">ชื่อจริง</label>
                     <input type="text" id="reqName" class="form-control" placeholder="ภาษาไทย" required>
                 </div>
                 <div class="col-6 text-start">
@@ -275,7 +266,7 @@
         <span class="btn-link-action" onclick="switchState('loginState')"><i class="fa-solid fa-circle-arrow-left me-1"></i>กลับไปหน้าเข้าสู่ระบบ</span>
     </div>
 
-    <!-- ==================== STATE 3: ฟอร์มเปลี่ยนรหัสผ่าน (CHANGE PASSWORD) ==================== -->
+    <!-- STATE 3: CHANGE PASSWORD -->
     <div id="changeState" class="form-transition d-none">
         <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-key me-2"></i>เปลี่ยนรหัสผ่านใหม่</h5>
         <p class="text-muted small mb-4" id="changePassDesc">กรอกชื่อผู้ใช้งาน และกำหนดรหัสผ่านใหม่ที่ต้องการใช้งาน</p>
@@ -298,43 +289,9 @@
         <div class="divider" id="changeDivider"></div>
         <span class="btn-link-action" id="btnBackToLogin" onclick="switchState('loginState')"><i class="fa-solid fa-circle-arrow-left me-1"></i>กลับไปหน้าเข้าสู่ระบบ</span>
     </div>
-
-    <!-- ==================== STATE 4: ฟอร์มลงทะเบียน (REGISTER) ==================== -->
-    <div id="registerState" class="form-transition d-none">
-        <h5 class="fw-semibold mb-3" style="color: var(--pink-neon);"><i class="fa-solid fa-user-plus me-2"></i>ลงทะเบียนผู้ใช้งาน</h5>
-        <p class="text-muted small mb-4">กรอกข้อมูลให้ครบถ้วนเพื่อขอสิทธิ์การเข้าใช้งานระบบ</p>
-        
-        <form id="registerForm">
-            <div class="mb-3 text-start">
-                <label class="form-label" for="regUserpn"><i class="fa-solid fa-user me-1" style="color: var(--pink-light);"></i> ชื่อผู้ใช้งาน (UserPN)</label>
-                <input type="text" id="regUserpn" class="form-control" placeholder="ตั้งชื่อผู้ใช้งาน" required>
-            </div>
-            <div class="mb-3 text-start">
-                <label class="form-label" for="regPassword"><i class="fa-solid fa-lock me-1" style="color: var(--pink-light);"></i> รหัสผ่าน (Password)</label>
-                <input type="password" id="regPassword" class="form-control" placeholder="ตั้งรหัสผ่าน" required minlength="4">
-            </div>
-            <div class="mb-3 text-start">
-                <label class="form-label" for="regEmail"><i class="fa-solid fa-envelope me-1" style="color: var(--pink-light);"></i> อีเมล (UserMail)</label>
-                <input type="email" id="regEmail" class="form-control" placeholder="example@udh.go.th" required>
-            </div>
-            <div class="row g-2 mb-3">
-                <div class="col-6 text-start">
-                    <label class="form-label" for="regName">ชื่อจริง</label>
-                    <input type="text" id="regName" class="form-control" placeholder="ภาษาไทย" required>
-                </div>
-                <div class="col-6 text-start">
-                    <label class="form-label" for="regSurname">นามสกุล</label>
-                    <input type="text" id="regSurname" class="form-control" placeholder="ภาษาไทย" required>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-submit"><i class="fa-solid fa-floppy-disk me-2"></i>ลงทะเบียน</button>
-        </form>
-        <div class="divider"></div>
-        <span class="btn-link-action" onclick="switchState('loginState')"><i class="fa-solid fa-circle-arrow-left me-1"></i>กลับไปหน้าเข้าสู่ระบบ</span>
-    </div>
 </div>
 
-<!-- ==================== POPUP MODAL ==================== -->
+<!-- POPUP MODAL -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4">
@@ -352,30 +309,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ดึง URL ของ Google Apps Script Web App
-    //const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
+    // ✅ เปิดการใช้งานค่า API_URL อย่างถูกต้อง
+    const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
-    // จัดการ DOM Elements
     const loginForm = document.getElementById('loginForm');
     const requestForm = document.getElementById('requestForm');
     const changeForm = document.getElementById('changeForm');
-    const registerForm = document.getElementById('registerForm');
     const loading = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
 
-    // ตัวแปรเก็บประวัติผู้ใช้กรณีต้องบังคับเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบสำเร็จ
     let forceResetUser = null;
 
-    // ฟังก์ชันเปิด/ปิด สเตทหน้าจอย่อยแบบสมูท
     function switchState(stateId) {
         document.getElementById('loginState').classList.add('d-none');
         document.getElementById('requestState').classList.add('d-none');
         document.getElementById('changeState').classList.add('d-none');
-        document.getElementById('registerState').classList.add('d-none');
         
         document.getElementById(stateId).classList.remove('d-none');
 
-        // เคลียร์ค่าหากสลับหน้าไปมา
         if (stateId === 'loginState') {
             forceResetUser = null;
             document.getElementById('changeUserpn').readOnly = false;
@@ -385,7 +336,6 @@
         }
     }
 
-    // จัดการ Loading Spinner
     function showLoading(text) {
         loadingText.innerText = text;
         loading.style.display = 'flex';
@@ -395,27 +345,21 @@
         loading.style.display = 'none';
     }
 
-    // ฟังก์ชันจัดการ Redirect เพื่อให้ทดสอบในหน้าต่าง Preview (Canvas) ได้โดยไม่เกิด Error
     function safeRedirect(url) {
         try {
             window.location.href = url;
         } catch (e) {
-            console.warn("จำลองการเปลี่ยนหน้าต่างไปที่: " + url);
             showAlert('จำลองเปลี่ยนหน้า (Preview)', `เมื่ออัปโหลดขึ้นเซิร์ฟเวอร์จริง ระบบจะพาคุณไปยังหน้า: ${url}`, 'success');
         }
     }
 
-   // ==================== FLOW 1: LOGIN PROCESS ====================
+    // LOGIN PROCESS
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        const username = document.getElementById('userpn').value.trim();
+        const password = document.getElementById('userpw').value;
 
-        const username =
-            document.getElementById('userpn').value.trim();
-
-        const password =
-            document.getElementById('userpw').value;
-
-        loading.style.display = 'flex';
+        showLoading('กำลังตรวจสอบข้อมูลการเข้าสู่ระบบ...');
 
         try {
             const response = await fetch(API_URL, {
@@ -431,59 +375,36 @@
             });
 
             const result = await response.json();
-
-            loading.style.display = 'none';
+            hideLoading();
 
             if (!result.success) {
-                showAlert(
-                    'เข้าสู่ระบบไม่สำเร็จ',
-                    result.message,
-                    'error'
-                );
-
+                showAlert('เข้าสู่ระบบไม่สำเร็จ', result.message, 'error');
                 return;
             }
 
-            localStorage.setItem(
-                'currentUser',
-                JSON.stringify(result.data)
-            );
+            // บันทึก Token และข้อมูลลง localStorage
+            localStorage.setItem('currentUser', JSON.stringify(result.data));
 
-            // ตรวจสอบเงื่อนไขบังคับเปลี่ยนรหัสผ่าน (resetRequired)
             if (result.resetRequired === true) {
-                // 1. บันทึกโปรไฟล์ผู้ใช้ลงตัวแปรที่เตรียมไว้
                 forceResetUser = result.data;
-
-                // 2. สลับหน้าไปยังฟอร์มเปลี่ยนรหัสผ่านภายในหน้าเดียวกัน
                 switchState('changeState');
-
-                // 3. นำชื่อผู้ใช้งานไปใส่ในฟอร์มเปลี่ยนรหัสผ่าน และล็อกให้เป็น ReadOnly ป้องกันการแก้ไข
                 const changeUserpn = document.getElementById('changeUserpn');
                 if (changeUserpn) {
                     changeUserpn.value = username;
                     changeUserpn.readOnly = true; 
                 }
-
-                // 4. ปรับเปลี่ยนคำอธิบาย และซ่อนปุ่ม "กลับไปหน้าเข้าสู่ระบบ" เพื่อบังคับให้เปลี่ยนรหัสผ่านให้เสร็จ
                 document.getElementById('changePassDesc').innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>เนื่องจากคุณใช้รหัสผ่านชั่วคราว หรือระบบบังคับให้เปลี่ยนรหัสผ่าน</span><br>กรุณากำหนดรหัสผ่านใหม่เพื่อความปลอดภัยของบัญชี`;
                 document.getElementById('btnBackToLogin').classList.add('d-none');
                 document.getElementById('changeDivider').classList.add('d-none');
-                
                 return;
             }
 
             safeRedirect('main_menu.html');
 
         } catch (err) {
-            loading.style.display = 'none';
-
+            hideLoading();
             console.error(err);
-
-            showAlert(
-                'ระบบขัดข้อง',
-                'ไม่สามารถเชื่อมต่อ Server ได้',
-                'error'
-            );
+            showAlert('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อ Server ได้', 'error');
         }
     });
 
@@ -493,12 +414,10 @@
     }
 
     function getCurrentUser() {
-        return JSON.parse(
-            localStorage.getItem('currentUser')
-        );
+        return JSON.parse(localStorage.getItem('currentUser'));
     }
 
-    // ==================== FLOW 2: REQUEST NEW PASSWORD PROCESS ====================
+    // REQUEST PASSWORD PROCESS
     requestForm.addEventListener('submit', function(e) {
         e.preventDefault();
         showLoading('กำลังค้นหาบัญชีและจัดส่งรหัสผ่านชั่วคราว...');
@@ -535,12 +454,11 @@
         })
         .catch(err => {
             hideLoading();
-            console.error("Error Request Password:", err);
-            showAlert('ผิดพลาด', 'เกิดปัญหาขณะพยายามส่งอีเมล กรุณาติดต่อเบอร์ภายในกลุ่มงานคอมพิวเตอร์ UDH', 'error');
+            showAlert('ผิดพลาด', 'เกิดปัญหาขณะพยายามส่งอีเมล กรุณาติดต่อกลุ่มงานคอมพิวเตอร์ UDH', 'error');
         });
     });
 
-   // ==================== FLOW 3: CHANGE PASSWORD PROCESS ====================
+    // CHANGE PASSWORD PROCESS
     changeForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -548,28 +466,24 @@
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // ตรวจสอบรหัสผ่านตรงกันบนเบราว์เซอร์
         if (newPassword !== confirmPassword) {
             showAlert('คำเตือน', 'รหัสผ่านใหม่ และ รหัสผ่านยืนยัน ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง', 'error');
             return;
         }
 
-        // --- เพิ่มการตรวจสอบและดึง Token ---
-        // ดึงข้อมูลจาก forceResetUser (กรณีถูกบังคับเปลี่ยนตอนล็อกอิน) หรือ getCurrentUser() (กรณีมากดเปลี่ยนเอง)
         const currentUser = forceResetUser || getCurrentUser();
         if (!currentUser || !currentUser.Token) {
             showAlert('ข้อผิดพลาด', 'ไม่พบ Token สิทธิ์การใช้งาน กรุณาเข้าสู่ระบบใหม่อีกครั้ง', 'error');
             return;
         }
-        // -----------------------------
 
-        showLoading('กำลังอัปเดตรหัสผ่านใหม่ลงในระบบคอมพิวเตอร์...');
+        showLoading('กำลังอัปเดตรหัสผ่านใหม่ลงในระบบ...');
 
         const payload = {
             action: 'changePassword',
             userpn: userpn,
             newPassword: newPassword,
-            token: currentUser.Token // <-- แนบ Token ส่งไปให้ Backend ตรวจสอบ
+            token: currentUser.Token
         };
 
         fetch(API_URL, {
@@ -591,10 +505,8 @@
                     if (modal) modal.hide();
 
                     if (forceResetUser) {
-                        // ถ้าเกิดจากเคสถูกบังคับเปลี่ยน ให้พามุ่งหน้าตรงไปยัง main_menu.html ทันทีเนื่องจากมีโปรไฟล์แล้ว
                         safeRedirect('main_menu.html');
                     } else {
-                        // สลับสเตทกลับหน้าปกติ
                         switchState('loginState');
                     }
                 }, 2000);
@@ -604,60 +516,15 @@
         })
         .catch(err => {
             hideLoading();
-            console.error("Error Change Password:", err);
-            showAlert('ข้อผิดพลาด', 'ระบบปลายทางปฏิเสธการเซ็ตติ้งรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
-        });
-    });
-    // ==================== FLOW 4: REGISTER PROCESS ====================
-    registerForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        showLoading('กำลังส่งข้อมูลการลงทะเบียน...');
-
-        const payload = {
-            action: 'register',
-            userpn: document.getElementById('regUserpn').value.trim(),
-            password: document.getElementById('regPassword').value,
-            email: document.getElementById('regEmail').value.trim(),
-            name: document.getElementById('regName').value.trim(),
-            surname: document.getElementById('regSurname').value.trim()
-        };
-
-        fetch(API_URL, {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            hideLoading();
-            if(res.success) {
-                showAlert('สำเร็จ!', res.message || 'บันทึกข้อมูลการลงทะเบียนเรียบร้อยแล้ว', 'success');
-                registerForm.reset();
-                setTimeout(() => {
-                    const alertModalEl = document.getElementById('alertModal');
-                    const modal = bootstrap.Modal.getInstance(alertModalEl);
-                    if (modal) modal.hide();
-                    switchState('loginState');
-                }, 2500);
-            } else {
-                showAlert('ขออภัย', res.message || 'ไม่สามารถทำการลงทะเบียนได้', 'error');
-            }
-        })
-        .catch(err => {
-            hideLoading();
-            console.error("Error Register:", err);
-            showAlert('ผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+            showAlert('ข้อผิดพลาด', 'ระบบปลายทางปฏิเสธการอัปเดตรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
         });
     });
 
-    // แสดงแจ้งเตือนผ่าน Bootstrap Modal (สไตล์ดีไซน์เดิม)
     function showAlert(title, msg, type) {
         const modal = new bootstrap.Modal(document.getElementById('alertModal'));
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMsg').innerText = msg;
         
-        // กำหนด Emoji สื่ออารมณ์ประเภทต่างๆ
         let icon = '🌸';
         if (type === 'error') {
             icon = '❌';
@@ -668,6 +535,5 @@
         modal.show();
     }
 </script>
-<script src="./login-script.js"></script>
 </body>
 </html>
