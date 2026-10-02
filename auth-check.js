@@ -1,10 +1,9 @@
 /*
  * ============================================================================
- * ไฟล์: auth-check.js (เวอร์ชันสมบูรณ์: เพิ่มระบบ Hard Check, Role Check และ Call API พร้อม Token)
+ * ไฟล์: auth-check.js (เวอร์ชันปรับปรุง: รองรับ Hard Check, Role Check และ Call API พร้อม Token)
  * วัตถุประสงค์: ตรวจสอบสถานะ, สิทธิ์การเข้าใช้งาน และจัดการการสื่อสารกับ Backend
  * ============================================================================
  */
-const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
 (function () {
     try {
@@ -108,6 +107,12 @@ function requireAuth(allowedRoles = []) {
  * ============================================================================
  */
 async function callApi(action, payload = {}) {
+    // ตรวจสอบว่าในหน้า HTML นั้น ๆ มีการประกาศตัวแปร API_URL ไว้หรือไม่
+    if (typeof API_URL === 'undefined') {
+        console.error("API_URL is not defined in this page.");
+        return { success: false, message: "ไม่ได้กำหนดค่า API_URL ในหน้าเว็บนี้" };
+    }
+
     const user = getCurrentUser();
     const token = user ? (user.Token || user.token) : '';
 
