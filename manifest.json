@@ -1,7 +1,7 @@
 {
   "name": "Inventory Stock System",
   "short_name": "InvStock",
-  "description": "ระบบจัดการคลังครุภัณฑ์คอมพิวเตอร์ โรงพยาบาลอุดรธานี",
+  "description": "ระบบจัดการงานช่างเทคโนโลยีสารสนเทศ โรงพยาบาลอุดรธานี",
   "start_url": "./main_menu.html",
   "display": "standalone",
   "background_color": "#ffffff",
