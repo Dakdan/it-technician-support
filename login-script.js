@@ -1,7 +1,7 @@
 /**
  * login-script.js
  * ใช้วางบนทุกหน้าที่ต้อง Login ก่อนเข้าใช้งาน
- * รองรับการแยกบันทึกข้อมูลตามประเภทอุปกรณ์ (PC / Smartphone) พร้อมระบบ TTL
+ * รองรับการแยกบันทึกข้อมูลตามประเภทอุปกรณ์ (PC / Smartphone) พร้อมระบบ TTL และการจัดเก็บ Token
  */
 const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
@@ -41,7 +41,7 @@ loginForm.addEventListener('submit', async function(e) {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const targetStorage = isMobile ? sessionStorage : localStorage;
 
-        // บันทึกข้อมูลพร้อมพารามิเตอร์ควบคุมเวลาหมดอายุเฉพาะบน PC (8 ชั่วโมง)
+        // บันทึกข้อมูล (รวมถึง Token จาก result.data) พร้อมพารามิเตอร์ควบคุมเวลาหมดอายุ
         const sessionData = {
             ...result.data,
             loginTime: new Date().getTime(),
