@@ -1,9 +1,11 @@
 /*
  * ============================================================================
- * ไฟล์: auth-check.js (เวอร์ชันเดิม + เพิ่มระบบ Hard Check & Role Check)
- * วัตถุประสงค์: ตรวจสอบสถานะและสิทธิ์การเข้าใช้งาน
+ * ไฟล์: auth-check.js (เวอร์ชันสมบูรณ์: เพิ่มระบบ Hard Check, Role Check และ Call API พร้อม Token)
+ * วัตถุประสงค์: ตรวจสอบสถานะ, สิทธิ์การเข้าใช้งาน และจัดการการสื่อสารกับ Backend
  * ============================================================================
  */
+const API_URL = "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
+
 (function () {
     try {
         // ดึงข้อมูลจาก sessionStorage (สำหรับ Mobile) หรือ localStorage (สำหรับ PC)
@@ -75,7 +77,7 @@ function logout() {
 
 /* 
  * ============================================================================
- * [ส่วนที่เพิ่มใหม่] ฟังก์ชันสำหรับหน้า HTML ที่ต้องการบังคับตรวจสิทธิ์/ตำแหน่ง (Hard Check)
+ * [ส่วนเดิม] ฟังก์ชันสำหรับหน้า HTML ที่ต้องการบังคับตรวจสิทธิ์/ตำแหน่ง (Hard Check)
  * ============================================================================
  */
 function requireAuth(allowedRoles = []) {
@@ -98,4 +100,44 @@ function requireAuth(allowedRoles = []) {
     }
     
     return true;
+}
+
+/* 
+ * ============================================================================
+ * [ส่วนเพิ่มใหม่] ฟังก์ชันกลางสำหรับเรียกใช้งาน API พร้อมแนบ Token และจัดการ Error อัตโนมัติ
+ * ============================================================================
+ */
+async function callApi(action, payload = {}) {
+    const user = getCurrentUser();
+    const token = user ? (user.Token || user.token) : '';
+
+    const requestData = {
+        action: action,
+        token: token,
+        ...payload
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(requestData),
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            }
+        });
+
+        const result = await response.json();
+
+        // ตรวจสอบกรณี Backend แจ้งว่า Token ไม่ถูกต้องหรือหมดอายุ (Unauthorized)
+        if (!result.success && result.message && result.message.includes("Unauthorized")) {
+            alert("เซสชันของคุณหมดอายุหรือเข้าสู่ระบบจากที่อื่น กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+            logout();
+            return null;
+        }
+
+        return result;
+    } catch (error) {
+        console.error("API Call Error: ", error);
+        return { success: false, message: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้: " + error.message };
+    }
 }
