@@ -1,6 +1,6 @@
 {
   "name": "IT UDH TECH",
-  "short_name": "InvStock",
+  "short_name": "IT UDH App",
   "description": "ระบบจัดการงานช่างเทคโนโลยีสารสนเทศ โรงพยาบาลอุดรธานี",
   "start_url": "./main_menu.html",
   "display": "standalone",
