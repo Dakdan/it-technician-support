@@ -8,19 +8,22 @@
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <!-- เรียกใช้ Manifest สำหรับ PWA -->
-    <link rel="manifest" href="./manifest.json">
-    
-    <!-- ตั้งค่า Theme color สำหรับเบราว์เซอร์มือถือ -->
-    <meta name="theme-color" content="#ff1493">
+    <!-- PWA Primary Manifest -->
+   <link rel="manifest" href="./manifest.json">
+   <meta name="theme-color" content="#ff1493">
+   
+   <!-- iOS Safari PWA Meta Tags -->
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+   <meta name="apple-mobile-web-app-title" content="IT UDH App">
+   <link rel="apple-touch-icon" href="./logo003v11.png">
     
     <!-- ไอคอนสำหรับ Apple/iOS -->
-    <link rel="apple-touch-icon" href="./logo512.png">
+    
 
-    <script src="./indexeddb.js"></script>
+    
     <link rel="icon" type="image/png" href="./logo003v11.png">
-    <script src="./invstock.js"></script>
-    <script src="./sw.js"></script>
+   
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT TECHNICIAN THEM</title>
