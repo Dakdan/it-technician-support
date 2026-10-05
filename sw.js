@@ -1,11 +1,12 @@
-const CACHE_NAME = 'it-udh-pwa-v2';
+const CACHE_NAME = 'it-udh-pwa-v3';
 const urlsToCache = [
   './',
   './index.html',
   './main_menu.html',
+  './app-core.js',
+  './indexeddb.js',
   './invstock.js',
   './manifest.json',
-  './indexeddb.js',
   './logo512.png',
   './logo003v11.png'
 ];
@@ -42,24 +43,40 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event (ข้ามการ Cache หากเป็น API ของ Google Apps Script)
+// 3. Fetch Event
 self.addEventListener('fetch', (event) => {
-  const reqUrl = event.request.url;
+  const req = event.request;
+  const reqUrl = req.url;
 
-  // ปล่อยผ่าน Request ที่ยิงไปยัง Google Apps Script API หรือ external domain ไม่ต้อง Cache
-  if (reqUrl.includes('script.google.com') || reqUrl.includes('googleusercontent.com')) {
+  // ข้ามการตรวจ Cache สำหรับ Request ที่ไม่ใช่ GET (เช่น POST Data ไป Apps Script)
+  // หรือ Request ที่ยิงไปยัง Domain ของ Google
+  if (req.method !== 'GET' || reqUrl.includes('script.google.com') || reqUrl.includes('googleusercontent.com')) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(req).then((cachedResponse) => {
+      // 3.1 ดึงไฟล์จาก Cache หากมีเก็บไว้แล้ว
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        // Fallback กรณีออฟไลน์และเข้าหน้าหลัก
-        if (event.request.mode === 'navigate') {
-          return caches.match('./main_menu.html');
+
+      // 3.2 หากไม่มีใน Cache ให้ดึงจาก Network และบันทึกเข้า Cache อัตโนมัติ (Dynamic Caching)
+      return fetch(req).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(req, responseToCache);
+        });
+
+        return networkResponse;
+      }).catch(() => {
+        // Fallback กรณีออฟไลน์และเป็นการเปลี่ยนหน้า (Navigation)
+        if (req.mode === 'navigate') {
+          return caches.match('./main_menu.html') || caches.match('./index.html');
         }
       });
     })
