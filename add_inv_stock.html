@@ -1,3 +1,4 @@
+  
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -412,7 +413,8 @@
         // =========================================================
         async function syncMasterFromCentral() {
             try {
-                const masterRes = await fetchAPI(`${API_CENTRAL_URL}?action=getDepartments`);                 const assetTypeRes = await fetchAPI(`${API_CENTRAL_URL}?action=getAssetTypes`);
+                const masterRes = await fetchAPI(`${API_CENTRAL_URL}?action=getDepartments`);
+                const assetTypeRes = await fetchAPI(`${API_CENTRAL_URL}?action=getAssetTypes`);
                 
                 if (masterRes || assetTypeRes) {
                     await idbApp.saveMasterData({
@@ -433,7 +435,12 @@
             if (str.startsWith('http://') || str.startsWith('https://')) {
                 const match = str.match(/id=([a-zA-Z0-9_-]+)/) || str.match(/\/d\/([a-zA-Z0-9_-]+)/);
                 if (match && match[1]) {
-                    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;                 }                 return str;             }             if (str.match(/^[a-zA-Z0-9_-]{15,}$/)) {                 return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
+                    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+                }
+                return str;
+            }
+            if (str.match(/^[a-zA-Z0-9_-]{15,}$/)) {
+                return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
             }
             return '';
         }
@@ -452,13 +459,19 @@
         function switchTab(tabId, event) {
             const tabs = ['dashboard', 'stockInList', 'stockOutList', 'inventory', 'reports'];
             tabs.forEach(t => {
-                const el = document.getElementById(`tab-${t}`);                 if (el) el.classList.add('hidden');                                  const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+                
+                const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (btn) {
                     btn.className = "flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50/50 transition-all whitespace-nowrap flex items-center justify-center gap-1.5";
                 }
             });
 
-            const activeContent = document.getElementById(`tab-${tabId}`);             if (activeContent) activeContent.classList.remove('hidden');              const activeBtn = event ? event.currentTarget : document.getElementById(`btnTab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+            const activeContent = document.getElementById(`tab-${tabId}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+
+            const activeBtn = event ? event.currentTarget : document.getElementById(`btnTab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
             if (activeBtn) {
                 activeBtn.className = "flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5";
             }
@@ -493,7 +506,8 @@
             showLoading();
             try {
                 const [resInv, resPeri] = await Promise.all([
-                    fetchAPI(`${API_INV_URL}?action=getInventory`).catch(() => []),                     fetchAPI(`${API_INV_URL}?action=getPeripherals`).catch(() => [])
+                    fetchAPI(`${API_INV_URL}?action=getInventory`).catch(() => []),
+                    fetchAPI(`${API_INV_URL}?action=getPeripherals`).catch(() => [])
                 ]);
 
                 globalInventoryRecords = Array.isArray(resInv) ? resInv : (resInv?.data || []);
@@ -996,4 +1010,734 @@
                 <span class="text-xs text-gray-500">แสดงหน้า ${currentStockOutPage} จาก ${totalPages}</span>
                 <div class="flex gap-1.5">
                     <button onclick="changeStockOutPage(${currentStockOutPage - 1})" ${currentStockOutPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium"'}>ก่อนหน้า</button>
-                    <button onclick="changeStockOutPage(${currentStockOutPage + 1})" ${currentStockOutPage === totalPages || totalPages === 0 ? '
+                    <button onclick="changeStockOutPage(${currentStockOutPage + 1})" ${currentStockOutPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium"'}>ถัดไป</button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function changeStockOutPage(p) {
+            currentStockOutPage = p;
+            renderStockOutTable(globalStockOutRecords);
+        }
+
+        async function loadInventoryRecords(forceRefresh = false) {
+            if (!forceRefresh && globalInventoryRecords.length === 0) {
+                try {
+                    const localInv = await idbApp.getData(STORE_INVENTORY);
+                    const localPeri = await idbApp.getData(STORE_PERIPHERALS);
+                    if (localInv && localInv.length > 0) {
+                        globalInventoryRecords = localInv;
+                        globalPeripheralsRecords = localPeri || [];
+                    }
+                } catch (e) {
+                    console.warn("Read IDB Inventory Error:", e);
+                }
+            }
+
+            if (!forceRefresh && globalInventoryRecords.length > 0) {
+                renderInventoryStatusBar();
+                filterInventoryRecords();
+                return;
+            }
+
+            showLoading();
+            try {
+                const [data, resPeri] = await Promise.all([
+                    fetchAPI(`${API_INV_URL}?action=getInventory`).catch(() => []),
+                    fetchAPI(`${API_INV_URL}?action=getPeripherals`).catch(() => [])
+                ]);
+                
+                globalInventoryRecords = Array.isArray(data) ? data : (data.data || []);
+                globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri.data || []);
+                
+                await idbApp.saveInvData({
+                    inventory: globalInventoryRecords,
+                    peripherals: globalPeripheralsRecords
+                });
+
+                renderInventoryStatusBar();
+                filterInventoryRecords();
+            } catch (err) {
+                console.error("Inventory fetch error:", err);
+                showAlert('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลคลังครุภัณฑ์ได้');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderInventoryStatusBar() {
+            const container = document.getElementById('inventoryStatusFilterBar');
+            if (!container) return;
+
+            const statusCounts = { 'ALL': globalInventoryRecords.length };
+            globalInventoryRecords.forEach(item => {
+                const st = item.Inv_Status || item.Status || 'รอตรวจสอบ';
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+            });
+
+            let html = `
+                <button onclick="setInventoryStatusFilter('ALL')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${currentInventoryStatusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
+                    ทั้งหมด (${statusCounts['ALL']})
+                </button>
+            `;
+
+            Object.keys(statusCounts).filter(k => k !== 'ALL').sort().forEach(st => {
+                const isActive = currentInventoryStatusFilter === st;
+                html += `
+                    <button onclick="setInventoryStatusFilter('${st.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
+                        ${st} (${statusCounts[st]})
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setInventoryStatusFilter(status) {
+            currentInventoryStatusFilter = status;
+            renderInventoryStatusBar();
+            filterInventoryRecords();
+        }
+
+        function filterInventoryRecords() {
+            const query = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
+            
+            currentFilteredInventoryRecords = globalInventoryRecords.filter(item => {
+                if (currentInventoryStatusFilter !== 'ALL') {
+                    const itemStatus = item.Inv_Status || item.Status || 'รอตรวจสอบ';
+                    if (itemStatus !== currentInventoryStatusFilter) return false;
+                }
+
+                if (!query) return true;
+                const aId = String(item.AssetID || item.Asset_ID || item.NOID || item.NoID || '').toLowerCase();
+                const serial = String(item.Asset_Serial || item.Serial || '').toLowerCase();
+                const typeName = String(item.Asset_Type_Name || item.Asset_Type_Group || '').toLowerCase();
+                const desc = String(item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || '').toLowerCase();
+
+                return aId.includes(query) || serial.includes(query) || typeName.includes(query) || desc.includes(query);
+            });
+
+            document.getElementById('inventorySearchCount').innerText = currentFilteredInventoryRecords.length;
+            renderInventoryAccordionTable(currentFilteredInventoryRecords);
+        }
+
+        function renderInventoryAccordionTable(records) {
+            const container = document.getElementById('inventoryAccordionContainer');
+            container.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                container.innerHTML = '<div class="bg-white p-8 text-center text-gray-400 rounded-2xl border border-indigo-100 text-xs font-light">ไม่พบรายการครุภัณฑ์ในคลังตามเงื่อนไขที่เลือก</div>';
+                return;
+            }
+
+            const groupedData = {};
+            records.forEach(item => {
+                const typeName = item.Asset_Type_Name || item.Asset_Type_Group || "ไม่ระบุประเภท";
+                if (!groupedData[typeName]) groupedData[typeName] = [];
+                groupedData[typeName].push(item);
+            });
+
+            let groupIndex = 0;
+
+            Object.keys(groupedData).sort().forEach(typeName => {
+                groupIndex++;
+                const groupItems = groupedData[typeName];
+                const groupId = `inv-group-${groupIndex}`;
+                const isExpanded = expandedInventoryGroups[groupId] === true;
+
+                const groupCard = document.createElement('div');
+                groupCard.className = "border border-indigo-200 rounded-2xl overflow-hidden bg-white shadow-xs transition-all";
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "bg-gradient-to-r from-indigo-50 via-purple-50 to-white p-3.5 flex justify-between items-center cursor-pointer select-none hover:bg-indigo-100/50 transition-colors border-b border-indigo-100";
+                headerDiv.onclick = () => toggleInventoryGroup(groupId);
+                headerDiv.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 text-indigo-600 transition-transform"></i>
+                        <span class="font-bold text-sm text-indigo-900 flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i> ${typeName}
+                        </span>
+                    </div>
+                    <span class="bg-indigo-600 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-xs">
+                        รวม ${groupItems.length} รายการ
+                    </span>
+                `;
+
+                const bodyDiv = document.createElement('div');
+                bodyDiv.id = groupId;
+                bodyDiv.className = isExpanded ? 'block' : 'hidden';
+
+                let tableHtml = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-indigo-100/40 text-indigo-800 font-semibold uppercase tracking-wider text-[11px]">
+                                    <th class="p-3 text-center w-12">ลำดับ</th>
+                                    <th class="p-3">ID ครุภัณฑ์ (Asset / NOID)</th>
+                                    <th class="p-3">รายละเอียด & สเปค</th>
+                                    <th class="p-3 text-center">อายุครุภัณฑ์</th>
+                                    <th class="p-3 text-center">สถานะ</th>
+                                    <th class="p-3 text-center">รูปภาพ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-indigo-50">
+                `;
+
+                groupItems.forEach((rec, idx) => {
+                    const assetId = rec.AssetID || rec.Asset_ID || rec.NOID || rec.NoID || rec.Inv_ID || "-";
+                    const serial = rec.Asset_Serial || rec.Serial || "-";
+                    const fullDetail = rec.Asset_FullDescription || rec.FullDescription || rec.Spec_Detai || "-";
+                    const shortDetail = truncateText(fullDetail, 20);
+                    const age = rec.Asset_AgeInfo || rec.Age || "-";
+                    const status = rec.Inv_Status || rec.Status || "รอตรวจสอบ";
+
+                    const rawImgSource = getItemImageSource(rec);
+                    const extractedImgUrl = getDriveImageUrl(rawImgSource);
+                    let imgEl = extractedImgUrl 
+                        ? `<img src="${extractedImgUrl}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded-lg border border-indigo-200 shadow-xs mx-auto cursor-pointer hover:opacity-80" onclick="event.stopPropagation(); openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
+                        : `<span class="text-gray-300 text-xs">-</span>`;
+
+                    tableHtml += `
+                        <tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer" onclick="openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
+                            <td class="p-3 text-center font-bold text-gray-500">${idx + 1}</td>
+                            <td class="p-3 font-bold text-indigo-700">
+                                ${assetId}<br>
+                                <span class="text-gray-500 text-[10px] font-normal">S/N: ${serial}</span>
+                            </td>
+                            <td class="p-3 text-gray-700 text-xs" title="${String(fullDetail).replace(/"/g, '&quot;')}">
+                                <p class="font-medium">${shortDetail}</p>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="age-badge-prominent">
+                                    <i data-lucide="clock" class="w-3 h-3"></i> ${age}
+                                </span>
+                            </td>
+                            <td class="p-3 text-center"><span class="bg-indigo-100 text-indigo-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs border border-indigo-200">${status}</span></td>
+                            <td class="p-3 text-center">${imgEl}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += `</tbody></table></div>`;
+
+                bodyDiv.innerHTML = tableHtml;
+                groupCard.appendChild(headerDiv);
+                groupCard.appendChild(bodyDiv);
+                container.appendChild(groupCard);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function toggleInventoryGroup(groupId) {
+            const el = document.getElementById(groupId);
+            if (!el) return;
+            const isHidden = el.classList.contains('hidden');
+            if (isHidden) {
+                el.classList.remove('hidden');
+                el.classList.add('block');
+                expandedInventoryGroups[groupId] = true;
+            } else {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+                expandedInventoryGroups[groupId] = false;
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openInventoryItemDetailModal(item) {
+            if (!item) return;
+            const content = document.getElementById('inventoryItemDetailContent');
+            
+            const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
+            const serial = item.Asset_Serial || item.Serial || "-";
+            const typeName = item.Asset_Type_Name || item.Asset_Type_Group || "-";
+            const detail = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || "-";
+            const age = item.Asset_AgeInfo || item.Age || "-";
+            const status = item.Inv_Status || item.Status || "รอตรวจสอบ";
+            
+            const rawImgSource = getItemImageSource(item);
+            const imgUrl = getDriveImageUrl(rawImgSource);
+
+            const invId = String(item.Inv_ID || '').trim();
+            const stockId = String(item.Stock_ID || '').trim();
+            const matchedPeripherals = (item.peripherals && item.peripherals.length > 0) 
+                ? item.peripherals 
+                : globalPeripheralsRecords.filter(p => {
+                    const ref = String(p.Inv_ID || p.StockIn_ID || p.Stock_ID || '').trim();
+                    return ref && (ref === invId || ref === stockId || ref === aId);
+                });
+
+            let periHtml = '';
+            if (matchedPeripherals.length > 0) {
+                periHtml = `
+                    <div class="mt-3 bg-purple-50 p-3 rounded-2xl border border-purple-200">
+                        <span class="text-[11px] font-bold text-purple-800 flex items-center gap-1 mb-1.5"><i data-lucide="plug" class="w-3.5 h-3.5"></i> อุปกรณ์ต่อพ่วงที่ผูกอยู่ (${matchedPeripherals.length} รายการ):</span>
+                        <ul class="text-xs text-purple-900 space-y-1 pl-2">
+                            ${matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity || 1} ${p.Unit || 'ชิ้น'}</span></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            let imgHtml = imgUrl 
+                ? `<div class="mb-4 text-center"><img src="${imgUrl}" referrerpolicy="no-referrer" class="max-h-60 mx-auto rounded-2xl border border-indigo-100 shadow-md object-contain" alt="Asset Image" onerror="this.onerror=null; this.src='https://placehold.co/300x200/e0e7ff/4f46e5?text=No+Image';"></div>`
+                : `<div class="mb-4 text-center bg-gray-50 py-8 rounded-2xl border border-dashed border-gray-200 text-gray-400">ไม่มีรูปภาพครุภัณฑ์</div>`;
+
+            content.innerHTML = `
+                ${imgHtml}
+                <div class="grid grid-cols-2 gap-3 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                    <div>
+                        <span class="text-[10px] text-gray-500 block uppercase font-bold">รหัสครุภัณฑ์ (Asset ID)</span>
+                        <strong class="text-sm text-pink-600 font-extrabold">${aId}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block uppercase font-bold">Serial Number (S/N)</span>
+                        <strong class="text-xs text-gray-800 font-semibold">${serial}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block uppercase font-bold">ประเภท (Asset_Type_Name)</span>
+                        <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">${typeName}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block uppercase font-bold">สถานะ</span>
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">${status}</span>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                    <span class="text-[10px] text-gray-500 block uppercase font-bold mb-1">รายละเอียด & สเปค</span>
+                    <p class="text-xs text-gray-800 leading-relaxed">${detail}</p>
+                </div>
+                <div class="flex items-center justify-between bg-amber-50 p-3 rounded-xl border border-amber-200">
+                    <span class="text-xs font-bold text-amber-800">อายุครุภัณฑ์:</span>
+                    <span class="age-badge-prominent">${age}</span>
+                </div>
+                ${periHtml}
+            `;
+
+            showModal('inventoryItemDetailModal');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function loadReportList(type) {
+            showLoading();
+            try {
+                const isStockIn = type === 'stockIn';
+                document.getElementById('printTitle').innerText = isStockIn ? 'รายการเอกสารรับเข้า (Stock In Reports)' : 'รายการเอกสารจ่ายออก (Stock Out Reports)';
+                document.getElementById('printTimestamp').innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+
+                let records = [];
+                if (isStockIn) {
+                    if (globalStockInRecords.length === 0) {
+                        try {
+                            const localStockIn = await idbApp.getData(STORE_STOCK_IN);
+                            if (localStockIn && localStockIn.length > 0) globalStockInRecords = localStockIn;
+                        } catch (e) {}
+
+                        if (globalStockInRecords.length === 0) {
+                            const data = await fetchAPI(`${API_INV_URL}?action=getStockIn`);
+                            globalStockInRecords = Array.isArray(data) ? data : (data.data || []);
+                            await idbApp.saveInvData({ stockIn: globalStockInRecords });
+                        }
+                    }
+                    records = globalStockInRecords;
+                } else {
+                    if (globalStockOutRecords.length === 0) {
+                        try {
+                            const localStockOut = await idbApp.getData(STORE_STOCK_OUT);
+                            if (localStockOut && localStockOut.length > 0) globalStockOutRecords = localStockOut;
+                        } catch (e) {}
+
+                        if (globalStockOutRecords.length === 0) {
+                            const data = await fetchAPI(`${API_INV_URL}?action=getStockOut`);
+                            globalStockOutRecords = Array.isArray(data) ? data : (data.data || []);
+                            await idbApp.saveInvData({ stockOut: globalStockOutRecords });
+                        }
+                    }
+                    records = globalStockOutRecords;
+                }
+
+                const tbody = document.getElementById('printTableBody');
+                tbody.innerHTML = '';
+
+                if (!records || records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center p-6 text-gray-400">ไม่พบรายการเอกสารในระบบ</td></tr>';
+                    return;
+                }
+
+                records.forEach((rec, idx) => {
+                    const docNo = isStockIn ? (rec.Stock_In_No || '-') : (rec.Stock_Out_No || '-');
+                    const dateTime = rec.Date_Time || rec.Timestamp || '-';
+                    const dept = rec.DEPT_ID || '-';
+                    const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
+                    const statusText = sigUrl ? '<span class="text-emerald-600 font-bold">ลงชื่อแล้ว</span>' : '<span class="text-amber-600 font-bold">รอลงชื่อ</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 border-b border-gray-200";
+                    tr.innerHTML = `
+                        <td class="border border-gray-300 p-2 text-center font-bold text-gray-500">${idx + 1}</td>
+                        <td class="border border-gray-300 p-2 font-bold text-pink-600">${docNo}</td>
+                        <td class="border border-gray-300 p-2">${dateTime}</td>
+                        <td class="border border-gray-300 p-2 font-semibold text-indigo-700">${dept}</td>
+                        <td class="border border-gray-300 p-2 text-center">${statusText}</td>
+                        <td class="border border-gray-300 p-2 text-center">
+                            <button onclick="openRecordDetail('${type}', '${docNo}'); setTimeout(openA4ReportModal, 200);" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-1 rounded text-[11px] font-semibold shadow-xs">พิมพ์ A4</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Report list error:", err);
+                showAlert('ข้อผิดพลาด', 'ไม่สามารถโหลดรายการสำหรับพิมพ์เอกสารได้');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function openRecordDetail(type, docNo) {
+            let record = null;
+            if (type === 'stockIn') {
+                record = globalStockInRecords.find(r => r.Stock_In_No === docNo);
+            } else {
+                record = globalStockOutRecords.find(r => r.Stock_Out_No === docNo);
+            }
+
+            if (!record) return;
+            activeDetailRecord = { type, record };
+
+            document.getElementById('detailDocNo').innerText = docNo;
+            const content = document.getElementById('detailContent');
+
+            let html = '';
+            let signatureUrl = getDriveImageUrl(record.User_Confirm || '');
+
+            if (type === 'stockIn') {
+                const stockInNo = record.Stock_In_No || '-';
+                const stockInId = record.Stock_In_ID || '-';
+                const dateTime = record.Date_Time || record.Timestamp || '-';
+                const deptId = record.DEPT_ID || '-';
+                const docId = record.Doc_ID || '-';
+                const sourceType = record.Source_Type || record.sourceType || '-';
+                const refNo = record.Reference_No || record.referenceNo || '-';
+
+                html = `
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-pink-50 to-white p-5 rounded-2xl border border-pink-100 shadow-sm">
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่เอกสาร</span> <span class="font-bold text-pink-700">${stockInNo}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">${stockInId}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">${dateTime}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงาน</span> <span class="font-bold text-indigo-600">${deptId}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">ประเภทรับเข้า</span> <span class="font-medium text-gray-700">${sourceType}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขอ้างอิง / Doc ID</span> <span class="font-medium text-gray-700">${refNo} <span class="text-gray-400 font-light">(${docId})</span></span></p>
+                    </div>
+                `;
+            } else {
+                const stockOutNo = record.Stock_Out_No || '-';
+                const stockOutId = record.Stock_Out_ID || '-';
+                const dateTime = record.Date_Time || record.Timestamp || '-';
+                const deptId = record.DEPT_ID || '-';
+
+                html = `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gradient-to-br from-purple-50 to-white p-5 rounded-2xl border border-purple-100 shadow-sm">
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่จ่ายออก</span> <span class="font-bold text-purple-700">${stockOutNo}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">${stockOutId}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">${dateTime}</span></p>
+                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงาน</span> <span class="font-bold text-indigo-600">${deptId}</span></p>
+                    </div>
+                `;
+            }
+
+            html += `<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ</h4>`;
+            
+            if (Array.isArray(record.items) && record.items.length > 0) {
+                const groupedItems = {};
+                record.items.forEach((item) => {
+                    const iNo = item.Inv_No || '-';
+                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
+                    const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
+                    
+                    if (!groupedItems[typeName]) groupedItems[typeName] = [];
+                    groupedItems[typeName].push({ item, enrichedItem });
+                });
+
+                html += `
+                    <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-3 text-center w-12 font-bold">ลำดับ</th>
+                                    <th class="p-3 text-center font-bold">รูปภาพ</th>
+                                    <th class="p-3 font-bold">รหัส Asset</th>
+                                    <th class="p-3 font-bold">รายละเอียด</th>
+                                    <th class="p-3 text-center font-bold">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                `;
+
+                let subGlobalIdx = 0;
+                Object.keys(groupedItems).sort().forEach(groupType => {
+                    const list = groupedItems[groupType];
+                    html += `
+                        <tr class="bg-gradient-to-r from-pink-50 via-pink-100/50 to-white font-bold text-pink-900 border-t border-b border-pink-200">
+                            <td colspan="5" class="p-2.5 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="flex items-center gap-1.5 font-extrabold text-pink-700">
+                                        <i data-lucide="folder" class="w-4 h-4 text-pink-500"></i> ประเภท: ${groupType}
+                                    </span>
+                                    <span class="bg-pink-600 text-white font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
+                                        ${list.length} รายการ
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+
+                    list.forEach(({ item, enrichedItem }) => {
+                        subGlobalIdx++;
+                        const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
+                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || '-';
+                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || '-';
+                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
+                        
+                        const rawImgSource = getItemImageSource(item) || getItemImageSource(enrichedItem);
+                        const extractedImg = getDriveImageUrl(rawImgSource);
+                        const imgHtml = extractedImg 
+                            ? `<img src="${extractedImg}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 cursor-pointer mx-auto hover:opacity-80" onclick="window.open('${extractedImg}','_blank')" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
+                            : `<span class="text-gray-300">-</span>`;
+
+                        let periHtml = '';
+                        if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
+                            periHtml = `
+                                <div class="mt-2 bg-purple-50/50 p-2 rounded-lg border border-purple-100 w-full whitespace-normal">
+                                    <p class="text-[10px] font-bold text-purple-700 flex items-center gap-1 mb-1"><i data-lucide="plug" class="w-3 h-3"></i> อุปกรณ์ต่อพ่วง (${item.peripherals.length} รายการ)</p>
+                                    <ul class="text-[10px] text-gray-600 list-disc pl-4 space-y-0.5">
+                                        ${item.peripherals.map(p => `<li><span class="font-semibold text-gray-800">${p.Name || p.Item_ID}</span> - จำนวน ${p.Quantity \vert{}\vert{} 1}${p.Unit || ''} <span class="text-gray-400">(${p.Note || '-'})</span></li>`).join('')}
+                                    </ul>
+                                </div>
+                            `;
+                        }
+
+                        html += `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-3 text-center font-bold text-gray-500 align-top">${subGlobalIdx}</td>
+                                <td class="p-3 text-center align-top">${imgHtml}</td>
+                                <td class="p-3 text-pink-600 font-bold align-top">${aId}</td>
+                                <td class="p-3 text-gray-800 whitespace-normal break-words max-w-sm align-top">
+                                    <span class="block mb-1 font-medium">${desc}</span>
+                                    <span class="age-badge-prominent text-[10px]">${age}</span>
+                                    ${periHtml}
+                                </td>
+                                <td class="p-3 text-center align-top"><span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold whitespace-nowrap border border-indigo-100 shadow-2xs text-[10px]">${stat}</span></td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                html += `</tbody></table></div>`;
+            } else {
+                html += `<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p></div>`;
+            }
+
+            const itUserText = record.IT_User || record.itUser || '-';
+            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
+            const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
+            const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
+
+            html += `
+                <div class="mt-8 break-inside-avoid">
+                    <h4 class="font-bold text-sm mb-4 text-gray-800 flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <i data-lucide="users" class="w-4 h-4 text-pink-500"></i> ข้อมูลผู้ รับ/ส่ง (Personnel & Signatures)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
+                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${roleIT}</p>
+                            <p class="font-bold text-gray-800 text-base">${itUserText}</p>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-${type === 'stockIn'?'emerald':'purple'}-200 shadow-sm relative">
+                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-3">${roleUser}</p>
+            `;
+            
+            if (signatureUrl && String(signatureUrl).trim().length > 5) {
+                html += `
+                    <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
+                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
+                    <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
+                `;
+            } else {
+                html += `
+                    <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
+                        <p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>
+                    </div>
+                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
+                    <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
+                `;
+            }
+            html += `</div></div></div>`;
+
+            content.innerHTML = html;
+            showModal('recordDetailModal');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function printReceiptSlip() {
+            document.body.classList.add('printing-receipt');
+            window.print();
+            document.body.classList.remove('printing-receipt');
+        }
+
+        function openA4ReportModal() {
+            if (!activeDetailRecord) return;
+            const { type, record } = activeDetailRecord;
+            
+            const docNo = type === 'stockIn' ? (record.Stock_In_No || '-') : (record.Stock_Out_No || '-');
+            const docId = type === 'stockIn' ? (record.Stock_In_ID || record.Doc_ID || '-') : (record.Stock_Out_ID || '-');
+            const dateTime = record.Date_Time || record.Timestamp || '-';
+            const deptId = record.DEPT_ID || '-';
+            const sourceType = record.Source_Type || record.sourceType || '-';
+            const refNo = record.Reference_No || record.referenceNo || '-';
+            const signatureUrl = getDriveImageUrl(record.User_Confirm || '');
+            const itUserText = record.IT_User || record.itUser || '-';
+            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
+
+            let html = `
+                <div class="text-center mb-6 border-b-2 border-gray-800 pb-4">
+                    <h2 class="text-xl font-bold text-gray-900">โรงพยาบาลอุดรธานี</h2>
+                    <p class="text-xs text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    <h3 class="text-base font-bold text-pink-600 mt-2">${type === 'stockIn' ? 'รายงานใบรับเข้าครุภัณฑ์คอมพิวเตอร์' : 'รายงานใบจ่ายออกครุภัณฑ์คอมพิวเตอร์'}</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p><strong>เลขที่เอกสาร:</strong> ${docNo}</p>
+                    <p><strong>รหัสอ้างอิงระบบ:</strong> ${docId}</p>
+                    <p><strong>วันที่ / เวลา:</strong> ${dateTime}</p>
+                    <p><strong>หน่วยงาน:</strong> ${deptId}</p>
+                    <p><strong>ประเภท:</strong> ${sourceType}</p>
+                    <p><strong>เลขอ้างอิง / Doc ID:</strong> ${refNo}</p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs text-gray-700 mb-2 uppercase tracking-wider">รายการครุภัณฑ์ย่อย</h4>
+                    <table class="w-full text-xs border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700">
+                                <th class="border border-gray-300 p-2 text-center w-12">ลำดับ</th>
+                                <th class="border border-gray-300 p-2">รหัส (Asset ID)</th>
+                                <th class="border border-gray-300 p-2">รายละเอียด</th>
+                                <th class="border border-gray-300 p-2 text-center">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (Array.isArray(record.items) && record.items.length > 0) {
+                const groupedReportItems = {};
+                record.items.forEach((item) => {
+                    const iNo = item.Inv_No || '-';
+                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
+                    const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
+                    if (!groupedReportItems[typeName]) groupedReportItems[typeName] = [];
+                    groupedReportItems[typeName].push({ item, enrichedItem });
+                });
+
+                let rIdx = 0;
+                Object.keys(groupedReportItems).sort().forEach(typeName => {
+                    html += `
+                        <tr class="bg-gray-100 font-bold text-gray-800">
+                            <td colspan="4" class="border border-gray-300 p-2 text-xs">📂 ประเภท: ${typeName}</td>
+                        </tr>
+                    `;
+
+                    groupedReportItems[typeName].forEach(({ item, enrichedItem }) => {
+                        rIdx++;
+                        const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
+                        let desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || '-';
+                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
+
+                        if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
+                            desc += `<br><span class="text-[10px] text-gray-500 italic">+ ต่อพ่วง: ${item.peripherals.map(p => p.Name || p.Item_ID).join(', ')}</span>`;
+                        }
+
+                        html += `
+                            <tr>
+                                <td class="border border-gray-300 p-2 text-center font-bold align-top">${rIdx}</td>
+                                <td class="border border-gray-300 p-2 font-bold text-pink-600 align-top">${aId}</td>
+                                <td class="border border-gray-300 p-2 align-top">${desc}</td>
+                                <td class="border border-gray-300 p-2 text-center align-top">${stat}</td>
+                            </tr>
+                        `;
+                    });
+                });
+            } else {
+                html += `<tr><td colspan="4" class="text-center p-4 text-gray-400">ไม่พบรายการครุภัณฑ์ย่อย</td></tr>`;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mt-12 pt-6 border-t border-gray-300 text-center text-xs break-inside-avoid">
+                    <div>
+                        <p class="font-bold mb-8">ลงชื่อผู้ดำเนินการ (IT)</p>
+                        <p class="font-semibold">(${itUserText})</p>
+                    </div>
+                    <div>
+                        <p class="font-bold mb-2">ลงชื่อผู้เกี่ยวข้อง (User)</p>
+            `;
+
+            if (signatureUrl && String(signatureUrl).trim().length > 5) {
+                html += `<img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-14 mx-auto object-contain mb-1" alt="Signature"><p class="font-semibold">(${userNameText})</p>`;
+            } else {
+                html += `<div class="h-12 flex items-center justify-center text-gray-400 italic">ยังไม่มีลายมือชื่อ</div><p class="font-semibold">(${userNameText})</p>`;
+            }
+
+            html += `</div></div>`;
+
+            document.getElementById('a4ReportContent').innerHTML = html;
+            closeModal('recordDetailModal');
+            showModal('a4ReportModal');
+        }
+
+        function printA4ReportModal() {
+            document.body.classList.add('printing-a4');
+            window.print();
+            document.body.classList.remove('printing-a4');
+        }
+
+        function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            showModal('alertModal');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const displayName = getDisplayName();
+            document.getElementById('headerDisplayName').innerText = displayName;
+
+            if (window.lucide) lucide.createIcons();
+            
+            // เรียก Master จาก CentralCode.gs แล้วค่อยโหลดหน้า Dashboard จาก Inv_Asset.gs
+            syncMasterFromCentral();
+            loadDashboardStats();
+        });
+
+        function closeWindow() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
+            }
+            window.location.href = "main_menu.html";
+            window.close();
+            setTimeout(() => {
+                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
