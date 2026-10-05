@@ -4,17 +4,19 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <link rel="manifest" href="./manifest.json">
-    <script src="./indexeddb.js"></script>
-    <meta name="theme-color" content="#ff1493">
-    
-    <link rel="apple-touch-icon" href="./logo512.png">
-    <link rel="icon" type="image/png" href="./logo003v11.png">
-    <script src="./invstock.js"></script> 
-    <script src="./sw.js"></script>  
+    <!-- PWA Primary Manifest -->
+   <link rel="manifest" href="./manifest.json">
+   <meta name="theme-color" content="#ff1493">
+   
+   <!-- iOS Safari PWA Meta Tags -->
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+   <meta name="apple-mobile-web-app-title" content="IT UDH App">
+   <link rel="apple-touch-icon" href="./logo003v11.png">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
