@@ -949,5 +949,20 @@
             }, 300);
         }
     </script>
+     <script>
+      window.history.pushState(null, "", window.location.href);
+
+      window.addEventListener('popstate', function (event) {
+        const confirmExit = confirm("คุณต้องการออกจากหน้าเมนูหลักใช่หรือไม่?");
+        
+        if (confirmExit) {
+          window.close();
+          // หรือถ้าเบราว์เซอร์ไม่ยอมปิด ให้เปลี่ยนเส้นทางไปหน้าอื่น เช่น หน้า Login หรือหน้าว่าง
+          // window.location.href = "about:blank"; 
+        } else {
+          window.history.pushState(null, "", window.location.href);
+        }
+      });
+    </script>
 </body>
 </html>
