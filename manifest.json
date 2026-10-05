@@ -4,7 +4,7 @@
   "description": "ระบบจัดการงานช่างเทคโนโลยีสารสนเทศ โรงพยาบาลอุดรธานี",
   "start_url": "./main_menu.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#ff1493",
   "theme_color": "#d946ef",
   "orientation": "portrait",
   "icons": [
