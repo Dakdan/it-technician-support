@@ -1,69 +1,59 @@
 const CACHE_NAME = 'invstock-pwa-cache-v1';
 const urlsToCache = [
-  './',
-  './main_menu.html',
-  './invstock.js',
-  './manifest.json',
-  './indexeddb.js',
-  './logo512.png',
-  './logo003v11.png'
+  './',
+  './main_menu.html',
+  './invstock.js',
+  './manifest.json',
+  './indexeddb.js',
+  './logo512.png',
+  './logo003v11.png'
 ];
 
-// ติดตั้ง Service Worker แบบปลอดภัย
+// ติดตั้ง Service Worker แบบปลอดภัย (ถ้าไฟล์ไหนหาไม่เจอ จะเตือนใน Console แต่ไม่ทำให้แอปพัง)
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return Promise.all(
-          urlsToCache.map((url) => {
-            return cache.add(url).catch((error) => {
-              console.warn(`Failed to cache: ${url}`, error);
-            });
-          })
-        );
-      })
-  );
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache');
+        // ใช้ Promise.all และ catch ทีละไฟล์ เพื่อกัน Error 404 ทำให้ Service Worker ล่ม
+        return Promise.all(
+          urlsToCache.map((url) => {
+            return cache.add(url).catch((error) => {
+              console.warn(`Failed to cache: ${url}`, error);
+            });
+          })
+        );
+      })
+  );
 });
 
-// ดึงข้อมูลจาก Cache (เพิ่มเงื่อนไขป้องกันการพังของ API ภายนอก)
+// ดึงข้อมูลจาก Cache เมื่อมีการ Request (ช่วยให้ออฟไลน์ได้)
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // 1. ถ้าไม่ใช่ Method 'GET' (เช่น POST ส่งข้อมูลไป Google Sheets) หรือเป็นลิงก์ Apps Script ให้ปล่อยผ่าน Network ปกติทันที
-  if (event.request.method !== 'GET' || url.hostname.includes('script.google.com')) {
-    return;
-  }
-
-  // 2. สำหรับไฟล์ภายในเว็บ ให้ใช้ระบบ Cache ปกติ
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).catch(() => {
-          // เผื่อกรณีออฟไลน์แล้วโหลดหน้าเว็บไม่พบ
-          if (event.request.destination === 'document') {
-            return caches.match('./main_menu.html');
-          }
-        });
-      })
-  );
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // ถ้าเจอไฟล์ใน Cache ให้ส่งคืน
+        if (response) {
+          return response;
+        }
+        // ถ้าไม่เจอให้ไปโหลดจาก Network
+        return fetch(event.request);
+      })
+  );
 });
 
 // อัปเดตและลบ Cache เก่า
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
 });
