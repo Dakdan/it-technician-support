@@ -1,59 +1,67 @@
-const CACHE_NAME = 'invstock-pwa-cache-v1';
+const CACHE_NAME = 'it-udh-pwa-v2';
 const urlsToCache = [
-  './',
-  './main_menu.html',
-  './invstock.js',
-  './manifest.json',
-  './indexeddb.js',
-  './logo512.png',
-  './logo003v11.png'
+  './',
+  './index.html',
+  './main_menu.html',
+  './invstock.js',
+  './manifest.json',
+  './indexeddb.js',
+  './logo512.png',
+  './logo003v11.png'
 ];
 
-// ติดตั้ง Service Worker แบบปลอดภัย (ถ้าไฟล์ไหนหาไม่เจอ จะเตือนใน Console แต่ไม่ทำให้แอปพัง)
+// 1. Install & Cache Static Assets
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        // ใช้ Promise.all และ catch ทีละไฟล์ เพื่อกัน Error 404 ทำให้ Service Worker ล่ม
-        return Promise.all(
-          urlsToCache.map((url) => {
-            return cache.add(url).catch((error) => {
-              console.warn(`Failed to cache: ${url}`, error);
-            });
-          })
-        );
-      })
-  );
+  self.skipWaiting(); // บังคับให้ Service Worker ตัวใหม่ทำงานทันที
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.all(
+        urlsToCache.map((url) => {
+          return cache.add(url).catch((err) => {
+            console.warn(`[SW] Failed to cache: ${url}`, err);
+          });
+        })
+      );
+    })
+  );
 });
 
-// ดึงข้อมูลจาก Cache เมื่อมีการ Request (ช่วยให้ออฟไลน์ได้)
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // ถ้าเจอไฟล์ใน Cache ให้ส่งคืน
-        if (response) {
-          return response;
-        }
-        // ถ้าไม่เจอให้ไปโหลดจาก Network
-        return fetch(event.request);
-      })
-  );
-});
-
-// อัปเดตและลบ Cache เก่า
+// 2. Activate & Clear Old Cache
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// 3. Fetch Event (ข้ามการ Cache หากเป็น API ของ Google Apps Script)
+self.addEventListener('fetch', (event) => {
+  const reqUrl = event.request.url;
+
+  // ปล่อยผ่าน Request ที่ยิงไปยัง Google Apps Script API หรือ external domain ไม่ต้อง Cache
+  if (reqUrl.includes('script.google.com') || reqUrl.includes('googleusercontent.com')) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        // Fallback กรณีออฟไลน์และเข้าหน้าหลัก
+        if (event.request.mode === 'navigate') {
+          return caches.match('./main_menu.html');
+        }
+      });
+    })
+  );
 });
