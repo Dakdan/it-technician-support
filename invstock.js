@@ -47,67 +47,64 @@ window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
 });
 
-// เก็บตัวแปร Event การติดตั้ง
 let deferredPrompt;
 
+// 1. ลงทะเบียน Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((registration) => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch((error) => {
+        console.log('ServiceWorker registration failed: ', error);
+      });
+  });
+}
+
+// 2. ดักจับ Event ปกติ
 window.addEventListener('beforeinstallprompt', (e) => {
-  // ป้องกันไม่ให้เบราว์เซอร์แสดง Prompt อัตโนมัติแบบเด้งแล้วหาย
   e.preventDefault();
   deferredPrompt = e;
-
-  const installBanner = document.getElementById('pwaInstallBanner');
-  
-  // ตรวจสอบว่าผู้ใช้เคยกดปิดแบนเนอร์ไปแล้วหรือยังในเซสชันนี้
-  const isClosed = sessionStorage.getItem('pwaPromptClosed');
-
-  // ถ้ายังไม่เคยปิด และมีแบนเนอร์อยู่ในหน้านั้น ให้แสดงผล
-  if (installBanner && isClosed !== 'true') {
-    installBanner.classList.remove('hidden');
-    // รองรับ Bootstrap class d-none ด้วย (เผื่อใช้สลับ)
-    installBanner.classList.remove('d-none'); 
-  }
 });
 
-// จัดการเมื่อคลิกปุ่มติดตั้ง
+// บังคับเปิดแสดงผลทันทีหลังโหลดหน้าเว็บ (เพื่อทดสอบว่า HTML/CSS ขึ้นไหม)
 document.addEventListener('DOMContentLoaded', () => {
   const installBanner = document.getElementById('pwaInstallBanner');
   const installButton = document.getElementById('installAppBtn');
   const closeBannerBtn = document.getElementById('closeBannerBtn');
 
+  const isClosed = sessionStorage.getItem('pwaPromptClosed');
+
+  // ถ้ายังไม่เคยปิด ให้แสดงแบนเนอร์ทันที (ไม่ต้องรอ event beforeinstallprompt)
+  if (installBanner && isClosed !== 'true') {
+    installBanner.classList.remove('d-none');
+  }
+
   if (installButton) {
     installButton.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-
-      // แสดงหน้าต่างติดตั้งของเบราว์เซอร์
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-
-      deferredPrompt = null;
+      if (deferredPrompt) {
+        // ถ้าเบราว์เซอร์พร้อมติดตั้งจริง จะเรียกหน้าต่างติดตั้งระบบ
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+      } else {
+        // กรณีเทสบนเบราว์เซอร์ที่ยังไม่รองรับ prompt อัตโนมัติ แจ้งเตือนผู้ใช้
+        alert("เบราว์เซอร์นี้อาจไม่รองรับการติดตั้งอัตโนมัติ หรือติดตั้งไปแล้ว ให้ลองกดเมนู (จุด 3 จุด) ของเบราว์เซอร์แล้วเลือก 'ติดตั้งแอป' หรือ 'เพิ่มลงหน้าจอหลัก'");
+      }
       if (installBanner) {
         installBanner.classList.add('d-none');
       }
     });
   }
 
-  // เมื่อผู้ใช้กดปุ่มกากบาท (ปิดแบนเนอร์)
   if (closeBannerBtn) {
     closeBannerBtn.addEventListener('click', () => {
       if (installBanner) {
         installBanner.classList.add('d-none');
       }
-      // บันทึกลงใน sessionStorage ว่าปิดไปแล้ว จะไม่แสดงซ้ำจนกว่าจะเปิดแท็บใหม่
       sessionStorage.setItem('pwaPromptClosed', 'true');
     });
-  }
-});
-
-// ซ่อนแบนเนอร์ทันทีเมื่อติดตั้งแอปสำเร็จ
-window.addEventListener('appinstalled', () => {
-  console.log('PWA was installed successfully!');
-  deferredPrompt = null;
-  const installBanner = document.getElementById('pwaInstallBanner');
-  if (installBanner) {
-    installBanner.classList.add('d-none');
   }
 });
