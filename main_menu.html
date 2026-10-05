@@ -474,7 +474,34 @@
             </div>
         </div>
     </div>
-
+   <!-- PWA Install Banner (ดีไซน์สไตล์ Card โทนชมพูอ่อน-ขาว) -->
+   <div id="pwaInstallBanner" class="hidden fixed bottom-20 left-4 right-4 z-50 bg-white/95 backdrop-blur-md border border-pink-100 shadow-xl rounded-2xl p-4 transition-all duration-300">
+     <div class="d-flex align-items-center justify-content-between gap-3">
+       <!-- ไอคอนและข้อความ -->
+       <div class="d-flex align-items-center gap-3">
+         <div class="bg-pink-soft rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0 border border-pink-light" style="width: 48px; height: 48px;">
+           <img src="./logo003v11.png" alt="Logo" class="w-100 h-100 object-fit-contain">
+         </div>
+         <div>
+           <h6 class="font-kanit fw-bold text-dark mb-1" style="font-size: 0.9rem;">ติดตั้งแอปพลิเคชัน IT UDH</h6>
+           <p class="font-kanit text-muted mb-0" style="font-size: 0.75rem;">ใช้งานสะดวกรวดเร็วขึ้น ไม่ต้องเปิดผ่านเบราว์เซอร์</p>
+         </div>
+       </div>
+   
+       <!-- ปุ่มกระทำ (Action Buttons) -->
+       <div class="d-flex align-items-center gap-2 flex-shrink-0">
+         <!-- ปุ่มปิดชั่วคราว -->
+         <button id="closeBannerBtn" class="btn btn-sm text-secondary p-1" style="border: none; background: transparent;">
+           <i class="fa-solid fa-xmark fs-5"></i>
+         </button>
+         
+         <!-- ปุ่มติดตั้งหลัก -->
+         <button id="installAppBtn" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-pill shadow-sm" style="background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); font-size: 0.75rem; border: none;">
+           <i class="fa-solid fa-download me-1"></i> ติดตั้ง
+         </button>
+       </div>
+     </div>
+   </div>
     <!-- Script ควบคุมระบบ -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxPiqo4F8HRP2PWOQcfnZmwDFryOUbc8aBTg4YJcm7-5iUGzabCgsN2kZ2k3NAWkWOB/exec"; 
