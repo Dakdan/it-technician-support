@@ -1798,6 +1798,12 @@
             loadDashboardStats();
         });
         function closeWindow() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
+            }
+            window.location.href = "main_menu.html";
             window.close();
             setTimeout(() => {
                 showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
