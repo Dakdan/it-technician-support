@@ -1,202 +1,125 @@
 /* ==========================================================================
-   PART 1: IndexedDB Helper (idbApp)
-   รองรับ Offline-First Data Caching ร่วมกับ Google Apps Script API
+   app-core.js : ตัวควบคุมข้อมูลกลาง (Global Data Store) & PWA Manager
    ========================================================================== */
-const idbApp = {
-    dbName: 'ITAssetDB',
-    dbVersion: 1,
-    storeName: 'assets',
-    db: null,
 
-    // 1.1 เริ่มต้นเปิดการเชื่อมต่อฐานข้อมูล
-    init: function () {
-        return new Promise((resolve, reject) => {
-            if (this.db) {
-                resolve(this.db);
-                return;
-            }
+const AppCore = {
+  // 📍 URL ของ Google Apps Script (Asset & Search API)
+  API_URL: 'https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec',
 
-            if (!('indexedDB' in window)) {
-                console.warn("เบราว์เซอร์นี้ไม่รองรับ IndexedDB ระบบจะทำงานในโหมดออนไลน์");
-                resolve(null);
-                return;
-            }
+  /**
+   * ดึงข้อมูลครุภัณฑ์ทั้งหมด (Smart Cache: อ่านจาก IndexedDB ก่อน ถ้าไม่มีเน็ตหรือสั่ง Force Refresh ให้ยิง API)
+   * @param {boolean} forceRefresh - กำหนด true หากต้องการบังคับดึงข้อมูลใหม่จาก GAS
+   */
+  getGlobalAssets: async function (forceRefresh = false) {
+    // 1. เปิดฐานข้อมูล IndexedDB ในเครื่องก่อน
+    await idbApp.init();
 
-            const request = indexedDB.open(this.dbName, this.dbVersion);
-
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    // กำหนด AssetID เป็น KeyPath หลัก
-                    db.createObjectStore(this.storeName, { keyPath: 'AssetID' });
-                }
-            };
-
-            request.onsuccess = (event) => {
-                this.db = event.target.result;
-                resolve(this.db);
-            };
-
-            request.onerror = (event) => {
-                console.error("IndexedDB Open Error:", event.target.error);
-                resolve(null); // Return null เพื่อให้หน้าเว็บไปดึงข้อมูลออนไลน์ต่อได้โดยไม่ค้าง
-            };
-        });
-    },
-
-    // 1.2 ดึงข้อมูลครุภัณฑ์ทั้งหมดจาก IndexedDB
-    getAllAssets: function () {
-        return new Promise((resolve) => {
-            if (!this.db) {
-                resolve([]);
-                return;
-            }
-
-            try {
-                const transaction = this.db.transaction([this.storeName], 'readonly');
-                const store = transaction.objectStore(this.storeName);
-                const request = store.getAll();
-
-                request.onsuccess = () => {
-                    resolve(request.result || []);
-                };
-
-                request.onerror = (event) => {
-                    console.error("IndexedDB getAll Error:", event.target.error);
-                    resolve([]);
-                };
-            } catch (err) {
-                console.error("IndexedDB getAll Exception:", err);
-                resolve([]);
-            }
-        });
-    },
-
-    // 1.3 บันทึก/อัปเดตข้อมูลลง IndexedDB
-    saveAssets: function (assetsArray) {
-        return new Promise((resolve, reject) => {
-            if (!this.db || !Array.isArray(assetsArray) || assetsArray.length === 0) {
-                resolve(false);
-                return;
-            }
-
-            try {
-                const transaction = this.db.transaction([this.storeName], 'readwrite');
-                const store = transaction.objectStore(this.storeName);
-
-                // เคลียร์ข้อมูลเก่าก่อนลงข้อมูลใหม่ เพื่อป้องกันข้อมูลตกค้าง
-                const clearRequest = store.clear();
-
-                clearRequest.onsuccess = () => {
-                    assetsArray.forEach((item, index) => {
-                        if (item) {
-                            // Normalize AssetID เพื่อป้องกัน DataError กรณี AssetID ซ่อนอยู่ใน Asset_Detail
-                            const primaryKey = item.AssetID || (item.Asset_Detail && item.Asset_Detail.AssetID) || `TEMP_KEY_${index}`;
-                            
-                            const dataToSave = {
-                                ...item,
-                                AssetID: String(primaryKey).trim()
-                            };
-                            
-                            store.put(dataToSave);
-                        }
-                    });
-                };
-
-                transaction.oncomplete = () => {
-                    resolve(true);
-                };
-
-                transaction.onerror = (event) => {
-                    console.error("IndexedDB saveAssets Error:", event.target.error);
-                    reject(event.target.error);
-                };
-            } catch (err) {
-                console.error("IndexedDB saveAssets Exception:", err);
-                reject(err);
-            }
-        });
+    // 2. ถ้าไม่ได้สั่ง forceRefresh ให้ลองอ่านจาก IndexedDB ก่อน
+    if (!forceRefresh) {
+      const localData = await idbApp.getAllAssets();
+      if (localData && localData.length > 0) {
+        console.log('⚡ [AppCore] โหลดข้อมูลกลางจาก IndexedDB สำเร็จ');
+        return localData;
+      }
     }
+
+    // 3. ยิง API ไปที่ Code.gs (ใช้ mode: 'getAllData')
+    try {
+      console.log('🌐 [AppCore] กำลังดึงข้อมูลกลางล่าสุดจาก GAS API...');
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          mode: 'getAllData',
+          forceRefresh: forceRefresh
+        })
+      });
+
+      const result = await response.json();
+
+      // รองรับโครงสร้าง response จาก getAllDataForFrontend()
+      if (result && (result.status === 'success' || result.success) && Array.isArray(result.data)) {
+        console.log(`✅ [AppCore] ดึงข้อมูลสำเร็จ ทั้งหมด ${result.totalCount || result.data.length} รายการ`);
+        
+        // เซฟข้อมูลลง IndexedDB ทันที
+        await idbApp.saveAssets(result.data);
+        return result.data;
+      } else {
+        throw new Error(result.message || 'โครงสร้างข้อมูลไม่ถูกต้อง');
+      }
+    } catch (error) {
+      console.warn('⚠️ [AppCore] เรียก API ไม่สำเร็จ (เข้าสู่โหมด Offline):', error);
+      // Fallback อ่านข้อมูลเดิมในเครื่องกรณีเน็ตหลุด
+      return await idbApp.getAllAssets();
+    }
+  },
+
+  /**
+   * ดึงประเภทครุภัณฑ์ (Asset Types) สำหรับใช้ใน Dropdown
+   */
+  getAssetTypes: async function () {
+    try {
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ mode: 'getAssetTypes' })
+      });
+      const result = await response.json();
+      return result.success ? result.data : [];
+    } catch (error) {
+      console.error('❌ [AppCore] getAssetTypes Error:', error);
+      return [];
+    }
+  },
+
+  /**
+   * ดึงรายชื่อหน่วยงาน (Departments)
+   */
+  getDepartments: async function () {
+    try {
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ mode: 'getDepartments' })
+      });
+      const result = await response.json();
+      return result.success ? result.data : [];
+    } catch (error) {
+      console.error('❌ [AppCore] getDepartments Error:', error);
+      return [];
+    }
+  }
 };
 
-
 /* ==========================================================================
-   PART 2: PWA & Service Worker Manager
-   จัดการการลงทะเบียน Service Worker และปุ่มติดตั้งแอป (Android/iOS/Desktop)
+   ส่วนการจัดการ Service Worker และ PWA Installation
    ========================================================================== */
 let deferredPrompt = null;
 
-// 2.1 ตรวจสอบสถานะการใช้งาน
-function isIOS() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
-
 function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
-// 2.2 ลงทะเบียน Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then((reg) => {
-                console.log('ServiceWorker registered with scope:', reg.scope);
-            })
-            .catch((err) => {
-                console.error('ServiceWorker registration failed:', err);
-            });
-    });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('ServiceWorker registered:', reg.scope))
+      .catch((err) => console.error('ServiceWorker registration failed:', err));
+  });
 }
 
-// 2.3 ดักจับ Event ก่อนเปิด Prompt ติดตั้งแอป (Android / Chrome / Edge)
 window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    const installBtn = document.getElementById('installAppBtn');
-    if (installBtn && !isStandalone()) {
-        installBtn.style.display = 'block';
-
-        installBtn.onclick = async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User choice outcome: ${outcome}`);
-            deferredPrompt = null;
-            installBtn.style.display = 'none';
-        };
-    }
-});
-
-// 2.4 จัดการ UI ปุ่มติดตั้ง PWA เมื่อ DOM พร้อมทำงาน
-document.addEventListener('DOMContentLoaded', () => {
-    const installBtn = document.getElementById('installAppBtn');
-    const iosInstructions = document.getElementById('iosInstallBanner');
-
-    // ถ้าเปิดในโหมดแอป PWA (Standalone) เรียบร้อยแล้ว ให้ซ่อนปุ่มทั้งหมด
-    if (isStandalone()) {
-        if (installBtn) installBtn.style.display = 'none';
-        if (iosInstructions) iosInstructions.style.display = 'none';
-        return;
-    }
-
-    // กรณีใช้งานผ่าน iOS Safari
-    if (isIOS() && installBtn) {
-        installBtn.style.display = 'block';
-        installBtn.addEventListener('click', () => {
-            if (iosInstructions) {
-                iosInstructions.style.display = 'block';
-            } else {
-                alert('วิธีติดตั้งบน iPhone/iPad:\n1. กดปุ่ม "แชร์" (Share) ที่แถบล่างสุดของ Safari\n2. เลื่อนลงแล้วเลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
-            }
-        });
-    }
-});
-
-// 2.5 เมื่อติดตั้งแอปสำเร็จ
-window.addEventListener('appinstalled', () => {
-    console.log('PWA was installed successfully!');
-    deferredPrompt = null;
-    const installBtn = document.getElementById('installAppBtn');
-    if (installBtn) installBtn.style.display = 'none';
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn && !isStandalone()) {
+    installBtn.style.display = 'block';
+    installBtn.onclick = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    };
+  }
 });
