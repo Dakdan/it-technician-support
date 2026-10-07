@@ -1587,8 +1587,7 @@
                                 <div class="mt-2 bg-purple-50/50 p-2 rounded-lg border border-purple-100 w-full whitespace-normal">
                                     <p class="text-[10px] font-bold text-purple-700 flex items-center gap-1 mb-1"><i data-lucide="plug" class="w-3 h-3"></i> อุปกรณ์ต่อพ่วง (${item.peripherals.length} รายการ)</p>
                                     <ul class="text-[10px] text-gray-600 list-disc pl-4 space-y-0.5">
-                                        ${item.peripherals.map(p => `<li><span class="font-semibold text-gray-800">${p.Name || p.Item_ID}</span> - จำนวน ${p.Quantity \vert{}\vert{} 1}${p.Unit || ''} <span class="text-gray-400">(${p.Note || '-'})</span></li>`).join('')}
-                                    </ul>
+                                       ${matchedPeripherals.map(p => '<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>' + (p.Name || p.Item_ID) + '</span><span class="font-bold text-purple-600">' + (p.Quantity || 1) + ' ' + (p.Unit || 'ชิ้น') + '</span></li>').join('')}
                                 </div>
                             `;
                         }
