@@ -13,7 +13,7 @@ const urlsToCache = [
 
 // 1. Install & Cache Static Assets
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // บังคับให้ Service Worker ตัวใหม่ทำงานทันที
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.all(
@@ -48,22 +48,21 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const reqUrl = req.url;
 
-  // ข้ามการตรวจ Cache สำหรับ Request ที่ไม่ใช่ GET (เช่น POST Data ไป Apps Script)
-  // หรือ Request ที่ยิงไปยัง Domain ของ Google
+  // ข้ามการตรวจ Cache สำหรับ Request ที่ไม่ใช่ GET หรือยิงไป Google API
   if (req.method !== 'GET' || reqUrl.includes('script.google.com') || reqUrl.includes('googleusercontent.com')) {
     return;
   }
 
   event.respondWith(
     caches.match(req).then((cachedResponse) => {
-      // 3.1 ดึงไฟล์จาก Cache หากมีเก็บไว้แล้ว
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // 3.2 หากไม่มีใน Cache ให้ดึงจาก Network และบันทึกเข้า Cache อัตโนมัติ (Dynamic Caching)
       return fetch(req).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+        // ปรับเงื่อนไขให้ยอมรับ 'cors' เพื่อให้ Cache CDN (เช่น FontAwesome, Bootstrap) ได้ด้วย
+        if (!networkResponse || networkResponse.status !== 200 || 
+           (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
           return networkResponse;
         }
 
@@ -76,7 +75,7 @@ self.addEventListener('fetch', (event) => {
       }).catch(() => {
         // Fallback กรณีออฟไลน์และเป็นการเปลี่ยนหน้า (Navigation)
         if (req.mode === 'navigate') {
-          return caches.match('./main_menu.html') || caches.match('./index.html');
+          return caches.match('./main_menu.html') || caches.match('./index.html') || caches.match('./');
         }
       });
     })
