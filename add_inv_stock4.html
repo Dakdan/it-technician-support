@@ -1367,7 +1367,7 @@
                     <div class="mt-3 bg-purple-50 p-3 rounded-2xl border border-purple-200">
                         <span class="text-[11px] font-bold text-purple-800 flex items-center gap-1 mb-1.5"><i data-lucide="plug" class="w-3.5 h-3.5"></i> อุปกรณ์ต่อพ่วงที่ผูกอยู่ (${matchedPeripherals.length} รายการ):</span>
                         <ul class="text-xs text-purple-900 space-y-1 pl-2">
-                            ${matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity \vert{}\vert{} 1}${p.Unit || 'ชิ้น'}</span></li>`).join('')}
+                            ${matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>} ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity \vert{}\vert{} 1}${p.Unit || 'ชิ้น'}</span></li>`).join('')}
                         </ul>
                     </div>
                 `;
