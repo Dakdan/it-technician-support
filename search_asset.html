@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-     <script src="./auth-check.js"></script>
+    <script src="./auth-check.js"></script>
     <script>
-    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role ตามที่กำหนด
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
     <!-- เรียกใช้ Manifest สำหรับ PWA -->
     <link rel="manifest" href="./manifest.json">
     <script src="./indexeddb.js"></script>
-    <script src="./app_core.js"></script>
+    <script src="./app-core.js"></script> <!-- แก้ชื่อไฟล์เป็น app-core.js -->
     <script src="./sw.js"></script>
+
     <!-- ตั้งค่า Theme color สำหรับเบราว์เซอร์มือถือ -->
     <meta name="theme-color" content="#ff1493">    
     <!-- ไอคอนสำหรับ Apple/iOS -->
@@ -118,7 +119,7 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-            margin-left: auto; /* ดันตัวปุ่มไปชิดขวาสุดของ Container */
+            margin-left: auto;
         }
         .btn-back:hover, .btn-back:active {
             background: rgba(255, 255, 255, 0.4);
@@ -341,8 +342,9 @@
                 <div class="org-title">ค้นหาข้อมูลครุภัณฑ์</div>
                 <div class="org-subtitle">ระบบบริหารจัดการครุภัณฑ์ IT</div>
             </div>
-            <button onclick="closeWindow()"   class="btn-back" title="HOME">
-                <i class="fa-solid fa-arrow-ritgh">📲</i>
+            <!-- ปรับแก้ไอคอนปุ่มย้อนกลับให้ถูกต้อง -->
+            <button onclick="closeWindow()" class="btn-back" title="ย้อนกลับ">
+                <i class="fa-solid fa-arrow-left"></i>
             </button>
         </div>
     </header>
@@ -415,7 +417,7 @@
         </div>
     </div>
 
-    <!-- Modal: Asset Detail (หน้าต่างดูข้อมูลครุภัณฑ์) -->
+    <!-- Modal: Asset Detail -->
     <div class="modal fade" id="assetDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
@@ -475,7 +477,6 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 justify-content-center gap-2 bg-light">
-                    <!-- ปุ่มเปิดประวัติไปยังแท็บใหม่ (New Tab) -->
                     <button type="button" id="btnViewHistory" class="btn text-white rounded-pill px-4 fw-bold" style="background-color: var(--pink-dark); border: none;">
                         <i class="fa-solid fa-clock-rotate-left me-2"></i>ดูประวัติครุภัณฑ์เต็มรูปแบบ
                     </button>
@@ -552,19 +553,16 @@
                 searchInput.focus();
             });
         });
-            // 1. ดึงข้อมูล (อัปเกรดเป็น Server -> IndexedDB -> allAssetsData)
+
         async function fetchAllData() {
             try {
-                // 1.1 เริ่มต้น IndexedDB
                 await idbApp.init();
 
-                // 1.2 โหลดข้อมูลจาก IndexedDB (Local Cache) ก่อนเป็นอันดับแรก (Zero Latency)
                 const localData = await idbApp.getAllAssets();
                 if (localData && localData.length > 0) {
-                    allAssetsData = localData; // <--- โยนเข้าตัวแปรเดิมของคุณโดยไม่แตะ Logic เดิม
+                    allAssetsData = localData; 
                     resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (โหลดแคชออฟไลน์สำเร็จ)";
                     
-                    // ปลดล็อกการค้นหาให้ผู้ใช้เริ่มพิมพ์ได้ทันทีที่โหลดข้อมูลจากเครื่องเสร็จ
                     searchInput.disabled = false; 
                     initialLoadingOverlay.style.opacity = '0';
                     setTimeout(() => {
@@ -573,7 +571,6 @@
                     }, 300);
                 }
 
-                // 1.3 ยิง Fetch ขอข้อมูลล่าสุดจาก Server แบบ Background ทับอีกชั้น (Silent Sync)
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ mode: 'getAllData' }),
@@ -583,15 +580,10 @@
                 if (response.ok) {
                     const result = await response.json();
                     if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
-                        
-                        // เอาข้อมูลล่าสุดอัปเดตลง IndexedDB ไว้ใช้รอบหน้า
                         await idbApp.saveAssets(result.data);
-                        
-                        // อัปเดตตัวแปร allAssetsData แบบ Real-time เพื่อให้กดค้นหาครั้งต่อไปได้ข้อมูลล่าสุดทันที
                         allAssetsData = result.data;
 
-                        // หากกรณีที่ IndexedDB ว่างเปล่าในตอนแรก (เปิดแอปครั้งแรก) ให้ปลดล็อก UI ตรงนี้
-                        if (localData.length === 0) {
+                        if (!localData || localData.length === 0) {
                             resultCountLabel.innerText = "ระบุข้อมูลในการค้นหาด้านบน (อัปเดตฐานข้อมูลสำเร็จ)";
                             searchInput.disabled = false; 
                             initialLoadingOverlay.style.opacity = '0';
@@ -604,7 +596,6 @@
                 }
             } catch (err) {
                 console.error("Fetch/IndexedDB Error:", err);
-                // ระบบ Fallback: กรณีเครื่องใหม่เอี่ยม ไม่มี IndexedDB เดิม และเน็ตมีปัญหา
                 if (allAssetsData.length === 0) {
                     resultCountLabel.innerText = "พิมพ์รหัสเพื่อค้นหาออนไลน์ (ระบบสลับเป็นโหมดออนไลน์)";
                     searchInput.disabled = false; 
@@ -616,6 +607,7 @@
                 }
             }
         }
+
         async function executeOnlineSearch(keyword) {
             resultsContainer.innerHTML = '';
             emptyState.classList.add('d-none');
@@ -692,40 +684,15 @@
             return Math.max(assetScore, serialScore);
         }
 
+        // ปรับปรุงฟังก์ชัน Highlight ให้เสถียรและรองรับภาษาไทย
         function highlightText(text, keyword) {
             if (!keyword || !text) return text;
-            
-            const cleanKeyword = String(keyword).toLowerCase().replace(/-/g, '');
-            if (!cleanKeyword) return text;
+            const strText = String(text);
+            const strKeyword = String(keyword).trim();
+            if (!strKeyword) return strText;
 
-            const escapedKeyword = cleanKeyword.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-            const patternStr = escapedKeyword.join('-?');
-
-            const exactRegex = new RegExp('^(' + patternStr + ')$', 'i');
-            const endRegex = new RegExp('(' + patternStr + ')$', 'i');
-            const startRegex = new RegExp('^(' + patternStr + ')', 'i');
-            const anyRegex = new RegExp('(' + patternStr + ')', 'gi');
-
-            if (exactRegex.test(text)) {
-                return text.replace(exactRegex, '<span class="highlight">$1</span>');
-            } else if (endRegex.test(text)) {
-                return text.replace(endRegex, '<span class="highlight">$1</span>');
-            } else if (startRegex.test(text)) {
-                return text.replace(startRegex, '<span class="highlight">$1</span>');
-            } else if (anyRegex.test(text)) {
-                let match;
-                let lastMatch;
-                while ((match = anyRegex.exec(text)) !== null) {
-                    lastMatch = match;
-                }
-                if (lastMatch) {
-                    const before = text.substring(0, lastMatch.index);
-                    const matched = lastMatch[0];
-                    const after = text.substring(lastMatch.index + matched.length);
-                    return before + `<span class="highlight">${matched}</span>` + after;
-                }
-            }
-            return text;
+            const reg = new RegExp(`(${strKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return strText.replace(reg, '<span class="highlight">$1</span>');
         }
 
         function renderResults(data, keyword) {
@@ -782,14 +749,14 @@
             });
         }
 
+        // แก้ไขให้ปลดการซ่อน (remove d-none) เพื่อแสดงสถานะไม่พบข้อมูล
         function showEmptyState(title, subtitle) {
             emptyStateTitle.innerText = title;
             emptyStateMsg.innerText = subtitle;
-            emptyState.classList.add('d-none');
+            emptyState.classList.remove('d-none');
             resultCountLabel.innerText = "ผลการค้นหาเป็นศูนย์";
         }
 
-        // ฟังก์ชันเปิดหน้าประวัติในแท็บใหม่ (New Tab) โดยไม่เปลี่ยนหน้าปัจจุบัน
         function goToDetail(assetId) {
             if (!assetId) return;
             const finalUrl = TARGET_URL_BASE + encodeURIComponent(assetId.trim());
@@ -833,25 +800,21 @@
                 document.getElementById('modalFieldNO').innerText = detail.NO || "-";
                 document.getElementById('modalFieldNOID').innerText = detail.NOID || "-";
 
-                // ดึงข้อมูล Inspection และ Usage (ดึงรายการล่าสุดมาแสดง)
                 const inspections = detail["Physical Asset Inspection"] || [];
                 const usages = detail["ข้อมูลการใช้งาน"] || [];
                 
                 const latestInspection = inspections.length > 0 ? inspections[inspections.length - 1] : {};
                 const latestUsage = usages.length > 0 ? usages[usages.length - 1] : {};
 
-                // Map ข้อมูลลงส่วนที่ 2
                 document.getElementById('modalFieldInspectYear').innerText = latestInspection["ปีที่ตรวจสอบ"] || "-";
                 document.getElementById('modalFieldInspectDate').innerText = latestInspection["วัน/เวลา ที่ตรวจสอบ"] || "-";
                 document.getElementById('modalFieldInspectDept').innerText = latestInspection["หน่วยงาน/กลุ่มงาน/สถานที่"] || "-";
 
-                // Map ข้อมูลลงส่วนที่ 3
                 document.getElementById('modalFieldUsage').innerText = latestUsage["การใช้งาน"] || "-";
                 document.getElementById('modalFieldPriority').innerText = latestUsage["กลุ่มผู้ใช้งาน"] || "-";
                 document.getElementById('modalFieldShift').innerText = latestUsage["ช่วงเวลาที่ใช้งาน"] || "-";
                 document.getElementById('modalFieldNote2').innerText = latestUsage["NOTE"] || detail["Note2"] || "-";
 
-                // จัดการ GPS Map
                 const gpsContainer = document.getElementById('modalGpsContainer');
                 const gpsMap = document.getElementById('modalGpsMap');
                 const gpsValue = String(latestInspection["ตำแหน่ง GPS"] || detail.GPS || "").trim();
@@ -865,7 +828,6 @@
                     gpsMap.innerHTML = '';
                 }
 
-                // สั่งเปิดแท็บใหม่เมื่อคลิกปุ่ม
                 document.getElementById('btnViewHistory').onclick = () => {
                     goToDetail(assetId); 
                 };
@@ -942,33 +904,21 @@
         function onScanFailure(error) {
             // รอจับภาพต่อไป
         }
-         function closeWindow() {
-              if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
-            }
-            window.location.href = "main_menu.html";
-            window.close();
-            setTimeout(() => {
-                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
-            }, 300);
-        }
-    </script>
-     <script>
-      window.history.pushState(null, "", window.location.href);
 
-      window.addEventListener('popstate', function (event) {
-        const confirmExit = confirm("คุณต้องการออกจากหน้าเมนูหลักใช่หรือไม่?");
-        
-        if (confirmExit) {
-          window.close();
-          // หรือถ้าเบราว์เซอร์ไม่ยอมปิด ให้เปลี่ยนเส้นทางไปหน้าอื่น เช่น หน้า Login หรือหน้าว่าง
-          // window.location.href = "about:blank"; 
-        } else {
-          window.history.pushState(null, "", window.location.href);
-        }
-      });
+        // ปรับแก้ฟังก์ชันย้อนกลับให้เรียบง่าย ป้องกัน Error
+        function closeWindow() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const fromParam = urlParams.get('from');
+          
+              if (fromParam === 'menu') {
+                  // ถ้าส่งมาจากเมนูหลัก ให้ Redirect กลับไปเมนูหลักโดยตรง
+                  window.location.href = "main_menu.html";
+              } else if (window.history.length > 1 && document.referrer) {
+                  window.history.back();
+              } else {
+                  window.location.href = "main_menu.html";
+              }
+          }
     </script>
 </body>
 </html>
