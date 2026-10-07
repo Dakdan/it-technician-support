@@ -20,7 +20,7 @@
     
     <link rel="icon" type="image/png" href="./logo003v11.png">
     <script src="./invstock.js"></script> 
-    <script src="./sw.js"></script>  
+    <!-- <script src="./sw.js"></script>  -->
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
@@ -483,7 +483,7 @@
         <div class="glass-card rounded-3xl max-w-lg w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
                 <h3 class="text-indigo-600 font-bold text-base flex items-center gap-2">
-                    <i data-lucide="box" class="w-5 h-5"></i> รายรายละเอียดครุภัณฑ์
+                    <i data-lucide="box" class="w-5 h-5"></i> รายละเอียดครุภัณฑ์
                 </h3>
                 <button onclick="closeModal('inventoryItemDetailModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 p-2 rounded-xl">✕</button>
             </div>
@@ -539,50 +539,16 @@
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
 
-        // โครงสร้างการเก็บฟิลเตอร์
+        // โครงสร้างการเก็บฟิลเตอร์ (แก้ไขให้รองรับอายุ)
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
         let filteredDashboardData = [];
 
         let currentInventoryStatusFilter = 'ALL';
         let expandedInventoryGroups = {}; // Stores group toggle states (default = collapsed)
 
-        function showLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.classList.add('hidden');
-        }
-
-        function showModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        }
-
-        function showAlert(title, message) {
-            const tEl = document.getElementById('alertTitle');
-            const mEl = document.getElementById('alertMessage');
-            if (tEl) tEl.innerHTML = `<i data-lucide="bell" class="w-4 h-4"></i> ${title}`;
-            if (mEl) mEl.innerText = message;
-            showModal('alertModal');
-            if (window.lucide) lucide.createIcons();
-        }
-
-        function closeWindow() {
-            if (confirm('คุณต้องการออกจากระบบ หรือปิดหน้านี้ใช่หรือไม่?')) {
-                window.close();
-            }
-        }
-
         async function fetchAPI(url, options = {}) {
             try {
+                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
                 const fetchOptions = { redirect: 'follow', ...options };
                 const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -650,6 +616,7 @@
         }
 
         async function loadDashboardStats(forceRefresh = false) {
+            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
@@ -664,6 +631,7 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
+                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
                 const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
@@ -676,6 +644,7 @@
 
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 
+                // ส่ง resPeriDash เข้าไปประมวลผลแสดงผลใน DOM ด้วย
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
@@ -780,13 +749,15 @@
             loadDashboardStats();
         }
 
+        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats();
+            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
         }
 
+        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -832,6 +803,7 @@
             let totalPeri = 0;
             let periBreakdownHtml = '';
 
+            // ใช้ข้อมูลจาก getPeripheralDashboard ที่ส่งเข้ามา (periDash)
             const activePeriDash = periDash || globalPeripheralDashboardData;
             if (activePeriDash && activePeriDash.summary) {
                 const periSummary = activePeriDash.summary;
@@ -892,6 +864,7 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        // Render Dashboard Table Grouped by Asset_Type_Name
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
             tbody.innerHTML = '';
@@ -997,6 +970,7 @@
         }
 
         async function loadStockInRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalStockInRecords.length > 0) {
                 renderStockInTable(globalStockInRecords);
                 return;
@@ -1075,7 +1049,8 @@
             renderStockInTable(globalStockInRecords);
         }
 
-        async function loadStockOutRecords(forceRefresh = false) {
+       async function loadStockOutRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalStockOutRecords.length > 0) {
                 renderStockOutTable(globalStockOutRecords);
                 return;
@@ -1155,6 +1130,7 @@
         }
 
         async function loadInventoryRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 renderInventoryStatusBar();
                 filterInventoryRecords();
@@ -1163,6 +1139,7 @@
 
             showLoading();
             try {
+                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
                 const [data, resPeri] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
@@ -1660,41 +1637,28 @@
             if (signatureUrl && String(signatureUrl).trim().length > 5) {
                 html += `
                     <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
-                    <p class="font-bold text-gray-800 text-sm">${userNameText}</p>
-                    <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full mt-1">✓ ยืนยันแล้ว</span>
+                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
+                    <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
                 `;
             } else {
                 html += `
-                    <div class="h-20 flex items-center justify-center text-gray-400 italic text-xs mb-2">ยังไม่มีลายเซ็นในระบบ</div>
-                    <p class="font-bold text-gray-800 text-sm">${userNameText}</p>
-                    <span class="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full mt-1">⏳ รอยืนยัน</span>
+                    <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
+                        <span class="text-xs text-gray-400 italic">ยังไม่มีการลงลายมือชื่อ</span>
+                    </div>
+                    <p class="font-bold text-gray-700 text-sm">(${userNameText})</p>
+                    <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> รอลงชื่อ</span>
                 `;
             }
 
-            html += `
-                        </div>
-                    </div>
-                </div>
-            `;
+            html += `</div></div></div>`;
 
             content.innerHTML = html;
             showModal('recordDetailModal');
             if (window.lucide) lucide.createIcons();
         }
 
-        function printReceiptSlip() {
-            document.body.classList.add('printing-receipt');
-            window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-receipt');
-            }, 1000);
-        }
-
         function openA4ReportModal() {
-            if (!activeDetailRecord) {
-                showAlert('แจ้งเตือน', 'กรุณาเลือกรายการเอกสารก่อนสร้างรายงาน A4');
-                return;
-            }
+            if (!activeDetailRecord) return;
 
             const { type, record } = activeDetailRecord;
             const container = document.getElementById('a4ReportContent');
@@ -1702,100 +1666,111 @@
             const isStockIn = type === 'stockIn';
             const docNo = isStockIn ? (record.Stock_In_No || '-') : (record.Stock_Out_No || '-');
             const dateTime = record.Date_Time || record.Timestamp || '-';
-            const dept = record.DEPT_ID || '-';
+            const deptId = record.DEPT_ID || '-';
             const itUser = record.IT_User || record.itUser || '-';
             const userName = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
+
             const signatureUrl = getDriveImageUrl(record.User_Confirm || '');
 
-            let html = `
-                <div class="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-start">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">โรงพยาบาลอุดรธานี</h2>
-                        <p class="text-xs text-gray-600 font-semibold">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-                        <p class="text-sm font-bold text-pink-600 mt-2">${isStockIn ? 'ใบรับเข้าครุภัณฑ์คอมพิวเตอร์ (Stock In Report)' : 'ใบเบิก/จ่ายออกครุภัณฑ์คอมพิวเตอร์ (Stock Out Report)'}</p>
-                    </div>
-                    <div class="text-right text-xs">
-                        <p class="font-bold text-gray-800">เลขที่เอกสาร: <span class="text-pink-600">${docNo}</span></p>
-                        <p class="text-gray-500">วันที่-เวลา: ${dateTime}</p>
-                        <p class="text-gray-500">หน่วยงาน: <span class="font-semibold text-gray-700">${dept}</span></p>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <h4 class="font-bold text-xs text-gray-700 uppercase tracking-wider mb-2">รายการครุภัณฑ์ที่ดำเนินการ:</h4>
-                    <table class="w-full text-xs border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-800 font-bold">
-                                <th class="border border-gray-300 p-2 text-center w-10">ลำดับ</th>
-                                <th class="border border-gray-300 p-2">รหัส Asset</th>
-                                <th class="border border-gray-300 p-2">รายละเอียด / สเปค</th>
-                                <th class="border border-gray-300 p-2 text-center">อายุ</th>
-                                <th class="border border-gray-300 p-2 text-center">สถานะ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            let itemsHtml = '';
+            let totalItems = 0;
 
             if (Array.isArray(record.items) && record.items.length > 0) {
+                totalItems = record.items.length;
                 record.items.forEach((item, idx) => {
                     const iNo = item.Inv_No || '-';
                     const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
-                    const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || item.NOID || '-';
-                    const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || '-';
+                    const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
+                    const serial = enrichedItem.Asset_Serial || item.Asset_Serial || enrichedItem.Serial || item.Serial || '-';
+                    const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
+                    const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || '-';
                     const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || '-';
-                    const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
 
-                    html += `
-                        <tr>
-                            <td class="border border-gray-300 p-2 text-center font-bold text-gray-500">${idx + 1}</td>
-                            <td class="border border-gray-300 p-2 font-bold text-pink-600">${aId}</td>
-                            <td class="border border-gray-300 p-2">${desc}</td>
-                            <td class="border border-gray-300 p-2 text-center font-medium">${age}</td>
-                            <td class="border border-gray-300 p-2 text-center">${stat}</td>
+                    let periText = '';
+                    if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
+                        periText = `<div class="text-[10px] text-gray-600 mt-1 pl-2 border-l-2 border-purple-300">อุปกรณ์ต่อพ่วง: ${item.peripherals.map(p => `${p.Name || p.Item_ID} (${p.Quantity \vert{}\vert{} 1}${p.Unit || ''})`).join(', ')}</div>`;
+                    }
+
+                    itemsHtml += `
+                        <tr class="border-b border-gray-300">
+                            <td class="p-2 border-r border-gray-300 text-center">${idx + 1}</td>
+                            <td class="p-2 border-r border-gray-300 font-bold">${aId}<br><span class="text-[10px] text-gray-500 font-normal">S/N: ${serial}</span></td>
+                            <td class="p-2 border-r border-gray-300 font-medium">${typeName}</td>
+                            <td class="p-2 border-r border-gray-300">
+                                <span>${desc}</span>
+                                ${periText}
+                            </td>
+                            <td class="p-2 text-center font-bold text-amber-700 whitespace-nowrap">${age}</td>
                         </tr>
                     `;
                 });
             } else {
-                html += `<tr><td colspan="5" class="border border-gray-300 p-4 text-center text-gray-400">ไม่พบข้อมูลรายการครุภัณฑ์</td></tr>`;
+                itemsHtml = `<tr><td colspan="5" class="p-4 text-center text-gray-400">ไม่พบรายการครุภัณฑ์</td></tr>`;
             }
 
-            html += `
-                        </tbody>
-                    </table>
+            const roleIT = isStockIn ? 'ผู้รับมอบ (เจ้าหน้าที่ IT)' : 'ผู้ส่งมอบ (เจ้าหน้าที่ IT)';
+            const roleUser = isStockIn ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
+
+            container.innerHTML = `
+                <div class="text-center border-b-2 border-gray-800 pb-4 mb-4">
+                    <h1 class="text-xl font-bold text-gray-900">โรงพยาบาลอุดรธานี</h1>
+                    <h2 class="text-base font-semibold text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</h2>
+                    <p class="text-sm font-bold text-pink-600 mt-1 uppercase tracking-wider">${isStockIn ? 'ใบรับเข้าครุภัณฑ์คอมพิวเตอร์ (Stock In Report)' : 'ใบจ่ายออกครุภัณฑ์คอมพิวเตอร์ (Stock Out Report)'}</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 pt-8 mt-12 border-t border-dashed border-gray-300 break-inside-avoid">
-                    <div class="text-center">
-                        <p class="text-xs font-bold text-gray-700 mb-8">${isStockIn ? 'ผู้รับมอบ (เจ้าหน้าที่ IT)' : 'ผู้จ่ายออก (เจ้าหน้าที่ IT)'}</p>
-                        <p class="text-xs border-b border-gray-400 pb-1 max-w-xs mx-auto font-bold">${itUser}</p>
-                        <p class="text-[10px] text-gray-500 mt-1">(...........................................................................)</p>
+                <div class="grid grid-cols-2 gap-4 text-xs mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <div>
+                        <p><strong>เลขที่เอกสาร:</strong> <span class="text-pink-600 font-bold">${docNo}</span></p>
+                        <p><strong>หน่วยงาน:</strong> ${deptId}</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-xs font-bold text-gray-700 mb-2">${isStockIn ? 'ผู้ส่งมอบ / ผู้คืน' : 'ผู้รับมอบครุภัณฑ์'}</p>
-            `;
-
-            if (signatureUrl && String(signatureUrl).trim().length > 5) {
-                html += `
-                    <div class="h-16 flex items-center justify-center">
-                        <img src="${signatureUrl}" referrerpolicy="no-referrer" class="max-h-14 object-contain" alt="Signature">
+                    <div class="text-right">
+                        <p><strong>วันที่เวลา:</strong> ${dateTime}</p>
+                        <p><strong>จำนวนรวมทั้งสิ้น:</strong> ${totalItems} รายการ</p>
                     </div>
-                    <p class="text-xs border-b border-gray-400 pb-1 max-w-xs mx-auto font-bold">${userName}</p>
-                `;
-            } else {
-                html += `
-                    <div class="h-16"></div>
-                    <p class="text-xs border-b border-gray-400 pb-1 max-w-xs mx-auto font-bold">${userName}</p>
-                `;
-            }
+                </div>
 
-            html += `
-                        <p class="text-[10px] text-gray-500 mt-1">(...........................................................................)</p>
+                <table class="w-full text-xs border-collapse border border-gray-400 mb-6">
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-400 font-bold text-gray-700">
+                            <th class="p-2 border-r border-gray-400 text-center w-10">ลำดับ</th>
+                            <th class="p-2 border-r border-gray-400 text-left w-32">รหัส Asset / S.N.</th>
+                            <th class="p-2 border-r border-gray-400 text-left w-28">ประเภท</th>
+                            <th class="p-2 border-r border-gray-400 text-left">รายการ / รายละเอียดสเปค</th>
+                            <th class="p-2 text-center w-24">อายุครุภัณฑ์</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+
+                <div class="grid grid-cols-2 gap-8 pt-6 border-t border-gray-300 break-inside-avoid">
+                    <div class="text-center flex flex-col items-center justify-between h-32">
+                        <p class="font-bold text-xs">${roleIT}</p>
+                        <div class="border-b border-dotted border-gray-500 w-48 my-2"></div>
+                        <p class="text-xs font-semibold">(${itUser})</p>
+                        <p class="text-[10px] text-gray-500">เจ้าหน้าที่ผู้ดำเนินการ</p>
+                    </div>
+                    <div class="text-center flex flex-col items-center justify-between h-32">
+                        <p class="font-bold text-xs">${roleUser}</p>
+                        <div class="my-1 flex items-center justify-center h-16">
+                            ${signatureUrl ? `<img src="${signatureUrl}" referrerpolicy="no-referrer" class="max-h-14 object-contain" alt="Signature">` : '<span class="text-xs text-gray-400 italic">(ยังไม่ได้ลงนาม)</span>'}
+                        </div>
+                        <p class="text-xs font-semibold">(${userName})</p>
+                        <p class="text-[10px] text-gray-500">ผู้ส่งมอบ / ผู้รับมอบ</p>
                     </div>
                 </div>
             `;
 
-            container.innerHTML = html;
             showModal('a4ReportModal');
+        }
+
+        function printReceiptSlip() {
+            document.body.classList.add('printing-receipt');
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-receipt');
+            }, 500);
         }
 
         function printA4ReportModal() {
@@ -1803,11 +1778,45 @@
             window.print();
             setTimeout(() => {
                 document.body.classList.remove('printing-a4');
-            }, 1000);
+            }, 500);
         }
 
-        // โหลดข้อมูล Dashboard ทันทีเมื่อเปิดหน้าเว็บ
-        document.addEventListener('DOMContentLoaded', () => {
+        function showModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        function showAlert(title, msg) {
+            document.getElementById('alertTitle').innerHTML = `<i data-lucide="bell" class="w-4 h-4"></i> ${title}`;
+            document.getElementById('alertMessage').innerText = msg;
+            showModal('alertModal');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function showLoading() {
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.add('hidden');
+        }
+
+        function closeWindow() {
+            if (window.confirm("คุณต้องการออกจากหน้านี้ใช่หรือไม่?")) {
+                window.close();
+                window.location.href = './index.html';
+            }
+        }
+
+        // เริ่มต้นโหลด Dashboard Stats เมื่อเปิดหน้าเว็บครั้งแรก
+        window.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
         });
     </script>
