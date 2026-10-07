@@ -92,34 +92,102 @@ const AppCore = {
 };
 
 /* ==========================================================================
-   ส่วนการจัดการ Service Worker และ PWA Installation
+   ส่วนการจัดการ Service Worker และ PWA Installation (จบปัญหารองรับทั้ง Android & iOS)
    ========================================================================== */
 let deferredPrompt = null;
 
+// 1. ฟังก์ชันเช็กสถานะแอปและอุปกรณ์
 function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// 2. ลงทะเบียน Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then((reg) => console.log('ServiceWorker registered:', reg.scope))
-      .catch((err) => console.error('ServiceWorker registration failed:', err));
+      .then((reg) => console.log('⚡ [PWA] ServiceWorker registered:', reg.scope))
+      .catch((err) => console.error('❌ [PWA] ServiceWorker registration failed:', err));
   });
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+// 3. ตัวควบคุมการแสดงผลและคำสั่งบนปุ่มติดตั้ง #installAppBtn
+function setupInstallButton() {
   const installBtn = document.getElementById('installAppBtn');
-  if (installBtn && !isStandalone()) {
+  if (!installBtn) return;
+
+  // หากผู้ใช้ติดตั้งเป็นแอปแล้ว ให้ซ่อนปุ่มทันที
+  if (isStandalone()) {
+    installBtn.style.display = 'none';
+    return;
+  }
+
+  // --- กรณีที่ 1: ผู้ใช้เปิดบน iOS (iPhone/iPad) ---
+  if (isIOS()) {
+    installBtn.style.display = 'block';
+    installBtn.onclick = () => {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'วิธีติดตั้งบน iPhone / iPad',
+          html: `
+            <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
+              <p><b>1.</b> เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Safari</b> เท่านั้น</p>
+              <p><b>2.</b> กดปุ่ม <b>แชร์ (Share)</b> <span style="font-size:1.2rem;">⎋</span> ด้านล่างหน้าจอ</p>
+              <p><b>3.</b> เลื่อนลงมาเลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b></p>
+              <p><b>4.</b> กด <b>"เพิ่ม" (Add)</b> ที่มุมขวาบน</p>
+            </div>
+          `,
+          icon: 'info',
+          confirmButtonText: 'เข้าใจแล้ว',
+          confirmButtonColor: '#ff1493'
+        });
+      } else {
+        alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
+      }
+    };
+    return;
+  }
+
+  // --- กรณีที่ 2: ผู้ใช้เปิดบน Android / PC (Chrome, Edge, Samsung Internet) ---
+  if (deferredPrompt) {
     installBtn.style.display = 'block';
     installBtn.onclick = async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        console.log('✅ [PWA] ผู้ใช้ติดตั้งแอปเรียบร้อยแล้ว');
+      }
       deferredPrompt = null;
       installBtn.style.display = 'none';
     };
+  } else {
+    // ถ้ายังไม่มี Prompt ส่งมาจากเบราว์เซอร์ ให้ซ่อนปุ่มไว้ก่อน
+    installBtn.style.display = 'none';
   }
+}
+
+// 4. ดักฟัง Event การติดตั้ง
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('📱 [PWA] พร้อมสำหรับการติดตั้ง');
+  setupInstallButton();
 });
+
+window.addEventListener('appinstalled', () => {
+  console.log('🎉 [PWA] ติดตั้งแอปเรียบร้อยแล้ว');
+  deferredPrompt = null;
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn) installBtn.style.display = 'none';
+});
+
+// 5. รันการตรวจสอบทันทีเมื่อ DOM พร้อม
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupInstallButton);
+} else {
+  setupInstallButton();
+}
