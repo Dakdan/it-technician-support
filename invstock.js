@@ -1,6 +1,6 @@
 /**
  * invstock.js - Frontend Client Module for Inventory & Stock Management System
- * Connected to Stock API (GAS 2) & Uses Centralized idbApp (indexeddb.js)
+ * Connected to Stock API (GAS 2) & Uses Centralized idbApp (indexeddb.js) & Auth Check
  */
 
 const InvStockApp = {
@@ -11,6 +11,7 @@ const InvStockApp = {
     departments: [],
     assetTypes: [],
     cartItems: [],
+    searchResults: [], // เพิ่มการเก็บ Array ค้นหา เพื่อป้องกันปัญหาส่ง JSON string ใน HTML
     sigCanvas: null,
     sigCtx: null,
     isDrawing: false,
@@ -23,7 +24,7 @@ const InvStockApp = {
             this.bindEvents();
             this.setupSignatureCanvas('signatureCanvas');
             
-            // โหลด Master Data จากระบบกลาง/API
+            // โหลด Master Data
             await Promise.all([
                 this.loadDepartments(),
                 this.loadAssetTypes()
@@ -51,35 +52,65 @@ const InvStockApp = {
     },
 
     // -----------------------------------------------------------------
-    // 2. HTTP API REQUESTS (Stock API - GAS 2)
+    // 2. HTTP API REQUESTS (รองรับ Auth Token และ Error Handling)
     // -----------------------------------------------------------------
+    getAuthToken() {
+        if (typeof getCurrentUser === 'function') {
+            const user = getCurrentUser();
+            return user ? (user.Token || user.token || '') : '';
+        }
+        return '';
+    },
+
     async apiGet(action, params = {}) {
         const url = new URL(this.API_URL);
         url.searchParams.append('action', action);
+        url.searchParams.append('token', this.getAuthToken());
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
         const response = await fetch(url.toString(), { method: 'GET' });
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        return await response.json();
+        const result = await response.json();
+
+        // ตรวจสอบกรณี Token หมดอายุ
+        if (result && result.message && result.message.includes("Unauthorized")) {
+            alert("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+            if (typeof logout === 'function') logout();
+            return null;
+        }
+        return result;
     },
 
     async apiPost(action, payload = {}) {
+        const requestData = {
+            action: action,
+            token: this.getAuthToken(),
+            payload: payload
+        };
+
         const response = await fetch(this.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: action, payload: payload })
+            body: JSON.stringify(requestData)
         });
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        return await response.json();
+        const result = await response.json();
+
+        if (result && result.message && result.message.includes("Unauthorized")) {
+            alert("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+            if (typeof logout === 'function') logout();
+            return null;
+        }
+        return result;
     },
 
     // -----------------------------------------------------------------
-    // 3. MASTER DATA & INDEXEDDB INTEGRATION (เรียกใช้ idbApp)
+    // 3. MASTER DATA & INDEXEDDB INTEGRATION
     // -----------------------------------------------------------------
     async loadDepartments() {
         try {
             const res = await this.apiGet('getDepartments');
-            this.departments = Array.isArray(res) ? res : [];
+            this.departments = Array.isArray(res) ? res : (res?.data || []);
             this.renderDepartmentOptions('depIdSelect');
         } catch (err) {
             console.error("Failed to load departments:", err);
@@ -89,7 +120,7 @@ const InvStockApp = {
     async loadAssetTypes() {
         try {
             const res = await this.apiGet('getAssetTypes');
-            if (res.success) {
+            if (res && res.success) {
                 this.assetTypes = res.data || [];
                 this.renderAssetTypeOptions('assetTypeSelect');
             }
@@ -98,7 +129,6 @@ const InvStockApp = {
         }
     },
 
-    // ซิงค์ข้อมูลจาก Stock API ลง idbApp (IndexedDB กลาง)
     async syncStockDataToLocal() {
         if (typeof idbApp === 'undefined') {
             console.warn("ไม่พบ idbApp (indexeddb.js) ในระบบ");
@@ -109,13 +139,12 @@ const InvStockApp = {
             this.showLoading(true, "กำลังซิงค์ข้อมูลคลังลงเครื่อง...");
             const res = await this.apiGet('getAllInvData');
             
-            if (res.status === 'success') {
-                // บันทึกลง Object Stores ของ IndexedDB กลางผ่าน idbApp
-                if (idbApp.saveData) {
-                    await idbApp.saveData('stockIn', res.stockIn);
-                    await idbApp.saveData('inventory', res.inventory);
-                    await idbApp.saveData('peripherals', res.peripherals);
-                    await idbApp.saveData('stockOut', res.stockOut);
+            if (res && (res.status === 'success' || res.success)) {
+                const dataToSave = res.inventory || res.data || [];
+                
+                // ใช้ saveAssets ตามที่มีใน indexeddb.js
+                if (typeof idbApp.saveAssets === 'function') {
+                    await idbApp.saveAssets(dataToSave);
                 }
                 this.showToast("ซิงค์ข้อมูลคลังพัสดุสำเร็จ", "success");
             }
@@ -128,17 +157,19 @@ const InvStockApp = {
     },
 
     // -----------------------------------------------------------------
-    // 4. SEARCH & TRANSACTIONS
+    // 4. SEARCH & TRANSACTIONS ( Batch Processing )
     // -----------------------------------------------------------------
     async handleAssetSearch(query) {
         if (!query || query.trim().length < 2) {
+            this.searchResults = [];
             this.renderSearchResults([]);
             return;
         }
 
         try {
             const results = await this.apiGet('searchAsset', { query: query.trim() });
-            this.renderSearchResults(results || []);
+            this.searchResults = results || [];
+            this.renderSearchResults(this.searchResults);
         } catch (err) {
             console.error("Search Error:", err);
         }
@@ -165,7 +196,8 @@ const InvStockApp = {
 
             const sigBase64 = this.getSignatureBase64();
 
-            const stockInPayload = {
+            // ส่งข้อมูลทั้งหมดแบบ Batch ใน Request เดียว เพื่อลดโหลด API
+            const fullStockInPayload = {
                 depId: document.getElementById('depIdSelect')?.value || '',
                 sourceType: document.getElementById('sourceTypeSelect')?.value || '',
                 referenceNo: document.getElementById('referenceNoInput')?.value || '',
@@ -174,43 +206,14 @@ const InvStockApp = {
                 docFileBase64: docBase64,
                 docMimeType: docMime,
                 docFileName: docName,
-                signatureBase64: sigBase64
+                signatureBase64: sigBase64,
+                items: this.cartItems // ส่ง Array สินค้าทั้งหมดไปบันทึกพร้อมกัน
             };
 
-            const stockInRes = await this.apiPost('saveStockIn', stockInPayload);
+            const stockInRes = await this.apiPost('saveBatchStockIn', fullStockInPayload);
             
-            if (stockInRes.status !== 'success') {
-                throw new Error(stockInRes.message || "บันทึก Stock In ไม่สำเร็จ");
-            }
-
-            const stockInID = stockInRes.stockInID;
-            const docId = stockInRes.docId;
-
-            this.showLoading(true, "กำลังบันทึก รายการ Inventory...");
-            
-            for (const item of this.cartItems) {
-                const invRes = await this.apiPost('saveSingleInventoryItem', {
-                    stockInID: stockInID,
-                    docId: docId,
-                    item: item
-                });
-
-                if (item.peripheralsList && item.peripheralsList.length > 0) {
-                    for (const peri of item.peripheralsList) {
-                        await this.apiPost('saveSinglePeripheral', {
-                            Inv_ID: invRes.invID || stockInID,
-                            StockIn_ID: stockInID,
-                            Item_ID: item.AssetID || item.NoID || '',
-                            Name: peri.name,
-                            Quantity: peri.quantity || 1,
-                            Unit: peri.unit || 'ชิ้น',
-                            Source_Type: stockInPayload.sourceType,
-                            Reference_No: stockInPayload.referenceNo,
-                            Note: peri.note || '',
-                            User: stockInPayload.itUser
-                        });
-                    }
-                }
+            if (!stockInRes || (stockInRes.status !== 'success' && !stockInRes.success)) {
+                throw new Error(stockInRes?.message || "บันทึก Stock In ไม่สำเร็จ");
             }
 
             this.showToast("บันทึกรับเข้าเรียบร้อยแล้ว", "success");
@@ -317,8 +320,8 @@ const InvStockApp = {
         select.innerHTML = '<option value="">-- เลือกประเภทครุภัณฑ์ --</option>';
         this.assetTypes.forEach(type => {
             const opt = document.createElement('option');
-            opt.value = type.Type_ID;
-            opt.textContent = type.Type_Name;
+            opt.value = type.Type_ID || type.type_id || '';
+            opt.textContent = type.Type_Name || type.type_name || opt.value;
             select.appendChild(opt);
         });
     },
@@ -327,19 +330,19 @@ const InvStockApp = {
         const container = document.getElementById('searchResultsContainer');
         if (!container) return;
 
-        if (results.length === 0) {
+        if (!results || results.length === 0) {
             container.innerHTML = '<div class="p-2 text-muted">ไม่พบข้อมูลครุภัณฑ์</div>';
             return;
         }
 
         let html = '<ul class="list-group">';
-        results.forEach(item => {
+        results.forEach((item, index) => {
             html += `
                 <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center cursor-pointer"
-                    onclick="InvStockApp.addAssetToCart('${encodeURIComponent(JSON.stringify(item))}')">
+                    onclick="InvStockApp.addAssetToCartByIndex(${index})">
                     <div>
-                        <strong>[${item.AssetID || 'N/A'}]</strong> ${item.FullDescription}
-                        <br><small class="text-muted">Serial: ${item.Serial || '-'} | ${item.AgeInfo}</small>
+                        <strong>[${item.AssetID || 'N/A'}]</strong> ${item.FullDescription || item.Name || ''}
+                        <br><small class="text-muted">Serial: ${item.Serial || '-'} | ${item.AgeInfo || ''}</small>
                     </div>
                     <button class="btn btn-sm btn-outline-primary" type="button">เลือก</button>
                 </li>
@@ -349,10 +352,15 @@ const InvStockApp = {
         container.innerHTML = html;
     },
 
-    addAssetToCart(jsonStr) {
-        const item = JSON.parse(decodeURIComponent(jsonStr));
-        item.peripheralsList = [];
-        this.cartItems.push(item);
+    addAssetToCartByIndex(index) {
+        const item = this.searchResults[index];
+        if (!item) return;
+
+        // Clone Object เพื่อไม่ให้กระทบ Search Result
+        const cartItem = JSON.parse(JSON.stringify(item));
+        cartItem.peripheralsList = cartItem.peripheralsList || [];
+        
+        this.cartItems.push(cartItem);
         this.renderCart();
     },
 
@@ -373,7 +381,7 @@ const InvStockApp = {
                 <tr>
                     <td>${index + 1}</td>
                     <td><strong>${item.AssetID || '-'}</strong></td>
-                    <td>${item.FullDescription}</td>
+                    <td>${item.FullDescription || item.Name || ''}</td>
                     <td>
                         <button class="btn btn-sm btn-danger" onclick="InvStockApp.removeFromCart(${index})">ลบ</button>
                     </td>
@@ -392,6 +400,7 @@ const InvStockApp = {
 
     resetStockInForm() {
         this.cartItems = [];
+        this.searchResults = [];
         this.renderCart();
         this.clearSignature();
         const form = document.getElementById('stockInForm');
