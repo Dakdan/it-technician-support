@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/png" href="./logo005v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -199,7 +201,13 @@
     </style>
 </head>
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <!-- JS Modules (เรียงลำดับตามนี้เพื่อป้องกัน Reference Error) -->
+  <script src="auth-check.js"></script>   <!-- ตรวจสอบ Session เดิม (ถ้ามีแล้วจะพาเข้า main_menu.html อัตโนมัติ) -->
+  <script src="indexeddb.js"></script>   <!-- คลังเก็บข้อมูลกลางในเบราว์เซอร์ -->
+  <script src="app-core.js"></script>    <!-- ลงทะเบียน Service Worker (sw.js) & ปุ่มติดตั้ง PWA -->
+  <script src="login-script.js"></script><!-- ดักฟัง Event Submit หน้า Login -->
 <!-- ส่วนแสดงผลสถานะการโหลด -->
 <div id="loadingOverlay">
     <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--pink-neon);" role="status"></div>
