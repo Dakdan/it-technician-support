@@ -327,13 +327,7 @@
     </style>
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
-      <script src="auth-check.js"></script> <!-- 1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
-      <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
-      <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
-      <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
+   
     <!-- Initial Loading Overlay -->
     <div id="initialLoadingOverlay">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--pink-neon);" role="status"></div>
@@ -492,6 +486,11 @@
             </div>
         </div>
     </div>
+    <!-- 7. JavaScript Modules (ต้องวางไว้ล่างสุดชิดกับ </body> เพื่อให้โหลดหลัง DOM พร้อมเสมอ) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="auth-check.js"></script>
+    <script src="indexeddb.js"></script>
+    <script src="app-core.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
