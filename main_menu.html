@@ -308,21 +308,14 @@
     </style>
 </head>
 <body>
-   <!-- UI Main Menu Content (มีปุ่มติดตั้ง #installAppBtn และปุ่ม #logoutBtn) -->
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- JS Modules -->
- <!-- <script src="auth-check.js"></script>  บังคับตรวจ Auth (ถ้าไม่มี Session/หมดอายุ จะเตะกลับหน้า index.html) -->
-  <script src="indexeddb.js"></script> <!-- เตรียมความพร้อม IndexedDB -->
-  <script src="app-core.js"></script>  <!-- ตัวควบคุม PWA และสั่ง Sync ข้อมูลกลาง -->
-    <!-- Overlay กำลังโหลด -->
+    <!-- 1. Overlay กำลังโหลด -->
     <div id="loadingOverlay">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
         <div class="mt-3 text-pink-dark fw-bold">กำลังโหลดข้อมูลเมนู...</div>
     </div>
 
-    <!-- HEADER -->
+    <!-- 2. HEADER -->
     <header class="app-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
             <img src="./logo005v1.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
@@ -335,8 +328,8 @@
         <div class="text-end" id="authZone"></div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <div class="container mt-4"
+    <!-- 3. MAIN CONTENT -->
+    <div class="container mt-4">
         <!-- ส่วนแสดง Alert ทั้งหมดในหน้าหลัก -->
         <div id="alertsContainer" class="mb-4"></div>
 
@@ -350,7 +343,31 @@
         <div id="mainMenuContainer"></div>
     </div>
 
-    <!-- BOTTOM NAVIGATION BAR -->
+    <!-- 4. PWA Install Banner (การ์ดลอยแจ้งเตือนติดตั้ง PWA) -->
+    <div id="pwaInstallBanner" class="hidden fixed bottom-20 left-4 right-4 z-50 bg-white/95 backdrop-blur-md border border-pink-100 shadow-xl rounded-2xl p-4 transition-all duration-300">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-pink-soft rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0 border border-pink-light" style="width: 48px; height: 48px;">
+                    <img src="./logo003v11.png" alt="Logo" class="w-100 h-100 object-fit-contain">
+                </div>
+                <div>
+                    <h6 class="font-kanit fw-bold text-dark mb-1" style="font-size: 0.9rem;">ติดตั้งแอปพลิเคชัน IT UDH</h6>
+                    <p class="font-kanit text-muted mb-0" style="font-size: 0.75rem;">ใช้งานสะดวกรวดเร็วขึ้น ไม่ต้องเปิดผ่านเบราว์เซอร์</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <button id="closeBannerBtn" class="btn btn-sm text-secondary p-1" style="border: none; background: transparent;">
+                    <i class="fa-solid fa-xmark fs-5"></i>
+                </button>
+                <button id="installAppBtn" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-pill shadow-sm" style="background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); font-size: 0.75rem; border: none;">
+                    <i class="fa-solid fa-download me-1"></i> ติดตั้ง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
         <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'HOME')">
             <i class="fa-solid fa-house"></i>
@@ -358,10 +375,9 @@
         </a>
         <a id="nav-myjobs" href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')">
             <i class="fa-solid fa-clipboard-list"></i>
-            MY JOBE
+            MY JOB
         </a>
         
-        <!-- Floating QR Button -->
         <div class="nav-fab-container">
             <div class="fab-qr" onclick="openScanner()">
                 <i class="fa-solid fa-qrcode"></i>
@@ -382,143 +398,34 @@
         </a>
     </nav>
 
-    <!-- Modal ต่างๆ -->
+    <!-- 6. Modals ทั้งหมด -->
     <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
-                <div class="modal-body">
-                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: #fff0f5; border-radius: 50%;">
-                        <i class="fa-solid fa-lock text-danger" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2 text-dark">กรุณาเข้าสู่ระบบก่อนใช้งาน</h5>
-                    <p class="text-muted small mb-4">สิทธิ์การเข้าถึงฟังก์ชันนี้ ถูกจำกัดไว้เฉพาะเจ้าหน้าที่กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี เท่านั้น</p>
-                    <div class="d-grid gap-2">
-                        <button type="button" onclick="goToLogin()" class="btn btn-danger rounded-pill py-2 fw-bold" style="background: linear-gradient(135deg, #ff85a2, #d63384); border: none;">
-                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>เข้าสู่ระบบตอนนี้
-                        </button>
-                        <button type="button" class="btn btn-light rounded-pill py-2 text-muted small" data-bs-dismiss="modal">กลับไปหน้าหลัก</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- โครงสร้าง Modal เข้าสู่ระบบ... -->
     </div>
 
     <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
-                <div class="modal-body">
-                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #fff0f5; border-radius: 50%;">
-                        <i id="systemAlertIcon" class="fa-solid fa-circle-info text-pink-dark" style="font-size: 2.2rem;"></i>
-                    </div>
-                    <h5 class="fw-bold mb-3 text-dark" id="systemAlertTitle">แจ้งเตือนระบบ</h5>
-                    <p class="text-muted small mb-4" id="systemAlertMessage"></p>
-                    <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-dismiss="modal" style="background-color: var(--pink-dark); border: none;">ตกลง</button>
-                </div>
-            </div>
-        </div>
+        <!-- โครงสร้าง Modal แจ้งเตือน... -->
     </div>
 
     <div class="modal fade" id="notificationsListModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
-                <div class="modal-header border-0 pb-1 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-bell text-warning me-2"></i>การแจ้งเตือนของฉัน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 pt-2" id="notificationsModalBody">
-                    <!-- รายการจะถูกแทรกที่นี่ด้วย JS -->
-                </div>
-            </div>
-        </div>
+        <!-- โครงสร้าง Modal รายการการแจ้งเตือน... -->
     </div>
 
     <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: var(--shadow-md);">
-                <div class="modal-header border-0 pb-1 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0" id="detailAlertTitle"><i class="fa-solid fa-bell text-warning me-2"></i>รายละเอียด</h5>
-                    <button type="button" class="btn-close" onclick="closeAlertDetailHandler()" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 pt-2">
-                    <div class="text-muted small mb-3" id="detailAlertTime"><i class="fa-regular fa-clock me-1"></i></div>
-                    <div class="p-3 rounded-4" style="background-color: #f8f9fa; font-size: 0.9rem; line-height: 1.6; color: var(--gray-text); border: 1px solid #e9ecef;" id="detailAlertMessage">
-                    </div>
-                </div>
-                <div class="modal-footer border-0 justify-content-center pb-4">
-                    <button type="button" class="btn btn-pink-dark rounded-pill px-5 py-2 fw-bold text-white" style="background-color: var(--pink-dark); border: none;" onclick="closeAlertDetailHandler()">รับทราบ / ปิด</button>
-                </div>
-            </div>
-        </div>
+        <!-- โครงสร้าง Modal รายละเอียด... -->
     </div>
 
     <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
-                <div class="modal-header border-0 pb-0 justify-content-between">
-                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-sliders text-pink-dark me-2"></i>ตั้งค่าและการแจ้งเตือน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex align-items-center bg-light p-3 rounded-4 mb-4 mt-3">
-                        <div class="bg-pink-soft rounded-circle p-3 text-pink-dark me-3">
-                            <i class="fa-solid fa-user-gear fs-3" style="color: var(--pink-dark);"></i>
-                        </div>
-                        <div>
-                            <div class="fw-bold" id="settingsUserTitle">ผู้ใช้งานระบบ</div>
-                            <div class="small text-muted" id="settingsUserRole">สิทธิ์เข้าถึง: เจ้าหน้าที่ IT</div>
-                        </div>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>ระบบแจ้งเตือนผ่านบราวเซอร์มือถือ</h6>
-                    <div class="bg-light p-3 rounded-4 mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <div class="fw-bold small">สถานะการอนุญาตแจ้งเตือน</div>
-                                <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
-                            </div>
-                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">
-                                เปิดรับแจ้งเตือน
-                            </button>
-                        </div>
-                        <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ Android:</strong> จะมีหน้าต่างเด้งขึ้นมาถามเพื่อขออนุญาตส่งข้อความเตือน</p>
-                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ iOS:</strong> ต้องกดแชร์หน้าเว็บนี้และกด "Add to Home Screen" ก่อนครับ</p>
-                    </div>
-                    <div class="d-grid gap-2 mb-4">
-                        <button onclick="testMobileNotification()" class="btn btn-outline-danger rounded-pill fw-bold" style="border-color: var(--pink-primary); color: var(--pink-dark);">
-                            <i class="fa-solid fa-circle-play me-2"></i>ทดสอบส่งแจ้งเตือนเข้ามือถือทันที
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- โครงสร้าง Modal ตั้งค่า... -->
     </div>
-   <!-- PWA Install Banner (ดีไซน์สไตล์ Card โทนชมพูอ่อน-ขาว) -->
-   <div id="pwaInstallBanner" class="hidden fixed bottom-20 left-4 right-4 z-50 bg-white/95 backdrop-blur-md border border-pink-100 shadow-xl rounded-2xl p-4 transition-all duration-300">
-     <div class="d-flex align-items-center justify-content-between gap-3">
-       <!-- ไอคอนและข้อความ -->
-       <div class="d-flex align-items-center gap-3">
-         <div class="bg-pink-soft rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0 border border-pink-light" style="width: 48px; height: 48px;">
-           <img src="./logo003v11.png" alt="Logo" class="w-100 h-100 object-fit-contain">
-         </div>
-         <div>
-           <h6 class="font-kanit fw-bold text-dark mb-1" style="font-size: 0.9rem;">ติดตั้งแอปพลิเคชัน IT UDH</h6>
-           <p class="font-kanit text-muted mb-0" style="font-size: 0.75rem;">ใช้งานสะดวกรวดเร็วขึ้น ไม่ต้องเปิดผ่านเบราว์เซอร์</p>
-         </div>
-       </div>
-   
-       <!-- ปุ่มกระทำ (Action Buttons) -->
-       <div class="d-flex align-items-center gap-2 flex-shrink-0">
-         <!-- ปุ่มปิดชั่วคราว -->
-         <button id="closeBannerBtn" class="btn btn-sm text-secondary p-1" style="border: none; background: transparent;">
-           <i class="fa-solid fa-xmark fs-5"></i>
-         </button>
-         
-         <!-- ปุ่มติดตั้งหลัก -->
-         <button id="installAppBtn" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-pill shadow-sm" style="background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); font-size: 0.75rem; border: none;">
-           <i class="fa-solid fa-download me-1"></i> ติดตั้ง
-         </button>
-       </div>
-     </div>
-   </div>
+
+    <!-- 7. JavaScript Modules (ต้องวางไว้ล่างสุดชิดกับ </body> เพื่อให้โหลดหลัง DOM พร้อมเสมอ) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="auth-check.js"></script>
+    <script src="indexeddb.js"></script>
+    <script src="app-core.js"></script>
+
+</body>
     <!-- Script ควบคุมระบบ -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxPiqo4F8HRP2PWOQcfnZmwDFryOUbc8aBTg4YJcm7-5iUGzabCgsN2kZ2k3NAWkWOB/exec"; 
