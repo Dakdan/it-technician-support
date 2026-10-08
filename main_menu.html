@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-   
+    <link rel="manifest" href="./manifest.json">
     <script src="./auth-check.js"></script>
     <script>
     // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <!-- PWA Primary Manifest -->
+    <!-- PWA Primary Manifest 
    <link rel="manifest" href="./manifest.json">
    <script src="./indexeddb.js"></script>
    <script src="./app-core.js"></script>
    <script src="./sw.js"></script>
-  <link rel="app_core" href="./app_core.json"> 
+  <link rel="app_core" href="./app_core.json"> -->
    
    
    <meta name="theme-color" content="#ff1493">
@@ -307,7 +307,14 @@
     </style>
 </head>
 <body>
+   <!-- UI Main Menu Content (มีปุ่มติดตั้ง #installAppBtn และปุ่ม #logoutBtn) -->
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- JS Modules -->
+ <!-- <script src="auth-check.js"></script>  บังคับตรวจ Auth (ถ้าไม่มี Session/หมดอายุ จะเตะกลับหน้า index.html) -->
+  <script src="indexeddb.js"></script> <!-- เตรียมความพร้อม IndexedDB -->
+  <script src="app-core.js"></script>  <!-- ตัวควบคุม PWA และสั่ง Sync ข้อมูลกลาง -->
     <!-- Overlay กำลังโหลด -->
     <div id="loadingOverlay">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
