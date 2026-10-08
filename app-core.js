@@ -112,103 +112,71 @@ function setupInstallButton() {
   const installBtn = document.getElementById('installAppBtn');
   if (!installBtn) return;
 
-  // เงื่อนไข 1: หากติดตั้งแอปเรียบร้อยแล้ว ให้ซ่อนปุ่มทันที
-  if (isStandalone()) {
+  // 1. ถ้าผู้ใช้ติดตั้งแอปไปแล้ว (อยู่ในหน้าจอ Standalone) ให้ซ่อนปุ่ม
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandalone) {
     installBtn.style.display = 'none';
     return;
   }
 
-  // เงื่อนไข 2: ถ้าเป็น Smartphone / Tablet หรือมี Prompt พร้อมใช้งาน -> ให้แสดงปุ่มเสมอ
-  if (isMobileDevice() || deferredPrompt) {
-    installBtn.style.display = 'block'; // หรือ 'inline-block' ตามดีไซน์
-    
+  // 2. เช็คว่าเป็น Smartphone / Tablet หรือไม่
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // 3. ถ้าเป็น Mobile -> สั่งแสดงปุ่มรอกดทันที!
+  if (isMobile) {
+    installBtn.style.display = 'block'; // หรือ 'inline-block' ตาม CSS
+
     installBtn.onclick = async () => {
-      // 🅰️ หากเป็น iOS (iPhone / iPad) -> แสดง Popup แนะนำวิธีติดตั้ง
-      if (isIOS()) {
-        showIOSInstruction();
+      // 🅰️ กรณี iOS (Safari ไม่สนับสนุน Native Prompt) -> ขึ้น Modal สอนกด Share -> Add to Home Screen
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'วิธีติดตั้งบน iPhone / iPad',
+            html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                     1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
+                     2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
+                     3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
+                   </div>`,
+            icon: 'info',
+            confirmButtonColor: '#ff1493'
+          });
+        } else {
+          alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม"');
+        }
         return;
       }
 
-      // 🅱️ หากเป็น Android / PC และมี Prompt พร้อม -> เรียก Native Install Dialog
+      // 🅱️ กรณี Android / PC
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === 'accepted') {
-          console.log('✅ [PWA] ผู้ใช้ติดตั้งแอปเรียบร้อยแล้ว');
           installBtn.style.display = 'none';
         }
         deferredPrompt = null;
       } else {
-        // 🅒 หากเป็น Android แต่ Prompt ยังไม่พร้อม -> แสดง คำแนะนำติดตั้งผ่านเมนูเบราว์เซอร์
-        showAndroidInstruction();
+        // หาก Android ยังไม่ปล่อย Prompt มา -> สอนกดเมนู 3 จุด
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'วิธีติดตั้งบน Android',
+            html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                     1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
+                     2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
+                   </div>`,
+            icon: 'info',
+            confirmButtonColor: '#ff1493'
+          });
+        } else {
+          alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+        }
       }
     };
   } else {
-    // บน PC ที่ไม่ใช่ Browser รองรับ PWA Prompt ให้ซ่อนไว้
-    installBtn.style.display = 'none';
+    // บน PC ถ้าไม่มี Prompt ให้ซ่อนไว้
+    if (!deferredPrompt) {
+      installBtn.style.display = 'none';
+    }
   }
-}
-
-// 4. คำแนะนำการติดตั้งสำหรับ iOS
-function showIOSInstruction() {
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      title: 'วิธีติดตั้งบน iPhone / iPad',
-      html: `
-        <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
-          <p><b>1.</b> เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Safari</b></p>
-          <p><b>2.</b> กดปุ่ม <b>แชร์ (Share)</b> <span style="font-size:1.2rem;">⎋</span> ด้านล่าง</p>
-          <p><b>3.</b> เลื่อนลงมาเลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b></p>
-          <p><b>4.</b> กด <b>"เพิ่ม" (Add)</b> ที่มุมขวาบน</p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'เข้าใจแล้ว',
-      confirmButtonColor: '#ff1493'
-    });
-  } else {
-    alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
-  }
-}
-
-// 5. คำแนะนำการติดตั้งสำหรับ Android กรณี Native Prompt ยังไม่ทำงาน
-function showAndroidInstruction() {
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      title: 'วิธีติดตั้งบน Android',
-      html: `
-        <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
-          <p><b>1.</b> กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> ที่มุมขวาบนของ Chrome</p>
-          <p><b>2.</b> เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก" (Add to Home screen)</b></p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'เข้าใจแล้ว',
-      confirmButtonColor: '#ff1493'
-    });
-  } else {
-    alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
-  }
-}
-
-// 6. Event Listeners สำหรับดักฟังการติดตั้ง
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  console.log('📱 [PWA] พร้อมสำหรับการติดตั้ง');
-  setupInstallButton();
-});
-
-window.addEventListener('appinstalled', () => {
-  console.log('🎉 [PWA] ติดตั้งแอปเรียบร้อยแล้ว');
-  deferredPrompt = null;
-  const installBtn = document.getElementById('installAppBtn');
-  if (installBtn) installBtn.style.display = 'none';
-});
-
-// 7. ตรวจสอบและแสดงปุ่มเมื่อ DOM โหลดเสร็จ
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupInstallButton);
-} else {
-  setupInstallButton();
 }
