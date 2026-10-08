@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <script src="./auth-check.js"></script>
     <script>
     // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role ตามที่กำหนด
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <!-- เรียกใช้ Manifest สำหรับ PWA -->
-    <link rel="manifest" href="./manifest.json">
+    <!-- เรียกใช้ Manifest สำหรับ PWA 
+    
     <script src="./indexeddb.js"></script>
-    <script src="./app-core.js"></script> <!-- แก้ชื่อไฟล์เป็น app-core.js -->
-    <script src="./sw.js"></script>
+    <script src="./app-core.js"></script> <!-- แก้ชื่อไฟล์เป็น app-core.js 
+    <script src="./sw.js"></script> -->
 
     <!-- ตั้งค่า Theme color สำหรับเบราว์เซอร์มือถือ -->
     <meta name="theme-color" content="#ff1493">    
@@ -326,7 +327,13 @@
     </style>
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
+      <script src="auth-check.js"></script> <!-- 1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
+      <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
+      <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
+      <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
     <!-- Initial Loading Overlay -->
     <div id="initialLoadingOverlay">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--pink-neon);" role="status"></div>
