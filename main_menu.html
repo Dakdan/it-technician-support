@@ -310,6 +310,7 @@
     </style>
 </head>
 <body>
+
     <!-- Overlay กำลังโหลด -->
     <div id="loadingOverlay">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
@@ -329,7 +330,7 @@
         <div class="text-end" id="authZone"></div>
     </header>
 
-    <!-- MAIN CONTENT (เติม > ปิดแท็ก container ตรงนี้ครับ) -->
+    <!-- MAIN CONTENT -->
     <div class="container mt-4">
         <!-- ส่วนแสดง Alert ทั้งหมดในหน้าหลัก -->
         <div id="alertsContainer" class="mb-4"></div>
@@ -344,24 +345,24 @@
         <div id="mainMenuContainer"></div>
     </div>
 
-    <!-- PWA Install Banner -->
-    <div id="pwaInstallBanner" class="hidden fixed bottom-20 left-4 right-4 z-50 bg-white/95 backdrop-blur-md border border-pink-100 shadow-xl rounded-2xl p-4 transition-all duration-300">
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="bg-pink-soft rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0 border border-pink-light" style="width: 48px; height: 48px;">
+    <!-- PWA Install Banner (ปรับใช้ d-none ของ Bootstrap เพื่อให้ซ่อนได้จริง 100%) -->
+    <div id="pwaInstallBanner" class="pwa-banner-float d-none">
+        <div class="d-flex align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-pink-soft rounded-3 p-1 d-flex align-items-center justify-content-center flex-shrink-0 border border-pink-light" style="width: 42px; height: 42px;">
                     <img src="./logo003v11.png" alt="Logo" class="w-100 h-100 object-fit-contain">
                 </div>
                 <div>
-                    <h6 class="font-kanit fw-bold text-dark mb-1" style="font-size: 0.9rem;">ติดตั้งแอปพลิเคชัน IT UDH</h6>
-                    <p class="font-kanit text-muted mb-0" style="font-size: 0.75rem;">ใช้งานสะดวกรวดเร็วขึ้น ไม่ต้องเปิดผ่านเบราว์เซอร์</p>
+                    <h6 class="font-kanit fw-bold text-dark mb-0" style="font-size: 0.85rem;">ติดตั้งแอปพลิเคชัน IT UDH</h6>
+                    <p class="font-kanit text-muted mb-0" style="font-size: 0.7rem;">ใช้งานสะดวก ไม่ต้องผ่านเบราว์เซอร์</p>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <div class="d-flex align-items-center gap-1 flex-shrink-0">
                 <button id="closeBannerBtn" class="btn btn-sm text-secondary p-1" style="border: none; background: transparent;">
                     <i class="fa-solid fa-xmark fs-5"></i>
                 </button>
-                <button id="installAppBtn" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-pill shadow-sm" style="background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); font-size: 0.75rem; border: none;">
+                <button id="installAppBtn" class="btn btn-sm text-white fw-bold px-3 py-1 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #ff85a2, #d63384); font-size: 0.75rem; border: none;">
                     <i class="fa-solid fa-download me-1"></i> ติดตั้ง
                 </button>
             </div>
@@ -399,17 +400,16 @@
         </a>
     </nav>
 
-    <!-- Modals ทั้งหมด (loginRequireModal, systemAlertModal, notificationsListModal, alertDetailModal, settingsControlModal) ตามที่คุณส่งมา... -->
+    <!-- Modals ทั้งหมดคงไว้ตามเดิม -->
 
-    <!-- 2. SweetAlert2 (ถ้ามี) -->
+    <!-- JS Libraries (โหลด Bootstrap Bundle ก่อนสคริปต์ระบบเสมอ) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- 3. Bootstrap JS Bundle (ต้องวางก่อนสคริปต์ระบบของคุณเสมอ!) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-     <!--  <script src="auth-check.js"></script>-->
+    
+    <!-- JS Modules ของระบบ -->
     <script src="indexeddb.js"></script>
     <script src="app-core.js"></script>
- </body>
+</body>
     <!-- Script ควบคุมระบบ -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxPiqo4F8HRP2PWOQcfnZmwDFryOUbc8aBTg4YJcm7-5iUGzabCgsN2kZ2k3NAWkWOB/exec"; 
