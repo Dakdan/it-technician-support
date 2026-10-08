@@ -3,19 +3,12 @@
    ========================================================================== */
 
 const AppCore = {
-  // 📍 URL ของ Google Apps Script (Asset & Search API)
   API_URL: 'https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec',
 
-  /**
-   * ดึงข้อมูลครุภัณฑ์ทั้งหมด (Smart Cache: อ่านจาก IndexedDB ก่อน ถ้าไม่มีเน็ตหรือสั่ง Force Refresh ให้ยิง API)
-   * @param {boolean} forceRefresh - กำหนด true หากต้องการบังคับดึงข้อมูลใหม่จาก GAS
-   */
   getGlobalAssets: async function (forceRefresh = false) {
-    // 1. เปิดฐานข้อมูล IndexedDB ในเครื่องก่อน
-    await idbApp.init();
+    if (typeof idbApp !== 'undefined') await idbApp.init();
 
-    // 2. ถ้าไม่ได้สั่ง forceRefresh ให้ลองอ่านจาก IndexedDB ก่อน
-    if (!forceRefresh) {
+    if (!forceRefresh && typeof idbApp !== 'undefined') {
       const localData = await idbApp.getAllAssets();
       if (localData && localData.length > 0) {
         console.log('⚡ [AppCore] โหลดข้อมูลกลางจาก IndexedDB สำเร็จ');
@@ -23,7 +16,6 @@ const AppCore = {
       }
     }
 
-    // 3. ยิง API ไปที่ Code.gs (ใช้ mode: 'getAllData')
     try {
       console.log('🌐 [AppCore] กำลังดึงข้อมูลกลางล่าสุดจาก GAS API...');
       const response = await fetch(this.API_URL, {
@@ -37,26 +29,20 @@ const AppCore = {
 
       const result = await response.json();
 
-      // รองรับโครงสร้าง response จาก getAllDataForFrontend()
       if (result && (result.status === 'success' || result.success) && Array.isArray(result.data)) {
         console.log(`✅ [AppCore] ดึงข้อมูลสำเร็จ ทั้งหมด ${result.totalCount || result.data.length} รายการ`);
-        
-        // เซฟข้อมูลลง IndexedDB ทันที
-        await idbApp.saveAssets(result.data);
+        if (typeof idbApp !== 'undefined') await idbApp.saveAssets(result.data);
         return result.data;
       } else {
         throw new Error(result.message || 'โครงสร้างข้อมูลไม่ถูกต้อง');
       }
     } catch (error) {
       console.warn('⚠️ [AppCore] เรียก API ไม่สำเร็จ (เข้าสู่โหมด Offline):', error);
-      // Fallback อ่านข้อมูลเดิมในเครื่องกรณีเน็ตหลุด
-      return await idbApp.getAllAssets();
+      if (typeof idbApp !== 'undefined') return await idbApp.getAllAssets();
+      return [];
     }
   },
 
-  /**
-   * ดึงประเภทครุภัณฑ์ (Asset Types) สำหรับใช้ใน Dropdown
-   */
   getAssetTypes: async function () {
     try {
       const response = await fetch(this.API_URL, {
@@ -72,9 +58,6 @@ const AppCore = {
     }
   },
 
-  /**
-   * ดึงรายชื่อหน่วยงาน (Departments)
-   */
   getDepartments: async function () {
     try {
       const response = await fetch(this.API_URL, {
@@ -92,17 +75,27 @@ const AppCore = {
 };
 
 /* ==========================================================================
-   ส่วนการจัดการ Service Worker และ PWA Installation (จบปัญหารองรับทั้ง Android & iOS)
+   ส่วนการจัดการ Service Worker และ PWA Installation (ปรับปรุงแก้ไขเรื่องปุ่มไม่แสดง)
    ========================================================================== */
 let deferredPrompt = null;
 
-// 1. ฟังก์ชันเช็กสถานะแอปและอุปกรณ์
+// 1. ฟังก์ชันเช็กสถานะ PWA และประเภทอุปกรณ์
 function isStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.navigator.standalone === true || 
+         document.referrer.includes('android-app://');
+}
+
+function isMobileDevice() {
+  const ua = navigator.userAgent;
+  const isTouchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1; // สำหรับ iPadOS
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || isTouchMac;
 }
 
 function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const ua = navigator.userAgent;
+  const isTouchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return /iPad|iPhone|iPod/.test(ua) || isTouchMac;
 }
 
 // 2. ลงทะเบียน Service Worker
@@ -114,63 +107,91 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 3. ตัวควบคุมการแสดงผลและคำสั่งบนปุ่มติดตั้ง #installAppBtn
+// 3. ตัวควบคุมการแสดงผลปุ่มติดตั้ง
 function setupInstallButton() {
   const installBtn = document.getElementById('installAppBtn');
   if (!installBtn) return;
 
-  // หากผู้ใช้ติดตั้งเป็นแอปแล้ว ให้ซ่อนปุ่มทันที
+  // เงื่อนไข 1: หากติดตั้งแอปเรียบร้อยแล้ว ให้ซ่อนปุ่มทันที
   if (isStandalone()) {
     installBtn.style.display = 'none';
     return;
   }
 
-  // --- กรณีที่ 1: ผู้ใช้เปิดบน iOS (iPhone/iPad) ---
-  if (isIOS()) {
-    installBtn.style.display = 'block';
-    installBtn.onclick = () => {
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          title: 'วิธีติดตั้งบน iPhone / iPad',
-          html: `
-            <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
-              <p><b>1.</b> เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Safari</b> เท่านั้น</p>
-              <p><b>2.</b> กดปุ่ม <b>แชร์ (Share)</b> <span style="font-size:1.2rem;">⎋</span> ด้านล่างหน้าจอ</p>
-              <p><b>3.</b> เลื่อนลงมาเลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b></p>
-              <p><b>4.</b> กด <b>"เพิ่ม" (Add)</b> ที่มุมขวาบน</p>
-            </div>
-          `,
-          icon: 'info',
-          confirmButtonText: 'เข้าใจแล้ว',
-          confirmButtonColor: '#ff1493'
-        });
-      } else {
-        alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
-      }
-    };
-    return;
-  }
-
-  // --- กรณีที่ 2: ผู้ใช้เปิดบน Android / PC (Chrome, Edge, Samsung Internet) ---
-  if (deferredPrompt) {
-    installBtn.style.display = 'block';
+  // เงื่อนไข 2: ถ้าเป็น Smartphone / Tablet หรือมี Prompt พร้อมใช้งาน -> ให้แสดงปุ่มเสมอ
+  if (isMobileDevice() || deferredPrompt) {
+    installBtn.style.display = 'block'; // หรือ 'inline-block' ตามดีไซน์
+    
     installBtn.onclick = async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        console.log('✅ [PWA] ผู้ใช้ติดตั้งแอปเรียบร้อยแล้ว');
+      // 🅰️ หากเป็น iOS (iPhone / iPad) -> แสดง Popup แนะนำวิธีติดตั้ง
+      if (isIOS()) {
+        showIOSInstruction();
+        return;
       }
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
+
+      // 🅱️ หากเป็น Android / PC และมี Prompt พร้อม -> เรียก Native Install Dialog
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          console.log('✅ [PWA] ผู้ใช้ติดตั้งแอปเรียบร้อยแล้ว');
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      } else {
+        // 🅒 หากเป็น Android แต่ Prompt ยังไม่พร้อม -> แสดง คำแนะนำติดตั้งผ่านเมนูเบราว์เซอร์
+        showAndroidInstruction();
+      }
     };
   } else {
-    // ถ้ายังไม่มี Prompt ส่งมาจากเบราว์เซอร์ ให้ซ่อนปุ่มไว้ก่อน
+    // บน PC ที่ไม่ใช่ Browser รองรับ PWA Prompt ให้ซ่อนไว้
     installBtn.style.display = 'none';
   }
 }
 
-// 4. ดักฟัง Event การติดตั้ง
+// 4. คำแนะนำการติดตั้งสำหรับ iOS
+function showIOSInstruction() {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'วิธีติดตั้งบน iPhone / iPad',
+      html: `
+        <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
+          <p><b>1.</b> เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Safari</b></p>
+          <p><b>2.</b> กดปุ่ม <b>แชร์ (Share)</b> <span style="font-size:1.2rem;">⎋</span> ด้านล่าง</p>
+          <p><b>3.</b> เลื่อนลงมาเลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b></p>
+          <p><b>4.</b> กด <b>"เพิ่ม" (Add)</b> ที่มุมขวาบน</p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: 'เข้าใจแล้ว',
+      confirmButtonColor: '#ff1493'
+    });
+  } else {
+    alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
+  }
+}
+
+// 5. คำแนะนำการติดตั้งสำหรับ Android กรณี Native Prompt ยังไม่ทำงาน
+function showAndroidInstruction() {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'วิธีติดตั้งบน Android',
+      html: `
+        <div style="text-align: left; font-size: 0.95rem; line-height: 1.7; color: #333;">
+          <p><b>1.</b> กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> ที่มุมขวาบนของ Chrome</p>
+          <p><b>2.</b> เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก" (Add to Home screen)</b></p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: 'เข้าใจแล้ว',
+      confirmButtonColor: '#ff1493'
+    });
+  } else {
+    alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+  }
+}
+
+// 6. Event Listeners สำหรับดักฟังการติดตั้ง
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -185,7 +206,7 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
 });
 
-// 5. รันการตรวจสอบทันทีเมื่อ DOM พร้อม
+// 7. ตรวจสอบและแสดงปุ่มเมื่อ DOM โหลดเสร็จ
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupInstallButton);
 } else {
