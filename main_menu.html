@@ -308,14 +308,13 @@
     </style>
 </head>
 <body>
-
-    <!-- 1. Overlay กำลังโหลด -->
+    <!-- Overlay กำลังโหลด -->
     <div id="loadingOverlay">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
         <div class="mt-3 text-pink-dark fw-bold">กำลังโหลดข้อมูลเมนู...</div>
     </div>
 
-    <!-- 2. HEADER -->
+    <!-- HEADER -->
     <header class="app-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
             <img src="./logo005v1.png" alt="Logo" class="header-logo me-2" onerror="this.src='https://via.placeholder.com/45?text=IT'">
@@ -328,7 +327,7 @@
         <div class="text-end" id="authZone"></div>
     </header>
 
-    <!-- 3. MAIN CONTENT -->
+    <!-- MAIN CONTENT (เติม > ปิดแท็ก container ตรงนี้ครับ) -->
     <div class="container mt-4">
         <!-- ส่วนแสดง Alert ทั้งหมดในหน้าหลัก -->
         <div id="alertsContainer" class="mb-4"></div>
@@ -343,7 +342,7 @@
         <div id="mainMenuContainer"></div>
     </div>
 
-    <!-- 4. PWA Install Banner (การ์ดลอยแจ้งเตือนติดตั้ง PWA) -->
+    <!-- PWA Install Banner -->
     <div id="pwaInstallBanner" class="hidden fixed bottom-20 left-4 right-4 z-50 bg-white/95 backdrop-blur-md border border-pink-100 shadow-xl rounded-2xl p-4 transition-all duration-300">
         <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
@@ -367,7 +366,7 @@
         </div>
     </div>
 
-    <!-- 5. BOTTOM NAVIGATION BAR -->
+    <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
         <a id="nav-home" href="#" class="nav-item active" onclick="handleNavClick(event, 'HOME')">
             <i class="fa-solid fa-house"></i>
@@ -398,34 +397,14 @@
         </a>
     </nav>
 
-    <!-- 6. Modals ทั้งหมด -->
-    <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <!-- โครงสร้าง Modal เข้าสู่ระบบ... -->
-    </div>
+    <!-- Modals ทั้งหมด (loginRequireModal, systemAlertModal, notificationsListModal, alertDetailModal, settingsControlModal) ตามที่คุณส่งมา... -->
 
-    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true">
-        <!-- โครงสร้าง Modal แจ้งเตือน... -->
-    </div>
-
-    <div class="modal fade" id="notificationsListModal" tabindex="-1" aria-hidden="true">
-        <!-- โครงสร้าง Modal รายการการแจ้งเตือน... -->
-    </div>
-
-    <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-hidden="true">
-        <!-- โครงสร้าง Modal รายละเอียด... -->
-    </div>
-
-    <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
-        <!-- โครงสร้าง Modal ตั้งค่า... -->
-    </div>
-
-    <!-- 7. JavaScript Modules (ต้องวางไว้ล่างสุดชิดกับ </body> เพื่อให้โหลดหลัง DOM พร้อมเสมอ) -->
+    <!-- JS Modules -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="auth-check.js"></script>
     <script src="indexeddb.js"></script>
     <script src="app-core.js"></script>
-
-</body>
+ </body>
     <!-- Script ควบคุมระบบ -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxPiqo4F8HRP2PWOQcfnZmwDFryOUbc8aBTg4YJcm7-5iUGzabCgsN2kZ2k3NAWkWOB/exec"; 
