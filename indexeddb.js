@@ -44,7 +44,12 @@ const idbApp = {
   },
 
   // 2. ดึงข้อมูลทั้งหมดจาก IndexedDB
-  getAllAssets: function () {
+  getAllAssets: async function () {
+    // ป้องกันกรณีไม่ได้สั่ง init() ก่อน
+    if (!this.db) {
+      await this.init();
+    }
+    
     return new Promise((resolve) => {
       if (!this.db) {
         resolve([]);
@@ -68,7 +73,12 @@ const idbApp = {
   },
 
   // 3. บันทึก/อัปเดตข้อมูลทั้งหมดลง IndexedDB
-  saveAssets: function (assetsArray) {
+  saveAssets: async function (assetsArray) {
+    // ป้องกันกรณีไม่ได้สั่ง init() ก่อน
+    if (!this.db) {
+      await this.init();
+    }
+
     return new Promise((resolve, reject) => {
       if (!this.db || !Array.isArray(assetsArray) || assetsArray.length === 0) {
         resolve(false);
@@ -80,17 +90,23 @@ const idbApp = {
 
         // เคลียร์ข้อมูลเก่าก่อนลงข้อมูลชุดใหม่
         const clearRequest = store.clear();
+        
         clearRequest.onsuccess = () => {
           assetsArray.forEach((item, index) => {
-            if (item) {
+            if (item && typeof item === 'object') {
               // ตรวจหา AssetID จากโครงสร้างที่ส่งมาจาก Code.gs
-              const primaryKey = item.AssetID || (item.Asset_Detail && item.Asset_Detail.AssetID) || `TEMP_KEY_${index}`;
-              
+              const rawKey = item.AssetID || (item.Asset_Detail && item.Asset_Detail.AssetID) || `TEMP_KEY_${index}_${Date.now()}`;
+              const primaryKey = String(rawKey).trim();
+
               const dataToSave = {
                 ...item,
-                AssetID: String(primaryKey).trim()
+                AssetID: primaryKey
               };
-              store.put(dataToSave);
+
+              const putRequest = store.put(dataToSave);
+              putRequest.onerror = (e) => {
+                console.warn(`[IndexedDB] ไม่สามารถบันทึกรายการ Index ${index} (AssetID: ${primaryKey})`, e.target.error);
+              };
             }
           });
         };
@@ -99,8 +115,13 @@ const idbApp = {
           console.log('💾 บันทึกข้อมูลกลางลง IndexedDB เรียบร้อยแล้ว');
           resolve(true);
         };
-        transaction.onerror = (event) => reject(event.target.error);
+
+        transaction.onerror = (event) => {
+          console.error('IndexedDB Transaction Error:', event.target.error);
+          reject(event.target.error);
+        };
       } catch (err) {
+        console.error('IndexedDB saveAssets Exception:', err);
         reject(err);
       }
     });
