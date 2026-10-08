@@ -961,6 +961,19 @@
                 showSystemModal('QR Scanner', 'โมดูลสำหรับการอ่านบาร์โค้ด/คิวอาร์โค้ดสำเร็จรูป (กำลังดำเนินการเชื่อมต่อกล้องฮาร์ดแวร์)', 'fa-solid fa-camera');
             }, 800);
         }      
+    
+
+        function openMyModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+        
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modalInstance.show();
+            } else {
+                console.warn("Bootstrap JS ยังโหลดไม่เสร็จสมบูรณ์");
+            }
+        }
     </script>
     <!-- นำสคริปต์มาวางไว้ตรงนี้ (ก่อนปิด body) -->
     <script>
