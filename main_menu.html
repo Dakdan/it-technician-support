@@ -698,41 +698,79 @@
             if (!mainContainer || !menusObj) return;
         
             let mainHtml = '';
-            
+            const headColors = ['#0066ff', '#16a34a', '#7d3cff', '#e11d48', '#ff6600', '#0ea5e9', '#d63384'];
+            let colorIdx = 0;
+        
             for (const [groupName, items] of Object.entries(menusObj)) {
                 if (!items || items.length === 0) continue; 
+        
+                const currentBorderColor = headColors[colorIdx % headColors.length];
                 
-                // แยกการสร้าง Card HTML ออกมาด้านนอก ไม่เขียนซ้อนใน ${ ... }
+                // สร้าง HTML สำหรับแต่ละ Card ในกลุ่มนี้
                 let cardsHtml = '';
                 items.forEach(m => {
-                    const url = m.LINK_URL || '#';
-                    const note3 = m.Note3 || m.NOTE3 || '-';
-                    const menuName = m.MENU_NAME || '';
-                    const icon = m.ICON || 'fa-solid fa-layer-group';
-        
-                    cardsHtml += `
-                        <div class="col-6 col-md-4 col-lg-3">
-                            <div class="menu-card" onclick="openMenu('${url}', '${note3}', '${menuName}')">
-                                <i class="${icon} menu-icon icon-default"></i>
-                                <div class="menu-title">${menuName}</div>
-                            </div>
-                        </div>
-                    `;
+                    cardsHtml += createCardHTML(m, alertCount);
                 });
         
                 mainHtml += `
                     <div class="mb-4">
-                        <h5 class="section-title">${groupName}</h5>
+                        <h5 class="section-title" style="border-bottom-color: ${currentBorderColor};">${groupName}</h5>
                         <div class="row g-3">
                             ${cardsHtml}
                         </div>
                     </div>
                 `;
+                colorIdx++;
             }
             
             mainContainer.innerHTML = mainHtml;
         }
-
+        
+        function createCardHTML(menu, alertCount = 0) {
+            const icon = menu.ICON || 'fa-solid fa-layer-group';
+            const name = menu.MENU_NAME || '';
+            const desc = menu.DESC || '';
+            const url = menu.LINK_URL || '#';
+            const note3 = menu.Note3 || menu.NOTE3 || '-'; 
+        
+            let iconClass = icon;
+            if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
+            
+            let colorClass = 'icon-default';
+            const menuNameLower = name.toLowerCase();
+        
+            if (menuNameLower.includes('network')) { iconClass = 'fa-solid fa-network-wired'; colorClass = 'icon-blue'; }
+            else if (menuNameLower.includes('ครุภัณฑ์')) { iconClass = 'fa-solid fa-desktop'; colorClass = 'icon-orange'; }
+            else if (menuNameLower.includes('คลัง') || menuNameLower.includes('อะไหล่')) { iconClass = 'fa-solid fa-boxes-stacked'; colorClass = 'icon-brown'; }
+            else if (menuNameLower.includes('จัดการข้อมูลระบบ')) { iconClass = 'fa-solid fa-server'; colorClass = 'icon-purple'; }
+            else if (menuNameLower.includes('งานด่วน')) { iconClass = 'fa-solid fa-bolt'; colorClass = 'icon-red'; }
+            else if (menuNameLower.includes('แจ้งเตือน')) { iconClass = 'fa-solid fa-bell'; colorClass = 'icon-yellow'; }
+            else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) { iconClass = 'fa-solid fa-briefcase'; colorClass = 'icon-green'; }
+            
+            let cardBadgeHtml = '';
+            if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
+                const displayCount = alertCount > 99 ? '99+' : alertCount;
+                cardBadgeHtml = `<span class="badge-counter" style="top: -8px; right: -15px; font-size: 0.75rem; padding: 3px 8px;">${displayCount}</span>`;
+            }
+        
+            // 🟢 ตรวจสอบรูปภาพเมนู (IMAGE_ID_URL) คืนค่ารูปภาพรูปเดิมกลับมาครบถ้วน
+            const iconHtml = menu.IMAGE_ID_URL ? 
+                `<img src="${menu.IMAGE_ID_URL}" alt="${name}" class="menu-icon" onerror="this.src='https://via.placeholder.com/62?text=IT'">` :
+                `<i class="${iconClass} menu-icon ${colorClass}"></i>`;
+        
+            return `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="menu-card" onclick="openMenu('${url}', '${note3}', '${name}')">
+                        <div class="icon-wrapper">
+                            ${iconHtml}
+                            ${cardBadgeHtml}
+                        </div>
+                        <div class="menu-title">${name}</div>
+                        ${desc ? `<div class="menu-desc">${desc}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
         function openMenu(url, note3 = '-', menuName = '') {
             const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             if (!activeUser && loginModal) { loginModal.show(); return; }
