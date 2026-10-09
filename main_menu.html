@@ -304,24 +304,47 @@
         </div>
     </div>
 
+    <!-- Modal ตั้งค่าและการแจ้งเตือน (ฉบับองค์ประกอบครบถ้วน) -->
     <div class="modal fade" id="settingsControlModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4" style="border-radius: 20px;">
+            <div class="modal-content p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.2); box-shadow: var(--shadow-md);">
                 <div class="modal-header border-0 pb-0 justify-content-between">
-                    <h5 class="fw-bold mb-0">ตั้งค่าการแจ้งเตือน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-sliders text-pink-dark me-2"></i>ตั้งค่าและการแจ้งเตือน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="bg-light p-3 rounded-4 mb-3">
-                        <div class="fw-bold" id="settingsUserTitle">ผู้ใช้งานระบบ</div>
-                        <div class="small text-muted" id="settingsUserRole">เจ้าหน้าที่ IT</div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4">
-                        <div>
-                            <div class="fw-bold small">สถานะการแจ้งเตือน</div>
-                            <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
+                    <!-- ส่วนข้อมูลผู้ใช้งาน -->
+                    <div class="d-flex align-items-center bg-light p-3 rounded-4 mb-4 mt-3">
+                        <div class="bg-pink-soft rounded-circle p-3 text-pink-dark me-3">
+                            <i class="fa-solid fa-user-gear fs-3" style="color: var(--pink-dark);"></i>
                         </div>
-                        <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill text-white">เปิดรับแจ้งเตือน</button>
+                        <div>
+                            <div class="fw-bold" id="settingsUserTitle">ผู้ใช้งานระบบ</div>
+                            <div class="small text-muted" id="settingsUserRole">สิทธิ์เข้าถึง: เจ้าหน้าที่ IT</div>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนสถานะและการขอสิทธิ์แจ้งเตือน -->
+                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>ระบบแจ้งเตือนผ่านบราวเซอร์มือถือ</h6>
+                    <div class="bg-light p-3 rounded-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="fw-bold small">สถานะการอนุญาตแจ้งเตือน</div>
+                                <div id="notificationStatusBadge" class="badge bg-secondary mt-1">ยังไม่ได้ขอสิทธิ์</div>
+                            </div>
+                            <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="btn btn-sm btn-pink-dark rounded-pill px-3 py-1 fw-bold text-white" style="background-color: var(--pink-dark); border: none; font-size: 0.8rem;">
+                                เปิดรับแจ้งเตือน
+                            </button>
+                        </div>
+                        <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ Android:</strong> จะมีหน้าต่างเด้งขึ้นมาถามเพื่อขออนุญาตส่งข้อความเตือน</p>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">* <strong>สำหรับ iOS:</strong> ต้องกดแชร์หน้าเว็บนี้และกด "Add to Home Screen" ก่อนครับ</p>
+                    </div>
+
+                    <!-- ปุ่มทดสอบการแจ้งเตือน -->
+                    <div class="d-grid gap-2 mb-2">
+                        <button onclick="testMobileNotification()" class="btn btn-outline-danger rounded-pill fw-bold" style="border-color: var(--pink-primary); color: var(--pink-dark);">
+                            <i class="fa-solid fa-circle-play me-2"></i>ทดสอบส่งแจ้งเตือนเข้ามือถือทันที
+                        </button>
                     </div>
                 </div>
             </div>
