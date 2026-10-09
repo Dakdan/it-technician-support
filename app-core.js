@@ -1,17 +1,18 @@
 /* ==========================================================================
    app-core.js : ตัวควบคุมข้อมูลกลาง (Global Data Store) & PWA Manager
    ========================================================================== */
-// 📍 วางฟังก์ชันนี้ไว้บนสุดของไฟล์ app-core.js
-function openModalSafely(modalId) {
-    const modalEl = document.getElementById(modalId);
-    if (!modalEl) return;
 
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modalInstance.show();
-    } else {
-        setTimeout(() => openModalSafely(modalId), 100);
-    }
+// 📍 ฟังก์ชันเปิด Modal อย่างปลอดภัย (ป้องกัน Bootstrap JS โหลดไม่ทัน)
+function openModalSafely(modalId) {
+  const modalEl = document.getElementById(modalId);
+  if (!modalEl) return;
+
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalInstance.show();
+  } else {
+    setTimeout(() => openModalSafely(modalId), 100);
+  }
 }
 
 const AppCore = {
@@ -87,7 +88,7 @@ const AppCore = {
 };
 
 /* ==========================================================================
-   ส่วนการจัดการ Service Worker และ PWA Installation (ปรับปรุงแก้ไขเรื่องปุ่มไม่แสดง)
+   ส่วนการจัดการ Service Worker และ PWA Installation
    ========================================================================== */
 let deferredPrompt = null;
 
@@ -119,76 +120,106 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 3. ตัวควบคุมการแสดงผลปุ่มติดตั้ง
+// 3. ตัวควบคุมการแสดงผลปุ่มติดตั้ง และ PWA Banner
 function setupInstallButton() {
   const installBtn = document.getElementById('installAppBtn');
-  if (!installBtn) return;
+  const bannerContainer = document.getElementById('pwaInstallBanner');
+  const closeBtn = document.getElementById('closeBannerBtn');
 
-  // 1. ถ้าผู้ใช้ติดตั้งแอปไปแล้ว (อยู่ในหน้าจอ Standalone) ให้ซ่อนปุ่ม
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  if (isStandalone) {
-    installBtn.style.display = 'none';
+  // ถ้าผู้ใช้ติดตั้งแอปไปแล้ว (อยู่ในหน้าจอ Standalone) ให้ซ่อน Banner/ปุ่ม ทั้งหมด
+  if (isStandalone()) {
+    if (bannerContainer) bannerContainer.classList.add('d-none');
+    if (installBtn) installBtn.style.display = 'none';
     return;
   }
 
-  // 2. เช็คว่าเป็น Smartphone / Tablet หรือไม่
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  // 3. ถ้าเป็น Mobile -> สั่งแสดงปุ่มรอกดทันที!
-  if (isMobile) {
-    installBtn.style.display = 'block'; // หรือ 'inline-block' ตาม CSS
-
-    installBtn.onclick = async () => {
-      // 🅰️ กรณี iOS (Safari ไม่สนับสนุน Native Prompt) -> ขึ้น Modal สอนกด Share -> Add to Home Screen
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'วิธีติดตั้งบน iPhone / iPad',
-            html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                     1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
-                     2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
-                     3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
-                   </div>`,
-            icon: 'info',
-            confirmButtonColor: '#ff1493'
-          });
-        } else {
-          alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม"');
-        }
-        return;
-      }
-
-      // 🅱️ กรณี Android / PC
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === 'accepted') {
-          installBtn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      } else {
-        // หาก Android ยังไม่ปล่อย Prompt มา -> สอนกดเมนู 3 จุด
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'วิธีติดตั้งบน Android',
-            html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                     1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
-                     2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
-                   </div>`,
-            icon: 'info',
-            confirmButtonColor: '#ff1493'
-          });
-        } else {
-          alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
-        }
-      }
+  // ผูกการทำงานปุ่มปิดแบนเนอร์ (ถ้ามี)
+  if (closeBtn && bannerContainer) {
+    closeBtn.onclick = () => {
+      bannerContainer.classList.add('d-none');
     };
-  } else {
-    // บน PC ถ้าไม่มี Prompt ให้ซ่อนไว้
-    if (!deferredPrompt) {
-      installBtn.style.display = 'none';
-    }
   }
+
+  // แสดง Banner/ปุ่ม หากเป็นอุปกรณ์มือถือ หรือเปิดรับ Prompt จาก Chrome
+  if (isMobileDevice() || deferredPrompt) {
+    if (bannerContainer) bannerContainer.classList.remove('d-none');
+    if (installBtn) installBtn.style.display = 'inline-block';
+
+    if (installBtn) {
+      installBtn.onclick = async () => {
+        // 🅰️ กรณี iOS (Safari)
+        if (isIOS()) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              title: 'วิธีติดตั้งบน iPhone / iPad',
+              html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                       1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
+                       2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
+                       3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
+                     </div>`,
+              icon: 'info',
+              confirmButtonColor: '#d63384'
+            });
+          } else {
+            alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม"');
+          }
+          return;
+        }
+
+        // 🅱️ กรณี Android / Desktop
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            if (bannerContainer) bannerContainer.classList.add('d-none');
+            installBtn.style.display = 'none';
+          }
+          deferredPrompt = null;
+        } else {
+          // หาก Android ยังไม่ส่ง Native Prompt มา
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              title: 'วิธีติดตั้งบน Android',
+              html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                       1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
+                       2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
+                     </div>`,
+              icon: 'info',
+              confirmButtonColor: '#d63384'
+            });
+          } else {
+            alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+          }
+        }
+      };
+    }
+  } else {
+    // กรณีบน PC ที่ยังไม่มี Prompt
+    if (bannerContainer) bannerContainer.classList.add('d-none');
+    if (installBtn) installBtn.style.display = 'none';
+  }
+}
+
+// 4. Event Listeners ตรวจจับการติดตั้ง PWA
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('📱 [PWA] พร้อมสำหรับการติดตั้ง');
+  setupInstallButton();
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('🎉 [PWA] ติดตั้งแอปเรียบร้อยแล้ว');
+  deferredPrompt = null;
+  const bannerContainer = document.getElementById('pwaInstallBanner');
+  const installBtn = document.getElementById('installAppBtn');
+  if (bannerContainer) bannerContainer.classList.add('d-none');
+  if (installBtn) installBtn.style.display = 'none';
+});
+
+// 5. สั่งรันเมื่อ DOM พร้อมทำงาน
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupInstallButton);
+} else {
+  setupInstallButton();
 }
