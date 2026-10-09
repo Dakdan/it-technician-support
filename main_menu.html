@@ -693,20 +693,58 @@
             container.innerHTML = html;
         }
 
-        function renderMenus(menusObj, alertCount = 0) {
+       function renderMenus(menusObj, alertCount = 0) {
+            const shortcutGrid = document.getElementById('shortcutGrid');
             const mainContainer = document.getElementById('mainMenuContainer');
             if (!mainContainer || !menusObj) return;
         
+            const finalGrouped = {};
+            const shortcuts = [];
+        
+            // 🟢 1. Logic เดิม: แยกประเภท Fast Menu / Alert Menu เข้า Shortcuts
+            for (const [groupName, items] of Object.entries(menusObj)) {
+                if (!Array.isArray(items)) continue;
+                items.forEach(m => {
+                    const menuType = String(m.MENU_TYPE || '').toLowerCase();
+                    if (menuType === 'fast-menu' || menuType === 'alert-menu') {
+                        shortcuts.push(m);
+                    } else {
+                        if (!finalGrouped[groupName]) finalGrouped[groupName] = [];
+                        finalGrouped[groupName].push(m);
+                    }
+                });
+            }
+        
+            // 🟢 2. Logic เดิม: แสดงผลส่วน Shortcut Section
+            if (shortcuts.length > 0) {
+                const shortcutSec = document.getElementById('shortcutSection');
+                if (shortcutSec) {
+                    shortcutSec.classList.remove('d-none');
+                    const titleEl = shortcutSec.querySelector('.section-title');
+                    if (titleEl) titleEl.style.borderBottomColor = '#eab308';
+                }
+                if (shortcutGrid) {
+                    let shortcutCardsHtml = '';
+                    shortcuts.forEach(m => {
+                        shortcutCardsHtml += createCardHTML(m, alertCount);
+                    });
+                    shortcutGrid.innerHTML = shortcutCardsHtml;
+                }
+            } else {
+                const shortcutSec = document.getElementById('shortcutSection');
+                if (shortcutSec) shortcutSec.classList.add('d-none');
+            }
+        
+            // 🟢 3. Logic เดิม: แสดงผลกลุ่มเมนูหลักตามหมวดหมู่พร้อมเวียนสีเส้นขอบ
             let mainHtml = '';
             const headColors = ['#0066ff', '#16a34a', '#7d3cff', '#e11d48', '#ff6600', '#0ea5e9', '#d63384'];
             let colorIdx = 0;
         
-            for (const [groupName, items] of Object.entries(menusObj)) {
+            for (const [groupName, items] of Object.entries(finalGrouped)) {
                 if (!items || items.length === 0) continue; 
-        
-                const currentBorderColor = headColors[colorIdx % headColors.length];
                 
-                // สร้าง HTML สำหรับแต่ละ Card ในกลุ่มนี้
+                const currentBorderColor = headColors[colorIdx % headColors.length];
+        
                 let cardsHtml = '';
                 items.forEach(m => {
                     cardsHtml += createCardHTML(m, alertCount);
@@ -736,6 +774,7 @@
             let iconClass = icon;
             if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
             
+            // 🟢 4. Logic เดิม: แมปสไตล์และสีไอคอนตามชื่อเมนู
             let colorClass = 'icon-default';
             const menuNameLower = name.toLowerCase();
         
@@ -747,13 +786,14 @@
             else if (menuNameLower.includes('แจ้งเตือน')) { iconClass = 'fa-solid fa-bell'; colorClass = 'icon-yellow'; }
             else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) { iconClass = 'fa-solid fa-briefcase'; colorClass = 'icon-green'; }
             
+            // 🟢 5. Logic เดิม: Badge ตัวเลขแจ้งเตือน
             let cardBadgeHtml = '';
             if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
                 const displayCount = alertCount > 99 ? '99+' : alertCount;
                 cardBadgeHtml = `<span class="badge-counter" style="top: -8px; right: -15px; font-size: 0.75rem; padding: 3px 8px;">${displayCount}</span>`;
             }
         
-            // 🟢 ตรวจสอบรูปภาพเมนู (IMAGE_ID_URL) คืนค่ารูปภาพรูปเดิมกลับมาครบถ้วน
+            // 🟢 6. Logic เดิม: ตรวจสอบรูปภาพเมนู IMAGE_ID_URL
             const iconHtml = menu.IMAGE_ID_URL ? 
                 `<img src="${menu.IMAGE_ID_URL}" alt="${name}" class="menu-icon" onerror="this.src='https://via.placeholder.com/62?text=IT'">` :
                 `<i class="${iconClass} menu-icon ${colorClass}"></i>`;
