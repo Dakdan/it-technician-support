@@ -1,6 +1,18 @@
 /* ==========================================================================
    app-core.js : ตัวควบคุมข้อมูลกลาง (Global Data Store) & PWA Manager
    ========================================================================== */
+// 📍 วางฟังก์ชันนี้ไว้บนสุดของไฟล์ app-core.js
+function openModalSafely(modalId) {
+    const modalEl = document.getElementById(modalId);
+    if (!modalEl) return;
+
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+    } else {
+        setTimeout(() => openModalSafely(modalId), 100);
+    }
+}
 
 const AppCore = {
   API_URL: 'https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec',
