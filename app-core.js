@@ -2,16 +2,26 @@
    app-core.js : ตัวควบคุมข้อมูลกลาง (Global Data Store) & PWA Manager
    ========================================================================== */
 
-// 📍 ฟังก์ชันเปิด Modal อย่างปลอดภัย (ป้องกัน Bootstrap JS โหลดไม่ทัน)
-function openModalSafely(modalId) {
+// 📍 ฟังก์ชันเปิด Modal อย่างปลอดภัย (กำหนด Retry ไม่เกิน 10 ครั้ง ป้องกันลูปค้าง)
+function openModalSafely(modalId, retryCount = 0) {
   const modalEl = document.getElementById(modalId);
-  if (!modalEl) return;
+  if (!modalEl) {
+    console.warn(`⚠️ [AppCore] ไม่พบ Element Modal: #${modalId}`);
+    return;
+  }
 
   if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modalInstance.show();
+    try {
+      const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalInstance.show();
+    } catch (err) {
+      console.error(`❌ [AppCore] เปิด Modal #${modalId} ล้มเหลว:`, err);
+    }
+  } else if (retryCount < 10) {
+    // พยายามลองใหม่สูงสุด 10 ครั้ง (1 วินาที) หากยังไม่ได้จะยกเลิกทันที ป้องกันลูปค้าง
+    setTimeout(() => openModalSafely(modalId, retryCount + 1), 100);
   } else {
-    setTimeout(() => openModalSafely(modalId), 100);
+    console.error(`❌ [AppCore] Bootstrap JS ยังไม่พร้อมใช้งาน ยกเลิกการเปิด #${modalId}`);
   }
 }
 
@@ -19,13 +29,24 @@ const AppCore = {
   API_URL: 'https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec',
 
   getGlobalAssets: async function (forceRefresh = false) {
-    if (typeof idbApp !== 'undefined') await idbApp.init();
+    // 🟢 เช็กและเริ่มการทำงานของ IndexedDB อย่างปลอดภัย
+    if (typeof idbApp !== 'undefined' && typeof idbApp.init === 'function') {
+      try {
+        await idbApp.init();
+      } catch (e) {
+        console.warn('⚠️ [AppCore] ไม่สามารถเริ่มต้น IndexedDB ได้:', e);
+      }
+    }
 
-    if (!forceRefresh && typeof idbApp !== 'undefined') {
-      const localData = await idbApp.getAllAssets();
-      if (localData && localData.length > 0) {
-        console.log('⚡ [AppCore] โหลดข้อมูลกลางจาก IndexedDB สำเร็จ');
-        return localData;
+    if (!forceRefresh && typeof idbApp !== 'undefined' && typeof idbApp.getAllAssets === 'function') {
+      try {
+        const localData = await idbApp.getAllAssets();
+        if (localData && localData.length > 0) {
+          console.log('⚡ [AppCore] โหลดข้อมูลกลางจาก IndexedDB สำเร็จ');
+          return localData;
+        }
+      } catch (e) {
+        console.warn('⚠️ [AppCore] อ่านข้อมูลจาก IndexedDB ล้มเหลว:', e);
       }
     }
 
@@ -40,18 +61,30 @@ const AppCore = {
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP Error Status: ${response.status}`);
+      }
+
       const result = await response.json();
 
       if (result && (result.status === 'success' || result.success) && Array.isArray(result.data)) {
         console.log(`✅ [AppCore] ดึงข้อมูลสำเร็จ ทั้งหมด ${result.totalCount || result.data.length} รายการ`);
-        if (typeof idbApp !== 'undefined') await idbApp.saveAssets(result.data);
+        if (typeof idbApp !== 'undefined' && typeof idbApp.saveAssets === 'function') {
+          await idbApp.saveAssets(result.data).catch(err => console.warn('บันทึก IDB ล้มเหลว:', err));
+        }
         return result.data;
       } else {
         throw new Error(result.message || 'โครงสร้างข้อมูลไม่ถูกต้อง');
       }
     } catch (error) {
       console.warn('⚠️ [AppCore] เรียก API ไม่สำเร็จ (เข้าสู่โหมด Offline):', error);
-      if (typeof idbApp !== 'undefined') return await idbApp.getAllAssets();
+      if (typeof idbApp !== 'undefined' && typeof idbApp.getAllAssets === 'function') {
+        try {
+          return await idbApp.getAllAssets();
+        } catch (e) {
+          return [];
+        }
+      }
       return [];
     }
   },
@@ -122,81 +155,83 @@ if ('serviceWorker' in navigator) {
 
 // 3. ตัวควบคุมการแสดงผลปุ่มติดตั้ง และ PWA Banner
 function setupInstallButton() {
-  const installBtn = document.getElementById('installAppBtn');
-  const bannerContainer = document.getElementById('pwaInstallBanner');
-  const closeBtn = document.getElementById('closeBannerBtn');
+  try {
+    const installBtn = document.getElementById('installAppBtn');
+    const bannerContainer = document.getElementById('pwaInstallBanner');
+    const closeBtn = document.getElementById('closeBannerBtn');
 
-  // ถ้าผู้ใช้ติดตั้งแอปไปแล้ว (อยู่ในหน้าจอ Standalone) ให้ซ่อน Banner/ปุ่ม ทั้งหมด
-  if (isStandalone()) {
-    if (bannerContainer) bannerContainer.classList.add('d-none');
-    if (installBtn) installBtn.style.display = 'none';
-    return;
-  }
+    // ถ้าอยู่ในโหมด Standalone แล้ว ให้ซ่อน Banner ทั้งหมด
+    if (isStandalone()) {
+      if (bannerContainer) bannerContainer.classList.add('d-none');
+      if (installBtn) installBtn.style.display = 'none';
+      return;
+    }
 
-  // ผูกการทำงานปุ่มปิดแบนเนอร์ (ถ้ามี)
-  if (closeBtn && bannerContainer) {
-    closeBtn.onclick = () => {
-      bannerContainer.classList.add('d-none');
-    };
-  }
-
-  // แสดง Banner/ปุ่ม หากเป็นอุปกรณ์มือถือ หรือเปิดรับ Prompt จาก Chrome
-  if (isMobileDevice() || deferredPrompt) {
-    if (bannerContainer) bannerContainer.classList.remove('d-none');
-    if (installBtn) installBtn.style.display = 'inline-block';
-
-    if (installBtn) {
-      installBtn.onclick = async () => {
-        // 🅰️ กรณี iOS (Safari)
-        if (isIOS()) {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              title: 'วิธีติดตั้งบน iPhone / iPad',
-              html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                       1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
-                       2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
-                       3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
-                     </div>`,
-              icon: 'info',
-              confirmButtonColor: '#d63384'
-            });
-          } else {
-            alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม"');
-          }
-          return;
-        }
-
-        // 🅱️ กรณี Android / Desktop
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          if (choice.outcome === 'accepted') {
-            if (bannerContainer) bannerContainer.classList.add('d-none');
-            installBtn.style.display = 'none';
-          }
-          deferredPrompt = null;
-        } else {
-          // หาก Android ยังไม่ส่ง Native Prompt มา
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              title: 'วิธีติดตั้งบน Android',
-              html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                       1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
-                       2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
-                     </div>`,
-              icon: 'info',
-              confirmButtonColor: '#d63384'
-            });
-          } else {
-            alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
-          }
-        }
+    // ผูกการทำงานปุ่มปิดแบนเนอร์
+    if (closeBtn && bannerContainer) {
+      closeBtn.onclick = () => {
+        bannerContainer.classList.add('d-none');
       };
     }
-  } else {
-    // กรณีบน PC ที่ยังไม่มี Prompt
-    if (bannerContainer) bannerContainer.classList.add('d-none');
-    if (installBtn) installBtn.style.display = 'none';
+
+    // แสดง Banner/ปุ่ม หากเป็นมือถือ หรือเปิดรับ Prompt
+    if (isMobileDevice() || deferredPrompt) {
+      if (bannerContainer) bannerContainer.classList.remove('d-none');
+      if (installBtn) installBtn.style.display = 'inline-block';
+
+      if (installBtn) {
+        installBtn.onclick = async () => {
+          // 🅰️ กรณี iOS (Safari)
+          if (isIOS()) {
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                title: 'วิธีติดตั้งบน iPhone / iPad',
+                html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                         1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
+                         2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
+                         3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
+                       </div>`,
+                icon: 'info',
+                confirmButtonColor: '#d63384'
+              });
+            } else {
+              alert('วิธีติดตั้งบน iOS:\n1. เปิดด้วย Safari\n2. กดปุ่ม Share ⎋\n3. เลือก "เพิ่มไปยังหน้าจอโฮม"');
+            }
+            return;
+          }
+
+          // 🅱️ กรณี Android / Desktop
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const choice = await deferredPrompt.userChoice;
+            if (choice.outcome === 'accepted') {
+              if (bannerContainer) bannerContainer.classList.add('d-none');
+              installBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+          } else {
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                title: 'วิธีติดตั้งบน Android',
+                html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
+                         1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
+                         2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
+                       </div>`,
+                icon: 'info',
+                confirmButtonColor: '#d63384'
+              });
+            } else {
+              alert('วิธีติดตั้งบน Android:\nกดเมนู จุด 3 จุด (⋮) มุมขวาบน -> เลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+            }
+          }
+        };
+      }
+    } else {
+      if (bannerContainer) bannerContainer.classList.add('d-none');
+      if (installBtn) installBtn.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('❌ [PWA] setupInstallButton Error:', err);
   }
 }
 
