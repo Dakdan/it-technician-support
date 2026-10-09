@@ -696,26 +696,40 @@
         function renderMenus(menusObj, alertCount = 0) {
             const mainContainer = document.getElementById('mainMenuContainer');
             if (!mainContainer || !menusObj) return;
-
+        
             let mainHtml = '';
+            
             for (const [groupName, items] of Object.entries(menusObj)) {
-                if (items.length === 0) continue; 
+                if (!items || items.length === 0) continue; 
+                
+                // แยกการสร้าง Card HTML ออกมาด้านนอก ไม่เขียนซ้อนใน ${ ... }
+                let cardsHtml = '';
+                items.forEach(m => {
+                    const url = m.LINK_URL || '#';
+                    const note3 = m.Note3 || m.NOTE3 || '-';
+                    const menuName = m.MENU_NAME || '';
+                    const icon = m.ICON || 'fa-solid fa-layer-group';
+        
+                    cardsHtml += `
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="menu-card" onclick="openMenu('${url}', '${note3}', '${menuName}')">
+                                <i class="${icon} menu-icon icon-default"></i>
+                                <div class="menu-title">${menuName}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+        
                 mainHtml += `
                     <div class="mb-4">
                         <h5 class="section-title">${groupName}</h5>
                         <div class="row g-3">
-                            ${items.map(m => `
-                                <div class="col-6 col-md-4 col-lg-3">
-                                    <div class="menu-card" onclick="openMenu('${m.LINK_URL || '#'}', '${m.Note3 \vert{}\vert{} m.NOTE3 \vert{}\vert{} '-'}', '${m.MENU_NAME || ''}')">
-                                        <i class="${m.ICON || 'fa-solid fa-layer-group'} menu-icon icon-default"></i>
-                                        <div class="menu-title">${m.MENU_NAME || ''}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
+                            ${cardsHtml}
                         </div>
                     </div>
                 `;
             }
+            
             mainContainer.innerHTML = mainHtml;
         }
 
