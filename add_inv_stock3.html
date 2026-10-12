@@ -183,7 +183,7 @@
 
         #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         
-        /* Functional styles from original file */
+        /* Functional styles */
         .spinner {
             border: 3px solid #fbcfe8;
             border-top: 3px solid var(--pink-neon);
@@ -706,7 +706,7 @@
 
         async function fetchAPI(url, options = {}) {
             try {
-                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
+                // เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
                 const fetchOptions = { redirect: 'follow', ...options };
                 const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -774,7 +774,7 @@
         }
 
         async function loadDashboardStats(forceRefresh = false) {
-            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
+            // ระบบ Caching
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
@@ -789,7 +789,7 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
-                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
+                // Parallel fetch
                 const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
@@ -801,8 +801,6 @@
                 globalPeripheralDashboardData = resPeriDash;
 
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
-                
-                // ส่ง resPeriDash เข้าไปประมวลผลแสดงผลใน DOM ด้วย
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
@@ -894,8 +892,9 @@
 
         function createBreakdownRow(label, count, filterKey, filterVal, isSelected) {
             const activeClass = isSelected ? 'bg-pink-100 border-pink-300 font-bold text-pink-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+            const safeVal = filterVal.replace(/'/g, "\\'");
             return `
-                <div onclick="toggleDashboardFilter('${filterKey}', '${filterVal.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
+                <div onclick="toggleDashboardFilter('${filterKey}', '${safeVal}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
                     <span class="flex items-center gap-1.5"><i data-lucide="${filterKey==='invStatus'?'activity':'layers'}" class="w-3.5 h-3.5 text-pink-500"></i> ${label}</span>
                     <span class="bg-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">${count}</span>
                 </div>
@@ -907,15 +906,13 @@
             loadDashboardStats();
         }
 
-        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
+            loadDashboardStats(); 
         }
 
-        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -960,14 +957,12 @@
             let totalPeri = 0;
             let periBreakdownHtml = '';
 
-            // ใช้ข้อมูลจาก getPeripheralDashboard ที่ส่งเข้ามา (periDash)
             const activePeriDash = periDash || globalPeripheralDashboardData;
             if (activePeriDash && activePeriDash.summary) {
                 const periSummary = activePeriDash.summary;
                 totalPeri = periSummary.totalQuantity ?? periSummary.totalRecords ?? 0;
                 
                 const deviceTypes = periSummary.byDeviceType || {};
-                const qtyRanges = periSummary.byQtyPerRecord || {};
 
                 Object.keys(deviceTypes).forEach(k => {
                     periBreakdownHtml += `
@@ -1004,9 +999,10 @@
             Object.keys(ageRanges).forEach(k => {
                 const isSelected = currentDashboardFilters.ageRange === k;
                 const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+                const safeKey = k.replace(/'/g, "\\'");
 
                 ageHtml += `
-                    <div onclick="toggleDashboardFilter('ageRange', '${k.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
+                    <div onclick="toggleDashboardFilter('ageRange', '${safeKey}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
                         <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> ${k}</span>
                         <span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">${ageRanges[k]}</span>
                     </div>
@@ -1022,7 +1018,6 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // Render Dashboard Table Grouped by Asset_Type_Name
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
             tbody.innerHTML = '';
@@ -1069,6 +1064,7 @@
                     const serial = item.Asset_Serial || item.Serial || "-";
                     const rawDetail = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || "-";
                     const shortDetail = truncateText(rawDetail, 20);
+                    const safeTitle = String(rawDetail).replace(/"/g, '&quot;');
                     const age = item.Asset_AgeInfo || item.Age || "ไม่ระบุ";
                     const status = item.Inv_Status || item.Status || "รอตรวจสอบ";
 
@@ -1078,7 +1074,7 @@
                             <span class="font-extrabold text-pink-600 block">${aId}</span>
                             <span class="text-[10px] text-gray-500 font-medium">S/N: ${serial}</span>
                         </td>
-                        <td data-label="รายละเอียด" class="p-2.5 border-b font-medium text-gray-800 text-xs" title="${String(rawDetail).replace(/"/g, '&quot;')}">
+                        <td data-label="รายละเอียด" class="p-2.5 border-b font-medium text-gray-800 text-xs" title="${safeTitle}">
                             ${shortDetail}
                         </td>
                         <td data-label="อายุครุภัณฑ์" class="p-2.5 border-b text-center">
@@ -1297,7 +1293,7 @@
 
             showLoading();
             try {
-                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
+                // Parallel fetch
                 const [data, resPeri] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
@@ -1334,8 +1330,9 @@
 
             Object.keys(statusCounts).filter(k => k !== 'ALL').sort().forEach(st => {
                 const isActive = currentInventoryStatusFilter === st;
+                const safeSt = st.replace(/'/g, "\\'");
                 html += `
-                    <button onclick="setInventoryStatusFilter('${st.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
+                    <button onclick="setInventoryStatusFilter('${safeSt}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
                         ${st} (${statusCounts[st]})
                     </button>
                 `;
@@ -1439,23 +1436,28 @@
                     const serial = rec.Asset_Serial || rec.Serial || "-";
                     const fullDetail = rec.Asset_FullDescription || rec.FullDescription || rec.Spec_Detai || "-";
                     const shortDetail = truncateText(fullDetail, 20);
+                    const safeTitle = String(fullDetail).replace(/"/g, '&quot;');
                     const age = rec.Asset_AgeInfo || rec.Age || "-";
                     const status = rec.Inv_Status || rec.Status || "รอตรวจสอบ";
 
                     const rawImgSource = getItemImageSource(rec);
                     const extractedImgUrl = getDriveImageUrl(rawImgSource);
+                    
+                    // ป้องกัน Error โดยการสกัด JSON ใส่ Attribute data-item เพื่อนำไปแปลงทีหลังแบบปลอดภัย
+                    const safeRec = JSON.stringify(rec).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
                     let imgEl = extractedImgUrl 
-                        ? `<img src="${extractedImgUrl}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded-lg border border-indigo-200 shadow-xs mx-auto cursor-pointer hover:opacity-80" onclick="event.stopPropagation(); openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
+                        ? `<img src="${extractedImgUrl}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded-lg border border-indigo-200 shadow-xs mx-auto cursor-pointer hover:opacity-80" data-item="${safeRec}" onclick="event.stopPropagation(); openInventoryItemDetailModal(JSON.parse(this.getAttribute('data-item')))" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
                         : `<span class="text-gray-300 text-xs">-</span>`;
 
                     tableHtml += `
-                        <tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer" onclick="openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
+                        <tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer" data-item="${safeRec}" onclick="openInventoryItemDetailModal(JSON.parse(this.getAttribute('data-item')))">
                             <td data-label="ลำดับ" class="p-3 text-center font-bold text-gray-500">${idx + 1}</td>
                             <td data-label="ID ครุภัณฑ์ (Asset / NOID)" class="p-3 font-bold text-indigo-700">
                                 ${assetId}<br>
                                 <span class="text-gray-500 text-[10px] font-normal">S/N: ${serial}</span>
                             </td>
-                            <td data-label="รายละเอียด & สเปค" class="p-3 text-gray-700 text-xs" title="${String(fullDetail).replace(/"/g, '&quot;')}">
+                            <td data-label="รายละเอียด & สเปค" class="p-3 text-gray-700 text-xs" title="${safeTitle}">
                                 <p class="font-medium">${shortDetail}</p>
                             </td>
                             <td data-label="อายุครุภัณฑ์" class="p-3 text-center">
@@ -1521,11 +1523,13 @@
 
             let periHtml = '';
             if (matchedPeripherals.length > 0) {
+                // สกัด logic ออกมานอก Template Literal ป้องกัน error parsing ในบราวเซอร์
+                const periListStr = matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity || 1} ${p.Unit || 'ชิ้น'}</span></li>`).join('');
                 periHtml = `
                     <div class="mt-3 bg-purple-50 p-3 rounded-2xl border border-purple-200">
                         <span class="text-[11px] font-bold text-purple-800 flex items-center gap-1 mb-1.5"><i data-lucide="plug" class="w-3.5 h-3.5"></i> อุปกรณ์ต่อพ่วงที่ผูกอยู่ (${matchedPeripherals.length} รายการ):</span>
                         <ul class="text-xs text-purple-900 space-y-1 pl-2">
-                            ${matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity \vert{}\vert{} 1}${p.Unit || 'ชิ้น'}</span></li>`).join('')}
+                            ${periListStr}
                         </ul>
                     </div>
                 `;
@@ -1743,18 +1747,22 @@
 
                         let periHtml = '';
                         if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
+                            const periListStr = item.peripherals.map(p => `<li><span class="font-semibold text-gray-800">${p.Name || p.Item_ID}</span> - จำนวน ${p.Quantity || 1} ${p.Unit || ''} <span class="text-gray-400">(${p.Note || '-'})</span></li>`).join('');
                             periHtml = `
                                 <div class="mt-2 bg-purple-50/50 p-2 rounded-lg border border-purple-100 w-full whitespace-normal">
                                     <p class="text-[10px] font-bold text-purple-700 flex items-center gap-1 mb-1"><i data-lucide="plug" class="w-3 h-3"></i> อุปกรณ์ต่อพ่วง (${item.peripherals.length} รายการ)</p>
                                     <ul class="text-[10px] text-gray-600 list-disc pl-4 space-y-0.5">
-                                        ${item.peripherals.map(p => `<li><span class="font-semibold text-gray-800">${p.Name || p.Item_ID}</span> - จำนวน ${p.Quantity \vert{}\vert{} 1}${p.Unit || ''} <span class="text-gray-400">(${p.Note || '-'})</span></li>`).join('')}
+                                        ${periListStr}
                                     </ul>
                                 </div>
                             `;
                         }
 
+                        // เข้ารหัสข้อมูลก่อนผูกกับ HTML ป้องกัน Syntax Error ในบราวเซอร์
+                        const safeItemData = JSON.stringify(modalData).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
                         html += `
-                            <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick='openInventoryItemDetailModal(${JSON.stringify(modalData).replace(/"/g, '&quot;')})'>
+                            <tr class="hover:bg-gray-50 transition-colors cursor-pointer" data-item="${safeItemData}" onclick="openInventoryItemDetailModal(JSON.parse(this.getAttribute('data-item')))">
                                 <td data-label="ลำดับ" class="p-3 text-center font-bold text-gray-500 align-top">${subGlobalIdx}</td>
                                 <td data-label="รูปภาพ" class="p-3 text-center align-top" onclick="event.stopPropagation()">${imgHtml}</td>
                                 <td data-label="รหัส Asset" class="p-3 text-pink-600 font-bold align-top">${aId}</td>
@@ -1778,6 +1786,7 @@
             const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
             const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
             const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
+            const themeColor = type === 'stockIn' ? 'emerald' : 'purple';
 
             html += `
                 <div class="mt-8 break-inside-avoid">
@@ -1789,14 +1798,14 @@
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${roleIT}</p>
                             <p class="font-bold text-gray-800 text-base">${itUserText}</p>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-${type === 'stockIn'?'emerald':'purple'}-200 shadow-sm relative">
+                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-${themeColor}-200 shadow-sm relative">
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-3">${roleUser}</p>
             `;
             
             if (signatureUrl && String(signatureUrl).trim().length > 5) {
                 html += `
                     <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
-                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
+                    <p class="font-bold text-${themeColor}-700 text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
                 `;
             } else {
@@ -1804,7 +1813,7 @@
                     <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
                         <p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>
                     </div>
-                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
+                    <p class="font-bold text-${themeColor}-700 text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
                 `;
             }
@@ -1890,7 +1899,8 @@
                         const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
 
                         if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
-                            desc += `<br><span class="text-[10px] text-gray-500 italic">+ ต่อพ่วง: ${item.peripherals.map(p => p.Name || p.Item_ID).join(', ')}</span>`;
+                            const periListStr = item.peripherals.map(p => p.Name || p.Item_ID).join(', ');
+                            desc += `<br><span class="text-[10px] text-gray-500 italic">+ ต่อพ่วง: ${periListStr}</span>`;
                         }
 
                         html += `
