@@ -18,19 +18,7 @@
     <link rel="apple-touch-icon" href="./logo512.png">
     <link rel="icon" type="image/png" href="./logo005v1.png">
 
-     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
-        <div class="spinner"></div>
-        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
-     <!-- <script src="auth-check.js"></script>  1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
-    <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
-    <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
-    <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -526,7 +514,19 @@
             <button type="button" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full py-3 rounded-2xl text-xs font-semibold shadow-md" onclick="closeModal('alertModal')">ตกลง</button>
         </div>
     </div>
+     <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
+        <div class="spinner"></div>
+        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
+     <!-- <script src="auth-check.js"></script>  1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
+    <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
+    <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
+    <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
    
 
     <script>
