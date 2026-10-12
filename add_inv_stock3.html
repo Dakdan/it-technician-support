@@ -1652,8 +1652,8 @@
             const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
             const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
 
-            const borderClass = type === 'stockIn' ? 'border-emerald-200' : 'border-purple-200';
-            const textClass = type === 'stockIn' ? 'text-emerald-700' : 'text-purple-700';
+            const borderStyle = type === 'stockIn' ? 'border-emerald-200' : 'border-purple-200';
+            const textStyle = type === 'stockIn' ? 'text-emerald-700' : 'text-purple-700';
 
             html += `
                 <div class="mt-8 break-inside-avoid">
@@ -1665,14 +1665,14 @@
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${roleIT}</p>
                             <p class="font-bold text-gray-800 text-base">${itUserText}</p>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed ${borderClass} shadow-sm relative">
+                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed ${borderStyle} shadow-sm relative">
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-3">${roleUser}</p>
             `;
             
             if (signatureUrl && String(signatureUrl).trim().length > 5) {
                 html += `
                     <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
-                    <p class="font-bold ${textClass} text-sm">(${userNameText})</p>
+                    <p class="font-bold ${textStyle} text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
                 `;
             } else {
@@ -1680,7 +1680,7 @@
                     <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
                         <p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>
                     </div>
-                    <p class="font-bold ${textClass} text-sm">(${userNameText})</p>
+                    <p class="font-bold ${textStyle} text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
                 `;
             }
