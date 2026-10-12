@@ -1913,8 +1913,24 @@
             document.body.classList.remove('printing-a4');
         }
 
-        function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+        let loadingTimeout = null;
+
+        function showLoading() { 
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            // ป้องกันค้างหมุนตลอดไป: หากผ่านไป 8 วินาทีแล้วยังไม่ปิด ให้บังคับซ่อนอัตโนมัติ
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            loadingTimeout = setTimeout(() => {
+                hideLoading();
+                console.warn("Loading timeout: บังคับปิดหน้าจอโหลดเนื่องจากรอนานเกินไป");
+            }, 8000);
+        }
+
+        function hideLoading() { 
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            document.getElementById('loadingOverlay').classList.add('hidden'); 
+        }
+
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function showAlert(title, message) {
