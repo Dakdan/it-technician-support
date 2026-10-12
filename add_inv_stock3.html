@@ -1924,19 +1924,10 @@
         let loadingTimeout = null;
 
         function showLoading() { 
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            
-            // ป้องกันค้างหมุนตลอดไป: หากผ่านไป 8 วินาทีแล้วยังไม่ปิด ให้บังคับซ่อนอัตโนมัติ
-            if (loadingTimeout) clearTimeout(loadingTimeout);
-            loadingTimeout = setTimeout(() => {
-                hideLoading();
-                console.warn("Loading timeout: บังคับปิดหน้าจอโหลดเนื่องจากรอนานเกินไป");
-            }, 8000);
+            console.log("Loading started (Overlay disabled to prevent freezing)"); 
         }
-
         function hideLoading() { 
-            if (loadingTimeout) clearTimeout(loadingTimeout);
-            document.getElementById('loadingOverlay').classList.add('hidden'); 
+            console.log("Loading finished"); 
         }
 
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
