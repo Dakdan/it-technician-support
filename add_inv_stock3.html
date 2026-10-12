@@ -7,71 +7,142 @@
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <link rel="manifest" href="./manifest.json">[cite: 7]
-    <meta name="theme-color" content="#ff1493">[cite: 7]
-    <meta name="mobile-web-app-capable" content="yes">[cite: 7]
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ff1493">
+    <meta name="mobile-web-app-capable" content="yes">
     
     <!-- รองรับ iOS Safari -->
-    <meta name="apple-mobile-web-app-capable" content="yes">[cite: 7]
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">[cite: 7]
-    <meta name="apple-mobile-web-app-title" content="IT Asset">[cite: 7]
-    <link rel="apple-touch-icon" href="./logo512.png">[cite: 7]
-    <link rel="icon" type="image/png" href="./logo005v1.png">[cite: 7]
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="IT Asset">
+    <link rel="apple-touch-icon" href="./logo512.png">
+    <link rel="icon" type="image/png" href="./logo005v1.png">
 
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">[cite: 7]
-    <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>[cite: 7]
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">[cite: 7]
-    <script src="https://cdn.tailwindcss.com"></script>[cite: 7]
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>[cite: 7]
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>[cite: 7]
-    <script src="https://unpkg.com/html5-qrcode"></script>[cite: 7]
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">[cite: 7]
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">[cite: 7]
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>[cite: 7]
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     
     <style>
         :root {
+            --pink-soft: #fff0f5;
+            --pink-light: #ffb6c1;
+            --pink-primary: #ff85a2;
+            --pink-dark: #d63384;
+            --pink-neon: #ff1493;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray-text: #444444;
+            --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
+            --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
+            
             --primary-color: #ec4899;      
             --secondary-color: #f472b6;    
             --accent-color: #8b5cf6;       
             --bg-color: #fdf2f8;           
             --text-main: #374151;
-            --white: #ffffff;
             --border-color: #fbcfe8;
             --shadow-soft: 0 10px 25px -5px rgba(236, 72, 153, 0.15), 0 8px 10px -6px rgba(236, 72, 153, 0.1);
         }
 
+        html, body {
+            overscroll-behavior-y: none; 
+            overscroll-behavior-x: none;
+        }
+
         * {
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Kanit', 'Sarabun', 'Inter', sans-serif;
             letter-spacing: 0.01em;
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-color) 0%, #fff 50%, #fef7ff 100%);
+            background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
             min-height: 100vh;
-            color: var(--text-main);
+            color: var(--gray-text);
+            padding-bottom: 90px; 
             position: relative;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        body::before {
+            content: "UDH-IT TECHNICIAN MAINTENANCE & SUPPORT ";
+            position: fixed;
+            top: -50%;  
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            transform: rotate(-30deg);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            font-size: 5vw; 
+            font-weight: 900;
+            line-height: 2.5; 
+            z-index: -1;
+            pointer-events: none;
+            color: rgba(240, 240, 240, 0.4); 
+            text-shadow: -1px -1px 1px rgba(255, 255, 255, 0.9), 1px  1px 1px rgba(0, 0, 0, 0.15);
+        }
+
+        .app-header {
+            background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
+            backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            border-bottom: 6px solid var(--pink-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
+        }
+        .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white); }
+        .org-title { color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); font-weight: 700; line-height: 1.2; }
+        .org-subtitle { color: #f8f9fa; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: 400; line-height: 1.2; }
+        .user-name { font-weight: 700; color: var(--pink-dark); text-shadow: 1px 1px 1px rgba(255,255,255,0.9); }
+
+        .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-bottom: 3px solid var(--pink-primary); padding-bottom: 8px; line-height: 1.4; }
+
+        .menu-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 133, 162, 0.15);
+            box-shadow: var(--shadow-sm);
+            padding: 22px 12px;
+            text-align: center;
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu-card:hover, .menu-card:active { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--pink-primary); }
+        .menu-icon { font-size: 2.25rem; margin-bottom: 12px; transition: transform 0.3s; }
+        .menu-card:hover .menu-icon { transform: scale(1.12); }
+        .menu-title { font-weight: 500; color: #2c2c2c; line-height: 1.4; word-wrap: break-word; }
+        .menu-desc { color: #777777; margin-top: 6px; line-height: 1.3; }
+
+        img.menu-icon {
+            width: 62px; height: 62px; object-fit: cover; border-radius: 50%;
+            border: 3px solid var(--pink-light); padding: 3px; background-color: var(--white);
+            box-shadow: 0 4px 10px rgba(214, 51, 132, 0.12); display: inline-block; margin-bottom: 12px; transition: transform 0.3s ease;
+        }
+        .menu-card:hover img.menu-icon { transform: scale(1.12); border-color: var(--pink-primary); box-shadow: 0 6px 15px rgba(214, 51, 132, 0.22); }
 
         .sparkle-glow {
             text-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
-        }
-
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 9vw;
-            color: rgba(236, 72, 153, 0.035);
-            font-weight: 700;
-            z-index: 0;
-            pointer-events: none;
-            white-space: nowrap;
-            user-select: none;
-            letter-spacing: 0.1em;
         }
 
         .spinner {
@@ -108,6 +179,33 @@
             white-space: nowrap;
         }
 
+        /* Mobile Card View for Tables on Smartphones */
+        @media (max-width: 640px) {
+            .responsive-card-table table,
+            .responsive-card-table tbody,
+            .responsive-card-table tr,
+            .responsive-card-table td {
+                display: block;
+                width: 100%;
+            }
+            .responsive-card-table thead {
+                display: none;
+            }
+            .responsive-card-table tr {
+                margin-bottom: 0.75rem;
+                background-color: #ffffff;
+                border: 1px solid #f3e8ff;
+                border-radius: 1rem;
+                padding: 0.75rem;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            }
+            .responsive-card-table td {
+                text-align: left !important;
+                padding: 0.35rem 0.25rem;
+                border: none !important;
+            }
+        }
+
         @media print {
             body.printing-receipt @page { size: 80mm auto; margin: 0; }
             body.printing-receipt, body.printing-receipt * { visibility: hidden !important; }
@@ -138,40 +236,23 @@
 </head>
     <body class="relative min-h-screen pb-12">
     
-        <div class="watermark">IT UDON HOSP ✨</div>[cite: 7]
-    
-        <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
-            <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center">
-                    <div class="relative">
-                        <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                        <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
-                    </div>
-                    <div>
-                        <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
-                            ✨ คลังครุภัณฑ์คอมพิวเตอร์
-                        </h1>
-                        <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
-                        <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-                    </div>
+        <header class="app-header flex items-center justify-between">
+            <div class="flex items-center">
+                <img src="./logo005v1.png" alt="Logo" class="header-logo mr-3" onerror="this.src='https://placehold.co/45x45/ff1493/ffffff?text=IT'">
+                <div>
+                    <div class="org-title text-sm md:text-base">✨ IT SUPPORT & ASSET APP</div>
+                    <div class="org-subtitle text-xs">กลุ่มงาน: เทคโนโลยีสารสนเทศทางการแพทย์</div>
+                    <div class="org-subtitle text-[11px]">โรงพยาบาลอุดรธานี (UDONTHANI HOSPITAL)</div>
                 </div>
-    
-                <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
-                    <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
-                        👤
-                    </div>
-                    <div class="text-left">
-                        <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
-                        <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
-                            <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT USER</span>
-                            <span id="headerUserPNText"></span>
-                        </p>
-                    </div>
-                    <!-- ปุ่ม Logout เรียกใช้ฟังก์ชันจาก auth-check.js -->
-                    <button onclick="closeWindow()" title="MENU" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
-                        <i data-lucide="log-out" class="w-4 h-4">❌️</i>
-                    </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-right hidden sm:block">
+                    <p id="headerDisplayName" class="user-name text-xs md:text-sm">-</p>
+                    <p id="headerUserPNText" class="text-[10px] text-pink-700 font-medium"></p>
                 </div>
+                <button onclick="closeWindow()" title="MENU" class="bg-pink-500 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
+                    <i data-lucide="log-out" class="w-4 h-4">❌</i>
+                </button>
             </div>
         </header>
     
@@ -292,7 +373,7 @@
                         <i data-lucide="table" class="w-4 h-4 text-pink-500"></i> ข้อมูลรายการตามตัวกรอง (รวมทั้งหมด <span id="dashFilteredCount" class="text-pink-600 font-extrabold text-base">0</span> รายการ)
                     </h4>
                 </div>
-                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm bg-white">
+                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm bg-white responsive-card-table">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
                             <tr class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold uppercase tracking-wider">
@@ -322,7 +403,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60 mb-4">
+                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60 mb-4 responsive-card-table">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-pink-100/70 text-pink-700 font-semibold text-xs uppercase tracking-wider">
@@ -356,7 +437,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60 mb-4">
+                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60 mb-4 responsive-card-table">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-purple-100/70 text-purple-700 font-semibold text-xs uppercase tracking-wider">
@@ -431,7 +512,7 @@
                         <p id="printTitle" class="text-sm text-pink-600 font-medium">รายการเอกสารสำหรับพิมพ์รายงาน A4</p>
                         <p class="text-[11px] text-gray-400" id="printTimestamp">-</p>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto responsive-card-table">
                         <table class="w-full text-xs border-collapse border border-gray-300">
                             <thead>
                                 <tr id="printTableHeader" class="bg-gray-100 text-gray-700">
@@ -519,7 +600,8 @@
             <button type="button" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full py-3 rounded-2xl text-xs font-semibold shadow-md" onclick="closeModal('alertModal')">ตกลง</button>
         </div>
     </div>
-     <!-- Loading Overlay -->
+
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
         <div class="spinner"></div>
         <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
@@ -527,12 +609,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
-     <!-- <script src="auth-check.js"></script>  1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
-    <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
-    <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
-    <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
-   
+    <!-- JS Modules -->
+    <script src="indexeddb.js"></script>
+    <script src="app-core.js"></script>
+    <script src="invstock.js"></script>
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec';
@@ -549,16 +629,14 @@
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
 
-        // โครงสร้างการเก็บฟิลเตอร์ (แก้ไขให้รองรับอายุ)
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
         let filteredDashboardData = [];
 
         let currentInventoryStatusFilter = 'ALL';
-        let expandedInventoryGroups = {}; // Stores group toggle states (default = collapsed)
+        let expandedInventoryGroups = {};
 
         async function fetchAPI(url, options = {}) {
             try {
-                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
                 const fetchOptions = { redirect: 'follow', ...options };
                 const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -626,7 +704,6 @@
         }
 
         async function loadDashboardStats(forceRefresh = false) {
-            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
@@ -641,7 +718,6 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
-                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
                 const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
@@ -653,8 +729,6 @@
                 globalPeripheralDashboardData = resPeriDash;
 
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
-                
-                // ส่ง resPeriDash เข้าไปประมวลผลแสดงผลใน DOM ด้วย
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
@@ -759,15 +833,13 @@
             loadDashboardStats();
         }
 
-        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
+            loadDashboardStats();
         }
 
-        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -812,14 +884,12 @@
             let totalPeri = 0;
             let periBreakdownHtml = '';
 
-            // ใช้ข้อมูลจาก getPeripheralDashboard ที่ส่งเข้ามา (periDash)
             const activePeriDash = periDash || globalPeripheralDashboardData;
             if (activePeriDash && activePeriDash.summary) {
                 const periSummary = activePeriDash.summary;
                 totalPeri = periSummary.totalQuantity ?? periSummary.totalRecords ?? 0;
                 
                 const deviceTypes = periSummary.byDeviceType || {};
-                const qtyRanges = periSummary.byQtyPerRecord || {};
 
                 Object.keys(deviceTypes).forEach(k => {
                     periBreakdownHtml += `
@@ -874,7 +944,6 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // Render Dashboard Table Grouped by Asset_Type_Name
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
             tbody.innerHTML = '';
@@ -915,7 +984,8 @@
                 groupItems.forEach((item) => {
                     globalIdx++;
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-pink-50/40 border-b border-gray-100 transition-colors";
+                    tr.className = "hover:bg-pink-50/40 border-b border-gray-100 transition-colors cursor-pointer";
+                    tr.onclick = () => openInventoryItemDetailModal(item);
                     
                     const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
                     const serial = item.Asset_Serial || item.Serial || "-";
@@ -980,7 +1050,6 @@
         }
 
         async function loadStockInRecords(forceRefresh = false) {
-            // ระบบ Caching
             if (!forceRefresh && globalStockInRecords.length > 0) {
                 renderStockInTable(globalStockInRecords);
                 return;
@@ -1059,8 +1128,7 @@
             renderStockInTable(globalStockInRecords);
         }
 
-       async function loadStockOutRecords(forceRefresh = false) {
-            // ระบบ Caching
+        async function loadStockOutRecords(forceRefresh = false) {
             if (!forceRefresh && globalStockOutRecords.length > 0) {
                 renderStockOutTable(globalStockOutRecords);
                 return;
@@ -1140,7 +1208,6 @@
         }
 
         async function loadInventoryRecords(forceRefresh = false) {
-            // ระบบ Caching
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 renderInventoryStatusBar();
                 filterInventoryRecords();
@@ -1149,7 +1216,6 @@
 
             showLoading();
             try {
-                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
                 const [data, resPeri] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
@@ -1271,7 +1337,7 @@
                 bodyDiv.className = isExpanded ? 'block' : 'hidden';
 
                 let tableHtml = `
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto responsive-card-table">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="bg-indigo-100/40 text-indigo-800 font-semibold uppercase tracking-wider text-[11px]">
@@ -1533,7 +1599,7 @@
                 `;
             }
 
-            html += `<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ</h4>`;
+            html += `<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ (คลิกที่แถบรายการเพื่อดูรายละเอียด)</h4>`;
             
             if (Array.isArray(record.items) && record.items.length > 0) {
                 const groupedItems = {};
@@ -1547,7 +1613,7 @@
                 });
 
                 html += `
-                    <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+                    <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm responsive-card-table">
                         <table class="w-full text-left text-xs whitespace-nowrap">
                             <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
                                 <tr>
@@ -1581,6 +1647,9 @@
 
                     list.forEach(({ item, enrichedItem }) => {
                         subGlobalIdx++;
+                        const fullItemData = Object.keys(enrichedItem).length > 0 ? enrichedItem : item;
+                        const itemJsonString = JSON.stringify(fullItemData).replace(/"/g, '&quot;');
+
                         const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
                         const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || '-';
                         const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || '-';
@@ -1589,7 +1658,7 @@
                         const rawImgSource = getItemImageSource(item) || getItemImageSource(enrichedItem);
                         const extractedImg = getDriveImageUrl(rawImgSource);
                         const imgHtml = extractedImg 
-                            ? `<img src="${extractedImg}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 cursor-pointer mx-auto hover:opacity-80" onclick="window.open('${extractedImg}','_blank')" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
+                            ? `<img src="${extractedImg}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 cursor-pointer mx-auto hover:opacity-80" onclick="event.stopPropagation(); openInventoryItemDetailModal(${itemJsonString})" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
                             : `<span class="text-gray-300">-</span>`;
 
                         let periHtml = '';
@@ -1605,7 +1674,7 @@
                         }
 
                         html += `
-                            <tr class="hover:bg-gray-50 transition-colors">
+                            <tr class="hover:bg-pink-50/60 transition-colors cursor-pointer" onclick="openInventoryItemDetailModal(${itemJsonString})">
                                 <td class="p-3 text-center font-bold text-gray-500 align-top">${subGlobalIdx}</td>
                                 <td class="p-3 text-center align-top">${imgHtml}</td>
                                 <td class="p-3 text-pink-600 font-bold align-top">${aId}</td>
@@ -1810,6 +1879,7 @@
             if (window.lucide) lucide.createIcons();
             loadDashboardStats();
         });
+
         function closeWindow() {
             if (window.history.length > 1) {
                 window.history.back();
