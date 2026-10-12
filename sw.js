@@ -15,6 +15,7 @@ const urlsToCache = [
   './indexeddb.js',
   './invstock.js',
   './manifest.json',
+  './favicon.ico',
   './logo512.png',
   './logo003v11.png'
 ];
