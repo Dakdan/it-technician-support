@@ -3,29 +3,32 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#ff1493">
-    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">[cite: 7]
+    <meta name="theme-color" content="#ff1493">[cite: 7]
+    <meta name="mobile-web-app-capable" content="yes">[cite: 7]
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="IT Asset">
-    <link rel="apple-touch-icon" href="./logo512.png">
-    <link rel="icon" type="image/png" href="./logo005v1.png">
+    <!-- รองรับ iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">[cite: 7]
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">[cite: 7]
+    <meta name="apple-mobile-web-app-title" content="IT Asset">[cite: 7]
+    <link rel="apple-touch-icon" href="./logo512.png">[cite: 7]
+    <link rel="icon" type="image/png" href="./logo005v1.png">[cite: 7]
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">[cite: 7]
+    <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>[cite: 7]
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">[cite: 7]
+    <script src="https://cdn.tailwindcss.com"></script>[cite: 7]
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>[cite: 7]
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>[cite: 7]
+    <script src="https://unpkg.com/html5-qrcode"></script>[cite: 7]
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">[cite: 7]
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">[cite: 7]
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>[cite: 7]
     
     <style>
         :root {
@@ -89,6 +92,7 @@
             transition: all 0.3s ease;
         }
 
+        /* Prominent Age Highlight Badge */
         .age-badge-prominent {
             background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
             color: #ffffff;
@@ -102,77 +106,6 @@
             align-items: center;
             gap: 0.25rem;
             white-space: nowrap;
-        }
-
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr {
-                margin-bottom: 1rem;
-                background: #fff;
-                border: 1px solid #fbcfe8;
-                border-radius: 1rem;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-                padding: 0.75rem;
-            }
-            td {
-                position: relative;
-                padding-left: 45% !important;
-                text-align: right !important;
-                border: none !important;
-                border-bottom: 1px solid #f3f4f6 !important;
-                padding-top: 0.5rem !important;
-                padding-bottom: 0.5rem !important;
-            }
-            td:last-child {
-                border-bottom: none !important;
-            }
-            td::before {
-                position: absolute;
-                left: 0.75rem;
-                width: 40%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
-                color: #db2777;
-            }
-            #dashboardDataTableBody td:nth-of-type(1)::before { content: "No."; }
-            #dashboardDataTableBody td:nth-of-type(2)::before { content: "รหัส Asset / S.N."; }
-            #dashboardDataTableBody td:nth-of-type(3)::before { content: "รายละเอียด"; }
-            #dashboardDataTableBody td:nth-of-type(4)::before { content: "อายุครุภัณฑ์"; }
-            #dashboardDataTableBody td:nth-of-type(5)::before { content: "สถานะ"; }
-
-            #stockInTableBody td:nth-of-type(1)::before { content: "ลำดับ"; }
-            #stockInTableBody td:nth-of-type(2)::before { content: "เลขที่ Stock In"; }
-            #stockInTableBody td:nth-of-type(3)::before { content: "วันที่ / เวลา"; }
-            #stockInTableBody td:nth-of-type(4)::before { content: "หน่วยงาน"; }
-            #stockInTableBody td:nth-of-type(5)::before { content: "ผู้ส่งมอบ"; }
-            #stockInTableBody td:nth-of-type(6)::before { content: "จำนวนย่อย"; }
-            #stockInTableBody td:nth-of-type(7)::before { content: "สถานะลายเซ็น"; }
-            #stockInTableBody td:nth-of-type(8)::before { content: "จัดการ"; }
-
-            #stockOutTableBody td:nth-of-type(1)::before { content: "ลำดับ"; }
-            #stockOutTableBody td:nth-of-type(2)::before { content: "เลขที่ Stock Out"; }
-            #stockOutTableBody td:nth-of-type(3)::before { content: "วันที่ / เวลา"; }
-            #stockOutTableBody td:nth-of-type(4)::before { content: "หน่วยงาน"; }
-            #stockOutTableBody td:nth-of-type(5)::before { content: "ผู้ใช้งาน IT"; }
-            #stockOutTableBody td:nth-of-type(6)::before { content: "จำนวน (Out)"; }
-            #stockOutTableBody td:nth-of-type(7)::before { content: "สถานะลายเซ็น"; }
-            #stockOutTableBody td:nth-of-type(8)::before { content: "จัดการ"; }
-
-            #inventoryAccordionContainer td:nth-of-type(1)::before { content: "ลำดับ"; }
-            #inventoryAccordionContainer td:nth-of-type(2)::before { content: "ID ครุภัณฑ์"; }
-            #inventoryAccordionContainer td:nth-of-type(3)::before { content: "รายละเอียด"; }
-            #inventoryAccordionContainer td:nth-of-type(4)::before { content: "อายุครุภัณฑ์"; }
-            #inventoryAccordionContainer td:nth-of-type(5)::before { content: "สถานะ"; }
-            #inventoryAccordionContainer td:nth-of-type(6)::before { content: "รูปภาพ"; }
         }
 
         @media print {
@@ -203,64 +136,67 @@
         .print-only-receipt, .print-only-a4 { display: none; }
     </style>
 </head>
-<body class="relative min-h-screen pb-12">
-
-    <div class="watermark">IT UDON HOSP ✨</div>
-
-    <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
-        <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center">
-                <div class="relative">
-                    <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                    <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+    <body class="relative min-h-screen pb-12">
+    
+        <div class="watermark">IT UDON HOSP ✨</div>[cite: 7]
+    
+        <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
+            <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center">
+                    <div class="relative">
+                        <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
+                        <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
+                            ✨ คลังครุภัณฑ์คอมพิวเตอร์
+                        </h1>
+                        <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
+                        <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
-                        ✨ คลังครุภัณฑ์คอมพิวเตอร์
-                    </h1>
-                    <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
-                    <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+    
+                <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
+                        👤
+                    </div>
+                    <div class="text-left">
+                        <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
+                        <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
+                            <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT USER</span>
+                            <span id="headerUserPNText"></span>
+                        </p>
+                    </div>
+                    <!-- ปุ่ม Logout เรียกใช้ฟังก์ชันจาก auth-check.js -->
+                    <button onclick="closeWindow()" title="MENU" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
+                        <i data-lucide="log-out" class="w-4 h-4">❌️</i>
+                    </button>
                 </div>
             </div>
+        </header>
+    
+        <script>
+            // อัปเดตข้อมูลผู้ใช้ขึ้น UI บน Header เมื่อโหลดหน้าเว็บ
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentUser = getCurrentUser();
+                const displayNameEl = document.getElementById('headerDisplayName');
+                const userPNTextEl = document.getElementById('headerUserPNText');
+    
+                if (currentUser) {
+                    if (displayNameEl) displayNameEl.textContent = getDisplayName();
+                    if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
+                } else {
+                    if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
+                    if (userPNTextEl) userPNTextEl.textContent = "";
+                }
+    
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            });
+        </script>
 
-            <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
-                    👤
-                </div>
-                <div class="text-left">
-                    <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
-                    <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
-                        <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT USER</span>
-                        <span id="headerUserPNText"></span>
-                    </p>
-                </div>
-                <button onclick="closeWindow()" title="MENU" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
-                    <i data-lucide="log-out" class="w-4 h-4">❌️</i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = getCurrentUser();
-            const displayNameEl = document.getElementById('headerDisplayName');
-            const userPNTextEl = document.getElementById('headerUserPNText');
-
-            if (currentUser) {
-                if (displayNameEl) displayNameEl.textContent = getDisplayName();
-                if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
-            } else {
-                if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
-                if (userPNTextEl) userPNTextEl.textContent = "";
-            }
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        });
-    </script>
-
+    <!-- Navigation Bar: Sticky Top -->
     <nav class="sticky top-0 z-50 max-w-6xl mx-auto px-4 py-2 my-2 transition-all">
         <div class="glass-card rounded-2xl p-1.5 flex gap-1 shadow-md overflow-x-auto bg-white/95 backdrop-blur-md border border-pink-200">
             <button id="btnTabDashboard" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-400 shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('dashboard', event)">
@@ -281,7 +217,10 @@
         </div>
     </nav>
 
+    <!-- Main Container -->
     <main class="max-w-6xl mx-auto my-4 px-4 relative z-10">
+        
+        <!-- Tab: Dashboard -->
         <div id="tab-dashboard" class="tab-content">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-3">
@@ -298,12 +237,14 @@
                     </div>
                 </div>
 
+                <!-- Active Filters Bar -->
                 <div id="activeFiltersContainer" class="hidden mb-5 bg-pink-50/50 border border-pink-100 p-3 rounded-xl flex items-center flex-wrap gap-2">
                     <span class="text-xs font-semibold text-gray-600 flex items-center gap-1"><i data-lucide="filter" class="w-3.5 h-3.5 text-pink-500"></i> ตัวกรองปัจจุบัน:</span>
                     <div id="activeFiltersList" class="flex flex-wrap gap-2"></div>
                     <button onclick="clearDashboardFilters()" class="text-xs text-red-500 hover:text-red-700 font-medium ml-2 underline decoration-dashed">ล้างตัวกรองทั้งหมด</button>
                 </div>
 
+                <!-- Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div class="bg-gradient-to-br from-pink-50 to-pink-100 p-5 rounded-2xl border border-pink-200 shadow-sm relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 opacity-10"><i data-lucide="package" class="w-20 h-20 text-pink-900"></i></div>
@@ -317,6 +258,7 @@
                     </div>
                 </div>
 
+                <!-- Breakdown Grids -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div class="border border-gray-200 rounded-xl p-4 bg-white/70 shadow-sm">
                         <h4 class="font-bold text-sm text-gray-700 mb-3 border-b border-gray-100 pb-2 flex justify-between items-center">
@@ -344,6 +286,7 @@
                     </div>
                 </div>
 
+                <!-- Data Table for Dashboard -->
                 <div class="flex justify-between items-center mb-3">
                     <h4 class="font-bold text-sm text-gray-700 flex items-center gap-1.5">
                         <i data-lucide="table" class="w-4 h-4 text-pink-500"></i> ข้อมูลรายการตามตัวกรอง (รวมทั้งหมด <span id="dashFilteredCount" class="text-pink-600 font-extrabold text-base">0</span> รายการ)
@@ -368,6 +311,7 @@
             </div>
         </div>
 
+        <!-- Tab: Stock In List -->
         <div id="tab-stockInList" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <div class="flex justify-between items-center mb-4 border-b border-dashed border-pink-200 pb-3">
@@ -401,6 +345,7 @@
             </div>
         </div>
 
+        <!-- Tab: Stock Out List -->
         <div id="tab-stockOutList" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <div class="flex justify-between items-center mb-4 border-b border-dashed border-purple-200 pb-3">
@@ -434,6 +379,7 @@
             </div>
         </div>
 
+        <!-- Tab: Inventory -->
         <div id="tab-inventory" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <div class="flex justify-between items-center mb-4 border-b border-dashed border-indigo-200 pb-3">
@@ -445,6 +391,7 @@
                     </button>
                 </div>
 
+                <!-- Status Filter Bar -->
                 <div class="mb-4 bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
                     <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto" id="inventoryStatusFilterBar"></div>
                     <div class="relative w-full md:w-72 shrink-0">
@@ -458,10 +405,12 @@
                     <span class="bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-full">พบทั้งหมด <strong id="inventorySearchCount">0</strong> รายการ</span>
                 </div>
 
+                <!-- Foldable Accordion Container -->
                 <div id="inventoryAccordionContainer" class="space-y-3"></div>
             </div>
         </div>
 
+        <!-- Tab: Reports -->
         <div id="tab-reports" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
                 <h3 class="text-pink-600 font-bold mb-4 text-base md:text-lg border-b border-dashed border-pink-200 pb-3 flex items-center gap-2">
@@ -504,6 +453,7 @@
         </div>
     </main>
 
+    <!-- Modal: Record Detail -->
     <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
             <div class="print-only-receipt text-center mb-4 border-b border-dashed border-gray-400 pb-3">
@@ -530,6 +480,7 @@
         </div>
     </div>
 
+    <!-- Modal: Single Inventory Item Detail Popup -->
     <div id="inventoryItemDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-lg w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
@@ -542,6 +493,7 @@
         </div>
     </div>
 
+    <!-- Modal: A4 Formal Report Preview -->
     <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
             <div class="flex justify-between items-center border-b border-gray-300 pb-4 mb-6 no-print">
@@ -559,6 +511,7 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
     <div id="alertModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center">
             <h3 id="alertTitle" class="text-pink-600 font-bold text-base mb-2 flex items-center justify-center gap-1.5"><i data-lucide="bell" class="w-4 h-4"></i> แจ้งเตือน ✨</h3>
@@ -566,16 +519,20 @@
             <button type="button" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full py-3 rounded-2xl text-xs font-semibold shadow-md" onclick="closeModal('alertModal')">ตกลง</button>
         </div>
     </div>
-
+     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
         <div class="spinner"></div>
         <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="indexeddb.js"></script>
-    <script src="app-core.js"></script>
-    <script src="invstock.js"></script>
+
+  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
+     <!-- <script src="auth-check.js"></script>  1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
+    <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
+    <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
+    <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
+   
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec';
@@ -592,14 +549,16 @@
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
 
+        // โครงสร้างการเก็บฟิลเตอร์ (แก้ไขให้รองรับอายุ)
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
         let filteredDashboardData = [];
 
         let currentInventoryStatusFilter = 'ALL';
-        let expandedInventoryGroups = {};
+        let expandedInventoryGroups = {}; // Stores group toggle states (default = collapsed)
 
         async function fetchAPI(url, options = {}) {
             try {
+                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
                 const fetchOptions = { redirect: 'follow', ...options };
                 const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -667,6 +626,7 @@
         }
 
         async function loadDashboardStats(forceRefresh = false) {
+            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
@@ -675,6 +635,13 @@
 
             showLoading();
             try {
+                const queryParams = new URLSearchParams();
+                queryParams.append('action', 'getDashboardStats');
+                if (currentDashboardFilters.invStatus) queryParams.append('invStatus', currentDashboardFilters.invStatus);
+                if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
+                if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
+
+                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
                 const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
@@ -686,6 +653,8 @@
                 globalPeripheralDashboardData = resPeriDash;
 
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
+                
+                // ส่ง resPeriDash เข้าไปประมวลผลแสดงผลใน DOM ด้วย
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
@@ -790,13 +759,15 @@
             loadDashboardStats();
         }
 
+        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats();
+            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
         }
 
+        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
@@ -841,13 +812,15 @@
             let totalPeri = 0;
             let periBreakdownHtml = '';
 
+            // ใช้ข้อมูลจาก getPeripheralDashboard ที่ส่งเข้ามา (periDash)
             const activePeriDash = periDash || globalPeripheralDashboardData;
             if (activePeriDash && activePeriDash.summary) {
                 const periSummary = activePeriDash.summary;
                 totalPeri = periSummary.totalQuantity ?? periSummary.totalRecords ?? 0;
                 
                 const deviceTypes = periSummary.byDeviceType || {};
-                
+                const qtyRanges = periSummary.byQtyPerRecord || {};
+
                 Object.keys(deviceTypes).forEach(k => {
                     periBreakdownHtml += `
                         <div class="flex justify-between items-center p-1.5 rounded hover:bg-purple-100/50">
@@ -901,6 +874,7 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        // Render Dashboard Table Grouped by Asset_Type_Name
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
             tbody.innerHTML = '';
@@ -1006,6 +980,7 @@
         }
 
         async function loadStockInRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalStockInRecords.length > 0) {
                 renderStockInTable(globalStockInRecords);
                 return;
@@ -1084,7 +1059,8 @@
             renderStockInTable(globalStockInRecords);
         }
 
-        async function loadStockOutRecords(forceRefresh = false) {
+       async function loadStockOutRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalStockOutRecords.length > 0) {
                 renderStockOutTable(globalStockOutRecords);
                 return;
@@ -1164,6 +1140,7 @@
         }
 
         async function loadInventoryRecords(forceRefresh = false) {
+            // ระบบ Caching
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 renderInventoryStatusBar();
                 filterInventoryRecords();
@@ -1172,6 +1149,7 @@
 
             showLoading();
             try {
+                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
                 const [data, resPeri] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
@@ -1652,8 +1630,7 @@
             const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
             const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
 
-            const borderStyle = type === 'stockIn' ? 'border-emerald-200' : 'border-purple-200';
-            const textStyle = type === 'stockIn' ? 'text-emerald-700' : 'text-purple-700';
+            const themeColorClass = type === 'stockIn' ? 'emerald' : 'purple';
 
             html += `
                 <div class="mt-8 break-inside-avoid">
@@ -1665,14 +1642,14 @@
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${roleIT}</p>
                             <p class="font-bold text-gray-800 text-base">${itUserText}</p>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed ${borderStyle} shadow-sm relative">
+                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-${themeColorClass}-200 shadow-sm relative">
                             <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-3">${roleUser}</p>
             `;
             
             if (signatureUrl && String(signatureUrl).trim().length > 5) {
                 html += `
                     <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
-                    <p class="font-bold ${textStyle} text-sm">(${userNameText})</p>
+                    <p class="font-bold text-${themeColorClass}-700 text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
                 `;
             } else {
@@ -1680,7 +1657,7 @@
                     <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
                         <p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>
                     </div>
-                    <p class="font-bold ${textStyle} text-sm">(${userNameText})</p>
+                    <p class="font-bold text-${themeColorClass}-700 text-sm">(${userNameText})</p>
                     <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
                 `;
             }
@@ -1833,7 +1810,6 @@
             if (window.lucide) lucide.createIcons();
             loadDashboardStats();
         });
-
         function closeWindow() {
             if (window.history.length > 1) {
                 window.history.back();
@@ -1846,6 +1822,7 @@
                 showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
             }, 300);
         }
+
     </script>
 </body>
 </html>
