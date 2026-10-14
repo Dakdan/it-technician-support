@@ -497,36 +497,36 @@
                         const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                         const myUid = activeUser ? String(activeUser.USERID || '').trim() : '';
 
-                        // 2. เช็คว่าเคยอ่านในเครื่อง/session นี้หรือยัง
+                        // 2. เช็คประวัติการอ่านจาก localStorage
                         let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
                         const alertKey = getAlertUniqueKey(alertItem);
                         
-                        // ถ้ายังไม่ได้อ่าน (สถานะไม่ใช่ CLOSED หรือ ยังไม่มีในประวัติ History ของเครื่อง)
+                        // ถ้าแอดมินยังไม่ได้ปิด (CLOSED) ในระบบ และ user ยังไม่เคยอ่านบนอุปกรณ์นี้
                         if (currentStatus !== 'CLOSED' && !readHistory.includes(alertKey)) {
                             
-                            // บันทึกประวัติการอ่านลงเครื่องผู้ใช้ (มีประโยชน์มากเวลาเป็น Alert แบบ ALL)
+                            // บันทึกประวัติลงเครื่องของ User
                             readHistory.push(alertKey);
                             localStorage.setItem('readAlertsHistory', JSON.stringify(readHistory));
                             
-                            // อัปเดต UI ทันที
+                            // อัปเดต UI หน้าจอทันที (เปลี่ยนสี ลบป้ายแจ้งเตือน)
                             renderNotificationsListBody();
                             updateUnreadCounts();
-                            fetchDashboardData(); 
                             
-                            // 3. ยิง API บันทึกสถานะและส่ง userId ไปลง Audit
+                            // นำ fetchDashboardData() ออก เพราะ Backend ไม่ได้เปลี่ยน STATUS แล้ว ไม่ต้องดึงใหม่ให้เปลืองโหลด
+                            
+                            // 3. ยิง API เพื่อไปบันทึกลงชีต AUDIT_ALERT_LOG อย่างเดียว
                             fetch(API_URL, {
                                 method: 'POST',
                                 body: JSON.stringify({
                                     action: 'updateAlertStatus',
-                                    status: 'CLOSED', 
                                     alertData: alertItem,
-                                    userId: myUid // ส่งพารามิเตอร์นี้ไปให้ code.gs
+                                    userId: myUid // ส่งรหัสคนที่อ่านไปลง Audit
                                 }),
                                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                             })
                             .then(response => response.json())
-                            .then(data => { console.log("Alert read status updated:", data); })
-                            .catch(e => console.error("Update status failed:", e));
+                            .then(data => { console.log("Audit log success:", data); })
+                            .catch(e => console.error("Audit log failed:", e));
                         }
                         currentDetailAlertIndex = -1;
                     }
