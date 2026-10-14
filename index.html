@@ -35,18 +35,20 @@
             --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
             --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
         }
-
+          /* นำไปใส่ในไฟล์ CSS หลัก หรือใส่ใน <style> ของหน้า main_menu.html */
         body {
             font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
+            background: linear-gradient(180deg, #ff1493 0%, #ffffff 100%);
             min-height: 100vh;
             margin: 0;
+            background-attachment: fixed; /* ล็อกพื้นหลังให้อยู่กับที่เมื่อสกรอลล์ */
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow-x: hidden;
         }
+      
 
         body::before {
             content: "IT UDON HOSP";
