@@ -537,17 +537,25 @@
             if (activeUser) {
                 const displayName = typeof getDisplayName === 'function' ? getDisplayName() : (activeUser.UserName || "ผู้ใช้งาน");
                 authZone.innerHTML = `
-                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ${displayName}</div>
-                    <button onclick="logout()" class="btn btn-sm btn-outline-light rounded-pill mt-1" style="font-size: 0.7rem; font-weight: 500;">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
-                    </button>
+                    <div class="d-flex flex-column align-items-end" style="background: rgba(255, 255, 255, 0.95); padding: 5px 12px; border-radius: 14px; border: 1px solid rgba(255, 133, 162, 0.4); box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                        <div class="user-name" style="color: var(--pink-dark); font-size: 0.85rem; font-weight: 700; text-shadow: none;">
+                            <i class="fa-solid fa-circle-user me-1 text-pink-primary"></i> ${displayName}
+                        </div>
+                        <button onclick="logout()" class="btn btn-sm btn-outline-danger rounded-pill mt-1 py-0 px-2.5" style="font-size: 0.68rem; font-weight: 600; border-color: var(--pink-primary); color: var(--pink-dark);">
+                            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>ออกจากระบบ
+                        </button>
+                    </div>
                 `;
             } else {
                 authZone.innerHTML = `
-                    <div class="user-name text-white"><i class="fa-solid fa-circle-user me-1 text-white"></i> ผู้มาเยือน</div>
-                    <button onclick="goToLogin()" class="btn btn-sm btn-danger rounded-pill mt-1 px-3" style="font-size: 0.7rem; font-weight:600; background-color: var(--pink-dark);">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i> เข้าสู่ระบบ
-                    </button>
+                    <div class="d-flex flex-column align-items-end" style="background: rgba(255, 255, 255, 0.95); padding: 5px 12px; border-radius: 14px; border: 1px solid rgba(255, 133, 162, 0.4); box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                        <div class="user-name" style="color: #666666; font-size: 0.85rem; font-weight: 700; text-shadow: none;">
+                            <i class="fa-solid fa-circle-user me-1 text-secondary"></i> ผู้มาเยือน
+                        </div>
+                        <button onclick="goToLogin()" class="btn btn-sm text-white rounded-pill mt-1 py-0 px-2.5" style="font-size: 0.68rem; font-weight: 600; background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); border: none;">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i>เข้าสู่ระบบ
+                        </button>
+                    </div>
                 `;
             }
         }
