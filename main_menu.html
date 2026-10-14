@@ -100,10 +100,43 @@
             z-index: 1000;
             box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
         }
-        .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white); }
-        .org-title { color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); font-weight: 700; line-height: 1.2; }
-        .org-subtitle { color: #f8f9fa; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: 400; line-height: 1.2; }
-        .user-name { font-weight: 700; color: var(--pink-dark); text-shadow: 1px 1px 1px rgba(255,255,255,0.9); }
+           .header-logo { 
+                width: 45px; 
+                height: 45px; 
+                object-fit: contain; 
+                border-radius: 50%; 
+                border: 2px solid var(--white); 
+                padding: 2px; 
+                background-color: var(--white); 
+            }
+            
+            .org-title { 
+                color: #ffffff; 
+                font-size: 0.95rem; /* ปรับขนาดชื่อหลักให้เด่นพอดี */
+                text-shadow: 1px 1px 3px rgba(0,0,0,0.4); 
+                font-weight: 700; 
+                line-height: 1.2; 
+            }
+            
+            /* ปรับขนาดตัวหนังสือ Sub ให้เล็กลง */
+            .org-subtitle { 
+                color: #f8f9fa; 
+                font-size: 0.75rem; /* ขนาดประมาณ 12px ช่วยให้เล็กลง อ่านง่าย ไม่แน่นเกินไป */
+                opacity: 0.9;       /* ปรับความโปร่งแสงเล็กน้อยให้ดูเป็นตัวรอง */
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
+                font-weight: 400; 
+                line-height: 1.25; 
+            }
+            
+            .user-name { 
+                font-weight: 700; 
+                color: var(--pink-dark); 
+                text-shadow: 1px 1px 1px rgba(255,255,255,0.9); 
+            }
+            
+            .sparkle-glow {
+                text-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+            }
 
         .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-bottom: 3px solid var(--pink-primary); padding-bottom: 8px; line-height: 1.4; }
         
