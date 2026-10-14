@@ -116,17 +116,16 @@
         
         .org-title { 
             color: #ffffff; 
-            font-size: 0.95rem; /* ปรับขนาดชื่อหลักให้เด่นพอดี */
+            font-size: 0.95rem; 
             text-shadow: 1px 1px 3px rgba(0,0,0,0.4); 
             font-weight: 700; 
             line-height: 1.2; 
         }
         
-        /* ปรับขนาดตัวหนังสือ Sub ให้เล็กลง */
         .org-subtitle { 
             color: #f8f9fa; 
-            font-size: 0.75rem; /* ขนาดประมาณ 12px ช่วยให้เล็กลง อ่านง่าย ไม่แน่นเกินไป */
-            opacity: 0.9;       /* ปรับความโปร่งแสงเล็กน้อยให้ดูเป็นตัวรอง */
+            font-size: 0.75rem; 
+            opacity: 0.9;       
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
             font-weight: 400; 
             line-height: 1.25; 
@@ -202,14 +201,12 @@
                 box-shadow: 0 6px 16px rgba(236, 72, 153, 0.12);
             }
 
-            /* Group Header Row (td with colspan) */
             .responsive-card-table tr td[colspan] {
                 padding: 0.25rem !important;
                 border: none !important;
                 text-align: left !important;
                 display: block;
             }
-            /* Styling the row that behaves as a group header */
             .responsive-card-table tr:has(td[colspan]) {
                 padding: 0.75rem 1rem;
                 border-radius: 0.75rem;
@@ -222,7 +219,6 @@
                 box-shadow: none;
             }
 
-            /* Normal Data Cells */
             .responsive-card-table td:not([colspan]) {
                 display: flex;
                 justify-content: space-between;
@@ -238,7 +234,6 @@
                 padding-bottom: 0 !important;
             }
 
-            /* Label using pseudo-element */
             .responsive-card-table td:not([colspan])::before {
                 font-size: 0.75rem;
                 font-weight: 700;
@@ -252,13 +247,11 @@
                 box-shadow: 0 1px 2px rgba(214, 51, 132, 0.05);
             }
 
-            /* Right-align content inside td */
             .responsive-card-table td:not([colspan]) > * {
                 text-align: right;
                 max-width: 65%;
             }
 
-            /* Specific Column Adjustments (Details, Actions) */
             .col-detail-mobile, 
             #dashboardDataTableBody td:not([colspan]):nth-child(3),
             #inventoryAccordionContainer table tbody td:not([colspan]):nth-child(3),
@@ -296,7 +289,6 @@
                 justify-content: center;
             }
             
-            /* Center Image Column */
             #inventoryAccordionContainer table tbody td:not([colspan]):nth-child(6) {
                 align-items: center;
             }
@@ -353,7 +345,6 @@
             #printTableBody td:not([colspan]):nth-child(5)::before { content: "สถานะ"; }
             #printTableBody td:not([colspan]):nth-child(6)::before { content: "พิมพ์ A4"; }
             
-            /* Make text inline elements align correctly inside flex */
             .responsive-card-table td:not([colspan]) span {
                 display: inline-block;
             }
@@ -395,15 +386,11 @@
             <img src="./logo512.png" alt="Logo" class="header-logo me-2 mr-3" onerror="this.src='https://via.placeholder.com/45?text=IT'">
             <div>
                 <div class="org-title">คลังคอมพิวเตอร์</div>
-                
                 <div class="org-subtitle">IT UDH App</div>
             </div>
         </div>
         <div class="text-end text-right flex items-center gap-2">
-        <!-- รวมโซนแสดงชื่อผู้ใช้และปุ่มปิดไว้ในกรอบเดียวกัน (Responsive สวยงาม ไม่ล้นจอ Smartphone) -->
         <div class="flex items-center gap-1.5 md:gap-2 bg-white/95 backdrop-blur-md p-1.5 pl-2.5 rounded-2xl border border-pink-300 shadow-md max-w-[200px] sm:max-w-[260px] md:max-w-none">
-            
-            <!-- โซนชื่อผู้ใช้และสถานะ (ตัดคำอัตโนมัติหากชื่อยาวเกินไป) -->
             <div id="authZone" class="flex flex-col text-right min-w-0 flex-1 leading-tight">
                 <div class="flex items-center justify-end gap-1 min-w-0">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Online"></span>
@@ -411,16 +398,11 @@
                 </div>
                 <span id="headerUserPNText" class="text-[9px] sm:text-[10px] font-semibold text-gray-500 truncate"></span>
             </div>
-        
-            <!-- เส้นคั่นแนวตั้ง -->
             <div class="h-6 w-[1px] bg-pink-200 shrink-0"></div>
-        
-            <!-- ปุ่มปิดหน้าต่าง (สไตล์มินิมอล ปุ่มขนาดพอดีไม่ล้นทับ) -->
             <button onclick="closeWindow()" title="ปิดหน้าต่าง / กลับเมนู" class="flex items-center gap-1 bg-pink-50 hover:bg-rose-100 text-rose-600 active:scale-95 px-2 py-1 rounded-xl transition-all border border-pink-200 shrink-0 text-[11px] sm:text-xs font-bold">
                 <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[9px] font-extrabold">✕</span>
                 <span>ปิด</span>
             </button>
-        
         </div>
     </div>
     </header>
@@ -692,9 +674,10 @@
             </div>
         </div>
     </main>
+
     <!-- Modal: Record Detail -->
     <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
+        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white flex flex-col">
             <div class="print-only-receipt text-center mb-4 border-b border-dashed border-gray-400 pb-3">
                 <h2 class="text-sm font-bold text-gray-900 mb-0.5">โรงพยาบาลอุดรธานี</h2>
                 <p class="text-[10px] text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
@@ -703,7 +686,7 @@
 
             <div class="flex flex-col md:flex-row md:justify-between md:items-center border-b border-dashed border-pink-200 pb-4 mb-5 no-print gap-4">
                 <h3 class="text-pink-600 font-bold text-lg flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-5 h-5"></i> รายรายละเอียดเอกสาร <span id="detailDocNo" class="text-gray-800 bg-pink-100 px-3 py-1 rounded-xl shadow-inner"></span>
+                    <i data-lucide="file-text" class="w-5 h-5"></i> รายละเอียดเอกสาร <span id="detailDocNo" class="text-gray-800 bg-pink-100 px-3 py-1 rounded-xl shadow-inner"></span>
                 </h3>
                 <div class="flex items-center flex-wrap gap-2">
                     <button onclick="printReceiptSlip()" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all">
@@ -715,26 +698,42 @@
                     <button onclick="closeModal('recordDetailModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 p-2 rounded-xl">✕</button>
                 </div>
             </div>
-            <div id="detailContent" class="space-y-5 text-sm text-gray-700 mb-6"></div>
+            
+            <div id="detailContent" class="space-y-5 text-sm text-gray-700 mb-6 flex-1"></div>
+
+            <!-- เพิ่มปุ่มปิดด้านล่างสุดของ Modal -->
+            <div class="mt-4 pt-4 border-t border-dashed border-gray-200 flex justify-center no-print w-full shrink-0">
+                <button type="button" onclick="closeModal('recordDetailModal')" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-200 px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                    <span>✕</span> ปิดหน้าต่าง
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Modal: Single Inventory Item Detail Popup -->
     <div id="inventoryItemDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl max-w-lg w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto flex flex-col">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
                 <h3 class="text-indigo-600 font-bold text-base flex items-center gap-2">
                     <i data-lucide="box" class="w-5 h-5"></i> รายละเอียดครุภัณฑ์
                 </h3>
                 <button onclick="closeModal('inventoryItemDetailModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 p-2 rounded-xl">✕</button>
             </div>
-            <div id="inventoryItemDetailContent" class="space-y-4 text-xs text-gray-700"></div>
+            
+            <div id="inventoryItemDetailContent" class="space-y-4 text-xs text-gray-700 flex-1"></div>
+
+            <!-- เพิ่มปุ่มปิดด้านล่างสุดของ Modal -->
+            <div class="mt-6 pt-4 border-t border-dashed border-gray-200 flex justify-center no-print w-full shrink-0">
+                <button type="button" onclick="closeModal('inventoryItemDetailModal')" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-200 px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                    <span>✕</span> ปิดหน้าต่าง
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Modal: A4 Formal Report Preview -->
     <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
+        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white flex flex-col">
             <div class="flex justify-between items-center border-b border-gray-300 pb-4 mb-6 no-print">
                 <h3 class="text-gray-800 font-bold text-lg flex items-center gap-2">
                     <i data-lucide="printer" class="w-5 h-5"></i> ตัวอย่างรายงานทางการ (A4 Report)
@@ -746,9 +745,18 @@
                     <button onclick="closeModal('a4ReportModal')" class="text-gray-400 hover:text-red-500 bg-gray-100 p-2 rounded-xl">✕</button>
                 </div>
             </div>
-            <div id="a4ReportContent" class="space-y-6 text-sm text-gray-800 p-4"></div>
+            
+            <div id="a4ReportContent" class="space-y-6 text-sm text-gray-800 p-4 flex-1"></div>
+
+            <!-- เพิ่มปุ่มปิดด้านล่างสุดของ Modal -->
+            <div class="mt-4 pt-4 border-t border-dashed border-gray-200 flex justify-center no-print w-full shrink-0">
+                <button type="button" onclick="closeModal('a4ReportModal')" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-200 px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                    <span>✕</span> ปิดหน้าต่าง
+                </button>
+            </div>
         </div>
     </div>
+    
     <!-- Session Expired Alert Modal -->
     <div id="sessionExpiredModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center bg-white border border-pink-200">
