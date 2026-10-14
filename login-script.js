@@ -4,7 +4,6 @@
  * รองรับการแยกบันทึกข้อมูลตามประเภทอุปกรณ์ (PC / Smartphone) พร้อมระบบ TTL และการจัดเก็บ Token
  */
 
-// กำหนด API_URL (ใช้ window.API_URL เพื่อป้องกันปัญหา Identifier Error กรณีโหลดหลายสคริปต์)
 window.API_URL = window.API_URL || "https://script.google.com/macros/s/AKfycby5WekOkEZJBTR-uC-HRSpyBx9BMoWoI10pyrgcKS9AGmWQdNG2UsThnYaaM55C2xKP/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,19 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetStorage = isMobile ? sessionStorage : localStorage;
             const otherStorage = isMobile ? localStorage : sessionStorage;
 
-            // 2. ล้าง Session ตกค้างใน Storage ฝั่งตรงข้าม เพื่อป้องกันข้อมูลตีกัน
-            otherStorage.removeItem('currentUser');
+            // 2. ล้าง Session ตกค้างใน Storage ทั้งหมดก่อนหน้าเพื่อความสะอาด
+            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
 
-            // 3. จัดเตรียม Session Data
+            // 3. จัดเตรียม Session Data + คำนวณ TTL ให้ถูกต้อง
             const sessionData = {
                 ...result.data,
+                // ตรวจสอบให้แน่ใจว่ามี UserPN (หาก Backend ส่ง username มา ให้ Map เพิ่มไว้)
+                UserPN: result.data.UserPN || result.data.username || username,
                 loginTime: new Date().getTime(),
-                expiresIn: 8 * 60 * 60 * 1000 // 8 ชั่วโมง
+                expiresIn: 8 * 60 * 60 * 1000 // กำหนดเวลาหมดอายุ 8 ชั่วโมง (หน่วย ms)
             };
 
             // 4. กรณีต้องบังคับเปลี่ยนรหัสผ่านก่อนเข้าใช้งาน
             if (result.resetRequired === true) {
-                // เก็บชั่วคราวแต่ตั้ง Flag ไว้ หรือไม่บันทึกเป็น Session สมบูรณ์
                 sessionData.mustChangePassword = true;
                 targetStorage.setItem('tempUserForReset', JSON.stringify(sessionData));
 
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 5. บันทึก Session สมบูรณ์ลงใน Storage
+            // 5. บันทึก Session สมบูรณ์ลงใน Storage ที่เลือก
             targetStorage.setItem('currentUser', JSON.stringify(sessionData));
 
             // 6. เปลี่ยนหน้าไปยังเมนูหลัก
