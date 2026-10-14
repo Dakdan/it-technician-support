@@ -3,11 +3,11 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
-    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN', 'BOSS', 'IT Staff', 'IT-STU'
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
-    <he<link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#ff1493">
     <meta name="mobile-web-app-capable" content="yes">
     
@@ -16,12 +16,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="IT Asset">
     <link rel="apple-touch-icon" href="./logo512.png">
-    <link rel="icon" type="image/png" href="./logo005v1.png">
+    <link rel="icon" type="image/png" href="./logo003v11.png">
 
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
@@ -32,46 +31,110 @@
     
     <style>
         :root {
+            --pink-soft: #fff0f5;
+            --pink-light: #ffb6c1;
+            --pink-primary: #ff85a2;
+            --pink-dark: #d63384;
+            --pink-neon: #ff1493;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray-text: #444444;
+            --shadow-sm: 0 4px 10px rgba(214, 51, 132, 0.05);
+            --shadow-md: 0 8px 20px rgba(214, 51, 132, 0.1);
+            
             --primary-color: #ec4899;      
             --secondary-color: #f472b6;    
             --accent-color: #8b5cf6;       
             --bg-color: #fdf2f8;           
             --text-main: #374151;
-            --white: #ffffff;
             --border-color: #fbcfe8;
             --shadow-soft: 0 10px 25px -5px rgba(236, 72, 153, 0.15), 0 8px 10px -6px rgba(236, 72, 153, 0.1);
         }
 
+        html, body {
+            overscroll-behavior-y: none; 
+            overscroll-behavior-x: none;
+        }
+
         * {
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Kanit', 'Sarabun', 'Inter', sans-serif;
             letter-spacing: 0.01em;
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-color) 0%, #fff 50%, #fef7ff 100%);
+            background: linear-gradient(135deg, var(--white) 0%, var(--pink-soft) 100%);
             min-height: 100vh;
-            color: var(--text-main);
+            color: var(--gray-text);
+            padding-bottom: 90px; 
             position: relative;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .sparkle-glow {
-            text-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
-        }
-
-        .watermark {
+        body::before {
+            content: "UDH-IT TECHNICIAN MAINTENANCE & SUPPORT ";
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 9vw;
-            color: rgba(236, 72, 153, 0.035);
-            font-weight: 700;
-            z-index: 0;
+            top: -50%;  
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            transform: rotate(-30deg);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            font-size: 5vw; 
+            font-weight: 900;
+            line-height: 2.5; 
+            z-index: -1;
             pointer-events: none;
-            white-space: nowrap;
-            user-select: none;
-            letter-spacing: 0.1em;
+            color: rgba(240, 240, 240, 0.4); 
+            text-shadow: -1px -1px 1px rgba(255, 255, 255, 0.9), 1px  1px 1px rgba(0, 0, 0, 0.15);
+        }
+
+        .app-header {
+            background: linear-gradient(to bottom, var(--pink-neon) 0%, var(--white) 100%);
+            backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            border-bottom: 6px solid var(--pink-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(214, 51, 132, 0.25);
+        }
+        .header-logo { 
+            width: 45px; 
+            height: 45px; 
+            object-fit: contain; 
+            border-radius: 50%; 
+            border: 2px solid var(--white); 
+            padding: 2px; 
+            background-color: var(--white); 
+        }
+        
+        .org-title { 
+            color: #ffffff; 
+            font-size: 0.95rem; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4); 
+            font-weight: 700; 
+            line-height: 1.2; 
+        }
+        
+        .org-subtitle { 
+            color: #f8f9fa; 
+            font-size: 0.75rem; 
+            opacity: 0.9;       
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
+            font-weight: 400; 
+            line-height: 1.25; 
+        }
+        
+        .user-name { 
+            font-weight: 700; 
+            color: var(--pink-dark); 
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.9); 
         }
 
         .spinner {
@@ -92,7 +155,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Prominent Age Highlight Badge */
         .age-badge-prominent {
             background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
             color: #ffffff;
@@ -106,6 +168,38 @@
             align-items: center;
             gap: 0.25rem;
             white-space: nowrap;
+        }
+
+        /* Modernized Responsive Card View Styles */
+        @media (max-width: 640px) {
+            .responsive-card-table table,
+            .responsive-card-table tbody,
+            .responsive-card-table tr,
+            .responsive-card-table td {
+                display: block;
+                width: 100%;
+            }
+            .responsive-card-table thead {
+                display: none;
+            }
+            .responsive-card-table tr {
+                margin-bottom: 1rem;
+                background: linear-gradient(135deg, #ffffff 0%, #fff5f8 100%);
+                border: 1px solid #fbcfe8;
+                border-radius: 1.25rem;
+                padding: 1rem;
+                box-shadow: 0 6px 20px rgba(236, 72, 153, 0.1);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                position: relative;
+            }
+            .responsive-card-table tr:active {
+                transform: scale(0.99);
+            }
+            .responsive-card-table td {
+                text-align: left !important;
+                padding: 0.4rem 0.25rem;
+                border: none !important;
+            }
         }
 
         @media print {
@@ -136,65 +230,40 @@
         .print-only-receipt, .print-only-a4 { display: none; }
     </style>
 </head>
-    <body class="relative min-h-screen pb-12">
-    
-        <div class="watermark">IT UDON HOSP ✨</div>
-    
-        <header class="relative text-white shadow-lg border-b-4 border-pink-300 z-30" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 65%, #ffffff 100%);">
-            <div class="max-w-6xl mx-auto p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center">
-                    <div class="relative">
-                        <div class="absolute -inset-1 bg-white rounded-full blur opacity-40 animate-pulse"></div>
-                        <img src="./logo003v1.png" alt="Logo" class="relative w-16 h-16 rounded-full border-3 border-white bg-white object-cover mr-4 shadow-md" onerror="this.src='https://placehold.co/70x70/ff66b2/ffffff?text=Logo'">
-                    </div>
-                    <div>
-                        <h1 class="text-xl md:text-2xl font-bold leading-tight sparkle-glow flex items-center gap-2">
-                            ✨ คลังครุภัณฑ์คอมพิวเตอร์
-                        </h1>
-                        <h2 class="text-sm font-medium text-pink-100">โรงพยาบาลอุดรธานี</h2>
-                        <p class="text-xs opacity-90 font-light">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-                    </div>
-                </div>
-    
-                <div class="bg-black/15 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 flex items-center gap-3 shadow-sm">
-                    <div class="w-10 h-10 rounded-full bg-white text-pink-500 font-bold flex items-center justify-center shadow-inner text-base">
-                        👤
-                    </div>
-                    <div class="text-left">
-                        <p id="headerDisplayName" class="text-xs font-semibold text-white drop-shadow-sm">-</p>
-                        <p id="headerUserPN" class="text-[10px] text-pink-100 flex items-center gap-1">
-                            <span id="headerUserRole" class="font-bold bg-white/20 px-1.5 py-0.5 rounded text-pink-50">IT USER</span>
-                            <span id="headerUserPNText"></span>
-                        </p>
-                    </div>
-                    <!-- ปุ่ม Logout เรียกใช้ฟังก์ชันจาก auth-check.js -->
-                    <button onclick="closeWindow()" title="MENU" class="ml-2 bg-white/30 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
-                        <i data-lucide="log-out" class="w-4 h-4">❌️</i>
-                    </button>
-                </div>
+   
+<body class="relative min-h-screen pb-12">
+
+    <header class="app-header d-flex justify-content-between align-items-center flex justify-between items-center">
+        <div class="d-flex align-items-center flex items-center">
+            <img src="./logo512.png" alt="Logo" class="header-logo me-2 mr-3" onerror="this.src='https://via.placeholder.com/45?text=IT'">
+            <div>
+                <div class="org-title">คลังคอมพิวเตอร์</div>
+                <div class="org-subtitle">IT UDH App</div>
             </div>
-        </header>
-    
-        <script>
-            // อัปเดตข้อมูลผู้ใช้ขึ้น UI บน Header เมื่อโหลดหน้าเว็บ
-            document.addEventListener('DOMContentLoaded', function() {
-                const currentUser = getCurrentUser();
-                const displayNameEl = document.getElementById('headerDisplayName');
-                const userPNTextEl = document.getElementById('headerUserPNText');
-    
-                if (currentUser) {
-                    if (displayNameEl) displayNameEl.textContent = getDisplayName();
-                    if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
-                } else {
-                    if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
-                    if (userPNTextEl) userPNTextEl.textContent = "";
-                }
-    
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            });
-        </script>
+        </div>
+        <div class="text-end text-right flex items-center gap-2">
+            <div class="flex items-center gap-1.5 md:gap-2 bg-white/95 backdrop-blur-md p-1.5 pl-2.5 rounded-2xl border border-pink-300 shadow-md max-w-[200px] sm:max-w-[260px] md:max-w-none">
+                <div id="authZone" class="flex flex-col text-right min-w-0 flex-1 leading-tight">
+                    <div class="flex items-center justify-end gap-1 min-w-0">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Online"></span>
+                        <span id="headerDisplayName" class="user-name text-[11px] sm:text-xs md:text-sm font-extrabold text-pink-700 tracking-wide truncate">ผู้ดูแลระบบ (Admin)</span>
+                    </div>
+                    <span id="headerUserPNText" class="text-[9px] sm:text-[10px] font-semibold text-gray-500 truncate">โรงพยาบาลอุดรธานี</span>
+                </div>
+                <div class="h-6 w-[1px] bg-pink-200 shrink-0"></div>
+                <button onclick="closeWindow()" title="ปิดหน้าต่าง / กลับเมนู" class="flex items-center gap-1 bg-pink-50 hover:bg-rose-100 text-rose-600 active:scale-95 px-2 py-1 rounded-xl transition-all border border-pink-200 shrink-0 text-[11px] sm:text-xs font-bold">
+                    <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[9px] font-extrabold">✕</span>
+                    <span>ปิด</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
+        <div class="spinner"></div>
+        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 🗂️</p>
+    </div>
 
     <!-- Navigation Bar: Sticky Top -->
     <nav class="sticky top-0 z-50 max-w-6xl mx-auto px-4 py-2 my-2 transition-all">
@@ -292,7 +361,7 @@
                         <i data-lucide="table" class="w-4 h-4 text-pink-500"></i> ข้อมูลรายการตามตัวกรอง (รวมทั้งหมด <span id="dashFilteredCount" class="text-pink-600 font-extrabold text-base">0</span> รายการ)
                     </h4>
                 </div>
-                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm bg-white">
+                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm bg-white responsive-card-table">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
                             <tr class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold uppercase tracking-wider">
@@ -322,7 +391,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60 mb-4">
+                <div class="overflow-x-auto border border-pink-200 rounded-2xl shadow-sm bg-white/60 mb-4 responsive-card-table">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-pink-100/70 text-pink-700 font-semibold text-xs uppercase tracking-wider">
@@ -356,7 +425,7 @@
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> รีเฟรช
                     </button>
                 </div>
-                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60 mb-4">
+                <div class="overflow-x-auto border border-purple-200 rounded-2xl shadow-sm bg-white/60 mb-4 responsive-card-table">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="bg-purple-100/70 text-purple-700 font-semibold text-xs uppercase tracking-wider">
@@ -431,7 +500,7 @@
                         <p id="printTitle" class="text-sm text-pink-600 font-medium">รายการเอกสารสำหรับพิมพ์รายงาน A4</p>
                         <p class="text-[11px] text-gray-400" id="printTimestamp">-</p>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto responsive-card-table">
                         <table class="w-full text-xs border-collapse border border-gray-300">
                             <thead>
                                 <tr id="printTableHeader" class="bg-gray-100 text-gray-700">
@@ -454,7 +523,7 @@
     </main>
 
     <!-- Modal: Record Detail -->
-    <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
             <div class="print-only-receipt text-center mb-4 border-b border-dashed border-gray-400 pb-3">
                 <h2 class="text-sm font-bold text-gray-900 mb-0.5">โรงพยาบาลอุดรธานี</h2>
@@ -481,7 +550,7 @@
     </div>
 
     <!-- Modal: Single Inventory Item Detail Popup -->
-    <div id="inventoryItemDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="inventoryItemDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-lg w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
                 <h3 class="text-indigo-600 font-bold text-base flex items-center gap-2">
@@ -494,7 +563,7 @@
     </div>
 
     <!-- Modal: A4 Formal Report Preview -->
-    <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white">
             <div class="flex justify-between items-center border-b border-gray-300 pb-4 mb-6 no-print">
                 <h3 class="text-gray-800 font-bold text-lg flex items-center gap-2">
@@ -511,28 +580,30 @@
         </div>
     </div>
 
+    <!-- Session Expired Alert Modal -->
+    <div id="sessionExpiredModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center bg-white border border-pink-200">
+            <div class="w-14 h-14 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
+                ⏰
+            </div>
+            <h3 class="text-pink-600 font-bold text-base mb-2">แจ้งเตือนเซสชัน</h3>
+            <p id="sessionExpiredMessage" class="text-xs text-gray-600 mb-5 leading-relaxed">
+                เซสชันของคุณหมดอายุ หรือไม่มีการใช้งานเป็นเวลานาน กรุณาเข้าสู่ระบบใหม่อีกครั้ง
+            </p>
+            <button type="button" onclick="redirectToLogin()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 active:scale-95 text-white w-full py-2.5 rounded-2xl text-xs font-semibold shadow-md transition-all">
+                ตกลง (ไปหน้าเข้าสู่ระบบ)
+            </button>
+        </div>
+    </div>
+
     <!-- Alert Modal -->
-    <div id="alertModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="alertModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center">
             <h3 id="alertTitle" class="text-pink-600 font-bold text-base mb-2 flex items-center justify-center gap-1.5"><i data-lucide="bell" class="w-4 h-4"></i> แจ้งเตือน ✨</h3>
             <p id="alertMessage" class="text-xs text-gray-600 mb-5 leading-relaxed"></p>
             <button type="button" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full py-3 rounded-2xl text-xs font-semibold shadow-md" onclick="closeModal('alertModal')">ตกลง</button>
         </div>
     </div>
-     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
-        <div class="spinner"></div>
-        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- JS Modules (เรียงลำดับการโหลดที่ถูกต้อง) -->
-     <!-- <script src="auth-check.js"></script>  1. ตรวจสิทธิ์เข้าใช้งาน + เตรียมฟังก์ชัน callApi/getCurrentUser/logout -->
-    <script src="indexeddb.js"></script> <!-- 2. ตัวจัดการ IndexedDB กลาง (idbApp) -->
-    <script src="app-core.js"></script>  <!-- 3. ตัวกลางจัดการ API/PWA (AppCore) -->
-    <script src="invstock.js"></script>  <!-- 4. ตัวควบคุม Logics ของหน้า คลังพัสดุ (InvStockApp) -->
-   
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec';
@@ -549,16 +620,14 @@
         let currentStockInPage = 1;
         let currentStockOutPage = 1;
 
-        // โครงสร้างการเก็บฟิลเตอร์ (แก้ไขให้รองรับอายุ)
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
         let filteredDashboardData = [];
 
         let currentInventoryStatusFilter = 'ALL';
-        let expandedInventoryGroups = {}; // Stores group toggle states (default = collapsed)
+        let expandedInventoryGroups = {};
 
         async function fetchAPI(url, options = {}) {
             try {
-                // แก้ไขที่ 1: เพิ่ม redirect: 'follow' เพื่อป้องกัน Request ขาดการเชื่อมต่อระหว่างที่ Google ทำการ Redirect
                 const fetchOptions = { redirect: 'follow', ...options };
                 const res = await fetch(url, fetchOptions);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -575,7 +644,7 @@
             if (!str || str === 'NO_IMAGE_DATA' || str.startsWith('ERROR:')) return '';
             if (str.startsWith('data:image')) return str;
             if (str.startsWith('http://') || str.startsWith('https://')) {
-                const match = str.match(/id=([a-zA-Z0-9_-]+)/) || str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                const match = str.match(/id=([a-zA-Z0-9_-]+/) || str.match(/\/d\/([a-zA-Z0-9_-]+)/);
                 if (match && match[1]) {
                     return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
                 }
@@ -626,7 +695,6 @@
         }
 
         async function loadDashboardStats(forceRefresh = false) {
-            // ระบบ Caching: ถ้าไม่บังคับรีเฟรช และมีข้อมูลอยู่แล้ว ให้ใช้ข้อมูลเดิมคำนวณทันทีโดยไม่ต้องโหลดใหม่
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, globalPeripheralDashboardData);
@@ -641,7 +709,6 @@
                 if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
                 if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
 
-                // กลับมาใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน (Parallel) ทำให้ลดเวลาโหลดลงไปได้ 2-3 เท่า
                 const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
@@ -653,8 +720,6 @@
                 globalPeripheralDashboardData = resPeriDash;
 
                 const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
-                
-                // ส่ง resPeriDash เข้าไปประมวลผลแสดงผลใน DOM ด้วย
                 updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
@@ -732,6 +797,8 @@
                 if (!isNaN(qty)) totalPeripheralQty += qty;
             });
 
+            filteredDashboardData = filteredInv;
+
             return {
                 summary: {
                     totalItems: filteredInv.length,
@@ -746,12 +813,12 @@
 
         function createBreakdownRow(label, count, filterKey, filterVal, isSelected) {
             const activeClass = isSelected ? 'bg-pink-100 border-pink-300 font-bold text-pink-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
-            return `
-                <div onclick="toggleDashboardFilter('${filterKey}', '${filterVal.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
-                    <span class="flex items-center gap-1.5"><i data-lucide="${filterKey==='invStatus'?'activity':'layers'}" class="w-3.5 h-3.5 text-pink-500"></i> ${label}</span>
-                    <span class="bg-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">${count}</span>
-                </div>
-            `;
+            const iconName = filterKey === 'invStatus' ? 'activity' : 'layers';
+            
+            return '<div onclick="toggleDashboardFilter(\'' + filterKey + '\', \'' + filterVal.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
+                   '<span class="flex items-center gap-1.5"><i data-lucide="' + iconName + '" class="w-3.5 h-3.5 text-pink-500"></i> ' + label + '</span>' +
+                   '<span class="bg-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">' + count + '</span>' +
+                   '</div>';
         }
 
         function toggleDashboardFilter(key, val) {
@@ -759,47 +826,38 @@
             loadDashboardStats();
         }
 
-        // เคลียร์ตัวกรองอายุเพิ่มเมื่อกดล้างตัวกรองทั้งหมด
         function clearDashboardFilters() {
             currentDashboardFilters.invStatus = null;
             currentDashboardFilters.assetType = null;
             currentDashboardFilters.ageRange = null;
-            loadDashboardStats(); // โหลดจาก Cache ใหม่อัตโนมัติ
+            loadDashboardStats();
         }
 
-        // แก้ไขที่ 5: เรนเดอร์ Badge ตัวกรองช่วงอายุใน Active Filters Bar
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
-            list.innerHTML = '';
+            if (!container || !list) return;
 
+            list.innerHTML = '';
             let hasActive = false;
+
             if (currentDashboardFilters.invStatus) {
                 hasActive = true;
-                list.innerHTML += `
-                    <span class="bg-pink-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">
-                        สถานะ: ${currentDashboardFilters.invStatus}
-                        <button onclick="toggleDashboardFilter('invStatus', '${currentDashboardFilters.invStatus}')" class="hover:text-pink-200 ml-1">✕</button>
-                    </span>
-                `;
+                list.innerHTML += '<span class="bg-pink-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">' +
+                    'สถานะ: ' + currentDashboardFilters.invStatus +
+                    ' <button onclick="toggleDashboardFilter(\'invStatus\', \'' + currentDashboardFilters.invStatus + '\')" class="hover:text-pink-200 ml-1">✕</button></span>';
             }
             if (currentDashboardFilters.assetType) {
                 hasActive = true;
-                list.innerHTML += `
-                    <span class="bg-purple-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">
-                        ประเภท: ${currentDashboardFilters.assetType}
-                        <button onclick="toggleDashboardFilter('assetType', '${currentDashboardFilters.assetType}')" class="hover:text-purple-200 ml-1">✕</button>
-                    </span>
-                `;
+                list.innerHTML += '<span class="bg-purple-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">' +
+                    'ประเภท: ' + currentDashboardFilters.assetType +
+                    ' <button onclick="toggleDashboardFilter(\'assetType\', \'' + currentDashboardFilters.assetType + '\')" class="hover:text-purple-200 ml-1">✕</button></span>';
             }
             if (currentDashboardFilters.ageRange) {
                 hasActive = true;
-                list.innerHTML += `
-                    <span class="bg-blue-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">
-                        อายุ: ${currentDashboardFilters.ageRange}
-                        <button onclick="toggleDashboardFilter('ageRange', '${currentDashboardFilters.ageRange}')" class="hover:text-blue-200 ml-1">✕</button>
-                    </span>
-                `;
+                list.innerHTML += '<span class="bg-blue-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">' +
+                    'อายุ: ' + currentDashboardFilters.ageRange +
+                    ' <button onclick="toggleDashboardFilter(\'ageRange\', \'' + currentDashboardFilters.ageRange + '\')" class="hover:text-blue-200 ml-1">✕</button></span>';
             }
 
             if (hasActive) container.classList.remove('hidden');
@@ -807,37 +865,44 @@
         }
 
         function updateDashboardDOM(summary, dataList, periDash) {
-            document.getElementById('dashTotalInv').innerHTML = `${summary.totalItems || 0} <span class="text-sm font-normal text-pink-600">รายการ</span>`;
+            const dashTotalInvEl = document.getElementById('dashTotalInv');
+            if (dashTotalInvEl) {
+                dashTotalInvEl.innerHTML = (summary.totalItems || 0) + ' <span class="text-sm font-normal text-pink-600">รายการ</span>';
+            }
             
             let totalPeri = 0;
             let periBreakdownHtml = '';
 
-            // ใช้ข้อมูลจาก getPeripheralDashboard ที่ส่งเข้ามา (periDash)
             const activePeriDash = periDash || globalPeripheralDashboardData;
             if (activePeriDash && activePeriDash.summary) {
                 const periSummary = activePeriDash.summary;
                 totalPeri = periSummary.totalQuantity ?? periSummary.totalRecords ?? 0;
                 
                 const deviceTypes = periSummary.byDeviceType || {};
-                const qtyRanges = periSummary.byQtyPerRecord || {};
 
                 Object.keys(deviceTypes).forEach(k => {
-                    periBreakdownHtml += `
-                        <div class="flex justify-between items-center p-1.5 rounded hover:bg-purple-100/50">
-                            <span class="text-gray-700 flex items-center gap-1"><i data-lucide="plug" class="w-3 h-3 text-purple-500"></i> ${k}</span>
-                            <span class="bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full text-[10px]">${deviceTypes[k]} ชิ้น</span>
-                        </div>
-                    `;
+                    periBreakdownHtml += '<div class="flex justify-between items-center p-1.5 rounded hover:bg-purple-100/50">' +
+                        '<span class="text-gray-700 flex items-center gap-1"><i data-lucide="plug" class="w-3 h-3 text-purple-500"></i> ' + k + '</span>' +
+                        '<span class="bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full text-[10px]">' + deviceTypes[k] + ' ชิ้น</span>' +
+                        '</div>';
                 });
             } else if (summary.peripherals) {
                 totalPeri = summary.peripherals.totalQuantitySum || 0;
             }
 
-            document.getElementById('dashTotalPeri').innerHTML = `${totalPeri} <span class="text-sm font-normal text-purple-600">ชิ้น</span>`;
-            document.getElementById('breakdownPeripherals').innerHTML = periBreakdownHtml || '<p class="text-gray-400 italic text-center p-2">ไม่มีข้อมูลอุปกรณ์ต่อพ่วง</p>';
+            const dashTotalPeriEl = document.getElementById('dashTotalPeri');
+            if (dashTotalPeriEl) {
+                dashTotalPeriEl.innerHTML = totalPeri + ' <span class="text-sm font-normal text-purple-600">ชิ้น</span>';
+            }
+
+            const breakdownPeripheralsEl = document.getElementById('breakdownPeripherals');
+            if (breakdownPeripheralsEl) {
+                breakdownPeripheralsEl.innerHTML = periBreakdownHtml || '<p class="text-gray-400 italic text-center p-2">ไม่มีข้อมูลอุปกรณ์ต่อพ่วง</p>';
+            }
 
             const renderRows = (obj, filterKey, containerId) => {
                 const container = document.getElementById(containerId);
+                if (!container) return;
                 let html = '';
                 if (obj && typeof obj === 'object') {
                     Object.keys(obj).sort().forEach(k => {
@@ -851,36 +916,40 @@
             renderRows(summary.byStatus || {}, 'invStatus', 'breakdownStatus');
             
             const ageContainer = document.getElementById('breakdownAge');
-            let ageHtml = '';
-            const ageRanges = summary.byAgeRange || {};
-            Object.keys(ageRanges).forEach(k => {
-                const isSelected = currentDashboardFilters.ageRange === k;
-                const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+            if (ageContainer) {
+                let ageHtml = '';
+                const ageRanges = summary.byAgeRange || {};
+                Object.keys(ageRanges).forEach(k => {
+                    const isSelected = currentDashboardFilters.ageRange === k;
+                    const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
 
-                ageHtml += `
-                    <div onclick="toggleDashboardFilter('ageRange', '${k.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ${activeClass}">
-                        <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> ${k}</span>
-                        <span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">${ageRanges[k]}</span>
-                    </div>
-                `;
-            });
-            ageContainer.innerHTML = ageHtml || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+                    ageHtml += '<div onclick="toggleDashboardFilter(\'ageRange\', \'' + k.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
+                        '<span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> ' + k + '</span>' +
+                        '<span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">' + ageRanges[k] + '</span>' +
+                        '</div>';
+                });
+                ageContainer.innerHTML = ageHtml || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+            }
 
             renderRows(summary.byType || {}, 'assetType', 'breakdownType');
-            document.getElementById('dashFilteredCount').innerText = dataList ? dataList.length : 0;
+            
+            const dashFilteredCountEl = document.getElementById('dashFilteredCount');
+            if (dashFilteredCountEl) {
+                dashFilteredCountEl.innerText = dataList ? dataList.length : 0;
+            }
 
             renderDashboardTable(dataList || []);
             renderActiveFilters();
             if (window.lucide) lucide.createIcons();
         }
 
-        // Render Dashboard Table Grouped by Asset_Type_Name
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             
             if (!dataList || dataList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-400 p-8">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 p-8">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>';
                 return;
             }
 
@@ -898,24 +967,23 @@
                 
                 const groupHeaderTr = document.createElement('tr');
                 groupHeaderTr.className = "bg-gradient-to-r from-pink-100 via-pink-50 to-white font-bold text-pink-900 border-t-2 border-b border-pink-200";
-                groupHeaderTr.innerHTML = `
-                    <td colspan="5" class="p-3 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-sm font-extrabold text-pink-700">
-                                <i data-lucide="folder" class="w-4 h-4 text-pink-500"></i> ประเภท: ${groupName}
-                            </span>
-                            <span class="bg-pink-600 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-sm">
-                                รวม ${groupItems.length} รายการ
-                            </span>
-                        </div>
-                    </td>
-                `;
+                groupHeaderTr.innerHTML = '<td colspan="5" class="p-3 text-xs">' +
+                    '<div class="flex items-center justify-between">' +
+                    '<span class="flex items-center gap-2 text-sm font-extrabold text-pink-700">' +
+                    '<i data-lucide="folder" class="w-4 h-4 text-pink-500"></i> ประเภท: ' + groupName +
+                    '</span>' +
+                    '<span class="bg-pink-600 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-sm">' +
+                    'รวม ' + groupItems.length + ' รายการ' +
+                    '</span>' +
+                    '</div>' +
+                    '</td>';
                 tbody.appendChild(groupHeaderTr);
 
                 groupItems.forEach((item) => {
                     globalIdx++;
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-pink-50/40 border-b border-gray-100 transition-colors";
+                    tr.className = "hover:bg-pink-50/40 border-b border-gray-100 transition-colors cursor-pointer";
+                    tr.onclick = () => openInventoryItemDetailModal(item);
                     
                     const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
                     const serial = item.Asset_Serial || item.Serial || "-";
@@ -924,24 +992,20 @@
                     const age = item.Asset_AgeInfo || item.Age || "ไม่ระบุ";
                     const status = item.Inv_Status || item.Status || "รอตรวจสอบ";
 
-                    tr.innerHTML = `
-                        <td class="p-2.5 border-b text-center font-bold text-gray-500">${globalIdx}</td>
-                        <td class="p-2.5 border-b">
-                            <span class="font-extrabold text-pink-600 block">${aId}</span>
-                            <span class="text-[10px] text-gray-500 font-medium">S/N: ${serial}</span>
-                        </td>
-                        <td class="p-2.5 border-b font-medium text-gray-800 text-xs" title="${String(rawDetail).replace(/"/g, '&quot;')}">
-                            ${shortDetail}
-                        </td>
-                        <td class="p-2.5 border-b text-center">
-                            <span class="age-badge-prominent">
-                                <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${age}
-                            </span>
-                        </td>
-                        <td class="p-2.5 border-b text-center">
-                            <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap border border-indigo-100 shadow-2xs">${status}</span>
-                        </td>
-                    `;
+                    tr.innerHTML = '<td class="p-2.5 border-b text-center font-bold text-gray-500">' + globalIdx + '</td>' +
+                        '<td class="p-2.5 border-b">' +
+                        '<span class="font-extrabold text-pink-600 block">' + aId + '</span>' +
+                        '<span class="text-[10px] text-gray-500 font-medium">S/N: ' + serial + '</span>' +
+                        '</td>' +
+                        '<td class="p-2.5 border-b font-medium text-gray-800 text-xs" title="' + String(rawDetail).replace(/"/g, '&quot;') + '">' +
+                        shortDetail +
+                        '</td>' +
+                        '<td class="p-2.5 border-b text-center">' +
+                        '<span class="age-badge-prominent"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ' + age + '</span>' +
+                        '</td>' +
+                        '<td class="p-2.5 border-b text-center">' +
+                        '<span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap border border-indigo-100 shadow-2xs">' + status + '</span>' +
+                        '</td>';
                     tbody.appendChild(tr);
                 });
             });
@@ -980,7 +1044,6 @@
         }
 
         async function loadStockInRecords(forceRefresh = false) {
-            // ระบบ Caching
             if (!forceRefresh && globalStockInRecords.length > 0) {
                 renderStockInTable(globalStockInRecords);
                 return;
@@ -1002,6 +1065,8 @@
         function renderStockInTable(records) {
             const tbody = document.getElementById('stockInTableBody');
             const paginationContainer = document.getElementById('stockInPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
             paginationContainer.innerHTML = '';
 
@@ -1027,30 +1092,29 @@
                 const itemCount = Array.isArray(rec.items) ? rec.items.length : (rec.itemCount || 0);
                 
                 const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
-                const sigBadge = sigUrl ? `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ลงชื่อแล้ว</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">รอลงชื่อ</span>`;
+                const sigBadge = sigUrl ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 shadow-2xs"><i data-lucide="check-circle" class="w-3 h-3"></i> ลงชื่อแล้ว</span>' : '<span class="bg-amber-100 text-amber-700 text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 shadow-2xs"><i data-lucide="clock" class="w-3 h-3"></i> รอลงชื่อ</span>';
 
-                tr.innerHTML = `
-                    <td class="p-3.5 text-center font-bold text-gray-500">${startIndex + idx + 1}</td>
-                    <td class="p-3.5 font-bold text-pink-600">${stockInNo}</td>
-                    <td class="p-3.5 text-xs text-gray-700">${dateTime}</td>
-                    <td class="p-3.5 text-xs font-semibold text-indigo-600">${dept}</td>
-                    <td class="p-3.5 text-xs text-gray-800 font-medium">${userName}</td>
-                    <td class="p-3.5 text-center font-bold text-pink-600">${itemCount}</td>
-                    <td class="p-3.5 text-center">${sigBadge}</td>
-                    <td class="p-3.5 text-center">
-                        <button onclick="openRecordDetail('stockIn', '${stockInNo}')" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs">ดูรายละเอียด</button>
-                    </td>
-                `;
+                tr.innerHTML = '<td class="p-3.5 text-center font-bold text-gray-500">' + (startIndex + idx + 1) + '</td>' +
+                    '<td class="p-3.5 font-bold text-pink-600">' + stockInNo + '</td>' +
+                    '<td class="p-3.5 text-xs text-gray-700">' + dateTime + '</td>' +
+                    '<td class="p-3.5 text-xs font-semibold text-indigo-600">' + dept + '</td>' +
+                    '<td class="p-3.5 text-xs text-gray-800 font-medium">' + userName + '</td>' +
+                    '<td class="p-3.5 text-center font-bold text-pink-600">' + itemCount + '</td>' +
+                    '<td class="p-3.5 text-center">' + sigBadge + '</td>' +
+                    '<td class="p-3.5 text-center">' +
+                    '<button onclick="openRecordDetail(\'stockIn\', \'' + stockInNo + '\')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95 inline-flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5"></i> ดูรายละเอียด</button>' +
+                    '</td>';
                 tbody.appendChild(tr);
             });
 
-            paginationContainer.innerHTML = `
-                <span class="text-xs text-gray-500">แสดงหน้า ${currentStockInPage} จาก ${totalPages}</span>
-                <div class="flex gap-1.5">
-                    <button onclick="changeStockInPage(${currentStockInPage - 1})" ${currentStockInPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium"'}>ก่อนหน้า</button>
-                    <button onclick="changeStockInPage(${currentStockInPage + 1})" ${currentStockInPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium"'}>ถัดไป</button>
-                </div>
-            `;
+            const prevBtnState = currentStockInPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium transition-all active:scale-95"';
+            const nextBtnState = (currentStockInPage === totalPages || totalPages === 0) ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium transition-all active:scale-95"';
+
+            paginationContainer.innerHTML = '<span class="text-xs text-gray-500">แสดงหน้า ' + currentStockInPage + ' จาก ' + totalPages + '</span>' +
+                '<div class="flex gap-1.5">' +
+                '<button onclick="changeStockInPage(' + (currentStockInPage - 1) + ')" ' + prevBtnState + '>ก่อนหน้า</button>' +
+                '<button onclick="changeStockInPage(' + (currentStockInPage + 1) + ')" ' + nextBtnState + '>ถัดไป</button>' +
+                '</div>';
             if (window.lucide) lucide.createIcons();
         }
 
@@ -1059,8 +1123,7 @@
             renderStockInTable(globalStockInRecords);
         }
 
-       async function loadStockOutRecords(forceRefresh = false) {
-            // ระบบ Caching
+        async function loadStockOutRecords(forceRefresh = false) {
             if (!forceRefresh && globalStockOutRecords.length > 0) {
                 renderStockOutTable(globalStockOutRecords);
                 return;
@@ -1082,6 +1145,8 @@
         function renderStockOutTable(records) {
             const tbody = document.getElementById('stockOutTableBody');
             const paginationContainer = document.getElementById('stockOutPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
             paginationContainer.innerHTML = '';
 
@@ -1107,30 +1172,29 @@
                 const itemCount = Array.isArray(rec.items) ? rec.items.length : (rec.itemCount || 0);
                 
                 const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
-                const sigBadge = sigUrl ? `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ลงชื่อแล้ว</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">รอลงชื่อ</span>`;
+                const sigBadge = sigUrl ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 shadow-2xs"><i data-lucide="check-circle" class="w-3 h-3"></i> ลงชื่อแล้ว</span>' : '<span class="bg-amber-100 text-amber-700 text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 shadow-2xs"><i data-lucide="clock" class="w-3 h-3"></i> รอลงชื่อ</span>';
 
-                tr.innerHTML = `
-                    <td class="p-3.5 text-center font-bold text-gray-500">${startIndex + idx + 1}</td>
-                    <td class="p-3.5 font-bold text-purple-700">${stockOutNo}</td>
-                    <td class="p-3.5 text-xs text-gray-700">${dateTime}</td>
-                    <td class="p-3.5 text-xs font-semibold text-indigo-600">${dept}</td>
-                    <td class="p-3.5 text-xs text-gray-800 font-medium">${itUser}</td>
-                    <td class="p-3.5 text-center font-bold text-purple-600">${itemCount}</td>
-                    <td class="p-3.5 text-center">${sigBadge}</td>
-                    <td class="p-3.5 text-center">
-                        <button onclick="openRecordDetail('stockOut', '${stockOutNo}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs">ดูรายละเอียด</button>
-                    </td>
-                `;
+                tr.innerHTML = '<td class="p-3.5 text-center font-bold text-gray-500">' + (startIndex + idx + 1) + '</td>' +
+                    '<td class="p-3.5 font-bold text-purple-700">' + stockOutNo + '</td>' +
+                    '<td class="p-3.5 text-xs text-gray-700">' + dateTime + '</td>' +
+                    '<td class="p-3.5 text-xs font-semibold text-indigo-600">' + dept + '</td>' +
+                    '<td class="p-3.5 text-xs text-gray-800 font-medium">' + itUser + '</td>' +
+                    '<td class="p-3.5 text-center font-bold text-purple-600">' + itemCount + '</td>' +
+                    '<td class="p-3.5 text-center">' + sigBadge + '</td>' +
+                    '<td class="p-3.5 text-center">' +
+                    '<button onclick="openRecordDetail(\'stockOut\', \'' + stockOutNo + '\')" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95 inline-flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5"></i> ดูรายละเอียด</button>' +
+                    '</td>';
                 tbody.appendChild(tr);
             });
 
-            paginationContainer.innerHTML = `
-                <span class="text-xs text-gray-500">แสดงหน้า ${currentStockOutPage} จาก ${totalPages}</span>
-                <div class="flex gap-1.5">
-                    <button onclick="changeStockOutPage(${currentStockOutPage - 1})" ${currentStockOutPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium"'}>ก่อนหน้า</button>
-                    <button onclick="changeStockOutPage(${currentStockOutPage + 1})" ${currentStockOutPage === totalPages || totalPages === 0 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium"'}>ถัดไป</button>
-                </div>
-            `;
+            const prevBtnState = currentStockOutPage === 1 ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium transition-all active:scale-95"';
+            const nextBtnState = (currentStockOutPage === totalPages || totalPages === 0) ? 'disabled class="px-3 py-1.5 rounded-xl text-xs bg-gray-100 text-gray-400 cursor-not-allowed"' : 'class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium transition-all active:scale-95"';
+
+            paginationContainer.innerHTML = '<span class="text-xs text-gray-500">แสดงหน้า ' + currentStockOutPage + ' จาก ' + totalPages + '</span>' +
+                '<div class="flex gap-1.5">' +
+                '<button onclick="changeStockOutPage(' + (currentStockOutPage - 1) + ')" ' + prevBtnState + '>ก่อนหน้า</button>' +
+                '<button onclick="changeStockOutPage(' + (currentStockOutPage + 1) + ')" ' + nextBtnState + '>ถัดไป</button>' +
+                '</div>';
             if (window.lucide) lucide.createIcons();
         }
 
@@ -1140,7 +1204,6 @@
         }
 
         async function loadInventoryRecords(forceRefresh = false) {
-            // ระบบ Caching
             if (!forceRefresh && globalInventoryRecords.length > 0) {
                 renderInventoryStatusBar();
                 filterInventoryRecords();
@@ -1149,7 +1212,6 @@
 
             showLoading();
             try {
-                // เปลี่ยนกลับมาใช้ Promise.all (Parallel)
                 const [data, resPeri] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
                     fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
@@ -1178,19 +1240,15 @@
                 statusCounts[st] = (statusCounts[st] || 0) + 1;
             });
 
-            let html = `
-                <button onclick="setInventoryStatusFilter('ALL')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${currentInventoryStatusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
-                    ทั้งหมด (${statusCounts['ALL']})
-                </button>
-            `;
+            let html = '<button onclick="setInventoryStatusFilter(\'ALL\')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ' + (currentInventoryStatusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50') + '">' +
+                'ทั้งหมด (' + statusCounts['ALL'] + ')' +
+                '</button>';
 
             Object.keys(statusCounts).filter(k => k !== 'ALL').sort().forEach(st => {
                 const isActive = currentInventoryStatusFilter === st;
-                html += `
-                    <button onclick="setInventoryStatusFilter('${st.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50'}">
-                        ${st} (${statusCounts[st]})
-                    </button>
-                `;
+                html += '<button onclick="setInventoryStatusFilter(\'' + st.replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ' + (isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50') + '">' +
+                    st + ' (' + statusCounts[st] + ')' +
+                    '</button>';
             });
 
             container.innerHTML = html;
@@ -1220,12 +1278,14 @@
                 return aId.includes(query) || serial.includes(query) || typeName.includes(query) || desc.includes(query);
             });
 
-            document.getElementById('inventorySearchCount').innerText = currentFilteredInventoryRecords.length;
+            const countEl = document.getElementById('inventorySearchCount');
+            if (countEl) countEl.innerText = currentFilteredInventoryRecords.length;
             renderInventoryAccordionTable(currentFilteredInventoryRecords);
         }
 
         function renderInventoryAccordionTable(records) {
             const container = document.getElementById('inventoryAccordionContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             if (!records || records.length === 0) {
@@ -1254,37 +1314,35 @@
                 const headerDiv = document.createElement('div');
                 headerDiv.className = "bg-gradient-to-r from-indigo-50 via-purple-50 to-white p-3.5 flex justify-between items-center cursor-pointer select-none hover:bg-indigo-100/50 transition-colors border-b border-indigo-100";
                 headerDiv.onclick = () => toggleInventoryGroup(groupId);
-                headerDiv.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 text-indigo-600 transition-transform"></i>
-                        <span class="font-bold text-sm text-indigo-900 flex items-center gap-2">
-                            <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i> ${typeName}
-                        </span>
-                    </div>
-                    <span class="bg-indigo-600 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-xs">
-                        รวม ${groupItems.length} รายการ
-                    </span>
-                `;
+                
+                const iconChevron = isExpanded ? 'chevron-down' : 'chevron-right';
+                headerDiv.innerHTML = '<div class="flex items-center gap-2">' +
+                    '<i data-lucide="' + iconChevron + '" class="w-4 h-4 text-indigo-600 transition-transform"></i>' +
+                    '<span class="font-bold text-sm text-indigo-900 flex items-center gap-2">' +
+                    '<i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i> ' + typeName +
+                    '</span>' +
+                    '</div>' +
+                    '<span class="bg-indigo-600 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-xs">' +
+                    'รวม ' + groupItems.length + ' รายการ' +
+                    '</span>';
 
                 const bodyDiv = document.createElement('div');
                 bodyDiv.id = groupId;
                 bodyDiv.className = isExpanded ? 'block' : 'hidden';
 
-                let tableHtml = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="bg-indigo-100/40 text-indigo-800 font-semibold uppercase tracking-wider text-[11px]">
-                                    <th class="p-3 text-center w-12">ลำดับ</th>
-                                    <th class="p-3">ID ครุภัณฑ์ (Asset / NOID)</th>
-                                    <th class="p-3">รายละเอียด & สเปค</th>
-                                    <th class="p-3 text-center">อายุครุภัณฑ์</th>
-                                    <th class="p-3 text-center">สถานะ</th>
-                                    <th class="p-3 text-center">รูปภาพ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-indigo-50">
-                `;
+                let tableHtml = '<div class="overflow-x-auto responsive-card-table">' +
+                    '<table class="w-full text-left text-xs border-collapse">' +
+                    '<thead>' +
+                    '<tr class="bg-indigo-100/40 text-indigo-800 font-semibold uppercase tracking-wider text-[11px]">' +
+                    '<th class="p-3 text-center w-12">ลำดับ</th>' +
+                    '<th class="p-3">ID ครุภัณฑ์ (Asset / NOID)</th>' +
+                    '<th class="p-3">รายละเอียด & สเปค</th>' +
+                    '<th class="p-3 text-center">อายุครุภัณฑ์</th>' +
+                    '<th class="p-3 text-center">สถานะ</th>' +
+                    '<th class="p-3 text-center">รูปภาพ</th>' +
+                    '</tr>' +
+                    '</thead>' +
+                    '<tbody class="divide-y divide-indigo-50">';
 
                 groupItems.forEach((rec, idx) => {
                     const assetId = rec.AssetID || rec.Asset_ID || rec.NOID || rec.NoID || rec.Inv_ID || "-";
@@ -1296,32 +1354,23 @@
 
                     const rawImgSource = getItemImageSource(rec);
                     const extractedImgUrl = getDriveImageUrl(rawImgSource);
-                    let imgEl = extractedImgUrl 
-                        ? `<img src="${extractedImgUrl}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded-lg border border-indigo-200 shadow-xs mx-auto cursor-pointer hover:opacity-80" onclick="event.stopPropagation(); openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
-                        : `<span class="text-gray-300 text-xs">-</span>`;
+                    const recJson = JSON.stringify(rec).replace(/"/g, '&quot;');
 
-                    tableHtml += `
-                        <tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer" onclick="openInventoryItemDetailModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
-                            <td class="p-3 text-center font-bold text-gray-500">${idx + 1}</td>
-                            <td class="p-3 font-bold text-indigo-700">
-                                ${assetId}<br>
-                                <span class="text-gray-500 text-[10px] font-normal">S/N: ${serial}</span>
-                            </td>
-                            <td class="p-3 text-gray-700 text-xs" title="${String(fullDetail).replace(/"/g, '&quot;')}">
-                                <p class="font-medium">${shortDetail}</p>
-                            </td>
-                            <td class="p-3 text-center">
-                                <span class="age-badge-prominent">
-                                    <i data-lucide="clock" class="w-3 h-3"></i> ${age}
-                                </span>
-                            </td>
-                            <td class="p-3 text-center"><span class="bg-indigo-100 text-indigo-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs border border-indigo-200">${status}</span></td>
-                            <td class="p-3 text-center">${imgEl}</td>
-                        </tr>
-                    `;
+                    let imgEl = extractedImgUrl 
+                        ? '<img src="' + extractedImgUrl + '" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded-lg border border-indigo-200 shadow-xs mx-auto cursor-pointer hover:opacity-80" onclick="event.stopPropagation(); openInventoryItemDetailModal(' + recJson + ')" onerror="this.onerror=null; this.src=\'https://placehold.co/60x60/e0e7ff/4f46e5?text=Img\';">' 
+                        : '<span class="text-gray-300 text-xs">-</span>';
+
+                    tableHtml += '<tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer" onclick="openInventoryItemDetailModal(' + recJson + ')">' +
+                        '<td class="p-3 text-center font-bold text-gray-500">' + (idx + 1) + '</td>' +
+                        '<td class="p-3 font-bold text-indigo-700">' + assetId + '<br><span class="text-gray-500 text-[10px] font-normal">S/N: ' + serial + '</span></td>' +
+                        '<td class="p-3 text-gray-700 text-xs" title="' + String(fullDetail).replace(/"/g, '&quot;') + '"><p class="font-medium">' + shortDetail + '</p></td>' +
+                        '<td class="p-3 text-center"><span class="age-badge-prominent"><i data-lucide="clock" class="w-3 h-3"></i> ' + age + '</span></td>' +
+                        '<td class="p-3 text-center"><span class="bg-indigo-100 text-indigo-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs border border-indigo-200">' + status + '</span></td>' +
+                        '<td class="p-3 text-center">' + imgEl + '</td>' +
+                        '</tr>';
                 });
 
-                tableHtml += `</tbody></table></div>`;
+                tableHtml += '</tbody></table></div>';
 
                 bodyDiv.innerHTML = tableHtml;
                 groupCard.appendChild(headerDiv);
@@ -1351,6 +1400,7 @@
         function openInventoryItemDetailModal(item) {
             if (!item) return;
             const content = document.getElementById('inventoryItemDetailContent');
+            if (!content) return;
             
             const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
             const serial = item.Asset_Serial || item.Serial || "-";
@@ -1373,50 +1423,39 @@
 
             let periHtml = '';
             if (matchedPeripherals.length > 0) {
-                periHtml = `
-                    <div class="mt-3 bg-purple-50 p-3 rounded-2xl border border-purple-200">
-                        <span class="text-[11px] font-bold text-purple-800 flex items-center gap-1 mb-1.5"><i data-lucide="plug" class="w-3.5 h-3.5"></i> อุปกรณ์ต่อพ่วงที่ผูกอยู่ (${matchedPeripherals.length} รายการ):</span>
-                        <ul class="text-xs text-purple-900 space-y-1 pl-2">
-                            ${matchedPeripherals.map(p => `<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ${p.Name || p.Item_ID}</span><span class="font-bold text-purple-600">${p.Quantity || 1} ${p.Unit || 'ชิ้น'}</span></li>`).join('')}
-                        </ul>
-                    </div>
-                `;
+                const listItems = matchedPeripherals.map(p => {
+                    const name = p.Name || p.Item_ID || '-';
+                    const qty = p.Quantity || 1;
+                    const unit = p.Unit || 'ชิ้น';
+                    return '<li class="flex justify-between items-center bg-white p-1.5 rounded-lg border border-purple-100"><span>• ' + name + '</span><span class="font-bold text-purple-600">' + qty + ' ' + unit + '</span></li>';
+                }).join('');
+
+                periHtml = '<div class="mt-3 bg-purple-50 p-3 rounded-2xl border border-purple-200">' +
+                    '<span class="text-[11px] font-bold text-purple-800 flex items-center gap-1 mb-1.5"><i data-lucide="plug" class="w-3.5 h-3.5"></i> อุปกรณ์ต่อพ่วงที่ผูกอยู่ (' + matchedPeripherals.length + ' รายการ):</span>' +
+                    '<ul class="text-xs text-purple-900 space-y-1 pl-2">' + listItems + '</ul>' +
+                    '</div>';
             }
 
             let imgHtml = imgUrl 
-                ? `<div class="mb-4 text-center"><img src="${imgUrl}" referrerpolicy="no-referrer" class="max-h-60 mx-auto rounded-2xl border border-indigo-100 shadow-md object-contain" alt="Asset Image" onerror="this.onerror=null; this.src='https://placehold.co/300x200/e0e7ff/4f46e5?text=No+Image';"></div>`
-                : `<div class="mb-4 text-center bg-gray-50 py-8 rounded-2xl border border-dashed border-gray-200 text-gray-400">ไม่มีรูปภาพครุภัณฑ์</div>`;
+                ? '<div class="mb-4 text-center"><img src="' + imgUrl + '" referrerpolicy="no-referrer" class="max-h-60 mx-auto rounded-2xl border border-indigo-100 shadow-md object-contain" alt="Asset Image" onerror="this.onerror=null; this.src=\'https://placehold.co/300x200/e0e7ff/4f46e5?text=No+Image\';"></div>'
+                : '<div class="mb-4 text-center bg-gray-50 py-8 rounded-2xl border border-dashed border-gray-200 text-gray-400">ไม่มีรูปภาพครุภัณฑ์</div>';
 
-            content.innerHTML = `
-                ${imgHtml}
-                <div class="grid grid-cols-2 gap-3 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
-                    <div>
-                        <span class="text-[10px] text-gray-500 block uppercase font-bold">รหัสครุภัณฑ์ (Asset ID)</span>
-                        <strong class="text-sm text-pink-600 font-extrabold">${aId}</strong>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-gray-500 block uppercase font-bold">Serial Number (S/N)</span>
-                        <strong class="text-xs text-gray-800 font-semibold">${serial}</strong>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-gray-500 block uppercase font-bold">ประเภท (Asset_Type_Name)</span>
-                        <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">${typeName}</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-gray-500 block uppercase font-bold">สถานะ</span>
-                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">${status}</span>
-                    </div>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                    <span class="text-[10px] text-gray-500 block uppercase font-bold mb-1">รายละเอียด & สเปค</span>
-                    <p class="text-xs text-gray-800 leading-relaxed">${detail}</p>
-                </div>
-                <div class="flex items-center justify-between bg-amber-50 p-3 rounded-xl border border-amber-200">
-                    <span class="text-xs font-bold text-amber-800">อายุครุภัณฑ์:</span>
-                    <span class="age-badge-prominent">${age}</span>
-                </div>
-                ${periHtml}
-            `;
+            content.innerHTML = imgHtml +
+                '<div class="grid grid-cols-2 gap-3 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">' +
+                '<div><span class="text-[10px] text-gray-500 block uppercase font-bold">รหัสครุภัณฑ์ (Asset ID)</span><strong class="text-sm text-pink-600 font-extrabold">' + aId + '</strong></div>' +
+                '<div><span class="text-[10px] text-gray-500 block uppercase font-bold">Serial Number (S/N)</span><strong class="text-xs text-gray-800 font-semibold">' + serial + '</strong></div>' +
+                '<div><span class="text-[10px] text-gray-500 block uppercase font-bold">ประเภท (Asset_Type_Name)</span><span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">' + typeName + '</span></div>' +
+                '<div><span class="text-[10px] text-gray-500 block uppercase font-bold">สถานะ</span><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">' + status + '</span></div>' +
+                '</div>' +
+                '<div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">' +
+                '<span class="text-[10px] text-gray-500 block uppercase font-bold mb-1">รายละเอียด & สเปค</span>' +
+                '<p class="text-xs text-gray-800 leading-relaxed">' + detail + '</p>' +
+                '</div>' +
+                '<div class="flex items-center justify-between bg-amber-50 p-3 rounded-xl border border-amber-200">' +
+                '<span class="text-xs font-bold text-amber-800">อายุครุภัณฑ์:</span>' +
+                '<span class="age-badge-prominent">' + age + '</span>' +
+                '</div>' +
+                periHtml;
 
             showModal('inventoryItemDetailModal');
             if (window.lucide) lucide.createIcons();
@@ -1426,8 +1465,11 @@
             showLoading();
             try {
                 const isStockIn = type === 'stockIn';
-                document.getElementById('printTitle').innerText = isStockIn ? 'รายการเอกสารรับเข้า (Stock In Reports)' : 'รายการเอกสารจ่ายออก (Stock Out Reports)';
-                document.getElementById('printTimestamp').innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+                const printTitleEl = document.getElementById('printTitle');
+                const printTimestampEl = document.getElementById('printTimestamp');
+
+                if (printTitleEl) printTitleEl.innerText = isStockIn ? 'รายการเอกสารรับเข้า (Stock In Reports)' : 'รายการเอกสารจ่ายออก (Stock Out Reports)';
+                if (printTimestampEl) printTimestampEl.innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
 
                 let records = [];
                 if (isStockIn) {
@@ -1445,6 +1487,7 @@
                 }
 
                 const tbody = document.getElementById('printTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
 
                 if (!records || records.length === 0) {
@@ -1461,16 +1504,14 @@
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50 border-b border-gray-200";
-                    tr.innerHTML = `
-                        <td class="border border-gray-300 p-2 text-center font-bold text-gray-500">${idx + 1}</td>
-                        <td class="border border-gray-300 p-2 font-bold text-pink-600">${docNo}</td>
-                        <td class="border border-gray-300 p-2">${dateTime}</td>
-                        <td class="border border-gray-300 p-2 font-semibold text-indigo-700">${dept}</td>
-                        <td class="border border-gray-300 p-2 text-center">${statusText}</td>
-                        <td class="border border-gray-300 p-2 text-center">
-                            <button onclick="openRecordDetail('${type}', '${docNo}'); setTimeout(openA4ReportModal, 200);" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-1 rounded text-[11px] font-semibold shadow-xs">พิมพ์ A4</button>
-                        </td>
-                    `;
+                    tr.innerHTML = '<td class="border border-gray-300 p-2 text-center font-bold text-gray-500">' + (idx + 1) + '</td>' +
+                        '<td class="border border-gray-300 p-2 font-bold text-pink-600">' + docNo + '</td>' +
+                        '<td class="border border-gray-300 p-2">' + dateTime + '</td>' +
+                        '<td class="border border-gray-300 p-2 font-semibold text-indigo-700">' + dept + '</td>' +
+                        '<td class="border border-gray-300 p-2 text-center">' + statusText + '</td>' +
+                        '<td class="border border-gray-300 p-2 text-center">' +
+                        '<button onclick="openRecordDetail(\'' + type + '\', \'' + docNo + '\'); setTimeout(openA4ReportModal, 200);" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-1 rounded text-[11px] font-semibold shadow-xs">พิมพ์ A4</button>' +
+                        '</td>';
                     tbody.appendChild(tr);
                 });
             } catch (err) {
@@ -1492,8 +1533,11 @@
             if (!record) return;
             activeDetailRecord = { type, record };
 
-            document.getElementById('detailDocNo').innerText = docNo;
+            const detailDocNoEl = document.getElementById('detailDocNo');
+            if (detailDocNoEl) detailDocNoEl.innerText = docNo;
+
             const content = document.getElementById('detailContent');
+            if (!content) return;
 
             let html = '';
             let signatureUrl = getDriveImageUrl(record.User_Confirm || '');
@@ -1507,320 +1551,184 @@
                 const sourceType = record.Source_Type || record.sourceType || '-';
                 const refNo = record.Reference_No || record.referenceNo || '-';
 
-                html = `
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-pink-50 to-white p-5 rounded-2xl border border-pink-100 shadow-sm">
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่เอกสาร</span> <span class="font-bold text-pink-700">${stockInNo}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">${stockInId}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">${dateTime}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงาน</span> <span class="font-bold text-indigo-600">${deptId}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">ประเภทรับเข้า</span> <span class="font-medium text-gray-700">${sourceType}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขอ้างอิง / Doc ID</span> <span class="font-medium text-gray-700">${refNo} <span class="text-gray-400 font-light">(${docId})</span></span></p>
-                    </div>
-                `;
+                html = '<div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-pink-50 to-white p-5 rounded-2xl border border-pink-100 shadow-sm">' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่เอกสาร</span> <span class="font-bold text-pink-700">' + stockInNo + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">' + stockInId + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">' + dateTime + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงาน</span> <span class="font-bold text-indigo-600">' + deptId + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่หนังสือ/เอกสาร</span> <span class="font-medium text-gray-800">' + docId + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">แหล่งที่มา / เลขที่อ้างอิง</span> <span class="font-medium text-gray-800">' + sourceType + ' (' + refNo + ')</span></p>' +
+                    '</div>';
+
+                if (Array.isArray(record.items) && record.items.length > 0) {
+                    html += '<div class="mt-4"><h4 class="font-bold text-xs text-gray-700 mb-2">รายการครุภัณฑ์ย่อย (' + record.items.length + ' รายการ):</h4>' +
+                        '<div class="space-y-2">';
+                    record.items.forEach((item, i) => {
+                        const aId = item.AssetID || item.Asset_ID || item.NOID || '-';
+                        const serial = item.Asset_Serial || item.Serial || '-';
+                        const detail = item.Asset_FullDescription || item.FullDescription || '-';
+                        const age = item.Asset_AgeInfo || item.Age || '-';
+                        html += '<div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs flex flex-col gap-1">' +
+                            '<div class="flex justify-between items-center"><strong class="text-pink-600">' + (i + 1) + '. AssetID: ' + aId + '</strong><span class="age-badge-prominent">' + age + '</span></div>' +
+                            '<span class="text-gray-500">S/N: ' + serial + '</span>' +
+                            '<p class="text-gray-800 mt-1">' + detail + '</p>' +
+                            '</div>';
+                    });
+                    html += '</div></div>';
+                }
             } else {
                 const stockOutNo = record.Stock_Out_No || '-';
                 const stockOutId = record.Stock_Out_ID || '-';
                 const dateTime = record.Date_Time || record.Timestamp || '-';
                 const deptId = record.DEPT_ID || '-';
+                const itUser = record.IT_User || record.itUser || '-';
 
-                html = `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gradient-to-br from-purple-50 to-white p-5 rounded-2xl border border-purple-100 shadow-sm">
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่จ่ายออก</span> <span class="font-bold text-purple-700">${stockOutNo}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">${stockOutId}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">${dateTime}</span></p>
-                        <p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงาน</span> <span class="font-bold text-indigo-600">${deptId}</span></p>
-                    </div>
-                `;
-            }
+                html = '<div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-purple-50 to-white p-5 rounded-2xl border border-purple-100 shadow-sm">' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เลขที่จ่ายออก</span> <span class="font-bold text-purple-700">' + stockOutNo + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">รหัสอ้างอิงระบบ</span> <span class="font-medium text-xs break-all">' + stockOutId + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">วันที่เวลา</span> <span class="font-semibold text-gray-800">' + dateTime + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">หน่วยงานรับมอบ</span> <span class="font-bold text-indigo-600">' + deptId + '</span></p>' +
+                    '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">เจ้าหน้าที่ IT ผู้จ่าย</span> <span class="font-medium text-gray-800">' + itUser + '</span></p>' +
+                    '</div>';
 
-            html += `<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ</h4>`;
-            
-            if (Array.isArray(record.items) && record.items.length > 0) {
-                const groupedItems = {};
-                record.items.forEach((item) => {
-                    const iNo = item.Inv_No || '-';
-                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
-                    const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
-                    
-                    if (!groupedItems[typeName]) groupedItems[typeName] = [];
-                    groupedItems[typeName].push({ item, enrichedItem });
-                });
-
-                html += `
-                    <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
-                        <table class="w-full text-left text-xs whitespace-nowrap">
-                            <thead class="bg-gray-100 text-gray-700 border-b border-gray-200 uppercase tracking-wider">
-                                <tr>
-                                    <th class="p-3 text-center w-12 font-bold">ลำดับ</th>
-                                    <th class="p-3 text-center font-bold">รูปภาพ</th>
-                                    <th class="p-3 font-bold">รหัส Asset</th>
-                                    <th class="p-3 font-bold">รายละเอียด</th>
-                                    <th class="p-3 text-center font-bold">สถานะ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
-                `;
-
-                let subGlobalIdx = 0;
-                Object.keys(groupedItems).sort().forEach(groupType => {
-                    const list = groupedItems[groupType];
-                    html += `
-                        <tr class="bg-gradient-to-r from-pink-50 via-pink-100/50 to-white font-bold text-pink-900 border-t border-b border-pink-200">
-                            <td colspan="5" class="p-2.5 text-xs">
-                                <div class="flex items-center justify-between">
-                                    <span class="flex items-center gap-1.5 font-extrabold text-pink-700">
-                                        <i data-lucide="folder" class="w-4 h-4 text-pink-500"></i> ประเภท: ${groupType}
-                                    </span>
-                                    <span class="bg-pink-600 text-white font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
-                                        ${list.length} รายการ
-                                    </span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-
-                    list.forEach(({ item, enrichedItem }) => {
-                        subGlobalIdx++;
-                        const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
-                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || '-';
-                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || '-';
-                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
-                        
-                        const rawImgSource = getItemImageSource(item) || getItemImageSource(enrichedItem);
-                        const extractedImg = getDriveImageUrl(rawImgSource);
-                        const imgHtml = extractedImg 
-                            ? `<img src="${extractedImg}" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 cursor-pointer mx-auto hover:opacity-80" onclick="window.open('${extractedImg}','_blank')" onerror="this.onerror=null; this.src='https://placehold.co/60x60/e0e7ff/4f46e5?text=Img';">` 
-                            : `<span class="text-gray-300">-</span>`;
-
-                        let periHtml = '';
-                        if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
-                            periHtml = `
-                                <div class="mt-2 bg-purple-50/50 p-2 rounded-lg border border-purple-100 w-full whitespace-normal">
-                                    <p class="text-[10px] font-bold text-purple-700 flex items-center gap-1 mb-1"><i data-lucide="plug" class="w-3 h-3"></i> อุปกรณ์ต่อพ่วง (${item.peripherals.length} รายการ)</p>
-                                    <ul class="text-[10px] text-gray-600 list-disc pl-4 space-y-0.5">
-                                        ${item.peripherals.map(p => `<li><span class="font-semibold text-gray-800">${p.Name || p.Item_ID}</span> - จำนวน ${p.Quantity || 1} ${p.Unit || ''} <span class="text-gray-400">(${p.Note || '-'})</span></li>`).join('')}
-                                    </ul>
-                                </div>
-                            `;
-                        }
-
-                        html += `
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="p-3 text-center font-bold text-gray-500 align-top">${subGlobalIdx}</td>
-                                <td class="p-3 text-center align-top">${imgHtml}</td>
-                                <td class="p-3 text-pink-600 font-bold align-top">${aId}</td>
-                                <td class="p-3 text-gray-800 whitespace-normal break-words max-w-sm align-top">
-                                    <span class="block mb-1 font-medium">${desc}</span>
-                                    <span class="age-badge-prominent text-[10px]">${age}</span>
-                                    ${periHtml}
-                                </td>
-                                <td class="p-3 text-center align-top"><span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold whitespace-nowrap border border-indigo-100 shadow-2xs text-[10px]">${stat}</span></td>
-                            </tr>
-                        `;
+                if (Array.isArray(record.items) && record.items.length > 0) {
+                    html += '<div class="mt-4"><h4 class="font-bold text-xs text-gray-700 mb-2">รายการครุภัณฑ์จ่ายออก (' + record.items.length + ' รายการ):</h4>' +
+                        '<div class="space-y-2">';
+                    record.items.forEach((item, i) => {
+                        const aId = item.AssetID || item.Asset_ID || item.NOID || '-';
+                        const serial = item.Asset_Serial || item.Serial || '-';
+                        const detail = item.Asset_FullDescription || item.FullDescription || '-';
+                        html += '<div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100 text-xs flex flex-col gap-1">' +
+                            '<div class="flex justify-between items-center"><strong class="text-purple-700">' + (i + 1) + '. AssetID: ' + aId + '</strong></div>' +
+                            '<span class="text-gray-500">S/N: ' + serial + '</span>' +
+                            '<p class="text-gray-800 mt-1">' + detail + '</p>' +
+                            '</div>';
                     });
-                });
-
-                html += `</tbody></table></div>`;
-            } else {
-                html += `<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p></div>`;
+                    html += '</div></div>';
+                }
             }
 
-            const itUserText = record.IT_User || record.itUser || '-';
-            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
-            const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
-            const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
-
-            html += `
-                <div class="mt-8 break-inside-avoid">
-                    <h4 class="font-bold text-sm mb-4 text-gray-800 flex items-center gap-2 border-b border-gray-200 pb-2">
-                        <i data-lucide="users" class="w-4 h-4 text-pink-500"></i> ข้อมูลผู้ รับ/ส่ง (Personnel & Signatures)
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${roleIT}</p>
-                            <p class="font-bold text-gray-800 text-base">${itUserText}</p>
-                        </div>
-                        <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-${type === 'stockIn'?'emerald':'purple'}-200 shadow-sm relative">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-3">${roleUser}</p>
-            `;
-            
-            if (signatureUrl && String(signatureUrl).trim().length > 5) {
-                html += `
-                    <img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-20 w-auto object-contain border-b border-gray-100 pb-2 mb-2" alt="Signature" onerror="this.onerror=null; this.src='https://placehold.co/200x80/f3f4f6/9ca3af?text=No+Sign';">
-                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
-                    <span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ลงชื่อแล้ว</span>
-                `;
+            if (signatureUrl) {
+                html += '<div class="mt-6 pt-4 border-t border-gray-200 text-center">' +
+                    '<p class="text-xs font-bold text-gray-700 mb-2">ลายมือชื่อผู้รับมอบ / ผู้ตรวจสอบ</p>' +
+                    '<img src="' + signatureUrl + '" referrerpolicy="no-referrer" class="max-h-32 mx-auto border border-gray-300 rounded-xl bg-white p-2 shadow-sm" alt="User Signature">' +
+                    '</div>';
             } else {
-                html += `
-                    <div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">
-                        <p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>
-                    </div>
-                    <p class="font-bold text-${type === 'stockIn'?'emerald':'purple'}-700 text-sm">(${userNameText})</p>
-                    <span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>
-                `;
+                html += '<div class="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-amber-600 font-medium">ยังไม่มีการลงลายมือชื่อในระบบ</div>';
             }
-            html += `</div></div></div>`;
 
             content.innerHTML = html;
             showModal('recordDetailModal');
             if (window.lucide) lucide.createIcons();
         }
 
-        function printReceiptSlip() {
-            document.body.classList.add('printing-receipt');
-            window.print();
-            document.body.classList.remove('printing-receipt');
-        }
-
         function openA4ReportModal() {
             if (!activeDetailRecord) return;
             const { type, record } = activeDetailRecord;
-            
+            const content = document.getElementById('a4ReportContent');
+            if (!content) return;
+
             const docNo = type === 'stockIn' ? (record.Stock_In_No || '-') : (record.Stock_Out_No || '-');
-            const docId = type === 'stockIn' ? (record.Stock_In_ID || record.Doc_ID || '-') : (record.Stock_Out_ID || '-');
             const dateTime = record.Date_Time || record.Timestamp || '-';
             const deptId = record.DEPT_ID || '-';
-            const sourceType = record.Source_Type || record.sourceType || '-';
-            const refNo = record.Reference_No || record.referenceNo || '-';
-            const signatureUrl = getDriveImageUrl(record.User_Confirm || '');
-            const itUserText = record.IT_User || record.itUser || '-';
-            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
+            const sigUrl = getDriveImageUrl(record.User_Confirm || '');
 
-            let html = `
-                <div class="text-center mb-6 border-b-2 border-gray-800 pb-4">
-                    <h2 class="text-xl font-bold text-gray-900">โรงพยาบาลอุดรธานี</h2>
-                    <p class="text-xs text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-                    <h3 class="text-base font-bold text-pink-600 mt-2">${type === 'stockIn' ? 'รายงานใบรับเข้าครุภัณฑ์คอมพิวเตอร์' : 'รายงานใบจ่ายออกครุภัณฑ์คอมพิวเตอร์'}</h3>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 text-xs mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <p><strong>เลขที่เอกสาร:</strong> ${docNo}</p>
-                    <p><strong>รหัสอ้างอิงระบบ:</strong> ${docId}</p>
-                    <p><strong>วันที่ / เวลา:</strong> ${dateTime}</p>
-                    <p><strong>หน่วยงาน:</strong> ${deptId}</p>
-                    <p><strong>ประเภท:</strong> ${sourceType}</p>
-                    <p><strong>เลขอ้างอิง / Doc ID:</strong> ${refNo}</p>
-                </div>
-
-                <div class="mb-6">
-                    <h4 class="font-bold text-xs text-gray-700 mb-2 uppercase tracking-wider">รายการครุภัณฑ์ย่อย</h4>
-                    <table class="w-full text-xs border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700">
-                                <th class="border border-gray-300 p-2 text-center w-12">ลำดับ</th>
-                                <th class="border border-gray-300 p-2">รหัส (Asset ID)</th>
-                                <th class="border border-gray-300 p-2">รายละเอียด</th>
-                                <th class="border border-gray-300 p-2 text-center">สถานะ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            let html = '<div class="text-center border-b-2 border-gray-800 pb-4 mb-4">' +
+                '<h1 class="text-lg font-bold text-gray-900">โรงพยาบาลอุดรธานี</h1>' +
+                '<p class="text-xs text-gray-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>' +
+                '<h2 class="text-sm font-bold text-gray-800 mt-2">รายงาน' + (type === 'stockIn' ? 'รับเข้าครุภัณฑ์ (Stock In Report)' : 'จ่ายออกครุภัณฑ์ (Stock Out Report)') + '</h2>' +
+                '</div>' +
+                '<div class="grid grid-cols-2 text-xs mb-4 gap-2 bg-gray-50 p-3 rounded border border-gray-200">' +
+                '<div><strong>เลขที่เอกสาร:</strong> ' + docNo + '</div>' +
+                '<div><strong>วันที่/เวลา:</strong> ' + dateTime + '</div>' +
+                '<div><strong>หน่วยงาน:</strong> ' + deptId + '</div>' +
+                '<div><strong>ประเภท:</strong> ' + (type === 'stockIn' ? 'รับเข้าคลัง' : 'จ่ายออก') + '</div>' +
+                '</div>';
 
             if (Array.isArray(record.items) && record.items.length > 0) {
-                const groupedReportItems = {};
-                record.items.forEach((item) => {
-                    const iNo = item.Inv_No || '-';
-                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
-                    const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
-                    if (!groupedReportItems[typeName]) groupedReportItems[typeName] = [];
-                    groupedReportItems[typeName].push({ item, enrichedItem });
+                html += '<table class="w-full text-xs border-collapse border border-gray-400 mb-6">' +
+                    '<thead><tr class="bg-gray-100 text-gray-800">' +
+                    '<th class="border border-gray-400 p-2 text-center w-12">ลำดับ</th>' +
+                    '<th class="border border-gray-400 p-2">รหัส AssetID</th>' +
+                    '<th class="border border-gray-400 p-2">Serial Number</th>' +
+                    '<th class="border border-gray-400 p-2">รายละเอียดครุภัณฑ์</th>' +
+                    '</tr></thead><tbody>';
+
+                record.items.forEach((item, i) => {
+                    const aId = item.AssetID || item.Asset_ID || item.NOID || '-';
+                    const serial = item.Asset_Serial || item.Serial || '-';
+                    const detail = item.Asset_FullDescription || item.FullDescription || '-';
+                    html += '<tr>' +
+                        '<td class="border border-gray-400 p-2 text-center">' + (i + 1) + '</td>' +
+                        '<td class="border border-gray-400 p-2 font-bold">' + aId + '</td>' +
+                        '<td class="border border-gray-400 p-2">' + serial + '</td>' +
+                        '<td class="border border-gray-400 p-2">' + detail + '</td>' +
+                        '</tr>';
                 });
-
-                let rIdx = 0;
-                Object.keys(groupedReportItems).sort().forEach(typeName => {
-                    html += `
-                        <tr class="bg-gray-100 font-bold text-gray-800">
-                            <td colspan="4" class="border border-gray-300 p-2 text-xs">📂 ประเภท: ${typeName}</td>
-                        </tr>
-                    `;
-
-                    groupedReportItems[typeName].forEach(({ item, enrichedItem }) => {
-                        rIdx++;
-                        const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
-                        let desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || '-';
-                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
-
-                        if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
-                            desc += `<br><span class="text-[10px] text-gray-500 italic">+ ต่อพ่วง: ${item.peripherals.map(p => p.Name || p.Item_ID).join(', ')}</span>`;
-                        }
-
-                        html += `
-                            <tr>
-                                <td class="border border-gray-300 p-2 text-center font-bold align-top">${rIdx}</td>
-                                <td class="border border-gray-300 p-2 font-bold text-pink-600 align-top">${aId}</td>
-                                <td class="border border-gray-300 p-2 align-top">${desc}</td>
-                                <td class="border border-gray-300 p-2 text-center align-top">${stat}</td>
-                            </tr>
-                        `;
-                    });
-                });
-            } else {
-                html += `<tr><td colspan="4" class="text-center p-4 text-gray-400">ไม่พบรายการครุภัณฑ์ย่อย</td></tr>`;
+                html += '</tbody></table>';
             }
 
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="grid grid-cols-2 gap-8 mt-12 pt-6 border-t border-gray-300 text-center text-xs break-inside-avoid">
-                    <div>
-                        <p class="font-bold mb-8">ลงชื่อผู้ดำเนินการ (IT)</p>
-                        <p class="font-semibold">(${itUserText})</p>
-                    </div>
-                    <div>
-                        <p class="font-bold mb-2">ลงชื่อผู้เกี่ยวข้อง (User)</p>
-            `;
-
-            if (signatureUrl && String(signatureUrl).trim().length > 5) {
-                html += `<img src="${signatureUrl}" referrerpolicy="no-referrer" class="h-14 mx-auto object-contain mb-1" alt="Signature"><p class="font-semibold">(${userNameText})</p>`;
-            } else {
-                html += `<div class="h-12 flex items-center justify-center text-gray-400 italic">ยังไม่มีลายมือชื่อ</div><p class="font-semibold">(${userNameText})</p>`;
+            if (sigUrl) {
+                html += '<div class="mt-8 flex justify-end"><div class="text-center"><p class="text-xs mb-1">ลงชื่อผู้รับมอบ/ตรวจสอบ</p><img src="' + sigUrl + '" referrerpolicy="no-referrer" class="h-20 mx-auto border border-gray-300 p-1 rounded"></div></div>';
             }
 
-            html += `</div></div>`;
-
-            document.getElementById('a4ReportContent').innerHTML = html;
-            closeModal('recordDetailModal');
+            content.innerHTML = html;
             showModal('a4ReportModal');
+        }
+
+        function printReceiptSlip() {
+            document.body.classList.add('printing-receipt');
+            window.print();
+            setTimeout(() => document.body.classList.remove('printing-receipt'), 500);
         }
 
         function printA4ReportModal() {
             document.body.classList.add('printing-a4');
             window.print();
-            document.body.classList.remove('printing-a4');
+            setTimeout(() => document.body.classList.remove('printing-a4'), 500);
         }
 
-        function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
-        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showLoading() {
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.add('hidden');
+        }
+
+        function showModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+        }
+
         function showAlert(title, message) {
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertMessage').innerText = message;
+            const titleEl = document.getElementById('alertTitle');
+            const msgEl = document.getElementById('alertMessage');
+            if (titleEl) titleEl.innerText = title;
+            if (msgEl) msgEl.innerText = message;
             showModal('alertModal');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const displayName = getDisplayName();
-            document.getElementById('headerDisplayName').innerText = displayName;
-
-            if (window.lucide) lucide.createIcons();
-            loadDashboardStats();
-        });
         function closeWindow() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
-            }
-            window.location.href = "main_menu.html";
             window.close();
-            setTimeout(() => {
-                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
-            }, 300);
+            showAlert('แจ้งเตือน', 'คุณสามารถปิดแถบนี้หรือกลับสู่หน้าเมนูหลักได้');
         }
 
+        function redirectToLogin() {
+            window.location.href = './login.html';
+        }
+
+        window.onload = function () {
+            if (window.lucide) lucide.createIcons();
+            loadDashboardStats();
+        };
     </script>
 </body>
 </html>
