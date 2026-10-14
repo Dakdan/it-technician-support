@@ -1291,8 +1291,22 @@
 
             // ตรวจสอบค่าซ้ำ (AssetID และ ประเภท)
             if (editingItemIndex === -1) {
-                const isDuplicate = savedItemsList.some((item, idx) => {
-                    const existingId = item.AssetID || item.NoID || item.NOID || "";
+                let invListForCheck = window.inventoryDataList || [];
+                // หากยังไม่ได้โหลดข้อมูล Inventory ให้โหลดมาก่อนเพื่อตรวจสอบ
+                if (invListForCheck.length === 0) {
+                    showLoading(true, 'กำลังตรวจสอบข้อมูล...');
+                    try {
+                        const res = await fetchAPI(`${SCRIPT_URL}?action=getInventory`);
+                        invListForCheck = Array.isArray(res) ? res : (res.data || []);
+                        window.inventoryDataList = invListForCheck;
+                    } catch (e) {
+                        console.warn("ไม่สามารถดึงข้อมูลคลังมาตรวจสอบซ้ำได้");
+                    }
+                    showLoading(false);
+                }
+
+                const isDuplicate = invListForCheck.some((item) => {
+                    const existingId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || "";
                     const existingType = item.Asset_Type || item.Type_ID || "";
                     return existingId === currentAssetId && existingType === typeVal;
                 });
@@ -1300,11 +1314,18 @@
                 if (isDuplicate) {
                     const confirmDup = await Swal.fire({
                         title: 'พบข้อมูลซ้ำ!',
-                        text: `AssetID: ${currentAssetId} และ ประเภทนี้ มีอยู่ในรายการแล้ว ต้องการยืนยันบันทึกซ้ำหรือไม่?`,
+                        text: `AssetID: ${currentAssetId} และ ประเภทนี้ มีอยู่ใน Inventory_Asset แล้ว ต้องการยืนยันบันทึกซ้ำหรือไม่?`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'ยืนยันบันทึก',
-                        cancelButtonText: 'ยกเลิก'
+                        cancelButtonText: 'ยกเลิก',
+                        didOpen: () => {
+                            // แก้ไข modal แจ้งเตือนค่าซ้ำให้แสดง (เพราะ assetConfirmModal z-index 2000)
+                            const swalContainer = document.querySelector('.swal2-container');
+                            if (swalContainer) {
+                                swalContainer.style.setProperty('z-index', '9999', 'important');
+                            }
+                        }
                     });
                     if (!confirmDup.isConfirmed) return;
                 }
