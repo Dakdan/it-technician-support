@@ -3,7 +3,7 @@
 <head>
     <script src="./auth-check.js"></script>
     <script>
-    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN' หรือ 'IT' ( UserTypeID = 1 )
+    // บังคับล็อกอิน + บังคับเฉพาะผู้ใช้ที่มี Role เป็น 'ADMIN', 'BOSS', 'IT Staff', 'IT-STU'
     requireAuth(['ADMIN', 'BOSS', 'IT Staff','IT-STU']);
     </script>
     
@@ -214,43 +214,26 @@
             </div>
         </div>
         <div class="text-end text-right flex items-center gap-2">
-            <div id="authZone"></div>
+            <div id="authZone" class="flex flex-col text-right">
+                <span id="headerDisplayName" class="user-name text-xs md:text-sm"></span>
+                <span id="headerUserPNText" class="text-[10px] text-gray-600"></span>
+            </div>
             <button onclick="closeWindow()" title="MENU" class="bg-pink-500 hover:bg-red-500 text-white p-2 rounded-xl transition-all shadow-sm flex items-center gap-1 text-xs">
                 <i data-lucide="log-out" class="w-4 h-4">❌</i>
             </button>
         </div>
     </header>
-         <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
-            <div class="spinner"></div>
-            <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
-        </div>
-    
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-        <!-- JS Modules -->
-        <script src="indexeddb.js"></script>
-        <script src="app-core.js"></script>
-        <script src="invstock.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = getCurrentUser();
-            const displayNameEl = document.getElementById('headerDisplayName');
-            const userPNTextEl = document.getElementById('headerUserPNText');
 
-            if (currentUser) {
-                if (displayNameEl) displayNameEl.textContent = getDisplayName();
-                if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || ''})`;
-            } else {
-                if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
-                if (userPNTextEl) userPNTextEl.textContent = "";
-            }
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center hidden">
+        <div class="spinner"></div>
+        <p class="text-pink-600 font-semibold text-sm mt-3 animate-pulse">กำลังโหลดข้อมูล 📲</p>
+    </div>
 
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        });
-    </script>
+    <!-- JS Modules -->
+    <script src="indexeddb.js"></script>
+    <script src="app-core.js"></script>
+    <script src="invstock.js"></script>
 
     <!-- Navigation Bar: Sticky Top -->
     <nav class="sticky top-0 z-50 max-w-6xl mx-auto px-4 py-2 my-2 transition-all">
@@ -576,8 +559,6 @@
         </div>
     </div>
 
-    
-
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec';
 
@@ -807,9 +788,11 @@
         function renderActiveFilters() {
             const container = document.getElementById('activeFiltersContainer');
             const list = document.getElementById('activeFiltersList');
-            list.innerHTML = '';
+            if (!container || !list) return;
 
+            list.innerHTML = '';
             let hasActive = false;
+
             if (currentDashboardFilters.invStatus) {
                 hasActive = true;
                 list.innerHTML += '<span class="bg-pink-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-xs">' +
@@ -834,7 +817,10 @@
         }
 
         function updateDashboardDOM(summary, dataList, periDash) {
-            document.getElementById('dashTotalInv').innerHTML = (summary.totalItems || 0) + ' <span class="text-sm font-normal text-pink-600">รายการ</span>';
+            const dashTotalInvEl = document.getElementById('dashTotalInv');
+            if (dashTotalInvEl) {
+                dashTotalInvEl.innerHTML = (summary.totalItems || 0) + ' <span class="text-sm font-normal text-pink-600">รายการ</span>';
+            }
             
             let totalPeri = 0;
             let periBreakdownHtml = '';
@@ -856,11 +842,19 @@
                 totalPeri = summary.peripherals.totalQuantitySum || 0;
             }
 
-            document.getElementById('dashTotalPeri').innerHTML = totalPeri + ' <span class="text-sm font-normal text-purple-600">ชิ้น</span>';
-            document.getElementById('breakdownPeripherals').innerHTML = periBreakdownHtml || '<p class="text-gray-400 italic text-center p-2">ไม่มีข้อมูลอุปกรณ์ต่อพ่วง</p>';
+            const dashTotalPeriEl = document.getElementById('dashTotalPeri');
+            if (dashTotalPeriEl) {
+                dashTotalPeriEl.innerHTML = totalPeri + ' <span class="text-sm font-normal text-purple-600">ชิ้น</span>';
+            }
+
+            const breakdownPeripheralsEl = document.getElementById('breakdownPeripherals');
+            if (breakdownPeripheralsEl) {
+                breakdownPeripheralsEl.innerHTML = periBreakdownHtml || '<p class="text-gray-400 italic text-center p-2">ไม่มีข้อมูลอุปกรณ์ต่อพ่วง</p>';
+            }
 
             const renderRows = (obj, filterKey, containerId) => {
                 const container = document.getElementById(containerId);
+                if (!container) return;
                 let html = '';
                 if (obj && typeof obj === 'object') {
                     Object.keys(obj).sort().forEach(k => {
@@ -874,21 +868,27 @@
             renderRows(summary.byStatus || {}, 'invStatus', 'breakdownStatus');
             
             const ageContainer = document.getElementById('breakdownAge');
-            let ageHtml = '';
-            const ageRanges = summary.byAgeRange || {};
-            Object.keys(ageRanges).forEach(k => {
-                const isSelected = currentDashboardFilters.ageRange === k;
-                const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+            if (ageContainer) {
+                let ageHtml = '';
+                const ageRanges = summary.byAgeRange || {};
+                Object.keys(ageRanges).forEach(k => {
+                    const isSelected = currentDashboardFilters.ageRange === k;
+                    const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
 
-                ageHtml += '<div onclick="toggleDashboardFilter(\'ageRange\', \'' + k.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
-                    '<span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> ' + k + '</span>' +
-                    '<span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">' + ageRanges[k] + '</span>' +
-                    '</div>';
-            });
-            ageContainer.innerHTML = ageHtml || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+                    ageHtml += '<div onclick="toggleDashboardFilter(\'ageRange\', \'' + k.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
+                        '<span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> ' + k + '</span>' +
+                        '<span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-xs">' + ageRanges[k] + '</span>' +
+                        '</div>';
+                });
+                ageContainer.innerHTML = ageHtml || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+            }
 
             renderRows(summary.byType || {}, 'assetType', 'breakdownType');
-            document.getElementById('dashFilteredCount').innerText = dataList ? dataList.length : 0;
+            
+            const dashFilteredCountEl = document.getElementById('dashFilteredCount');
+            if (dashFilteredCountEl) {
+                dashFilteredCountEl.innerText = dataList ? dataList.length : 0;
+            }
 
             renderDashboardTable(dataList || []);
             renderActiveFilters();
@@ -897,6 +897,7 @@
 
         function renderDashboardTable(dataList) {
             const tbody = document.getElementById('dashboardDataTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             
             if (!dataList || dataList.length === 0) {
@@ -1016,6 +1017,8 @@
         function renderStockInTable(records) {
             const tbody = document.getElementById('stockInTableBody');
             const paginationContainer = document.getElementById('stockInPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
             paginationContainer.innerHTML = '';
 
@@ -1094,6 +1097,8 @@
         function renderStockOutTable(records) {
             const tbody = document.getElementById('stockOutTableBody');
             const paginationContainer = document.getElementById('stockOutPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
             paginationContainer.innerHTML = '';
 
@@ -1225,12 +1230,14 @@
                 return aId.includes(query) || serial.includes(query) || typeName.includes(query) || desc.includes(query);
             });
 
-            document.getElementById('inventorySearchCount').innerText = currentFilteredInventoryRecords.length;
+            const countEl = document.getElementById('inventorySearchCount');
+            if (countEl) countEl.innerText = currentFilteredInventoryRecords.length;
             renderInventoryAccordionTable(currentFilteredInventoryRecords);
         }
 
         function renderInventoryAccordionTable(records) {
             const container = document.getElementById('inventoryAccordionContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             if (!records || records.length === 0) {
@@ -1345,6 +1352,7 @@
         function openInventoryItemDetailModal(item) {
             if (!item) return;
             const content = document.getElementById('inventoryItemDetailContent');
+            if (!content) return;
             
             const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
             const serial = item.Asset_Serial || item.Serial || "-";
@@ -1409,8 +1417,11 @@
             showLoading();
             try {
                 const isStockIn = type === 'stockIn';
-                document.getElementById('printTitle').innerText = isStockIn ? 'รายการเอกสารรับเข้า (Stock In Reports)' : 'รายการเอกสารจ่ายออก (Stock Out Reports)';
-                document.getElementById('printTimestamp').innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+                const printTitleEl = document.getElementById('printTitle');
+                const printTimestampEl = document.getElementById('printTimestamp');
+
+                if (printTitleEl) printTitleEl.innerText = isStockIn ? 'รายการเอกสารรับเข้า (Stock In Reports)' : 'รายการเอกสารจ่ายออก (Stock Out Reports)';
+                if (printTimestampEl) printTimestampEl.innerText = `อัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
 
                 let records = [];
                 if (isStockIn) {
@@ -1428,6 +1439,7 @@
                 }
 
                 const tbody = document.getElementById('printTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
 
                 if (!records || records.length === 0) {
@@ -1473,8 +1485,11 @@
             if (!record) return;
             activeDetailRecord = { type, record };
 
-            document.getElementById('detailDocNo').innerText = docNo;
+            const detailDocNoEl = document.getElementById('detailDocNo');
+            if (detailDocNoEl) detailDocNoEl.innerText = docNo;
+
             const content = document.getElementById('detailContent');
+            if (!content) return;
 
             let html = '';
             let signatureUrl = getDriveImageUrl(record.User_Confirm || '');
@@ -1740,7 +1755,9 @@
 
             html += '</div></div>';
 
-            document.getElementById('a4ReportContent').innerHTML = html;
+            const reportContentEl = document.getElementById('a4ReportContent');
+            if (reportContentEl) reportContentEl.innerHTML = html;
+            
             closeModal('recordDetailModal');
             showModal('a4ReportModal');
         }
@@ -1751,21 +1768,46 @@
             document.body.classList.remove('printing-a4');
         }
 
-        function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
-        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showLoading() { 
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.remove('hidden'); 
+        }
+        function hideLoading() { 
+            const el = document.getElementById('loadingOverlay');
+            if (el) el.classList.add('hidden'); 
+        }
+        function showModal(id) { 
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden'); 
+        }
+        function closeModal(id) { 
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden'); 
+        }
         function showAlert(title, message) {
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertMessage').innerText = message;
+            const titleEl = document.getElementById('alertTitle');
+            const msgEl = document.getElementById('alertMessage');
+            if (titleEl) titleEl.innerText = title;
+            if (msgEl) msgEl.innerText = message;
             showModal('alertModal');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const displayName = getDisplayName();
-            document.getElementById('headerDisplayName').innerText = displayName;
+            const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            const displayNameEl = document.getElementById('headerDisplayName');
+            const userPNTextEl = document.getElementById('headerUserPNText');
 
-            if (window.lucide) lucide.createIcons();
+            if (currentUser) {
+                if (displayNameEl) displayNameEl.textContent = typeof getDisplayName === 'function' ? getDisplayName() : 'เจ้าหน้าที่ IT';
+                if (userPNTextEl) userPNTextEl.textContent = `(${currentUser.UserPN || currentUser.username || ''})`;
+            } else {
+                if (displayNameEl) displayNameEl.textContent = "เจ้าหน้าที่ IT (Guest)";
+                if (userPNTextEl) userPNTextEl.textContent = "";
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             loadDashboardStats();
         });
 
@@ -1773,12 +1815,12 @@
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
+                if (typeof showToast === 'function') showToast('ไม่พบหน้าก่อนหน้าเพื่อย้อนกลับ');
             }
             window.location.href = "main_menu.html";
             window.close();
             setTimeout(() => {
-                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
+                if (typeof showToast === 'function') showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
             }, 300);
         }
     </script>
