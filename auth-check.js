@@ -1,51 +1,82 @@
 /*
  * ============================================================================
- * ไฟล์: auth-check.js (เวอร์ชันปรับปรุง: รองรับ Hard Check, Role Check และ Call API พร้อม Token)
- * วัตถุประสงค์: ตรวจสอบสถานะ, สิทธิ์การเข้าใช้งาน และจัดการการสื่อสารกับ Backend
+ * ไฟล์: auth-check.js
+ * วัตถุประสงค์: ตรวจสอบสถานะการล็อกอิน, ตรวจสอบ TTL, และตรวจจับการไม่ได้ใช้งาน
  * ============================================================================
  */
 
 (function () {
     try {
-        // ดึงข้อมูลจาก sessionStorage (สำหรับ Mobile) หรือ localStorage (สำหรับ PC)
-        const userData = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
+        // ตรวจดึงข้อมูลจากทั้ง sessionStorage และ localStorage
+        const rawData = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
 
-        // เงื่อนไข 1: หากไม่มีข้อมูลในระบบ
-        if (!userData) {
+        if (!rawData) {
             window.user = null;
             return;
         }
 
-        const user = JSON.parse(userData);
+        const user = JSON.parse(rawData);
 
-        // เงื่อนไข 2: หากมีข้อมูลแต่โครงสร้างไม่ถูกต้อง (ไม่มี UserPN)
-        if (!user || !user.UserPN) {
-            sessionStorage.removeItem('currentUser');
-            localStorage.removeItem('currentUser');
-            window.user = null;
+        // ตรวจสอบฟิลด์ UserPN หรือ username
+        if (!user || (!user.UserPN && !user.username)) {
+            clearSessionAndRedirect();
             return;
         }
 
-        // เงื่อนไข 3: ตรวจสอบเวลาหมดอายุ (TTL)
+        // ตรวจสอบการหมดอายุของ Session (TTL Expiry)
         if (user.loginTime && user.expiresIn) {
             const now = new Date().getTime();
             if (now - user.loginTime > user.expiresIn) {
-                sessionStorage.removeItem('currentUser');
-                localStorage.removeItem('currentUser');
-                window.user = null;
+                alert("เซสชันของคุณหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+                clearSessionAndRedirect();
                 return;
             }
         }
 
-        // เงื่อนไข 4: ข้อมูลถูกต้อง -> ผูกเข้า Global Window
+        // ผ่านทุกเงื่อนไข -> บันทึกเข้า Global Object
         window.user = user;
+
+        // เริ่มต้นระบบตรวจจับผู้ใช้ไม่ได้ใช้งาน (Inactivity Checker)
+        initInactivityChecker();
+
     } catch (err) {
         console.error("Auth-Check error: ", err);
-        sessionStorage.removeItem('currentUser');
-        localStorage.removeItem('currentUser');
-        window.user = null;
+        clearSessionAndRedirect();
     }
 })();
+
+// ล้าง Session จากทั้ง 2 Storage และเด้งกลับหน้า Login
+function clearSessionAndRedirect() {
+    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
+    sessionStorage.clear();
+    window.user = null;
+
+    const currentPage = window.location.pathname.split('/').pop();
+    if (currentPage !== 'index.html' && currentPage !== 'login.html' && currentPage !== '') {
+        window.location.replace("index.html");
+    }
+}
+
+// ตรวจจับการไม่ได้ใช้งานนาน (Inactivity Checker)
+function initInactivityChecker() {
+    // ตั้งเวลานิ่งเกิน 15 นาที -> บังคับ Logout (15 * 60 * 1000 ms)
+    const INACTIVITY_LIMIT = 15 * 60 * 1000;
+    let timeoutId;
+
+    function resetTimer() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            alert("คุณไม่ได้ใช้งานระบบเป็นเวลานาน เพื่อความปลอดภัย กรุณายืนยันตัวตนใหม่อีกครั้ง");
+            clearSessionAndRedirect();
+        }, INACTIVITY_LIMIT);
+    }
+
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    events.forEach(evt => document.addEventListener(evt, resetTimer, false));
+
+    resetTimer();
+}
 
 function getCurrentUser() {
     return window.user || null;
@@ -53,7 +84,6 @@ function getCurrentUser() {
 
 function hasRole(role) {
     if (!window.user) return false;
-    // ตรวจสอบทั้ง UserTypeID หรือ Role ตามโครงสร้างข้อมูลที่มี
     const currentRole = window.user.UserTypeID || window.user.Role || '';
     return String(currentRole).toUpperCase() === String(role).toUpperCase();
 }
@@ -64,31 +94,17 @@ function getDisplayName() {
 }
 
 function logout() {
-    sessionStorage.removeItem('currentUser');
-    localStorage.removeItem('currentUser');
-    sessionStorage.clear();
-    try {
-        window.location.replace("index.html");
-    } catch(e) {
-        window.location.href = "index.html";
-    }
+    clearSessionAndRedirect();
 }
 
-/* 
- * ============================================================================
- * [ส่วนเดิม] ฟังก์ชันสำหรับหน้า HTML ที่ต้องการบังคับตรวจสิทธิ์/ตำแหน่ง (Hard Check)
- * ============================================================================
- */
 function requireAuth(allowedRoles = []) {
     const user = getCurrentUser();
     
-    // 1. ถ้ายังไม่ได้ล็อกอิน ให้เด้งไปหน้า login.html
     if (!user) {
-        logout();
+        clearSessionAndRedirect();
         return false;
     }
     
-    // 2. ถ้ามีการระบุ Role ที่อนุญาต แล้ว User ไม่มีสิทธิ์ตรงตามนั้น
     if (allowedRoles.length > 0) {
         const hasPermission = allowedRoles.some(role => hasRole(role));
         if (!hasPermission) {
@@ -101,18 +117,13 @@ function requireAuth(allowedRoles = []) {
     return true;
 }
 
-/* 
- * ============================================================================
- * [ส่วนเพิ่มใหม่] ฟังก์ชันกลางสำหรับเรียกใช้งาน API พร้อมแนบ Token และจัดการ Error อัตโนมัติ
- * ============================================================================
- */
 async function callApi(action, payload = {}) {
-    // ตรวจสอบว่าในหน้า HTML นั้น ๆ มีการประกาศตัวแปร API_URL ไว้หรือไม่
-    if (typeof API_URL === 'undefined') {
+    if (typeof API_URL === 'undefined' && typeof window.API_URL === 'undefined') {
         console.error("API_URL is not defined in this page.");
         return { success: false, message: "ไม่ได้กำหนดค่า API_URL ในหน้าเว็บนี้" };
     }
 
+    const apiUrl = window.API_URL || API_URL;
     const user = getCurrentUser();
     const token = user ? (user.Token || user.token) : '';
 
@@ -123,7 +134,7 @@ async function callApi(action, payload = {}) {
     };
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             body: JSON.stringify(requestData),
             headers: {
@@ -133,10 +144,9 @@ async function callApi(action, payload = {}) {
 
         const result = await response.json();
 
-        // ตรวจสอบกรณี Backend แจ้งว่า Token ไม่ถูกต้องหรือหมดอายุ (Unauthorized)
         if (!result.success && result.message && result.message.includes("Unauthorized")) {
             alert("เซสชันของคุณหมดอายุหรือเข้าสู่ระบบจากที่อื่น กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-            logout();
+            clearSessionAndRedirect();
             return null;
         }
 
