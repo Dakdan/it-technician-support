@@ -19,7 +19,7 @@
 
         // ตรวจสอบฟิลด์ UserPN หรือ username
         if (!user || (!user.UserPN && !user.username)) {
-            clearSessionAndRedirect();
+            clearSessionAndRedirect("โครงสร้างข้อมูลผู้ใช้ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่");
             return;
         }
 
@@ -27,8 +27,7 @@
         if (user.loginTime && user.expiresIn) {
             const now = new Date().getTime();
             if (now - user.loginTime > user.expiresIn) {
-                alert("เซสชันของคุณหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-                clearSessionAndRedirect();
+                clearSessionAndRedirect("เซสชันของคุณหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
                 return;
             }
         }
@@ -41,20 +40,49 @@
 
     } catch (err) {
         console.error("Auth-Check error: ", err);
-        clearSessionAndRedirect();
+        clearSessionAndRedirect("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ กรุณาเข้าสู่ระบบใหม่");
     }
 })();
 
-// ล้าง Session จากทั้ง 2 Storage และเด้งกลับหน้า Login
-function clearSessionAndRedirect() {
+// ล้าง Session จากทั้ง 2 Storage และแจ้งเตือนผ่าน Modal ก่อนเด้งกลับหน้า Login
+function clearSessionAndRedirect(customMessage) {
     sessionStorage.removeItem('currentUser');
     localStorage.removeItem('currentUser');
     sessionStorage.clear();
     window.user = null;
 
     const currentPage = window.location.pathname.split('/').pop();
-    if (currentPage !== 'index.html' && currentPage !== 'login.html' && currentPage !== '') {
+    if (currentPage === 'index.html' || currentPage === 'login.html' || currentPage === '') {
+        return;
+    }
+
+    const modal = document.getElementById('sessionExpiredModal');
+    const msgEl = document.getElementById('sessionExpiredMessage');
+
+    if (modal) {
+        if (msgEl && customMessage) {
+            msgEl.innerText = customMessage;
+        }
+        modal.classList.remove('hidden');
+    } else {
+        if (customMessage) {
+            alert(customMessage);
+        }
         window.location.replace("index.html");
+    }
+}
+
+// ฟังก์ชันสำหรับปุ่มตกลงบน Modal ในการย้ายกลับหน้า Login
+function redirectToLogin() {
+    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
+    sessionStorage.clear();
+    window.user = null;
+    
+    try {
+        window.location.replace("index.html");
+    } catch (e) {
+        window.location.href = "index.html";
     }
 }
 
@@ -67,8 +95,7 @@ function initInactivityChecker() {
     function resetTimer() {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-            alert("คุณไม่ได้ใช้งานระบบเป็นเวลานาน เพื่อความปลอดภัย กรุณายืนยันตัวตนใหม่อีกครั้ง");
-            clearSessionAndRedirect();
+            clearSessionAndRedirect("คุณไม่ได้ใช้งานระบบเป็นเวลานาน เพื่อความปลอดภัย กรุณายืนยันตัวตนใหม่อีกครั้ง");
         }, INACTIVITY_LIMIT);
     }
 
@@ -145,8 +172,7 @@ async function callApi(action, payload = {}) {
         const result = await response.json();
 
         if (!result.success && result.message && result.message.includes("Unauthorized")) {
-            alert("เซสชันของคุณหมดอายุหรือเข้าสู่ระบบจากที่อื่น กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-            clearSessionAndRedirect();
+            clearSessionAndRedirect("เซสชันของคุณหมดอายุหรือเข้าสู่ระบบจากที่อื่น กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
             return null;
         }
 
