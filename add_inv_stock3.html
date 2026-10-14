@@ -243,20 +243,28 @@
             </div>
         </div>
         <div class="text-end text-right flex items-center gap-2">
-        <!-- โซนแสดงชื่อผู้ใช้งาน (เพิ่มการ์ดพื้นหลัง + กรอบ + เงา ให้เด่นชัด) -->
-        <div id="authZone" class="flex flex-col text-right bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-pink-300 shadow-md transition-all hover:shadow-lg">
-            <div class="flex items-center justify-end gap-1.5">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Online"></span>
-                <span id="headerDisplayName" class="user-name text-xs md:text-sm font-extrabold text-pink-700 tracking-wide drop-shadow-xs"></span>
+        <!-- รวมโซนแสดงชื่อผู้ใช้และปุ่มปิดไว้ในกรอบเดียวกัน (Responsive สวยงาม ไม่ล้นจอ Smartphone) -->
+        <div class="flex items-center gap-1.5 md:gap-2 bg-white/95 backdrop-blur-md p-1.5 pl-2.5 rounded-2xl border border-pink-300 shadow-md max-w-[200px] sm:max-w-[260px] md:max-w-none">
+            
+            <!-- โซนชื่อผู้ใช้และสถานะ (ตัดคำอัตโนมัติหากชื่อยาวเกินไป) -->
+            <div id="authZone" class="flex flex-col text-right min-w-0 flex-1 leading-tight">
+                <div class="flex items-center justify-end gap-1 min-w-0">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Online"></span>
+                    <span id="headerDisplayName" class="user-name text-[11px] sm:text-xs md:text-sm font-extrabold text-pink-700 tracking-wide truncate"></span>
+                </div>
+                <span id="headerUserPNText" class="text-[9px] sm:text-[10px] font-semibold text-gray-500 truncate"></span>
             </div>
-            <span id="headerUserPNText" class="text-[11px] font-semibold text-gray-600"></span>
+        
+            <!-- เส้นคั่นแนวตั้งเบาๆ -->
+            <div class="h-6 w-[1px] bg-pink-200 shrink-0"></div>
+        
+            <!-- ปุ่มปิดหน้าต่าง -->
+            <button onclick="closeWindow()" title="ปิดหน้าต่าง / กลับเมนู" class="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 active:scale-95 text-white px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 text-[11px] sm:text-xs font-bold border border-rose-300 shrink-0">
+                <i data-lucide="log-out" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                <span>❌ปิด</span>
+            </button>
+        
         </div>
-    
-        <!-- ปุ่มออก/ปิดหน้าต่าง (ปรับให้เป็นปุ่มแดงไล่ระดับสี เด่นชัด และมีเอฟเฟกต์กด) -->
-        <button onclick="closeWindow()" title="ปิดหน้าต่าง / กลับเมนู" class="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 active:scale-95 text-white px-3.5 py-2 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center gap-1.5 text-xs font-bold border border-rose-300 shrink-0">
-            <i data-lucide="log-out" class="w-4 h-4"></i>
-            <span>❌️ปิด</span>
-        </button>
     </div>
     </header>
 
