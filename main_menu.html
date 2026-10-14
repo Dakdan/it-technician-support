@@ -474,6 +474,11 @@
             return el && typeof bootstrap !== 'undefined' ? bootstrap.Modal.getOrCreateInstance(el) : null;
         }
 
+        // ฟังก์ชันสร้างคีย์จำเพาะสำหรับ Alert (เพื่อเก็บลง localStorage)
+        function getAlertUniqueKey(alertItem) {
+            return (alertItem.ALERT_NO || alertItem.ALERT_TEXT) + "_" + alertItem.ALERT_TIME_START;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loginModal = safeInitModal('loginRequireModal');
             systemAlertModal = safeInitModal('systemAlertModal');
@@ -488,22 +493,39 @@
                         const alertItem = myCurrentAlerts[currentDetailAlertIndex];
                         const currentStatus = String(alertItem.STATUS || '').toUpperCase();
                         
-                        if (currentStatus !== 'CLOSED') {
-                            alertItem.STATUS = "CLOSED"; 
+                        // 1. ดึงข้อมูล User ปัจจุบัน
+                        const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                        const myUid = activeUser ? String(activeUser.USERID || '').trim() : '';
+
+                        // 2. เช็คว่าเคยอ่านในเครื่อง/session นี้หรือยัง
+                        let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
+                        const alertKey = getAlertUniqueKey(alertItem);
+                        
+                        // ถ้ายังไม่ได้อ่าน (สถานะไม่ใช่ CLOSED หรือ ยังไม่มีในประวัติ History ของเครื่อง)
+                        if (currentStatus !== 'CLOSED' && !readHistory.includes(alertKey)) {
+                            
+                            // บันทึกประวัติการอ่านลงเครื่องผู้ใช้ (มีประโยชน์มากเวลาเป็น Alert แบบ ALL)
+                            readHistory.push(alertKey);
+                            localStorage.setItem('readAlertsHistory', JSON.stringify(readHistory));
+                            
+                            // อัปเดต UI ทันที
                             renderNotificationsListBody();
                             updateUnreadCounts();
+                            fetchDashboardData(); 
                             
+                            // 3. ยิง API บันทึกสถานะและส่ง userId ไปลง Audit
                             fetch(API_URL, {
                                 method: 'POST',
                                 body: JSON.stringify({
                                     action: 'updateAlertStatus',
                                     status: 'CLOSED', 
-                                    alertData: alertItem
+                                    alertData: alertItem,
+                                    userId: myUid // ส่งพารามิเตอร์นี้ไปให้ code.gs
                                 }),
                                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                             })
                             .then(response => response.json())
-                            .then(() => fetchDashboardData())
+                            .then(data => { console.log("Alert read status updated:", data); })
                             .catch(e => console.error("Update status failed:", e));
                         }
                         currentDetailAlertIndex = -1;
@@ -690,8 +712,14 @@
             }
         }
 
+        // ฟังก์ชันนับ Alert ที่ยังไม่ได้อ่าน (คำนวณจาก DB + localStorage)
         function getUnreadAlertCount() {
-            return myCurrentAlerts.filter(a => String(a.STATUS || '').toUpperCase() !== 'CLOSED').length;
+            let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
+            return myCurrentAlerts.filter(a => {
+                const isGloballyClosed = String(a.STATUS || '').toUpperCase() === 'CLOSED';
+                const isLocallyRead = readHistory.includes(getAlertUniqueKey(a));
+                return !isGloballyClosed && !isLocallyRead;
+            }).length;
         }
 
         function updateUnreadCounts() {
@@ -711,6 +739,7 @@
             if (notificationsListModal) notificationsListModal.show();
         }
 
+        // ฟังก์ชันแสดงรายการ Alert ใน Modal จัดการสีเมื่ออ่านแล้ว/ยังไม่อ่าน
         function renderNotificationsListBody() {
             const body = document.getElementById('notificationsModalBody');
             if (!body) return;
@@ -727,18 +756,25 @@
                 return;
             }
 
+            let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
             let html = '<div class="list-group list-group-flush mb-2">';
+            
             myCurrentAlerts.forEach((alertItem, index) => {
                 const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || '';
                 const time = alertItem.ALERT_TIME_START;
                 const status = String(alertItem.STATUS || '').toUpperCase();
-                const isRead = (status === 'CLOSED');
+                
+                // ตรวจสอบว่า "อ่านแล้ว" จากทั้งฝั่ง Backend หรือ LocalStorage
+                const isRead = (status === 'CLOSED' || readHistory.includes(getAlertUniqueKey(alertItem)));
 
                 html += `
-                    <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border ${isRead ? 'bg-white text-secondary' : 'bg-pink-soft text-dark'}" onclick="openAlertDetail(${index})" style="cursor: pointer;">
+                    <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border ${isRead ? 'bg-white text-secondary opacity-75' : 'bg-pink-soft text-dark'}" onclick="openAlertDetail(${index})" style="cursor: pointer;">
                         <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                            <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation me-2"></i>${type}</h6>
+                            <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">
+                                ${isRead ? '<i class="fa-solid fa-envelope-open me-2 text-secondary"></i>' : '<i class="fa-solid fa-envelope me-2 text-danger"></i>'}
+                                ${type}
+                            </h6>
                             <small class="text-muted" style="font-size: 0.7rem;">${time ? new Date(time).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : ''}</small>
                         </div>
                         <p class="mb-0 text-truncate" style="font-size: 0.8rem;">${text}</p>
@@ -769,16 +805,23 @@
             if (alertDetailModalInstance) alertDetailModalInstance.hide();
         }
 
+        // ฟังก์ชันแสดง Alert ที่หน้าหลัก กรองเฉพาะอันที่ 'ยังไม่ได้อ่าน' จากทั้ง Server และ Local
         function renderAllAlertsOnMainPage(alerts) {
             const container = document.getElementById('alertsContainer');
             if (!container) return;
             container.innerHTML = '';
             if (!alerts || alerts.length === 0) return;
 
-            const unreadAlerts = alerts.filter(item => String(item.STATUS || '').toUpperCase() !== 'CLOSED');
+            let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
+            
+            const unreadAlerts = alerts.filter(item => {
+                const status = String(item.STATUS || '').toUpperCase();
+                return status !== 'CLOSED' && !readHistory.includes(getAlertUniqueKey(item));
+            });
+            
             if (unreadAlerts.length === 0) return;
 
-            let html = `<div class="alerts-section-header"><i class="fa-solid fa-satellite-dish"></i> กระดานข่าวสารและแจ้งเตือน</div>`;
+            let html = `<div class="alerts-section-header"><i class="fa-solid fa-satellite-dish"></i> กระดานข่าวสารและแจ้งเตือนล่าสุด</div>`;
             
             unreadAlerts.forEach(alertItem => {
                 const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
@@ -811,7 +854,6 @@
             const finalGrouped = {};
             const shortcuts = [];
         
-            // 🟢 1. Logic เดิม: แยกประเภท Fast Menu / Alert Menu เข้า Shortcuts
             for (const [groupName, items] of Object.entries(menusObj)) {
                 if (!Array.isArray(items)) continue;
                 items.forEach(m => {
@@ -825,7 +867,6 @@
                 });
             }
         
-            // 🟢 2. Logic เดิม: แสดงผลส่วน Shortcut Section
             if (shortcuts.length > 0) {
                 const shortcutSec = document.getElementById('shortcutSection');
                 if (shortcutSec) {
@@ -845,7 +886,6 @@
                 if (shortcutSec) shortcutSec.classList.add('d-none');
             }
         
-            // 🟢 3. Logic เดิม: แสดงผลกลุ่มเมนูหลักตามหมวดหมู่พร้อมเวียนสีเส้นขอบ
             let mainHtml = '';
             const headColors = ['#0066ff', '#16a34a', '#7d3cff', '#e11d48', '#ff6600', '#0ea5e9', '#d63384'];
             let colorIdx = 0;
@@ -884,7 +924,6 @@
             let iconClass = icon;
             if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
             
-            // 🟢 4. Logic เดิม: แมปสไตล์และสีไอคอนตามชื่อเมนู
             let colorClass = 'icon-default';
             const menuNameLower = name.toLowerCase();
         
@@ -896,14 +935,12 @@
             else if (menuNameLower.includes('แจ้งเตือน')) { iconClass = 'fa-solid fa-bell'; colorClass = 'icon-yellow'; }
             else if (menuNameLower.includes('my job') || menuNameLower.includes('my jobe')) { iconClass = 'fa-solid fa-briefcase'; colorClass = 'icon-green'; }
             
-            // 🟢 5. Logic เดิม: Badge ตัวเลขแจ้งเตือน
             let cardBadgeHtml = '';
             if (menuNameLower.includes('แจ้งเตือน') && alertCount > 0) {
                 const displayCount = alertCount > 99 ? '99+' : alertCount;
                 cardBadgeHtml = `<span class="badge-counter" style="top: -8px; right: -15px; font-size: 0.75rem; padding: 3px 8px;">${displayCount}</span>`;
             }
         
-            // 🟢 6. Logic เดิม: ตรวจสอบรูปภาพเมนู IMAGE_ID_URL
             const iconHtml = menu.IMAGE_ID_URL ? 
                 `<img src="${menu.IMAGE_ID_URL}" alt="${name}" class="menu-icon" onerror="this.src='https://via.placeholder.com/62?text=IT'">` :
                 `<i class="${iconClass} menu-icon ${colorClass}"></i>`;
@@ -940,19 +977,6 @@
         function openScanner() {
             showSystemModal('QR Scanner', 'กำลังเชื่อมต่อกล้องฮาร์ดแวร์เพื่อสแกน QR...', 'fa-solid fa-camera');
         }
-    </script>
-
-    <!-- ป้องกันการกดย้อนกลับ (History Popstate) -->
-    <script>
-        window.history.pushState(null, "", window.location.href);
-        window.addEventListener('popstate', function () {
-            const confirmExit = confirm("คุณต้องการออกจากหน้าเมนูหลักใช่หรือไม่?");
-            if (confirmExit) {
-                window.close();
-            } else {
-                window.history.pushState(null, "", window.location.href);
-            }
-        });
     </script>
 </body>
 </html>
