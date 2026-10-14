@@ -63,13 +63,23 @@
         }
 
         .login-card {
-            background: linear-gradient(to bottom, var(--pink-soft) 0%, var(--white) 100%);
+            /* เปลี่ยนสีชมพูและสีขาวให้มีความโปร่งใส (Alpha: 0.75 ถึง 0.85) */
+            background: linear-gradient(
+                to bottom, 
+                rgba(255, 182, 193, 0.75) 0%,   /* สีชมพูอ่อนโปร่งใส 75% */
+                rgba(255, 255, 255, 0.85) 100%   /* สีขาวโปร่งใส 85% */
+            );
+            
             border-radius: 30px;
             box-shadow: var(--shadow-md);
             width: 100%;
             max-width: 440px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5); /* ปรับขอบให้กลมกลืน */
+            
+            /* ลด Blur ลงเล็กน้อยเพื่อไม่ให้ลายน้ำด้านหลังเบลอจนมองไม่ออก */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); /* รองรับ Safari/iOS */
+            
             padding: 3rem 2rem;
             text-align: center;
             transition: all 0.3s ease-in-out;
