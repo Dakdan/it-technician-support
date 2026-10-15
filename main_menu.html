@@ -739,7 +739,7 @@
             if (notificationsListModal) notificationsListModal.show();
         }
 
-        // ฟังก์ชันแสดงรายการ Alert ใน Modal จัดการสีเมื่ออ่านแล้ว/ยังไม่อ่าน
+        // ฟังก์ชันแสดงรายการ Alert ใน Modal จัดการสีเมื่ออ่านแล้ว/ยังไม่อ่าน และแยกกลุ่ม
         function renderNotificationsListBody() {
             const body = document.getElementById('notificationsModalBody');
             if (!body) return;
@@ -757,19 +757,33 @@
             }
 
             let readHistory = JSON.parse(localStorage.getItem('readAlertsHistory') || '[]');
-            let html = '<div class="list-group list-group-flush mb-2">';
             
+            // แยกกลุ่มแจ้งเตือน (เก็บ index เดิมไว้ด้วยเพื่อให้ตอนกดเปิดอ่านดึงข้อมูลได้ถูกตัว)
+            let unreadAlerts = [];
+            let readAlerts = [];
+
             myCurrentAlerts.forEach((alertItem, index) => {
+                const status = String(alertItem.STATUS || '').toUpperCase();
+                const isRead = (status === 'CLOSED' || readHistory.includes(getAlertUniqueKey(alertItem)));
+                
+                if (isRead) {
+                    readAlerts.push({ alertItem, index, isRead });
+                } else {
+                    unreadAlerts.push({ alertItem, index, isRead });
+                }
+            });
+
+            let html = '';
+
+            // ฟังก์ชันย่อยสำหรับสร้างหน้าตาของแต่ละรายการ
+            const createItemHtml = (data) => {
+                const { alertItem, index, isRead } = data;
                 const type = alertItem.ALERT_TYPE_ID || 'แจ้งเตือนระบบ';
                 const text = alertItem.ALERT_TEXT || '';
                 const time = alertItem.ALERT_TIME_START;
-                const status = String(alertItem.STATUS || '').toUpperCase();
                 
-                // ตรวจสอบว่า "อ่านแล้ว" จากทั้งฝั่ง Backend หรือ LocalStorage
-                const isRead = (status === 'CLOSED' || readHistory.includes(getAlertUniqueKey(alertItem)));
-
-                html += `
-                    <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border ${isRead ? 'bg-white text-secondary opacity-75' : 'bg-pink-soft text-dark'}" onclick="openAlertDetail(${index})" style="cursor: pointer;">
+                return `
+                    <div class="list-group-item list-group-item-action p-3 mb-2 rounded-4 border ${isRead ? 'bg-white text-secondary opacity-75' : 'bg-pink-soft text-dark shadow-sm'}" onclick="openAlertDetail(${index})" style="cursor: pointer;">
                         <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                             <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">
                                 ${isRead ? '<i class="fa-solid fa-envelope-open me-2 text-secondary"></i>' : '<i class="fa-solid fa-envelope me-2 text-danger"></i>'}
@@ -780,8 +794,30 @@
                         <p class="mb-0 text-truncate" style="font-size: 0.8rem;">${text}</p>
                     </div>
                 `;
-            });
-            html += '</div>';
+            };
+
+            // 1. ส่วนหัวและรายการที่ "ยังไม่ได้อ่าน"
+            html += `<h6 class="fw-bold text-danger mb-3 px-1"><i class="fa-solid fa-bell me-2"></i>ยังไม่ได้อ่าน (${unreadAlerts.length})</h6>`;
+            if (unreadAlerts.length > 0) {
+                html += '<div class="list-group list-group-flush mb-4">';
+                unreadAlerts.forEach(item => {
+                    html += createItemHtml(item);
+                });
+                html += '</div>';
+            } else {
+                html += `<div class="text-center p-3 text-muted bg-light rounded-4 mb-4"><small>ไม่มีข้อความใหม่</small></div>`;
+            }
+
+            // 2. ส่วนหัวและรายการที่ "อ่านแล้ว"
+            if (readAlerts.length > 0) {
+                html += `<h6 class="fw-bold text-secondary mb-3 px-1 border-top pt-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>อ่านแล้ว (${readAlerts.length})</h6>`;
+                html += '<div class="list-group list-group-flush mb-2">';
+                readAlerts.forEach(item => {
+                    html += createItemHtml(item);
+                });
+                html += '</div>';
+            }
+
             body.innerHTML = html;
         }
 
