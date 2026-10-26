@@ -943,11 +943,16 @@
                 return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทจ่ายออกและหน่วยงานก่อน', 'warning');
             }
             
-            showLoading(true, 'กำลังสร้างเอกสารจ่ายออก...');
+            showLoading(true, 'กำลังบันทึกข้อมูลหัวบิล...');
             try {
+                // ตรวจสอบว่ามี stockOutID อยู่แล้วหรือไม่ (กรณีแก้ไขบิลเดิม)
+                const isEditing = !!currentSessionStockOutId;
+                
                 const stockPayload = {
-                    action: 'saveStockOut',
+                    action: isEditing ? 'updateStockOutHeader' : 'saveStockOut',
                     payload: {
+                        stockOutID: currentSessionStockOutId || "",
+                        stockOutNo: currentSessionStockOutNo || "",
                         depId: depId,
                         docId: uploadedDocFileName || "",
                         sourceType: sourceType,
@@ -987,7 +992,7 @@
                 document.getElementById('btnSign').disabled = false;
                 
                 showLoading(false);
-                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: `สร้างเอกสารจ่ายออก: ${currentSessionStockOutNo}`, timer: 1500, showConfirmButton: false });
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: isEditing ? 'อัปเดตข้อมูลหัวบิลสำเร็จ' : `สร้างเอกสารจ่ายออก: ${currentSessionStockOutNo}`, timer: 1500, showConfirmButton: false });
                 
             } catch(e) {
                 showLoading(false);
