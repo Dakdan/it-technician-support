@@ -1647,7 +1647,11 @@
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'updateSignature',
-                        payload: { stockOutNo: currentSessionStockOutNo, signatureBase64: b64, userName: senderName }
+                        payload: { 
+                            stockOutNo: currentSessionStockOutNo, 
+                            signatureBase64: b64, 
+                            userName: senderName // ส่งชื่อผู้รับไปบันทึกลง User_Name ด้วย
+                        }
                     })
                 });
                 showLoading(false);
