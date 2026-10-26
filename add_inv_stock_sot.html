@@ -314,24 +314,6 @@
                         <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Reference_No"><i class="fa-solid fa-hashtag text-pink-400 w-5"></i> หมายเหตุ/อ้างอิง (Reference_No)</label>
                         <input type="text" id="Reference_No" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="ระบุเลขที่เอกสารเพิ่มเติม (ถ้ามี)">
                     </div>
-
-                    <!-- เพิ่มเติมช่องฟิลด์ Note1 ถึง Note4 ตามโครงสร้างชีต Asset_Stock_Out -->
-                    <div class="form-group">
-                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Note1">Note 1</label>
-                        <input type="text" id="Note1" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="บันทึกเพิ่มเติม 1">
-                    </div>
-                    <div class="form-group">
-                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Note2">Note 2</label>
-                        <input type="text" id="Note2" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="บันทึกเพิ่มเติม 2">
-                    </div>
-                    <div class="form-group">
-                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Note3">Note 3</label>
-                        <input type="text" id="Note3" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="บันทึกเพิ่มเติม 3">
-                    </div>
-                    <div class="form-group md:col-span-2 lg:col-span-3">
-                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Note4">Note 4</label>
-                        <input type="text" id="Note4" class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none shadow-sm header-input" placeholder="บันทึกเพิ่มเติม 4">
-                    </div>
                     
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end gap-3 mt-2" id="headerActionBlock">
                         <button type="button" onclick="executeReset()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl shadow transition-all flex items-center gap-2">
@@ -949,10 +931,6 @@
             const sourceType = document.getElementById('Source_Type').value;
             const depId = document.getElementById('DEP_ID').value;
             const refNo = document.getElementById('Reference_No').value;
-            const note1 = document.getElementById('Note1').value;
-            const note2 = document.getElementById('Note2').value;
-            const note3 = document.getElementById('Note3').value;
-            const note4 = document.getElementById('Note4').value;
             
             if (!sourceType || !depId) {
                 return Swal.fire('แจ้งเตือน', 'กรุณาเลือกประเภทจ่ายออกและหน่วยงานก่อน', 'warning');
@@ -969,11 +947,7 @@
                         referenceNo: refNo,
                         itUser: getSafeDisplayName(),
                         userName: "-",
-                        signatureBase64: "",
-                        note1: note1,
-                        note2: note2,
-                        note3: note3,
-                        note4: note4
+                        signatureBase64: ""
                     }
                 };
                 
@@ -1787,10 +1761,6 @@
                     <p><strong>ผู้จ่าย (IT_User):</strong> <span class="text-purple-700 font-bold">${row.IT_User || '-'}</span></p>
                     <p><strong>ผู้รับมอบ (User_Name):</strong> <span class="text-gray-800 font-bold">${row.User_Name || '-'}</span></p>
                     <p><strong>ผู้ยืนยัน (User_Confirm):</strong> <span class="text-gray-800 font-bold">${row.User_Confirm || '-'}</span></p>
-                    ${row.Note1 ? `<p><strong>Note 1:</strong> ${row.Note1}</p>` : ''}
-                    ${row.Note2 ? `<p><strong>Note 2:</strong> ${row.Note2}</p>` : ''}
-                    ${row.Note3 ? `<p><strong>Note 3:</strong> ${row.Note3}</p>` : ''}
-                    ${row.Note4 ? `<p><strong>Note 4:</strong> ${row.Note4}</p>` : ''}
                 </div>
                 <div class="mt-4 border-t pt-2 bg-gray-50 p-3 rounded-2xl">
                     <p class="font-bold mb-2 text-xs">รายการครุภัณฑ์ (${items.length} รายการ):</p>
@@ -1845,11 +1815,6 @@
 
             const refNoEl = document.getElementById('Reference_No');
             if (refNoEl) refNoEl.value = row.Reference_No || "";
-
-            if (document.getElementById('Note1')) document.getElementById('Note1').value = row.Note1 || "";
-            if (document.getElementById('Note2')) document.getElementById('Note2').value = row.Note2 || "";
-            if (document.getElementById('Note3')) document.getElementById('Note3').value = row.Note3 || "";
-            if (document.getElementById('Note4')) document.getElementById('Note4').value = row.Note4 || "";
 
             document.getElementById('summarySourceTypeBadge').innerText = row.Source_Type || "-";
             document.getElementById('summaryStockIdDisplay').innerText = currentSessionStockOutNo || "-";
