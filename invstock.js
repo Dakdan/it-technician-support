@@ -10,8 +10,10 @@ const InvStockApp = {
     // Runtime State
     departments: [],
     assetTypes: [],
-    cartItems: [],
-    searchResults: [], // เพิ่มการเก็บ Array ค้นหา เพื่อป้องกันปัญหาส่ง JSON string ใน HTML
+    cartItems: [],         // สำหรับ Stock In
+    stockOutCart: [],     // เพิ่มสำหรับ Stock Out (รายการครุภัณฑ์ที่จะจ่ายออก)
+    searchResults: [], 
+    stockOutSearchResults: [], // เพิ่มสำหรับผลการค้นหาฝั่ง Stock Out
     sigCanvas: null,
     sigCtx: null,
     isDrawing: false,
@@ -23,6 +25,7 @@ const InvStockApp = {
         try {
             this.bindEvents();
             this.setupSignatureCanvas('signatureCanvas');
+            this.setupSignatureCanvas('signatureCanvasOut'); // รองรับ Canvas ฝั่ง Stock Out (ถ้ามี)
             
             // โหลด Master Data
             await Promise.all([
@@ -36,6 +39,7 @@ const InvStockApp = {
     },
 
     bindEvents() {
+        // Stock In Search
         const searchInput = document.getElementById('assetSearchInput');
         if (searchInput) {
             let timeout = null;
@@ -45,9 +49,24 @@ const InvStockApp = {
             });
         }
 
+        // Stock Out Search (ค้นหาครุภัณฑ์ในสต็อกเพื่อจ่ายออก)
+        const stockOutSearchInput = document.getElementById('stockOutSearchInput');
+        if (stockOutSearchInput) {
+            let timeoutOut = null;
+            stockOutSearchInput.addEventListener('input', (e) => {
+                clearTimeout(timeoutOut);
+                timeoutOut = setTimeout(() => this.handleStockOutAssetSearch(e.target.value), 400);
+            });
+        }
+
         const stockInForm = document.getElementById('stockInForm');
         if (stockInForm) {
             stockInForm.addEventListener('submit', (e) => this.handleStockInSubmit(e));
+        }
+
+        const stockOutForm = document.getElementById('stockOutForm');
+        if (stockOutForm) {
+            stockOutForm.addEventListener('submit', (e) => this.handleStockOutSubmit(e));
         }
     },
 
@@ -112,6 +131,7 @@ const InvStockApp = {
             const res = await this.apiGet('getDepartments');
             this.departments = Array.isArray(res) ? res : (res?.data || []);
             this.renderDepartmentOptions('depIdSelect');
+            this.renderDepartmentOptions('depIdSelectOut'); // รองรับฟอร์ม Stock Out
         } catch (err) {
             console.error("Failed to load departments:", err);
         }
@@ -138,11 +158,10 @@ const InvStockApp = {
         try {
             this.showLoading(true, "กำลังซิงค์ข้อมูลคลังลงเครื่อง...");
             const res = await this.apiGet('getAllInvData');
-            
+             
             if (res && (res.status === 'success' || res.success)) {
                 const dataToSave = res.inventory || res.data || [];
-                
-                // ใช้ saveAssets ตามที่มีใน indexeddb.js
+                 
                 if (typeof idbApp.saveAssets === 'function') {
                     await idbApp.saveAssets(dataToSave);
                 }
@@ -157,7 +176,7 @@ const InvStockApp = {
     },
 
     // -----------------------------------------------------------------
-    // 4. SEARCH & TRANSACTIONS ( Batch Processing )
+    // 4. SEARCH & TRANSACTIONS (Stock In & Stock Out)
     // -----------------------------------------------------------------
     async handleAssetSearch(query) {
         if (!query || query.trim().length < 2) {
@@ -175,9 +194,43 @@ const InvStockApp = {
         }
     },
 
+    // ค้นหาครุภัณฑ์ในระบบเพื่อทำ Stock Out (ค้นหาจาก Inventory หรือ Asset ที่พร้อมจ่าย)
+    async handleStockOutAssetSearch(query) {
+        if (!query || query.trim().length < 2) {
+            this.stockOutSearchResults = [];
+            this.renderStockOutSearchResults([]);
+            return;
+        }
+
+        try {
+            // สามารถเรียกผ่าน IndexedDB หากมีข้อมูลอยู่ในเครื่อง หรือเรียกผ่าน API 'getInventory' / 'searchAsset'
+            if (typeof idbApp !== 'undefined' && typeof idbApp.getAssets === 'function') {
+                const localAssets = await idbApp.getAssets();
+                const q = query.trim().toLowerCase();
+                this.stockOutSearchResults = localAssets.filter(item => 
+                    String(item.AssetID || '').toLowerCase().includes(q) ||
+                    String(item.Inv_ID || '').toLowerCase().includes(q) ||
+                    String(item.FullDescription || '').toLowerCase().includes(q)
+                ).slice(0, 20);
+            } else {
+                const res = await this.apiGet('getInventory');
+                const items = Array.isArray(res) ? res : (res?.data || []);
+                const q = query.trim().toLowerCase();
+                this.stockOutSearchResults = items.filter(item => 
+                    String(item.AssetID || '').toLowerCase().includes(q) ||
+                    String(item.Inv_ID || '').toLowerCase().includes(q) ||
+                    String(item.FullDescription || '').toLowerCase().includes(q)
+                ).slice(0, 20);
+            }
+            this.renderStockOutSearchResults(this.stockOutSearchResults);
+        } catch (err) {
+            console.error("StockOut Search Error:", err);
+        }
+    },
+
     async handleStockInSubmit(e) {
         e.preventDefault();
-        
+         
         if (this.cartItems.length === 0) {
             this.showToast("กรุณาเลือกรายการครุภัณฑ์อย่างน้อย 1 รายการ", "warning");
             return;
@@ -196,7 +249,6 @@ const InvStockApp = {
 
             const sigBase64 = this.getSignatureBase64();
 
-            // ส่งข้อมูลทั้งหมดแบบ Batch ใน Request เดียว เพื่อลดโหลด API
             const fullStockInPayload = {
                 depId: document.getElementById('depIdSelect')?.value || '',
                 sourceType: document.getElementById('sourceTypeSelect')?.value || '',
@@ -207,19 +259,17 @@ const InvStockApp = {
                 docMimeType: docMime,
                 docFileName: docName,
                 signatureBase64: sigBase64,
-                items: this.cartItems // ส่ง Array สินค้าทั้งหมดไปบันทึกพร้อมกัน
+                items: this.cartItems 
             };
 
             const stockInRes = await this.apiPost('saveBatchStockIn', fullStockInPayload);
-            
+             
             if (!stockInRes || (stockInRes.status !== 'success' && !stockInRes.success)) {
                 throw new Error(stockInRes?.message || "บันทึก Stock In ไม่สำเร็จ");
             }
 
             this.showToast("บันทึกรับเข้าเรียบร้อยแล้ว", "success");
             this.resetStockInForm();
-            
-            // ซิงค์อัปเดตข้อมูลกลับลง idbApp
             this.syncStockDataToLocal();
 
         } catch (error) {
@@ -230,19 +280,75 @@ const InvStockApp = {
         }
     },
 
+    // ฟังก์ชันจัดการบันทึก Stock Out ส่งไปยัง GAS Backend ตามโครงสร้างใหม่ที่รองรับ
+    async handleStockOutSubmit(e) {
+        e.preventDefault();
+
+        if (this.stockOutCart.length === 0) {
+            this.showToast("กรุณาเลือกรายการครุภัณฑ์ที่จะจ่ายออกอย่างน้อย 1 รายการ", "warning");
+            return;
+        }
+
+        try {
+            this.showLoading(true, "กำลังบันทึกเอกสารจ่ายออก (Stock Out)...");
+
+            const docFile = document.getElementById('docFileOutInput')?.files[0];
+            let docBase64 = "", docMime = "", docName = "";
+            if (docFile) {
+                docBase64 = await this.fileToBase64(docFile);
+                docMime = docFile.type;
+                docName = docFile.name;
+            }
+
+            const userConfirmBase64 = this.getSignatureBase64('signatureCanvasOut');
+
+            const stockOutPayload = {
+                depId: document.getElementById('depIdSelectOut')?.value || '',
+                sourceType: document.getElementById('sourceTypeSelectOut')?.value || '',
+                referenceNo: document.getElementById('referenceNoInputOut')?.value || '',
+                itUser: document.getElementById('itUserOutInput')?.value || '',
+                userName: document.getElementById('userNameOutInput')?.value || '',
+                issueTo: document.getElementById('issueToInput')?.value || '',
+                note: document.getElementById('stockOutNoteInput')?.value || '',
+                docFileBase64: docBase64,
+                docMimeType: docMime,
+                docFileName: docName,
+                userConfirmBase64: userConfirmBase64,
+                items: this.stockOutCart,       // ส่งรายการ Inventory_Asset_Out
+                peripherals: []                 // สามารถพ่วงอุปกรณ์ต่อพ่วง (Peripherals_Device_Out) ถ้ามี
+            };
+
+            const stockOutRes = await this.apiPost('saveStockOut', stockOutPayload);
+
+            if (!stockOutRes || (stockOutRes.status !== 'success' && !stockOutRes.success)) {
+                throw new Error(stockOutRes?.message || "บันทึก Stock Outไม่สำเร็จ");
+            }
+
+            this.showToast("บันทึกจ่ายออกสำเร็จ", "success");
+            this.resetStockOutForm();
+            this.syncStockDataToLocal();
+
+        } catch (error) {
+            console.error("Stock Out Failed:", error);
+            this.showToast("เกิดข้อผิดพลาด: " + error.message, "error");
+        } finally {
+            this.showLoading(false);
+        }
+    },
+
     // -----------------------------------------------------------------
     // 5. SIGNATURE & UTILITIES
     // -----------------------------------------------------------------
     setupSignatureCanvas(canvasId) {
-        this.sigCanvas = document.getElementById(canvasId);
-        if (!this.sigCanvas) return;
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
 
-        this.sigCtx = this.sigCanvas.getContext('2d');
-        this.sigCtx.lineWidth = 2;
-        this.sigCtx.strokeStyle = '#000000';
+        const ctx = canvas.getContext('2d');
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000000';
 
         const getPos = (e) => {
-            const rect = this.sigCanvas.getBoundingClientRect();
+            const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return { x: clientX - rect.left, y: clientY - rect.top };
@@ -251,43 +357,46 @@ const InvStockApp = {
         const startDraw = (e) => {
             this.isDrawing = true;
             const pos = getPos(e);
-            this.sigCtx.beginPath();
-            this.sigCtx.moveTo(pos.x, pos.y);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
         };
 
         const draw = (e) => {
             if (!this.isDrawing) return;
             e.preventDefault();
             const pos = getPos(e);
-            this.sigCtx.lineTo(pos.x, pos.y);
-            this.sigCtx.stroke();
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
         };
 
         const stopDraw = () => { this.isDrawing = false; };
 
-        this.sigCanvas.addEventListener('mousedown', startDraw);
-        this.sigCanvas.addEventListener('mousemove', draw);
-        this.sigCanvas.addEventListener('mouseup', stopDraw);
-        this.sigCanvas.addEventListener('mouseleave', stopDraw);
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
 
-        this.sigCanvas.addEventListener('touchstart', startDraw);
-        this.sigCanvas.addEventListener('touchmove', draw);
-        this.sigCanvas.addEventListener('touchend', stopDraw);
+        canvas.addEventListener('touchstart', startDraw);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDraw);
     },
 
-    clearSignature() {
-        if (this.sigCanvas && this.sigCtx) {
-            this.sigCtx.clearRect(0, 0, this.sigCanvas.width, this.sigCanvas.height);
+    clearSignature(canvasId = 'signatureCanvas') {
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     },
 
-    getSignatureBase64() {
-        if (!this.sigCanvas) return "";
+    getSignatureBase64(canvasId = 'signatureCanvas') {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return "";
         const blank = document.createElement('canvas');
-        blank.width = this.sigCanvas.width;
-        blank.height = this.sigCanvas.height;
-        if (this.sigCanvas.toDataURL() === blank.toDataURL()) return "";
-        return this.sigCanvas.toDataURL('image/png');
+        blank.width = canvas.width;
+        blank.height = canvas.height;
+        if (canvas.toDataURL() === blank.toDataURL()) return "";
+        return canvas.toDataURL('image/png');
     },
 
     fileToBase64(file) {
@@ -352,16 +461,60 @@ const InvStockApp = {
         container.innerHTML = html;
     },
 
+    // เรนเดอร์ผลการค้นหาฝั่ง Stock Out
+    renderStockOutSearchResults(results) {
+        const container = document.getElementById('stockOutSearchResultsContainer');
+        if (!container) return;
+
+        if (!results || results.length === 0) {
+            container.innerHTML = '<div class="p-2 text-muted">ไม่พบข้อมูลครุภัณฑ์ในสต็อก</div>';
+            return;
+        }
+
+        let html = '<ul class="list-group">';
+        results.forEach((item, index) => {
+            html += `
+                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center cursor-pointer"
+                    onclick="InvStockApp.addAssetToStockOutCartByIndex(${index})">
+                    <div>
+                        <strong>[Inv: ${item.Inv_ID || 'N/A'}] Asset ID: ${item.AssetID || '-'}</strong> 
+                        <br>${item.FullDescription || ''}
+                        <br><small class="text-muted">สถานะ: ${item.InvStatus || 'ปกติ'}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-success" type="button">เลือกจ่ายออก</button>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+    },
+
     addAssetToCartByIndex(index) {
         const item = this.searchResults[index];
         if (!item) return;
 
-        // Clone Object เพื่อไม่ให้กระทบ Search Result
         const cartItem = JSON.parse(JSON.stringify(item));
         cartItem.peripheralsList = cartItem.peripheralsList || [];
-        
+         
         this.cartItems.push(cartItem);
         this.renderCart();
+    },
+
+    // เพิ่มครุภัณฑ์ลงในตะกร้า Stock Out
+    addAssetToStockOutCartByIndex(index) {
+        const item = this.stockOutSearchResults[index];
+        if (!item) return;
+
+        // ตรวจสอบว่ามีอยู่ในตะกร้า Stock Out แล้วหรือยัง
+        const exists = this.stockOutCart.some(i => (i.Inv_ID && i.Inv_ID === item.Inv_ID) || (i.AssetID && i.AssetID === item.AssetID));
+        if (exists) {
+            this.showToast("รายการนี้อยู่ในรายการจ่ายออกแล้ว", "warning");
+            return;
+        }
+
+        const cartItem = JSON.parse(JSON.stringify(item));
+        this.stockOutCart.push(cartItem);
+        this.renderStockOutCart();
     },
 
     renderCart() {
@@ -369,7 +522,7 @@ const InvStockApp = {
         if (!container) return;
 
         if (this.cartItems.length === 0) {
-            container.innerHTML = '<p class="text-muted text-center py-3">ยังไม่มีรายการที่เลือก</p>';
+            container.innerHTML = '<p class="text-muted text-center py-3">ยังไม่มีรายการรับเข้าที่เลือก</p>';
             return;
         }
 
@@ -393,17 +546,62 @@ const InvStockApp = {
         container.innerHTML = html;
     },
 
+    // เรนเดอร์ตะกร้า Stock Out
+    renderStockOutCart() {
+        const container = document.getElementById('stockOutCartContainer');
+        if (!container) return;
+
+        if (this.stockOutCart.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center py-3">ยังไม่มีรายการจ่ายออกที่เลือก</p>';
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-bordered align-middle">';
+        html += '<thead><tr><th>#</th><th>Inv ID</th><th>รหัสครุภัณฑ์</th><th>รายละเอียด</th><th>จัดการ</th></tr></thead><tbody>';
+
+        this.stockOutCart.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><small>${item.Inv_ID || '-'}</small></td>
+                    <td><strong>${item.AssetID || '-'}</strong></td>
+                    <td>${item.FullDescription || ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="InvStockApp.removeFromStockOutCart(${index})">ลบ</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    },
+
     removeFromCart(index) {
         this.cartItems.splice(index, 1);
         this.renderCart();
+    },
+
+    removeFromStockOutCart(index) {
+        this.stockOutCart.splice(index, 1);
+        this.renderStockOutCart();
     },
 
     resetStockInForm() {
         this.cartItems = [];
         this.searchResults = [];
         this.renderCart();
-        this.clearSignature();
+        this.clearSignature('signatureCanvas');
         const form = document.getElementById('stockInForm');
+        if (form) form.reset();
+    },
+
+    resetStockOutForm() {
+        this.stockOutCart = [];
+        this.stockOutSearchResults = [];
+        this.renderStockOutCart();
+        this.clearSignature('signatureCanvasOut');
+        const form = document.getElementById('stockOutForm');
         if (form) form.reset();
     },
 
