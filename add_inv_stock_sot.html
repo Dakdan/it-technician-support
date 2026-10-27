@@ -229,7 +229,7 @@
             <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn"><i class="fa-solid fa-chart-pie mr-2"></i> สรุปรายการ</button>
             <button onclick="switchTab('stockin')" id="tab-stockin" class="tab-btn active"><i class="fa-solid fa-boxes-packing mr-2"></i> บันทึกจ่ายออก (Stock Out)</button>
             <button onclick="switchTab('history')" id="tab-history" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติจ่ายออก</button>
-            <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn"><i class="fa-solid fa-warehouse mr-2"></i> คลังครุภัณฑ์</button>
+           <!-- <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn"><i class="fa-solid fa-warehouse mr-2"></i> คลังครุภัณฑ์</button> -->
         </div>
 
         <!-- Tab: Summary -->
@@ -290,10 +290,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type"><i class="fa-solid fa-turn-down text-pink-400 w-5"></i> ประเภทการจ่ายออก (Source Type) <span class="text-pink-500">*</span></label>
+                        <label class="block mb-1.5 font-semibold text-xs md:text-sm text-gray-700" for="Source_Type"><i class="fa-solid fa-turn-down text-pink-400 w-5"></i> เลือกแหล่งที่มา (Source INV) <span class="text-pink-500">*</span></label>
                         <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none transition-all shadow-sm header-input">
-                            <option value="">-- เลือกประเภทการจ่ายออก --</option>
-                            <option value="เบิกใช้งาน">เบิกใช้งาน</option>
+                            <option value="">-- เลือกแหลงครุภัณฑ์ --</option>
+                            <option value="เบิกใช้งาน">คลังสำรอง/Spar</option>
+                            <option value="เบิกใช้งาน">คลังครุภัณฑ์ใหม่</option>
+                            <option value="เบิกใช้งาน">ครุภัณฑ์นอกคลัง</option>
                             <option value="ส่งซ่อมภายนอก">ส่งซ่อมภายนอก</option>
                             <option value="จำหน่าย/แทงจำหน่าย">จำหน่าย/แทงจำหน่าย</option>
                         </select>
@@ -465,7 +467,7 @@
         <div onclick="switchTab('summary')" class="nav-item" id="nav-summary"><i class="fa-solid fa-chart-pie"></i><span>สรุป</span></div>
         <div onclick="switchTab('stockin')" class="nav-item active" id="nav-stockin"><i class="fa-solid fa-boxes-packing text-xl"></i><span>จ่ายออก</span></div>
         <div onclick="switchTab('history')" class="nav-item" id="nav-history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></div>
-        <div onclick="switchTab('inventory')" class="nav-item" id="nav-inventory"><i class="fa-solid fa-warehouse"></i><span>คลัง</span></div>
+        <!--<div onclick="switchTab('inventory')" class="nav-item" id="nav-inventory"><i class="fa-solid fa-warehouse"></i><span>คลัง</span></div>-->
     </nav>
 
     <!-- Modal: CRUD ครุภัณฑ์ -->
@@ -496,10 +498,7 @@
                 <div>
                     <label class="block mb-1.5 font-bold text-gray-700 text-xs uppercase">สถานะ <span class="text-red-500">*</span></label>
                     <select id="modalStatus" class="w-full p-3 border-2 border-pink-100 rounded-xl bg-white focus:border-pink-400 outline-none">
-                        <option value="รอตรวจสอบ">รอตรวจสอบ</option>
-                        <option value="Spar">Spar (สำรอง)</option>
-                        <option value="รอส่งคืน">รอส่งคืน</option>
-                        <option value="ใช้งานปกติ">ใช้งานปกติ</option>
+                          <option value="ใช้งานปกติ">รอจ่าย</option>
                     </select>
                 </div>
 
