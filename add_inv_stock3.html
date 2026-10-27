@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         :root {
@@ -206,6 +207,31 @@
         }
         
         .print-only-receipt, .print-only-a4 { display: none; }
+
+        @media print {
+            body.printing-receipt @page { size: 80mm auto; margin: 0; }
+            body.printing-receipt, body.printing-receipt * { visibility: hidden !important; }
+            body.printing-receipt #recordDetailModal, body.printing-receipt #recordDetailModal * { visibility: visible !important; }
+            body.printing-receipt #recordDetailModal {
+                position: absolute !important; left: 0 !important; top: 0 !important;
+                width: 80mm !important; max-width: 80mm !important; margin: 0 !important; padding: 4mm !important;
+                background: white !important; box-shadow: none !important; border: none !important;
+                font-size: 11px !important; overflow: visible !important;
+            }
+            body.printing-receipt .no-print { display: none !important; }
+            body.printing-receipt .print-only-receipt { display: block !important; }
+
+            body.printing-a4 @page { size: A4 portrait; margin: 15mm; }
+            body.printing-a4, body.printing-a4 * { visibility: hidden !important; }
+            body.printing-a4 #a4ReportModal, body.printing-a4 #a4ReportModal * { visibility: visible !important; }
+            body.printing-a4 #a4ReportModal {
+                position: absolute !important; left: 0 !important; top: 0 !important;
+                width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important;
+                background: white !important; box-shadow: none !important; border: none !important; font-size: 12pt !important;
+            }
+            body.printing-a4 .no-print { display: none !important; }
+            body.printing-a4 .print-only-a4 { display: block !important; }
+        }
     </style>
 </head>
    
@@ -259,9 +285,6 @@
             </button>
             <button id="btnTabStockOutList" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-purple-600 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('stockOutList', event)">
                 📤 รายการจ่ายออก
-            </button>
-            <button id="btnTabStockOutForm" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-purple-600 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('stockOutFormTab', event)">
-                ➕ บันทึกจ่ายออก
             </button>
             <button id="btnTabInventory" class="flex-1 px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium text-gray-600 hover:text-indigo-600 transition-all whitespace-nowrap flex items-center justify-center gap-1.5" onclick="switchTab('inventory', event)">
                 📦 คลังครุภัณฑ์
@@ -406,76 +429,6 @@
             </div>
         </div>
 
-        <!-- Tab: Stock Out Form -->
-        <div id="tab-stockOutFormTab" class="tab-content hidden">
-            <div class="glass-card rounded-3xl p-6 md:p-8">
-                <h3 class="text-purple-600 font-bold mb-6 text-base md:text-lg border-b border-dashed border-purple-200 pb-3 flex items-center gap-2">
-                    ➕ บันทึกจ่ายออกครุภัณฑ์ (Stock Out Form)
-                </h3>
-                <form id="stockOutForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">หน่วยงานปลายทาง (DEPT_ID)</label>
-                            <select id="depIdSelectOut" class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-400">
-                                <option value="">-- เลือกหน่วยงาน --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">ประเภทแหล่งที่มา (Source Type)</label>
-                            <input type="text" id="sourceTypeSelectOut" placeholder="เช่น เบิกใช้งาน, ยืมใช้งาน" class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-400">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">เลขอ้างอิง (Reference No)</label>
-                            <input type="text" id="referenceNoInputOut" placeholder="ระบุเลขอ้างอิงเอกสาร" class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-400">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">ผู้บันทึก IT (IT User)</label>
-                            <input type="text" id="itUserOutInput" placeholder="ชื่อผู้ทำรายการ" class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-400">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">ผู้รับมอบ / ผู้ใช้งาน (User Name)</label>
-                            <input type="text" id="userNameOutInput" placeholder="ชื่อผู้รับมอบ" class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-400">
-                        </div>
-                    </div>
-
-                    <!-- ค้นหาครุภัณฑ์ในสต็อกเพื่อจ่ายออก -->
-                    <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100">
-                        <label class="block text-xs font-bold text-purple-800 mb-2">ค้นหาครุภัณฑ์ในสต็อกเพื่อจ่ายออก (Inventory Asset Search)</label>
-                        <input type="text" id="stockOutSearchInput" placeholder="พิมพ์ค้นหา Asset ID หรือรายละเอียด..." class="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs mb-2">
-                        <div id="stockOutSearchResultsContainer" class="max-h-48 overflow-y-auto bg-white rounded-xl border border-purple-200 empty:hidden"></div>
-                    </div>
-
-                    <!-- ตะกร้า Stock Out -->
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-2">รายการครุภัณฑ์ที่เลือกจ่ายออก</label>
-                        <div id="stockOutCartContainer" class="border border-purple-200 rounded-xl p-3 bg-white">
-                            <p class="text-muted text-center py-3 text-xs text-gray-400">ยังไม่มีรายการจ่ายออกที่เลือก</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">แนบไฟล์เอกสาร (Doc File)</label>
-                            <input type="file" id="docFileOutInput" class="w-full p-2 bg-white border border-purple-200 rounded-xl text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">ลายเซ็นผู้รับมอบ (User Confirm Signature)</label>
-                            <div class="border border-purple-200 rounded-xl bg-white p-2 text-center">
-                                <canvas id="signatureCanvasOut" width="300" height="120" class="border border-dashed border-gray-300 rounded-lg mx-auto touch-none"></canvas>
-                                <button type="button" onclick="clearSignature('signatureCanvasOut')" class="mt-2 text-xs text-rose-600 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200">ล้างลายเซ็น</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center pt-4">
-                        <button type="submit" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 text-white font-bold px-8 py-3 rounded-2xl text-xs shadow-lg transition-all">
-                            บันทึกจ่ายออก (Save Stock Out)
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- Tab: Inventory -->
         <div id="tab-inventory" class="tab-content hidden">
             <div class="glass-card rounded-3xl p-6 md:p-8">
@@ -534,9 +487,13 @@
     <!-- Modals ต่างๆ -->
     <div id="recordDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white flex flex-col">
-            <div class="flex justify-between items-center border-b pb-4 mb-5">
+            <div class="flex justify-between items-center border-b pb-4 mb-5 no-print">
                 <h3 class="text-pink-600 font-bold text-lg">รายละเอียดเอกสาร <span id="detailDocNo" class="text-gray-800 bg-pink-100 px-3 py-1 rounded-xl"></span></h3>
-                <button onclick="closeModal('recordDetailModal')" class="text-gray-400 hover:text-red-500">✕</button>
+                <div class="flex items-center gap-2">
+                    <button onclick="printReceiptSlip()" class="bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-semibold">พิมพ์สลิป</button>
+                    <button onclick="openA4ReportModal()" class="bg-pink-500 text-white px-4 py-2 rounded-xl text-xs font-semibold">รายงาน A4</button>
+                    <button onclick="closeModal('recordDetailModal')" class="text-gray-400 hover:text-red-500">✕</button>
+                </div>
             </div>
             <div id="detailContent" class="space-y-5 text-sm text-gray-700 mb-6 flex-1"></div>
         </div>
@@ -552,6 +509,20 @@
         </div>
     </div>
 
+    <!-- Modal: A4 Formal Report Preview -->
+    <div id="a4ReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl max-h-[95vh] overflow-y-auto bg-white flex flex-col">
+            <div class="flex justify-between items-center border-b pb-4 mb-6 no-print">
+                <h3 class="text-gray-800 font-bold text-lg">ตัวอย่างรายงานทางการ (A4 Report)</h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="printA4ReportModal()" class="bg-pink-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold">พิมพ์เอกสาร A4</button>
+                    <button onclick="closeModal('a4ReportModal')" class="text-gray-400 hover:text-red-500">✕</button>
+                </div>
+            </div>
+            <div id="a4ReportContent" class="space-y-6 text-sm text-gray-800 p-4 flex-1"></div>
+        </div>
+    </div>
+
     <div id="alertModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[9999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center">
             <h3 id="alertTitle" class="text-pink-600 font-bold text-base mb-2">แจ้งเตือน ✨</h3>
@@ -561,13 +532,14 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwpUYuQ-1M_GsqShOGLKteE_gdl1_FM2xljqw6PL3YGBm5KTpUQE-kdTMutcVUkV5B5/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx12mphDKfws65LMzaCy_GI_fmeDqvF3fVqL9PvRlNeG1A3RzKUNJV3Axi0Vm7aJTh37Q/exec';
 
         let globalStockInRecords = [];
         let globalStockOutRecords = [];
         let globalInventoryRecords = [];
         let currentFilteredInventoryRecords = [];
         let globalPeripheralsRecords = [];
+        let globalPeripheralDashboardData = null;
         let activeDetailRecord = null;
         
         const ITEMS_PER_PAGE = 10;
@@ -575,6 +547,7 @@
         let currentStockOutPage = 1;
 
         let currentDashboardFilters = { invStatus: null, assetType: null, ageRange: null };
+        let filteredDashboardData = [];
         let currentInventoryStatusFilter = 'ALL';
         let expandedInventoryGroups = {};
 
@@ -620,7 +593,7 @@
         }
 
         function switchTab(tabId, event) {
-            const tabs = ['dashboard', 'stockInList', 'stockOutList', 'stockOutFormTab', 'inventory', 'reports'];
+            const tabs = ['dashboard', 'stockInList', 'stockOutList', 'inventory', 'reports'];
             tabs.forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 if (el) el.classList.add('hidden');
@@ -649,15 +622,24 @@
         async function loadDashboardStats(forceRefresh = false) {
             showLoading();
             try {
-                const [resInv, resPeri] = await Promise.all([
+                const queryParams = new URLSearchParams();
+                queryParams.append('action', 'getDashboardStats');
+                if (currentDashboardFilters.invStatus) queryParams.append('invStatus', currentDashboardFilters.invStatus);
+                if (currentDashboardFilters.assetType) queryParams.append('assetType', currentDashboardFilters.assetType);
+                if (currentDashboardFilters.ageRange) queryParams.append('ageRange', currentDashboardFilters.ageRange);
+
+                const [resInv, resPeri, resPeriDash] = await Promise.all([
                     fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
-                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
+                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getPeripheralDashboard`).catch(() => null)
                 ]);
 
                 globalInventoryRecords = Array.isArray(resInv) ? resInv : (resInv?.data || []);
                 globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri?.data || []);
+                globalPeripheralDashboardData = resPeriDash;
 
-                updateDashboardDOM(globalInventoryRecords, globalPeripheralsRecords);
+                const fallbackResult = calculateDashboardLocally(globalInventoryRecords, globalPeripheralsRecords, currentDashboardFilters);
+                updateDashboardDOM(fallbackResult.summary, fallbackResult.data, resPeriDash);
             } catch (err) {
                 console.error("Dashboard stats error", err);
             } finally {
@@ -665,16 +647,190 @@
             }
         }
 
-        function updateDashboardDOM(inventoryList, peripheralsList) {
+        function calculateDashboardLocally(inventoryList, peripheralsList, filters) {
+            let filteredInv = inventoryList.filter(item => {
+                const typeName = item.Asset_Type_Name || item.Asset_Type_Group || '';
+                if (filters) {
+                    if (filters.invStatus && item.Inv_Status !== filters.invStatus) return false;
+                    if (filters.assetType && typeName !== filters.assetType) return false;
+                    if (filters.ageRange) {
+                        let ageVal = 0;
+                        let ageStr = item.Asset_AgeInfo || item.Age || "";
+                        if (ageStr && ageStr !== "-") {
+                            let matchAge = String(ageStr).match(/\d+/);
+                            if (matchAge) ageVal = parseInt(matchAge[0], 10);
+                        }
+                        const isNoAge = !ageStr || ageStr === "-" || isNaN(ageVal);
+                        if (filters.ageRange === "น้อยกว่า 4 ปี" && (isNoAge || ageVal >= 4)) return false;
+                        if (filters.ageRange === "4 - 7 ปี" && (isNoAge || ageVal < 4 || ageVal > 7)) return false;
+                        if (filters.ageRange === "7 - 10 ปี" && (isNoAge || ageVal <= 7 || ageVal > 10)) return false;
+                        if (filters.ageRange === "มากกว่า 10 ปี" && (isNoAge || ageVal <= 10)) return false;
+                        if (filters.ageRange === "ไม่ระบุ" && !isNoAge) return false;
+                    }
+                }
+                return true;
+            });
+
+            if (filteredInv.length === 0 && inventoryList.length > 0 && !filters.invStatus && !filters.assetType && !filters.ageRange) {
+                filteredInv = inventoryList;
+            }
+
+            let groupByType = {};
+            let groupAgeRange = { "น้อยกว่า 4 ปี": 0, "4 - 7 ปี": 0, "7 - 10 ปี": 0, "มากกว่า 10 ปี": 0, "ไม่ระบุ": 0 };
+            let groupByStatus = {};
+
+            filteredInv.forEach(item => {
+                let aType = item.Asset_Type_Name || item.Asset_Type_Group || "ไม่ระบุประเภท";
+                groupByType[aType] = (groupByType[aType] || 0) + 1;
+
+                let ageVal = 0;
+                let ageStr = item.Asset_AgeInfo || item.Age || "";
+                if (ageStr && ageStr !== "-") {
+                    let matchAge = String(ageStr).match(/\d+/);
+                    if (matchAge) ageVal = parseInt(matchAge[0], 10);
+                }
+
+                if (!ageStr || ageStr === "-" || isNaN(ageVal)) {
+                    groupAgeRange["ไม่ระบุ"]++;
+                } else if (ageVal < 4) {
+                    groupAgeRange["น้อยกว่า 4 ปี"]++;
+                } else if (ageVal >= 4 && ageVal <= 7) {
+                    groupAgeRange["4 - 7 ปี"]++;
+                } else if (ageVal > 7 && ageVal <= 10) {
+                    groupAgeRange["7 - 10 ปี"]++;
+                } else {
+                    groupAgeRange["มากกว่า 10 ปี"]++;
+                }
+
+                let status = item.Inv_Status || item.Status || "รอตรวจสอบ";
+                groupByStatus[status] = (groupByStatus[status] || 0) + 1;
+            });
+
+            let totalPeripheralQty = 0;
+            peripheralsList.forEach(p => {
+                let qty = parseInt(p.Quantity || 1, 10);
+                if (!isNaN(qty)) totalPeripheralQty += qty;
+            });
+
+            return {
+                summary: {
+                    totalItems: filteredInv.length,
+                    byType: groupByType,
+                    byAgeRange: groupAgeRange,
+                    byStatus: groupByStatus,
+                    peripherals: { totalQuantitySum: totalPeripheralQty }
+                },
+                data: filteredInv
+            };
+        }
+
+        function createBreakdownRow(label, count, filterKey, filterVal, isSelected) {
+            const activeClass = isSelected ? 'bg-pink-100 border-pink-300 font-bold text-pink-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+            return '<div onclick="toggleDashboardFilter(\'' + filterKey + '\', \'' + filterVal.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
+                   '<span>' + label + '</span>' +
+                   '<span class="bg-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px]">' + count + '</span>' +
+                   '</div>';
+        }
+
+        function toggleDashboardFilter(key, val) {
+            currentDashboardFilters[key] = (currentDashboardFilters[key] === val) ? null : val;
+            loadDashboardStats();
+        }
+
+        function clearDashboardFilters() {
+            currentDashboardFilters.invStatus = null;
+            currentDashboardFilters.assetType = null;
+            currentDashboardFilters.ageRange = null;
+            loadDashboardStats();
+        }
+
+        function renderActiveFilters() {
+            const container = document.getElementById('activeFiltersContainer');
+            const list = document.getElementById('activeFiltersList');
+            if (!container || !list) return;
+
+            list.innerHTML = '';
+            let hasActive = false;
+
+            if (currentDashboardFilters.invStatus) {
+                hasActive = true;
+                list.innerHTML += '<span class="bg-pink-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold">สถานะ: ' + currentDashboardFilters.invStatus + '</span>';
+            }
+            if (currentDashboardFilters.assetType) {
+                hasActive = true;
+                list.innerHTML += '<span class="bg-purple-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold">ประเภท: ' + currentDashboardFilters.assetType + '</span>';
+            }
+            if (currentDashboardFilters.ageRange) {
+                hasActive = true;
+                list.innerHTML += '<span class="bg-blue-500 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold">อายุ: ' + currentDashboardFilters.ageRange + '</span>';
+            }
+
+            if (hasActive) container.classList.remove('hidden');
+            else container.classList.add('hidden');
+        }
+
+        function updateDashboardDOM(summary, dataList, periDash) {
+            filteredDashboardData = dataList || [];
+            
             const dashTotalInvEl = document.getElementById('dashTotalInv');
-            if (dashTotalInvEl) dashTotalInvEl.innerHTML = inventoryList.length + ' <span class="text-sm font-normal text-pink-600">รายการ</span>';
+            if (dashTotalInvEl) dashTotalInvEl.innerHTML = (summary.totalItems || 0) + ' <span class="text-sm font-normal text-pink-600">รายการ</span>';
             
             let totalPeri = 0;
-            peripheralsList.forEach(p => { totalPeri += parseInt(p.Quantity || 1, 10); });
+            let periBreakdownHtml = '';
+            const activePeriDash = periDash || globalPeripheralDashboardData;
+            if (activePeriDash && activePeriDash.summary) {
+                totalPeri = activePeriDash.summary.totalQuantity ?? activePeriDash.summary.totalRecords ?? 0;
+                const deviceTypes = activePeriDash.summary.byDeviceType || {};
+                Object.keys(deviceTypes).forEach(k => {
+                    periBreakdownHtml += '<div class="flex justify-between items-center p-1.5 rounded hover:bg-purple-100/50"><span class="text-gray-700">' + k + '</span><span class="bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full text-[10px]">' + deviceTypes[k] + ' ชิ้น</span></div>';
+                });
+            } else if (summary.peripherals) {
+                totalPeri = summary.peripherals.totalQuantitySum || 0;
+            }
+
             const dashTotalPeriEl = document.getElementById('dashTotalPeri');
             if (dashTotalPeriEl) dashTotalPeriEl.innerHTML = totalPeri + ' <span class="text-sm font-normal text-purple-600">ชิ้น</span>';
 
-            renderDashboardTable(inventoryList);
+            const breakdownPeripheralsEl = document.getElementById('breakdownPeripherals');
+            if (breakdownPeripheralsEl) breakdownPeripheralsEl.innerHTML = periBreakdownHtml || '<p class="text-gray-400 italic text-center p-2">ไม่มีข้อมูลอุปกรณ์ต่อพ่วง</p>';
+
+            const renderRows = (obj, filterKey, containerId) => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                let html = '';
+                if (obj && typeof obj === 'object') {
+                    Object.keys(obj).sort().forEach(k => {
+                        const isSelected = currentDashboardFilters[filterKey] === k;
+                        html += createBreakdownRow(k, obj[k], filterKey, k, isSelected);
+                    });
+                }
+                container.innerHTML = html || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+            };
+
+            renderRows(summary.byStatus || {}, 'invStatus', 'breakdownStatus');
+            
+            const ageContainer = document.getElementById('breakdownAge');
+            if (ageContainer) {
+                let ageHtml = '';
+                const ageRanges = summary.byAgeRange || {};
+                Object.keys(ageRanges).forEach(k => {
+                    const isSelected = currentDashboardFilters.ageRange === k;
+                    const activeClass = isSelected ? 'bg-blue-100 border-blue-300 font-bold text-blue-800' : 'hover:bg-gray-50 border-transparent text-gray-700';
+                    ageHtml += '<div onclick="toggleDashboardFilter(\'ageRange\', \'' + k.replace(/'/g, "\\'") + '\')" class="flex justify-between items-center p-2 rounded-lg border cursor-pointer transition-all ' + activeClass + '">' +
+                        '<span>' + k + '</span>' +
+                        '<span class="bg-blue-500 text-white font-extrabold px-2 py-0.5 rounded-full text-[10px]">' + ageRanges[k] + '</span>' +
+                        '</div>';
+                });
+                ageContainer.innerHTML = ageHtml || '<p class="text-gray-400 italic">ไม่มีข้อมูล</p>';
+            }
+
+            renderRows(summary.byType || {}, 'assetType', 'breakdownType');
+            
+            const dashFilteredCountEl = document.getElementById('dashFilteredCount');
+            if (dashFilteredCountEl) dashFilteredCountEl.innerText = dataList ? dataList.length : 0;
+
+            renderDashboardTable(dataList || []);
+            renderActiveFilters();
         }
 
         function renderDashboardTable(dataList) {
@@ -683,7 +839,7 @@
             tbody.innerHTML = '';
             
             if (!dataList || dataList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 p-8">ไม่พบข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 p-8">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>';
                 return;
             }
 
@@ -708,10 +864,40 @@
         }
 
         function exportDashboardToCSV() {
-            showAlert('แจ้งเตือน', 'ฟังก์ชัน Export CSV พร้อมใช้งาน');
+            if (!filteredDashboardData || filteredDashboardData.length === 0) {
+                showAlert('แจ้งเตือน', 'ไม่มีข้อมูลสำหรับ Export CSV');
+                return;
+            }
+
+            let csvContent = "\uFEFF";
+            csvContent += "ลำดับ,AssetID,Serial Number,รายละเอียด,อายุ,สถานะ\n";
+
+            filteredDashboardData.forEach((item, index) => {
+                const aId = `"${(item.AssetID || item.Asset_ID || item.NOID || '-').replace(/"/g, '""')}"`;
+                const serial = `"${(item.Asset_Serial || item.Serial || '-').replace(/"/g, '""')}"`;
+                const detail = `"${(item.Asset_FullDescription || item.FullDescription || '-').replace(/"/g, '""')}"`;
+                const age = `"${(item.Asset_AgeInfo || item.Age || '-').replace(/"/g, '""')}"`;
+                const status = `"${(item.Inv_Status || item.Status || '-').replace(/"/g, '""')}"`;
+
+                csvContent += `${index + 1},${aId},${serial},${detail},${age},${status}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Inventory_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         async function loadStockInRecords(forceRefresh = false) {
+            if (!forceRefresh && globalStockInRecords.length > 0) {
+                renderStockInTable(globalStockInRecords);
+                return;
+            }
+
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockIn`);
@@ -726,27 +912,62 @@
 
         function renderStockInTable(records) {
             const tbody = document.getElementById('stockInTableBody');
-            if (!tbody) return;
+            const paginationContainer = document.getElementById('stockInPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
+            paginationContainer.innerHTML = '';
+
             if (!records || records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 p-8">ไม่พบรายการรับเข้า</td></tr>';
                 return;
             }
-            records.forEach((rec, idx) => {
+
+            const totalPages = Math.ceil(records.length / ITEMS_PER_PAGE);
+            if (currentStockInPage > totalPages) currentStockInPage = totalPages || 1;
+
+            const startIndex = (currentStockInPage - 1) * ITEMS_PER_PAGE;
+            const paginatedRecords = records.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            paginatedRecords.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = '<td class="p-3.5 text-center">' + (idx + 1) + '</td>' +
-                    '<td class="p-3.5 font-bold text-pink-600">' + (rec.Stock_In_No || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.Date_Time || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.DEPT_ID || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.User_Name || '-') + '</td>' +
-                    '<td class="p-3.5 text-center font-bold">' + (Array.isArray(rec.items) ? rec.items.length : 0) + '</td>' +
-                    '<td class="p-3.5 text-center"><span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">บันทึกแล้ว</span></td>' +
-                    '<td class="p-3.5 text-center"><button onclick="openRecordDetail(\'stockIn\', \'' + rec.Stock_In_No + '\')" class="bg-pink-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">ดูรายละเอียด</button></td>';
+                const stockInNo = rec.Stock_In_No || "-";
+                const dateTime = rec.Date_Time || '-';
+                const dept = rec.DEPT_ID || '-';
+                const userName = rec.User_Name || '-';
+                const itemCount = Array.isArray(rec.items) ? rec.items.length : 0;
+                const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
+                const sigBadge = sigUrl ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ลงชื่อแล้ว</span>' : '<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">รอลงชื่อ</span>';
+
+                tr.innerHTML = '<td class="p-3.5 text-center">' + (startIndex + idx + 1) + '</td>' +
+                    '<td class="p-3.5 font-bold text-pink-600">' + stockInNo + '</td>' +
+                    '<td class="p-3.5 text-xs">' + dateTime + '</td>' +
+                    '<td class="p-3.5 text-xs">' + dept + '</td>' +
+                    '<td class="p-3.5 text-xs">' + userName + '</td>' +
+                    '<td class="p-3.5 text-center font-bold">' + itemCount + '</td>' +
+                    '<td class="p-3.5 text-center">' + sigBadge + '</td>' +
+                    '<td class="p-3.5 text-center"><button onclick="openRecordDetail(\'stockIn\', \'' + stockInNo + '\')" class="bg-pink-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">ดูรายละเอียด</button></td>';
                 tbody.appendChild(tr);
             });
+
+            paginationContainer.innerHTML = '<span class="text-xs text-gray-500">แสดงหน้า ' + currentStockInPage + ' จาก ' + totalPages + '</span>' +
+                '<div class="flex gap-1.5">' +
+                '<button onclick="changeStockInPage(' + (currentStockInPage - 1) + ')" class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 text-pink-700 font-medium">ก่อนหน้า</button>' +
+                '<button onclick="changeStockInPage(' + (currentStockInPage + 1) + ')" class="px-3 py-1.5 rounded-xl text-xs bg-pink-100 text-pink-700 font-medium">ถัดไป</button>' +
+                '</div>';
+        }
+
+        function changeStockInPage(p) {
+            currentStockInPage = p;
+            renderStockInTable(globalStockInRecords);
         }
 
         async function loadStockOutRecords(forceRefresh = false) {
+            if (!forceRefresh && globalStockOutRecords.length > 0) {
+                renderStockOutTable(globalStockOutRecords);
+                return;
+            }
+
             showLoading();
             try {
                 const data = await fetchAPI(`${API_URL}?action=getStockOut`);
@@ -761,31 +982,74 @@
 
         function renderStockOutTable(records) {
             const tbody = document.getElementById('stockOutTableBody');
-            if (!tbody) return;
+            const paginationContainer = document.getElementById('stockOutPagination');
+            if (!tbody || !paginationContainer) return;
+
             tbody.innerHTML = '';
+            paginationContainer.innerHTML = '';
+
             if (!records || records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 p-8">ไม่พบรายการจ่ายออก</td></tr>';
                 return;
             }
-            records.forEach((rec, idx) => {
+
+            const totalPages = Math.ceil(records.length / ITEMS_PER_PAGE);
+            if (currentStockOutPage > totalPages) currentStockOutPage = totalPages || 1;
+
+            const startIndex = (currentStockOutPage - 1) * ITEMS_PER_PAGE;
+            const paginatedRecords = records.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            paginatedRecords.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = '<td class="p-3.5 text-center">' + (idx + 1) + '</td>' +
-                    '<td class="p-3.5 font-bold text-purple-700">' + (rec.Stock_Out_No || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.Date_Time || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.DEPT_ID || '-') + '</td>' +
-                    '<td class="p-3.5 text-xs">' + (rec.IT_User || '-') + '</td>' +
-                    '<td class="p-3.5 text-center font-bold">' + (Array.isArray(rec.items) ? rec.items.length : 0) + '</td>' +
-                    '<td class="p-3.5 text-center"><span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">บันทึกแล้ว</span></td>' +
-                    '<td class="p-3.5 text-center"><button onclick="openRecordDetail(\'stockOut\', \'' + rec.Stock_Out_No + '\')" class="bg-purple-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">ดูรายละเอียด</button></td>';
+                const stockOutNo = rec.Stock_Out_No || "-";
+                const dateTime = rec.Date_Time || '-';
+                const dept = rec.DEPT_ID || '-';
+                const itUser = rec.IT_User || '-';
+                const itemCount = Array.isArray(rec.items) ? rec.items.length : 0;
+                const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
+                const sigBadge = sigUrl ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ลงชื่อแล้ว</span>' : '<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">รอลงชื่อ</span>';
+
+                tr.innerHTML = '<td class="p-3.5 text-center">' + (startIndex + idx + 1) + '</td>' +
+                    '<td class="p-3.5 font-bold text-purple-700">' + stockOutNo + '</td>' +
+                    '<td class="p-3.5 text-xs">' + dateTime + '</td>' +
+                    '<td class="p-3.5 text-xs">' + dept + '</td>' +
+                    '<td class="p-3.5 text-xs">' + itUser + '</td>' +
+                    '<td class="p-3.5 text-center font-bold">' + itemCount + '</td>' +
+                    '<td class="p-3.5 text-center">' + sigBadge + '</td>' +
+                    '<td class="p-3.5 text-center"><button onclick="openRecordDetail(\'stockOut\', \'' + stockOutNo + '\')" class="bg-purple-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">ดูรายละเอียด</button></td>';
                 tbody.appendChild(tr);
             });
+
+            paginationContainer.innerHTML = '<span class="text-xs text-gray-500">แสดงหน้า ' + currentStockOutPage + ' จาก ' + totalPages + '</span>' +
+                '<div class="flex gap-1.5">' +
+                '<button onclick="changeStockOutPage(' + (currentStockOutPage - 1) + ')" class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 text-purple-700 font-medium">ก่อนหน้า</button>' +
+                '<button onclick="changeStockOutPage(' + (currentStockOutPage + 1) + ')" class="px-3 py-1.5 rounded-xl text-xs bg-purple-100 text-purple-700 font-medium">ถัดไป</button>' +
+                '</div>';
+        }
+
+        function changeStockOutPage(p) {
+            currentStockOutPage = p;
+            renderStockOutTable(globalStockOutRecords);
         }
 
         async function loadInventoryRecords(forceRefresh = false) {
+            if (!forceRefresh && globalInventoryRecords.length > 0) {
+                renderInventoryStatusBar();
+                filterInventoryRecords();
+                return;
+            }
+
             showLoading();
             try {
-                const data = await fetchAPI(`${API_URL}?action=getInventory`);
+                const [data, resPeri] = await Promise.all([
+                    fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
+                    fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
+                ]);
+                
                 globalInventoryRecords = Array.isArray(data) ? data : (data.data || []);
+                globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri.data || []);
+                
+                renderInventoryStatusBar();
                 filterInventoryRecords();
             } catch (err) {
                 console.error("Inventory fetch error:", err);
@@ -794,13 +1058,47 @@
             }
         }
 
+        function renderInventoryStatusBar() {
+            const container = document.getElementById('inventoryStatusFilterBar');
+            if (!container) return;
+
+            const statusCounts = { 'ALL': globalInventoryRecords.length };
+            globalInventoryRecords.forEach(item => {
+                const st = item.Inv_Status || item.Status || 'รอตรวจสอบ';
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+            });
+
+            let html = '<button onclick="setInventoryStatusFilter(\'ALL\')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ' + (currentInventoryStatusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50') + '">ทั้งหมด (' + statusCounts['ALL'] + ')</button>';
+
+            Object.keys(statusCounts).filter(k => k !== 'ALL').sort().forEach(st => {
+                const isActive = currentInventoryStatusFilter === st;
+                html += '<button onclick="setInventoryStatusFilter(\'' + st.replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ' + (isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50') + '">' + st + ' (' + statusCounts[st] + ')</button>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setInventoryStatusFilter(status) {
+            currentInventoryStatusFilter = status;
+            renderInventoryStatusBar();
+            filterInventoryRecords();
+        }
+
         function filterInventoryRecords() {
             const query = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
+            
             currentFilteredInventoryRecords = globalInventoryRecords.filter(item => {
+                if (currentInventoryStatusFilter !== 'ALL') {
+                    const itemStatus = item.Inv_Status || item.Status || 'รอตรวจสอบ';
+                    if (itemStatus !== currentInventoryStatusFilter) return false;
+                }
                 if (!query) return true;
-                const aId = String(item.AssetID || '').toLowerCase();
-                return aId.includes(query);
+                const aId = String(item.AssetID || item.Asset_ID || item.NOID || item.NoID || '').toLowerCase();
+                const serial = String(item.Asset_Serial || item.Serial || '').toLowerCase();
+                const desc = String(item.Asset_FullDescription || item.FullDescription || '').toLowerCase();
+                return aId.includes(query) || serial.includes(query) || desc.includes(query);
             });
+
             renderInventoryAccordionTable(currentFilteredInventoryRecords);
         }
 
@@ -808,13 +1106,23 @@
             const container = document.getElementById('inventoryAccordionContainer');
             if (!container) return;
             container.innerHTML = '';
+
             if (!records || records.length === 0) {
                 container.innerHTML = '<div class="bg-white p-8 text-center text-gray-400 rounded-2xl">ไม่พบรายการครุภัณฑ์</div>';
                 return;
             }
+
             let html = '<div class="grid grid-cols-1 gap-2">';
             records.forEach(rec => {
-                html += '<div class="bg-white p-4 rounded-xl border border-indigo-100 flex justify-between items-center"><div><strong>' + (rec.AssetID || '-') + '</strong> - ' + (rec.FullDescription || '') + '</div><span class="text-xs text-indigo-600 font-bold">' + (rec.Inv_Status || 'ปกติ') + '</span></div>';
+                const aId = rec.AssetID || rec.Asset_ID || rec.NOID || rec.NoID || '-';
+                const desc = rec.Asset_FullDescription || rec.FullDescription || '-';
+                const status = rec.Inv_Status || rec.Status || 'ปกติ';
+                const recJson = JSON.stringify(rec).replace(/"/g, '&quot;');
+
+                html += '<div class="bg-white p-4 rounded-xl border border-indigo-100 flex justify-between items-center cursor-pointer hover:bg-indigo-50/40" onclick="openInventoryItemDetailModal(' + recJson + ')">' +
+                    '<div><strong class="text-indigo-600">' + aId + '</strong> - ' + truncateText(desc, 40) + '</div>' +
+                    '<span class="text-xs text-indigo-600 font-bold">' + status + '</span>' +
+                    '</div>';
             });
             html += '</div>';
             container.innerHTML = html;
@@ -824,22 +1132,99 @@
             if (!item) return;
             const content = document.getElementById('inventoryItemDetailContent');
             if (!content) return;
-            content.innerHTML = '<p><strong>Asset ID:</strong> ' + (item.AssetID || '-') + '</p><p><strong>รายละเอียด:</strong> ' + (item.FullDescription || '-') + '</p>';
+            
+            const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || '-';
+            const detail = item.Asset_FullDescription || item.FullDescription || '-';
+            const status = item.Inv_Status || item.Status || 'ปกติ';
+            const rawImgSource = getItemImageSource(item);
+            const imgUrl = getDriveImageUrl(rawImgSource);
+
+            let imgHtml = imgUrl ? '<img src="' + imgUrl + '" referrerpolicy="no-referrer" class="max-h-48 mx-auto rounded-xl mb-3 object-contain">' : '';
+
+            content.innerHTML = imgHtml + 
+                '<p><strong>Asset ID:</strong> ' + aId + '</p>' +
+                '<p><strong>รายละเอียด:</strong> ' + detail + '</p>' +
+                '<p><strong>สถานะ:</strong> ' + status + '</p>';
             showModal('inventoryItemDetailModal');
         }
 
         async function loadReportList(type) {
-            if (type === 'stockIn') loadStockInRecords();
-            else loadStockOutRecords();
+            showLoading();
+            try {
+                const isStockIn = type === 'stockIn';
+                let records = isStockIn ? globalStockInRecords : globalStockOutRecords;
+                if (records.length === 0) {
+                    const data = await fetchAPI(`${API_URL}?action=${type === 'stockIn' ? 'getStockIn' : 'getStockOut'}`);
+                    records = Array.isArray(data) ? data : (data.data || []);
+                    if (isStockIn) globalStockInRecords = records;
+                    else globalStockOutRecords = records;
+                }
+
+                const tbody = document.getElementById('printTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                records.forEach((rec, idx) => {
+                    const docNo = isStockIn ? (rec.Stock_In_No || '-') : (rec.Stock_Out_No || '-');
+                    const dateTime = rec.Date_Time || '-';
+                    const dept = rec.DEPT_ID || '-';
+                    const sigUrl = getDriveImageUrl(rec.User_Confirm || '');
+                    const statusText = sigUrl ? '<span class="text-emerald-600 font-bold">ลงชื่อแล้ว</span>' : '<span class="text-amber-600 font-bold">รอลงชื่อ</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 border-b border-gray-200";
+                    tr.innerHTML = '<td class="border border-gray-300 p-2 text-center">' + (idx + 1) + '</td>' +
+                        '<td class="border border-gray-300 p-2 font-bold text-pink-600">' + docNo + '</td>' +
+                        '<td class="border border-gray-300 p-2">' + dateTime + '</td>' +
+                        '<td class="border border-gray-300 p-2">' + dept + '</td>' +
+                        '<td class="border border-gray-300 p-2 text-center">' + statusText + '</td>' +
+                        '<td class="border border-gray-300 p-2 text-center"><button onclick="openRecordDetail(\'' + type + '\', \'' + docNo + '\'); setTimeout(openA4ReportModal, 200);" class="bg-pink-500 text-white px-3 py-1 rounded text-xs">พิมพ์ A4</button></td>';
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Report list error:", err);
+            } finally {
+                hideLoading();
+            }
         }
 
         function openRecordDetail(type, docNo) {
             let record = type === 'stockIn' ? globalStockInRecords.find(r => r.Stock_In_No === docNo) : globalStockOutRecords.find(r => r.Stock_Out_No === docNo);
             if (!record) return;
             activeDetailRecord = { type, record };
+
             document.getElementById('detailDocNo').innerText = docNo;
             document.getElementById('detailContent').innerHTML = '<pre class="text-xs bg-gray-50 p-4 rounded-xl overflow-x-auto">' + JSON.stringify(record, null, 2) + '</pre>';
             showModal('recordDetailModal');
+        }
+
+        function printReceiptSlip() {
+            document.body.classList.add('printing-receipt');
+            window.print();
+            document.body.classList.remove('printing-receipt');
+        }
+
+        function openA4ReportModal() {
+            if (!activeDetailRecord) return;
+            const { type, record } = activeDetailRecord;
+            const docNo = type === 'stockIn' ? (record.Stock_In_No || '-') : (record.Stock_Out_No || '-');
+            
+            let html = '<div class="text-center mb-6 border-b-2 border-gray-800 pb-4">' +
+                '<h2 class="text-xl font-bold">โรงพยาบาลอุดรธานี</h2>' +
+                '<p class="text-xs">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>' +
+                '<h3 class="text-base font-bold text-pink-600 mt-2">รายงานเอกสาร: ' + docNo + '</h3>' +
+                '</div>' +
+                '<pre class="text-xs bg-gray-50 p-4 rounded-xl overflow-x-auto">' + JSON.stringify(record, null, 2) + '</pre>';
+
+            document.getElementById('a4ReportContent').innerHTML = html;
+            closeModal('recordDetailModal');
+            showModal('a4ReportModal');
+        }
+
+        function printA4ReportModal() {
+            document.body.classList.add('printing-a4');
+            window.print();
+            document.body.classList.remove('printing-a4');
         }
 
         function showLoading() { document.getElementById('loadingOverlay')?.classList.remove('hidden'); }
