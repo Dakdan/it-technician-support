@@ -835,7 +835,7 @@
 
         function getItemImageSource(item) {
             if (!item) return '';
-            return item.Inv_Image_ID || item.file || '';
+            return item.Inv_Image_ID || item.file || item.Image_ID || item.Image_FileId || '';
         }
 
         function truncateText(text, maxLength = 20) {
@@ -1582,8 +1582,8 @@
             const aId = item.AssetID || item.Asset_ID || item.NOID || item.NoID || item.Inv_ID || "-";
             const serial = item.Asset_Serial || item.Serial || "-";
             const typeName = item.Asset_Type_Name || item.Asset_Type_Group || "-";
-            const detail = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || "-";
-            const age = item.Asset_AgeInfo || item.Age || "-";
+            const detail = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || item['รายละเอียด'] || "-";
+            const age = item.Asset_AgeInfo || item.Age || item['อายุ'] || "-";
             const status = item.Inv_Status || item.Status || "รอตรวจสอบ";
             
             const rawImgSource = getItemImageSource(item);
@@ -1688,7 +1688,7 @@
                         '<td class="border border-gray-300 p-2 font-semibold text-indigo-700">' + dept + '</td>' +
                         '<td class="border border-gray-300 p-2 text-center">' + statusText + '</td>' +
                         '<td class="border border-gray-300 p-2 text-center">' +
-                        '<button onclick="openRecordDetail(\'' + type + '\', \'' + docNo + '\'); setTimeout(openA4ReportModal, 200);" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-1 rounded text-[11px] font-semibold shadow-xs">พิมพ์ A4</button>' +
+                        '<button onclick="prepareA4Report(\'' + type + '\', \'' + docNo + '\')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-1 rounded text-[11px] font-semibold shadow-xs">พิมพ์ A4</button>' +
                         '</td>';
                     tbody.appendChild(tr);
                 });
@@ -1700,7 +1700,33 @@
             }
         }
 
-        function openRecordDetail(type, docNo) {
+        async function prepareA4Report(type, docNo) {
+            await openRecordDetail(type, docNo);
+            setTimeout(() => {
+                closeModal('recordDetailModal');
+                openA4ReportModal();
+            }, 150);
+        }
+
+        async function openRecordDetail(type, docNo) {
+            // โหลดข้อมูล Inventory เผื่อกรณีเข้าหน้าแรกแล้วมาที่จ่ายออกเลย จะได้ดึง Detail / Age ได้
+            if (globalInventoryRecords.length === 0) {
+                showLoading();
+                try {
+                    const [data, resPeri] = await Promise.all([
+                        fetchAPI(`${API_URL}?action=getInventory`).catch(() => []),
+                        fetchAPI(`${API_URL}?action=getPeripherals`).catch(() => [])
+                    ]);
+                    globalInventoryRecords = Array.isArray(data) ? data : (data.data || []);
+                    if (globalPeripheralsRecords.length === 0) {
+                        globalPeripheralsRecords = Array.isArray(resPeri) ? resPeri : (resPeri.data || []);
+                    }
+                } catch (e) {
+                    console.error("Fetch Inventory error:", e);
+                }
+                hideLoading();
+            }
+
             let record = null;
             if (type === 'stockIn') {
                 record = globalStockInRecords.find(r => (r.Stock_In_No || r.StockIn_No || r.No) === docNo);
@@ -1756,8 +1782,12 @@
             if (Array.isArray(record.items) && record.items.length > 0) {
                 const groupedItems = {};
                 record.items.forEach((item) => {
-                    const iNo = item.Inv_No || '-';
-                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
+                    const enrichedItem = globalInventoryRecords.find(inv => 
+                        (inv.Inv_ID && item.Inv_ID && inv.Inv_ID === item.Inv_ID) || 
+                        (inv.Inv_No && item.Inv_No && inv.Inv_No === item.Inv_No) ||
+                        (inv.AssetID && item.AssetID && item.AssetID !== "-" && inv.AssetID === item.AssetID) ||
+                        (inv.NOID && item.NOID && item.NOID !== "-" && inv.NOID === item.NOID)
+                    ) || {};
                     const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
                     
                     if (!groupedItems[typeName]) groupedItems[typeName] = [];
@@ -1799,9 +1829,9 @@
                         const itemJsonString = JSON.stringify(fullItemData).replace(/"/g, '&quot;');
 
                         const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
-                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || '-';
-                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || '-';
-                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
+                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || item['รายละเอียด'] || 'ไม่มีข้อมูลรายละเอียด';
+                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || item.Age || item.AgeInfo || item['อายุ'] || 'ไม่ระบุ';
+                        const stat = item.Inv_Status || enrichedItem.Inv_Status || item.Status || 'รอตรวจสอบ';
                         
                         const rawImgSource = getItemImageSource(item) || getItemImageSource(enrichedItem);
                         const extractedImg = getDriveImageUrl(rawImgSource);
@@ -1831,7 +1861,7 @@
                             '<td class="p-3 text-pink-600 font-bold align-top">' + aId + '</td>' +
                             '<td class="p-3 text-gray-800 whitespace-normal break-words max-w-sm align-top">' +
                             '<span class="block mb-1 font-medium">' + desc + '</span>' +
-                            '<span class="age-badge-prominent text-[10px]">' + age + '</span>' +
+                            '<span class="age-badge-prominent text-[10px]"><i data-lucide="clock" class="w-3 h-3"></i> ' + age + '</span>' +
                             periHtml +
                             '</td>' +
                             '<td class="p-3 text-center align-top"><span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold whitespace-nowrap border border-indigo-100 shadow-2xs text-[10px]">' + stat + '</span></td>' +
@@ -1935,8 +1965,12 @@
             if (Array.isArray(record.items) && record.items.length > 0) {
                 const groupedReportItems = {};
                 record.items.forEach((item) => {
-                    const iNo = item.Inv_No || '-';
-                    const enrichedItem = globalInventoryRecords.find(inv => inv.Inv_No === iNo) || {};
+                    const enrichedItem = globalInventoryRecords.find(inv => 
+                        (inv.Inv_ID && item.Inv_ID && inv.Inv_ID === item.Inv_ID) || 
+                        (inv.Inv_No && item.Inv_No && inv.Inv_No === item.Inv_No) ||
+                        (inv.AssetID && item.AssetID && item.AssetID !== "-" && inv.AssetID === item.AssetID) ||
+                        (inv.NOID && item.NOID && item.NOID !== "-" && inv.NOID === item.NOID)
+                    ) || {};
                     const typeName = enrichedItem.Asset_Type_Name || item.Asset_Type_Name || enrichedItem.Asset_Type_Group || item.Asset_Type_Group || 'ไม่ระบุประเภท';
                     if (!groupedReportItems[typeName]) groupedReportItems[typeName] = [];
                     groupedReportItems[typeName].push({ item, enrichedItem });
@@ -1951,8 +1985,8 @@
                     groupedReportItems[typeName].forEach(({ item, enrichedItem }) => {
                         rIdx++;
                         const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
-                        let desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || '-';
-                        const stat = item.Inv_Status || enrichedItem.Inv_Status || '-';
+                        let desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || item['รายละเอียด'] || 'ไม่มีข้อมูลรายละเอียด';
+                        const stat = item.Inv_Status || enrichedItem.Inv_Status || item.Status || 'รอตรวจสอบ';
 
                         if (item.peripherals && Array.isArray(item.peripherals) && item.peripherals.length > 0) {
                             const pNames = item.peripherals.map(p => p.Name || p.Item_ID).join(', ');
@@ -1987,7 +2021,6 @@
             const reportContentEl = document.getElementById('a4ReportContent');
             if (reportContentEl) reportContentEl.innerHTML = html;
             
-            closeModal('recordDetailModal');
             showModal('a4ReportModal');
         }
 
