@@ -290,7 +290,7 @@
                         <select id="Source_Type" required class="w-full px-4 py-3 border border-pink-200 rounded-2xl text-sm bg-white/70 focus:bg-white focus:border-pink-400 outline-none transition-all shadow-sm header-input">
                             <option value="">-- เลือกแหล่งครุภัณฑ์ --</option>
                             <option value="คลังสำรอง/Spar">คลังสำรอง/Spar</option>
-                            <option value="เบิกใช้งาน">คลังครุภัณฑ์ใหม่</option>
+                            <option value="คลังครุภัณฑ์ใหม่">คลังครุภัณฑ์ใหม่</option>
                             <option value="ครุภัณฑ์นอกคลัง">ครุภัณฑ์นอกคลัง</option>
                             <option value="ส่งซ่อมภายนอก">ส่งซ่อมภายนอก</option>
                             <option value="จำหน่าย/แทงจำหน่าย">จำหน่าย/แทงจำหน่าย</option>
@@ -1011,17 +1011,19 @@
             }
         }
 
-        // ฟังก์ชันค้นหาครุภัณฑ์บนหน้าเว็บพร้อมแนบเงื่อนไข Source_Type ไปด้วย
+        
+       // ฟังก์ชันค้นหาครุภัณฑ์บนหน้าเว็บพร้อมแนบเงื่อนไข Source_Type ไปด้วย
         async function searchAsset() {
             let q = document.getElementById('assetQuery').value.trim();
-            const sourceType = document.getElementById('Source_Type').value;
+            const sourceType = document.getElementById('Source_Type').value; // ดึงค่า Source_Type ปัจจุบัน
             const area = document.getElementById('resultsArea');
             if (!area) return;
             
             area.innerHTML = '<div class="p-6 text-center"><div class="spinner mx-auto border-2 w-8 h-8 mb-2"></div><p class="text-xs text-gray-400">กำลังค้นหาฐานข้อมูล...</p></div>';
             area.classList.remove('hidden');
-
+        
             try {
+                // แนบ &sourceType= ไปกับ URL ด้วย
                 const res = await fetchAPI(`${SCRIPT_URL}?action=searchAsset&query=${encodeURIComponent(q)}&sourceType=${encodeURIComponent(sourceType)}`);
                 const assetResults = Array.isArray(res) ? res : (res.data || []);
                 area.innerHTML = '';
