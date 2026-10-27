@@ -1193,8 +1193,60 @@
             if (!record) return;
             activeDetailRecord = { type, record };
 
-            document.getElementById('detailDocNo').innerText = docNo;
-            document.getElementById('detailContent').innerHTML = '<pre class="text-xs bg-gray-50 p-4 rounded-xl overflow-x-auto">' + JSON.stringify(record, null, 2) + '</pre>';
+            const detailDocNoEl = document.getElementById('detailDocNo');
+            if (detailDocNoEl) detailDocNoEl.innerText = docNo;
+
+            const content = document.getElementById('detailContent');
+            if (!content) return;
+
+            let html = '';
+            let signatureUrl = getDriveImageUrl(record.User_Confirm || '');
+
+            // ส่วนหัวรายละเอียดเอกสาร
+            const dateTime = record.Date_Time || record.Timestamp || '-';
+            const deptId = record.DEPT_ID || '-';
+            const sourceType = record.Source_Type || record.sourceType || '-';
+            const refNo = record.Reference_No || record.referenceNo || '-';
+
+            html = '<div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gradient-to-br from-pink-50 to-white p-5 rounded-2xl border border-pink-100 shadow-sm">' +
+                '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase">เลขที่เอกสาร</span> <span class="font-bold text-pink-700">' + docNo + '</span></p>' +
+                '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase">วันที่เวลา</span> <span class="font-semibold text-gray-800">' + dateTime + '</span></p>' +
+                '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase">หน่วยงาน</span> <span class="font-bold text-indigo-600">' + deptId + '</span></p>' +
+                '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase">ประเภท</span> <span class="font-medium text-gray-700">' + sourceType + '</span></p>' +
+                '<p class="flex flex-col"><span class="text-[11px] text-gray-500 font-bold uppercase">เลขอ้างอิง</span> <span class="font-medium text-gray-700">' + refNo + '</span></p>' +
+                '</div>';
+
+            // ตารางแสดงรายการครุภัณฑ์ย่อยด้านใน
+            html += '<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800">รายการครุภัณฑ์ย่อย</h4>';
+            
+            if (Array.isArray(record.items) && record.items.length > 0) {
+                html += '<div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm"><table class="w-full text-left text-xs">' +
+                    '<thead class="bg-gray-100 text-gray-700 uppercase"><tr>' +
+                    '<th class="p-2 text-center">ลำดับ</th>' +
+                    '<th class="p-2">รหัส Asset</th>' +
+                    '<th class="p-2">รายละเอียด</th>' +
+                    '<th class="p-2 text-center">สถานะ</th>' +
+                    '</tr></thead><tbody>';
+
+                record.items.forEach((item, idx) => {
+                    const aId = item.AssetID || item.Asset_ID || item.NOID || '-';
+                    const desc = item.Asset_FullDescription || item.FullDescription || item.Spec_Detai || '-';
+                    const stat = item.Inv_Status || 'ปกติ';
+
+                    html += '<tr class="border-b border-gray-100">' +
+                        '<td class="p-2 text-center font-bold">' + (idx + 1) + '</td>' +
+                        '<td class="p-2 font-bold text-pink-600">' + aId + '</td>' +
+                        '<td class="p-2">' + desc + '</td>' +
+                        '<td class="p-2 text-center"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">' + stat + '</span></td>' +
+                        '</tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p class="text-gray-400 italic text-xs bg-gray-50 p-4 rounded-xl text-center">ไม่พบรายการครุภัณฑ์ย่อย</p>';
+            }
+            html += '</div>';
+
+            content.innerHTML = html;
             showModal('recordDetailModal');
         }
 
