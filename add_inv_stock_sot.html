@@ -1570,7 +1570,7 @@
             if (!content) return;
 
             let html = '';
-            let signatureUrl = getDriveImageUrl(record.User_Confirm || record.Signature || Object.values(record)[9] || '');
+            let signatureUrl = getDriveImageUrl(record.User_Confirm || record.Signature || '');
 
             if (type === 'stockIn') {
                 const stockInNo = record.Stock_In_No || record.StockIn_No || '-';
@@ -1603,7 +1603,7 @@
                     '</div>';
             }
 
-            html += '<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i class="fa-solid fa-list text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ (คลิกที่แถบเพื่อดูรายละเอียด)</h4>';
+            html += '<div class="mt-6"><h4 class="font-bold text-sm mb-3 text-gray-800 flex items-center gap-2"><i class="fa-solid fa-list text-pink-500"></i> รายการครุภัณฑ์ที่ดำเนินการ</h4>';
             
             const recordItems = record.items || record.assets || [];
             if (Array.isArray(recordItems) && recordItems.length > 0) {
@@ -1652,18 +1652,15 @@
 
                     list.forEach(({ item, enrichedItem }) => {
                         subGlobalIdx++;
-                        const fullItemData = Object.keys(enrichedItem).length > 0 ? enrichedItem : item;
-                        const itemJsonString = JSON.stringify(fullItemData).replace(/"/g, '&quot;');
-
                         const aId = enrichedItem.AssetID || item.AssetID || item.Asset_ID || enrichedItem.NOID || item.NOID || item.NoID || '-';
-                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || item['รายละเอียด'] || 'ไม่มีข้อมูลรายละเอียด';
-                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || item.Age || item.AgeInfo || item['อายุ'] || 'ไม่ระบุ';
+                        const desc = enrichedItem.Asset_FullDescription || item.Asset_FullDescription || enrichedItem.FullDescription || item.FullDescription || item.Spec_Detai || 'ไม่มีข้อมูลรายละเอียด';
+                        const age = enrichedItem.Asset_AgeInfo || item.Asset_AgeInfo || item.Age || item.AgeInfo || 'ไม่ระบุ';
                         const stat = item.Inv_Status || enrichedItem.Inv_Status || item.Status || 'รอตรวจสอบ';
                         
                         const rawImgSource = getItemImageSource(item) || getItemImageSource(enrichedItem);
                         const extractedImg = getDriveImageUrl(rawImgSource);
                         const imgHtml = extractedImg 
-                            ? '<img src="' + extractedImg + '" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 cursor-pointer mx-auto hover:opacity-80">' 
+                            ? '<img src="' + extractedImg + '" referrerpolicy="no-referrer" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 mx-auto">' 
                             : '<span class="text-gray-300">-</span>';
 
                         let periHtml = '';
@@ -1691,21 +1688,23 @@
                             '<span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium"><i class="fa-solid fa-clock"></i> ' + age + '</span>' +
                             periHtml +
                             '</td>' +
-                            '<td class="p-3 text-center align-top"><span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold whitespace-nowrap border border-indigo-100 shadow-2xs text-[10px]">' + stat + '</span></td>' +
+                            '<td class="p-3 text-center align-top"><span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold whitespace-nowrap border border-indigo-100 text-[10px]">' + stat + '</span></td>' +
                             '</tr>';
                     });
                 });
 
                 html += '</tbody></table></div>';
             } else {
-                html += '<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p></div>';
+                html += '<p class="text-gray-400 italic text-xs bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">ไม่พบรายการครุภัณฑ์ย่อยที่ผูกกับเอกสารนี้</p>';
             }
+            html += '</div>';
 
-            const itUserText = record.IT_User || record.itUser || record.User_Name || record.userName || '-';
-            const userNameText = record.User_Name || record.userName || record.IT_User || record.itUser || 'ไม่ระบุชื่อ';
+            const itUserText = record.IT_User || record.itUser || '-';
+            const userNameText = record.User_Name || record.userName || 'ไม่ระบุชื่อ';
             const roleIT = type === 'stockIn' ? 'ผู้รับมอบ (IT / ผู้ทำรายการ)' : 'ผู้ส่งมอบ (IT / ผู้จ่ายออก)';
             const roleUser = type === 'stockIn' ? 'ผู้ส่งมอบ / ผู้คืนครุภัณฑ์' : 'ผู้รับมอบครุภัณฑ์';
             const themeColorClass = type === 'stockIn' ? 'emerald' : 'purple';
+            const docNoKey = record.Stock_Out_No || record.StockOut_No || record.Stock_In_No || docNo;
 
             html += '<div class="mt-8 break-inside-avoid">' +
                 '<h4 class="font-bold text-sm mb-4 text-gray-800 flex items-center gap-2 border-b border-gray-200 pb-2">' +
@@ -1724,8 +1723,11 @@
                     '<p class="font-bold text-' + themeColorClass + '-700 text-sm">(' + userNameText + ')</p>' +
                     '<span class="absolute top-2 right-2 bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1"><i class="fa-solid fa-check"></i> ลงชื่อแล้ว</span>';
             } else {
-                html += '<div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2">' +
-                    '<p class="text-gray-400 italic text-xs">ยังไม่มีการลงลายมือชื่อ</p>' +
+                html += '<div class="h-20 w-full flex items-center justify-center border-b border-gray-100 pb-2 mb-2 flex-col">' +
+                    '<p class="text-amber-500 italic text-xs font-bold mb-2"><i class="fa-solid fa-triangle-exclamation"></i> ยังไม่มีการลงลายมือชื่อ</p>' +
+                    '<button type="button" onclick="openSignModalForRecord(\'' + docNoKey + '\', \'' + userNameText + '\')" class="px-3 py-1.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-xl text-xs font-bold shadow hover:shadow-md transition-all flex items-center gap-1.5">' +
+                    '<i class="fa-solid fa-signature"></i> ลงชื่อรับตอนนี้' +
+                    '</button>' +
                     '</div>' +
                     '<p class="font-bold text-' + themeColorClass + '-700 text-sm">(' + userNameText + ')</p>' +
                     '<span class="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">รอลงชื่อ</span>';
@@ -1733,7 +1735,30 @@
             html += '</div></div></div>';
 
             content.innerHTML = html;
+            
+            const footerAction = document.getElementById('detailFooterAction');
+            if (footerAction) {
+                footerAction.innerHTML = `<button type="button" onclick="closeModal('detailModal')" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-bold transition">ปิดหน้าต่าง</button>`;
+            }
+
             document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function openSignModalForRecord(docNo, defaultName) {
+            currentSessionStockOutNo = docNo;
+            closeModal('detailModal');
+            document.getElementById('sigStockNo').innerText = docNo;
+            const nameInput = document.getElementById('modalUserName');
+            if (nameInput) nameInput.value = (defaultName && defaultName !== 'ไม่ระบุชื่อ') ? defaultName : '';
+            document.getElementById('signatureModal').classList.remove('hidden');
+            setTimeout(() => {
+                const canvas = document.getElementById('signatureCanvas');
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.parentElement.offsetWidth * ratio;
+                canvas.height = canvas.parentElement.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                if (signaturePad) signaturePad.clear();
+            }, 100);
         }
 
         function initHtml5QrCode() { if (typeof Html5Qrcode !== 'undefined') html5QrCode = new Html5Qrcode("reader"); }
