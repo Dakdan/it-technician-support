@@ -1015,7 +1015,7 @@
        // ฟังก์ชันค้นหาครุภัณฑ์บนหน้าเว็บพร้อมแนบเงื่อนไข Source_Type ไปด้วย
         async function searchAsset() {
             let q = document.getElementById('assetQuery').value.trim();
-            const sourceType = document.getElementById('Source_Type').value; // ดึงค่า Source_Type ปัจจุบัน
+            const sourceType = document.getElementById('Source_Type').value; // ดึงค่า Source_Type เพื่อระบุแหล่งข้อมูล
             const area = document.getElementById('resultsArea');
             if (!area) return;
             
@@ -1023,10 +1023,11 @@
             area.classList.remove('hidden');
         
             try {
-                // แนบ &sourceType= ไปกับ URL ด้วย
+                // ส่ง sourceType ไปให้ Apps Script ประมวลผลดึงข้อมูลจากแหล่งที่ถูกต้อง
                 const res = await fetchAPI(`${SCRIPT_URL}?action=searchAsset&query=${encodeURIComponent(q)}&sourceType=${encodeURIComponent(sourceType)}`);
                 const assetResults = Array.isArray(res) ? res : (res.data || []);
                 area.innerHTML = '';
+                
                 if (!assetResults || assetResults.length === 0) {
                     area.innerHTML = '<p class="text-center p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">ไม่พบรหัสครุภัณฑ์นี้</p>';
                     return;
@@ -1037,15 +1038,11 @@
                     d.className = "p-3.5 bg-white rounded-2xl border border-pink-100 flex justify-between items-center cursor-pointer shadow-sm hover:border-pink-300 transition-all mb-2";
                     
                     const itemID = item.AssetID || item.NoID || item.NOID;
-                    const highlightedID = highlightText(itemID, q);
-                    const serialText = item.Serial ? String(item.Serial) : "-";
-                    const highlightedSerial = serialText !== "-" ? highlightText(serialText, q) : serialText;
-
                     d.innerHTML = `
                         <div class="flex-grow pr-4">
-                            <p class="text-[13px] font-bold text-pink-500 uppercase tracking-tight mb-0.5">${highlightedID}</p>
+                            <p class="text-[13px] font-bold text-pink-500 uppercase tracking-tight mb-0.5">${itemID}</p>
                             <p class="text-xs font-bold text-gray-700 leading-tight">${item.FullDescription || '-'}</p>
-                            <p class="text-[11px] font-medium text-gray-500 mt-1">S/N: ${highlightedSerial} | ${item.AgeInfo || '-'}</p>
+                            <p class="text-[11px] font-medium text-gray-500 mt-1">S/N: ${item.Serial || '-'} | ${item.AgeInfo || '-'}</p>
                         </div>
                         <div>
                             <span class="bg-pink-100 text-pink-600 px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1 shadow-sm">+ เลือก</span>
@@ -1054,7 +1051,9 @@
                     d.onclick = () => openAssetModal(item, -1);
                     area.appendChild(d);
                 });
-            } catch(e) { area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">เกิดข้อผิดพลาดในการเชื่อมต่อค้นหาข้อมูล</p>'; }
+            } catch(e) { 
+                area.innerHTML = '<p class="text-center text-red-400 text-xs p-4">เกิดข้อผิดพลาดในการเชื่อมต่อค้นหาข้อมูล</p>'; 
+            }
         }
 
         function setupImagePreview() {
