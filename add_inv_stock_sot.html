@@ -1135,7 +1135,7 @@
             document.getElementById('modalAssetID').innerText = tempSelectedAsset.AssetID || tempSelectedAsset.NoID || tempSelectedAsset.NOID || '-';
             document.getElementById('modalAge').innerText = tempSelectedAsset.AgeInfo || tempSelectedAsset.Asset_AgeInfo || '-';
             document.getElementById('modalSpec').value = tempSelectedAsset.Spec_Detai || tempSelectedAsset.FullDescription || '-';
-            document.getElementById('modalStatus').value = tempSelectedAsset.InvStatus || tempSelectedAsset.Inv_Status || 'รอตรวจสอบ';
+            document.getElementById('modalStatus').value = tempSelectedAsset.InvStatus || tempSelectedAsset.Inv_Status || 'รอจ่าย';
             
             const typeSelect = document.getElementById('modalAssetType');
             const currentTypeVal = tempSelectedAsset.Asset_Type || tempSelectedAsset.Type_ID || "";
@@ -1320,7 +1320,7 @@
                     <td class="p-4 text-center">${imgSrcHTML}</td>
                     <td class="p-4 font-bold text-pink-600">${item.AssetID || item.NoID || item.NOID || '-'}<br><span class="text-[10px] text-gray-400 font-normal">S/N: ${item.Serial || '-'}</span></td>
                     <td class="p-4 text-xs text-gray-600">${item.Spec_Detai || item.FullDescription || '-'}</td>
-                    <td class="p-4 text-center"><span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</span></td>
+                    <td class="p-4 text-center"><span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold">${item.InvStatus || item.Inv_Status || 'รอจ่าย'}</span></td>
                     <td class="p-4 text-center">${peripheralCol}</td>
                     <td class="p-4 text-center space-x-1">
                         <button type="button" onclick="openAssetModal(null, ${index})" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors shadow-sm"><i class="fa-solid fa-pen text-xs"></i></button>
@@ -1340,7 +1340,7 @@
                                 <p class="text-[10px] text-gray-400">S/N: ${item.Serial || '-'}</p>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-700">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</span>
+                        <span class="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-700">${item.InvStatus || item.Inv_Status || 'รอจ่าย'}</span>
                     </div>
                     <p class="text-xs text-gray-600">${item.Spec_Detai || item.FullDescription || '-'}</p>
                     ${peripheralCardHTML}
@@ -1510,7 +1510,7 @@
                 tbody.innerHTML += `<tr><td class="border border-black p-2 text-center">${idx + 1}</td>
                 <td class="border border-black p-2 font-bold">${item.AssetID || item.NoID || item.NOID || '-'}</td>
                 <td class="border border-black p-2">${item.Spec_Detai || item.FullDescription || '-'}</td>
-                <td class="border border-black p-2 text-center">${item.InvStatus || item.Inv_Status || 'รอตรวจสอบ'}</td></tr>`;
+                <td class="border border-black p-2 text-center">${item.InvStatus || item.Inv_Status || ''}</td></tr>`;
             });
         }
 
