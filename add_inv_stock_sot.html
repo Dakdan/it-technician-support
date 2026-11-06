@@ -1015,14 +1015,50 @@
         }
 
         function normalizeText(str) { return String(str || '').replace(/[-/_\s]/g, "").toUpperCase(); }
+        // ใช้ชื่อเดิม highlightText แต่ใส่ลอจิกการจัดการแบบขวามาซ้าย (Reverse Replacement) 
         function highlightText(fullText, query) {
             if (!query || !fullText) return fullText || "";
-            const cleanQuery = normalizeText(query);
-            if (!cleanQuery) return fullText;
+            
+            const textStr = String(fullText);
+            const cleanQuery = String(query).trim();
+            if (!cleanQuery) return textStr;
+        
             try {
-                const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                return String(fullText).replace(new RegExp(`(${escaped})`, 'gi'), '<span class="text-emerald-600 font-bold bg-emerald-50 px-1 rounded">$1</span>');
-            } catch(e) { return fullText; }
+                const escaped = cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(escaped, 'gi');
+                
+                let match;
+                let indices = [];
+                
+                // 1. ค้นหาตำแหน่งทั้งหมดที่พบคำค้น และเก็บ Index ไว้
+                while ((match = regex.exec(textStr)) !== null) {
+                    indices.push({
+                        start: match.index,
+                        end: regex.lastIndex,
+                        text: match[0]
+                    });
+                }
+        
+                if (indices.length === 0) return textStr;
+        
+                // 2. กลับลำดับจากขวามาซ้าย (Reverse) 
+                // เพื่อเวลาใส่แท็ก HTML แล้วตำแหน่ง Index ของตัวอักษรทางซ้ายจะไม่คลาดเคลื่อน
+                indices.reverse();
+        
+                let resultStr = textStr;
+                indices.forEach(item => {
+                    const before = resultStr.substring(0, item.start);
+                    const target = resultStr.substring(item.start, item.end);
+                    const after = resultStr.substring(item.end);
+                    
+                    resultStr = before + `<span class="text-emerald-600 font-bold bg-emerald-50 px-1 rounded">${target}</span>` + after;
+                });
+        
+                return resultStr;
+        
+            } catch (e) { 
+                return fullText; 
+            }
         }
 
         function debouncedSearch() {
