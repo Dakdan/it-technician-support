@@ -1211,7 +1211,7 @@
                                 NoID: tempSelectedAsset.NoID || tempSelectedAsset.NOID || "",
                                 AssetID: tempSelectedAsset.AssetID || "",
                                 FullDescription: tempSelectedAsset.FullDescription || "",
-                                InvStatus: tempSelectedAsset.InvStatus || "รอตรวจสอบ",
+                                InvStatus: tempSelectedAsset.InvStatus || "",
                                 imageBase64: tempSelectedAsset.imageBase64 || "",
                                 Peripherals: tempSelectedAsset.Peripherals,
                                 Asset_Type: tempSelectedAsset.Asset_Type,
@@ -1254,7 +1254,7 @@
                                 method: 'POST',
                                 body: JSON.stringify({
                                     action: 'deleteRecord',
-                                    payload: { sheetName: 'Inventory_Asset', colIndex: 1, targetId: item.Inv_ID }
+                                    payload: { sheetName: 'Inventory_Asset_Out', colIndex: 1, targetId: item.Inv_ID }
                                 })
                             });
                         } catch(e) { console.warn("Delete remote warning:", e); }
