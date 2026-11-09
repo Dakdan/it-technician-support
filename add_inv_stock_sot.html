@@ -1244,6 +1244,8 @@
                             stockOutID: currentSessionStockOutId,
                             docId: uploadedDocFileName || "",
                             item: {
+                                // ---> เพิ่มตรงนี้เพื่อให้ส่ง Inv_ID ไปด้วย <---
+                                Inv_ID: tempSelectedAsset.Inv_ID || tempSelectedAsset.inv_id || "",
                                 NoID: tempSelectedAsset.NoID || tempSelectedAsset.NOID || "",
                                 AssetID: tempSelectedAsset.AssetID || "",
                                 FullDescription: tempSelectedAsset.FullDescription || "",
