@@ -230,7 +230,7 @@
 
     <main class="max-w-7xl mx-auto glass-card p-3 sm:p-6 md:p-8 no-print mb-6 min-h-[60vh] mt-4">
         <!-- Tab Navigation -->
-        <div class="flex border-b border-pink-100 mb-6 overflow-x-auto hide-scrollbar w-full bg-white/50 rounded-2xl p-1 shadow-xs">
+        <div class="hidden sm:flex flex border-b border-pink-100 mb-6 overflow-x-auto hide-scrollbar w-full bg-white/50 rounded-2xl p-1 shadow-xs">
             <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn flex-1 py-3 px-4 text-xs md:text-sm font-bold flex items-center justify-center gap-2 rounded-xl transition-all">
                 <i class="fa-solid fa-chart-pie"></i> สรุปรายการ
             </button>
@@ -437,10 +437,31 @@
     </main>
 
     <!-- Mobile Bottom Nav -->
-    <nav class="bottom-nav sm:hidden no-print">
-        <div onclick="switchTab('summary')" class="nav-item" id="nav-summary"><i class="fa-solid fa-chart-pie"></i><span>สรุป</span></div>
-        <div onclick="switchTab('stockin')" class="nav-item active" id="nav-stockin"><i class="fa-solid fa-boxes-packing text-xl"></i><span>จ่ายออก</span></div>
-        <div onclick="switchTab('history')" class="nav-item" id="nav-history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></div>
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav sm:hidden no-print flex justify-around items-center px-2 py-1">
+    <!-- ปุ่มกลับหน้าหลัก -->
+        <div onclick="history.back()" class="nav-item text-gray-500 hover:text-pink-600 cursor-pointer flex flex-col items-center justify-center flex-1 py-1">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px] mt-0.5">หน้าหลัก</span>
+        </div>
+    
+        <!-- ปุ่มแท็บ: สรุป -->
+        <div onclick="switchTab('summary')" class="nav-item flex flex-col items-center justify-center flex-1 py-1" id="nav-summary">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[10px] mt-0.5">สรุป</span>
+        </div>
+    
+        <!-- ปุ่มแท็บ: จ่ายออก -->
+        <div onclick="switchTab('stockin')" class="nav-item active flex flex-col items-center justify-center flex-1 py-1" id="nav-stockin">
+            <i class="fa-solid fa-boxes-packing text-lg"></i>
+            <span class="text-[10px] mt-0.5">จ่ายออก</span>
+        </div>
+    
+        <!-- ปุ่มแท็บ: ประวัติ -->
+        <div onclick="switchTab('history')" class="nav-item flex flex-col items-center justify-center flex-1 py-1" id="nav-history">
+            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+            <span class="text-[10px] mt-0.5">ประวัติ</span>
+        </div>
     </nav>
 
     <!-- Modal: CRUD ครุภัณฑ์ -->
@@ -485,7 +506,7 @@
                 <div>
                     <label class="block mb-1.5 font-bold text-gray-700 text-xs"><i class="fa-solid fa-camera text-pink-400 mr-1"></i> ถ่ายรูป/แนบรูป</label>
                     <div class="relative">
-                        <input type="file" id="modalImgUpload" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <input type="file" id="modalImgUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                         <div class="w-full border-2 border-dashed border-pink-200 rounded-xl p-4 flex flex-col items-center justify-center bg-pink-50/30 text-pink-500 hover:bg-pink-50">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl mb-1"></i>
                             <span class="font-medium text-xs">คลิกเลือกรูป</span>
