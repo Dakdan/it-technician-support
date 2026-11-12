@@ -670,16 +670,32 @@
             const timelineStatusManagement = document.getElementById('timelineStatusManagement');
             if (timelineStatusManagement) {
                 if (logs.status && logs.status.length > 0) {
+                    
+                    // ตาราง Map รหัสสถานะเป็นภาษาไทย (ป้องกันกรณีฝั่ง Backend ส่งมาเป็นรหัส)
+                    const statusMap = {
+                        "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
+                        "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
+                        "MAS-007": "ตัดเป็นสูญหาย", "MAS-008": "สำรอง/คลัง", "MAS-009": "แผนทดแทนประจำปี",
+                        "COS-001": "ใช้งานอยู่", "COS-002": "ชำรุด", "COS-003": "ส่งซ่อม",
+                        "COS-004": "ไม่พร้อมใช้งาน", "COS-005": "สูญหาย", "COS-006": "ทดแทน",
+                        "COS-007": "พร้อมใช้งาน/รอเบิกจ่าย", "COS-008": "รอตรวจสอบสภาพ"
+                    };
+
                     timelineStatusManagement.innerHTML = logs.status.map(item => {
                         const dateTimeStr = item.stLogDateTime || '-';
-                        const maStat = item.maStatus || '-';
-                        const coStat = item.coStatus || '-';
+                        
+                        // ดึงค่ารหัสสถานะ และแปลงเป็นชื่อภาษาไทย (รองรับทั้งฟิลด์สำเร็จรูปหรือรหัสเดิม)
+                        const rawMa = item.maStatus || '';
+                        const rawCo = item.coStatus || '';
+                        const maStat = item.maStatusName || statusMap[rawMa] || rawMa || '-';
+                        const coStat = item.coStatusName || statusMap[rawCo] || rawCo || '-';
+                        
                         const gpsVal = item.gps || '-';
                         const deptNameVal = item.deptName || '-';
 
                         let gpsHtml = '-';
-                        if (gpsVal && gpsVal !== '-' && gpsVal.trim() !== '') {
-                            const cleanGps = encodeURIComponent(gpsVal.trim());
+                        if (gpsVal && gpsVal !== '-' && String(gpsVal).trim() !== '') {
+                            const cleanGps = encodeURIComponent(String(gpsVal).trim());
                             gpsHtml = `<a href="https://maps.google.com/?q=${cleanGps}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-bold"><i class="fa-solid fa-map-location-dot"></i> ${gpsVal}</a>`;
                         }
 
