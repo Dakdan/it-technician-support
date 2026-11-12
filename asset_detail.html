@@ -414,24 +414,17 @@
                     </div>
                 </div>
 
-                <!-- Notes & Gallery Section -->
+                <!-- Management Status & Condition Usage & Gallery Section -->
                 <div class="flex flex-col gap-6 w-full overflow-hidden">
                     <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 border border-slate-100 border-t-4 border-t-udon">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-8 h-8 rounded-xl bg-pink-50 text-[#E6005C] flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-paperclip"></i>
+                                <i class="fa-solid fa-sliders"></i>
                             </div>
-                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Notes & Attachments</h3>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wide">Management Status & Condition Usage</h3>
                         </div>
-                        <div class="space-y-5">
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">พิกัดตำแหน่ง GPS</p>
-                                <div id="valNote2" class="text-sm">-</div>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold mb-1.5 uppercase tracking-wider">บันทึกเพิ่มเติม</p>
-                                <div id="valNote3" class="text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-100 font-medium">-</div>
-                            </div>
+                        <div id="timelineStatusManagement" class="timeline">
+                            <p class="text-sm text-slate-400 italic">กำลังดึงข้อมูลประวัติสถานะ...</p>
                         </div>
                     </div>
 
@@ -502,7 +495,7 @@
 
             const asset = response.data.info;
             const calc = response.data.calculations || {};
-            const logs = response.data.logs || { move: [], ma: [], pm: [], images: [], inspection: [] };
+            const logs = response.data.logs || { move: [], ma: [], pm: [], images: [], inspection: [], status: [] };
 
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('mainDashboard').style.display = 'block';
@@ -673,16 +666,39 @@
             safeSetText('kpiMA', maCount + ' ครั้ง');
             safeSetText('valTotalRepairCost', 'มูลค่าซ่อมสะสม: ' + totalRepairCost.toLocaleString() + ' ฿');
 
-            const note2Val = getVal('Note2', 'GPS');
-            const note2El = document.getElementById('valNote2');
-            if (note2El) {
-                if (note2Val !== '-') {
-                    note2El.innerHTML = `<a href="https://maps.google.com/?q=${encodeURIComponent(note2Val.trim())}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-100"><i class="fa-solid fa-map-location-dot"></i> ดูพิกัดบนแผนที่</a>`;
+            // Render Management Status & Condition Usage (แทนที่ Notes เดิม)
+            const timelineStatusManagement = document.getElementById('timelineStatusManagement');
+            if (timelineStatusManagement) {
+                if (logs.status && logs.status.length > 0) {
+                    timelineStatusManagement.innerHTML = logs.status.map(item => {
+                        const dateTimeStr = item.stLogDateTime || '-';
+                        const maStat = item.maStatus || '-';
+                        const coStat = item.coStatus || '-';
+                        const gpsVal = item.gps || '-';
+                        const deptNameVal = item.deptName || '-';
+
+                        let gpsHtml = '-';
+                        if (gpsVal && gpsVal !== '-' && gpsVal.trim() !== '') {
+                            const cleanGps = encodeURIComponent(gpsVal.trim());
+                            gpsHtml = `<a href="https://maps.google.com/?q=${cleanGps}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-bold"><i class="fa-solid fa-map-location-dot"></i> ${gpsVal}</a>`;
+                        }
+
+                        return `
+                            <div class="timeline-item">
+                                <span class="badge mb-2 bg-brand-600"><i class="fa-regular fa-clock mr-1"></i> ${dateTimeStr}</span>
+                                <div class="text-xs text-slate-700 space-y-1 mt-1">
+                                    <div><strong class="text-slate-500">สถานะพัสดุ (MA):</strong> <span class="text-emerald-700 font-semibold">${maStat}</span></div>
+                                    <div><strong class="text-slate-500">สถานะใช้งาน (CO):</strong> <span class="text-blue-700 font-semibold">${coStat}</span></div>
+                                    <div><strong class="text-slate-500">หน่วยงาน:</strong> <span class="text-slate-800 font-medium">${deptNameVal}</span></div>
+                                    <div><strong class="text-slate-500">พิกัด GPS:</strong> ${gpsHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
                 } else {
-                    note2El.textContent = '-';
+                    timelineStatusManagement.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีข้อมูลประวัติการเปลี่ยนแปลงสถานะ</p>';
                 }
             }
-            safeSetText('valNote3', getVal('Note3', 'Note4'));
 
             const timelineMovement = document.getElementById('timelineMovement');
             if (timelineMovement) {
