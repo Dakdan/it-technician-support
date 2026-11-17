@@ -119,8 +119,8 @@
 
     <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
         <div class="spinner mb-6"></div>
-        <h2 class="text-2xl font-bold text-brand-700">Loading Data from IndexedDB...</h2>
-        <p class="text-slate-500 mt-2">กำลังโหลดข้อมูลครุภัณฑ์โรงพยาบาลอุดรธานี</p>
+        <h2 class="text-2xl font-bold text-brand-700">Loading Data...</h2>
+        <p class="text-slate-500 mt-2">กำลังเชื่อมต่อฐานข้อมูลโรงพยาบาลอุดรธานี</p>
     </div>
 
     <div id="errorScreen" class="hidden flex-col items-center justify-center min-h-screen text-center px-4">
@@ -450,76 +450,19 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_mX0O7D3PAl4uitg3V5apUECjXUZZPB4sM_B_3Ca7HnBdgJl9jPRiWgWKePrGRNdAFA/exec";
+
+        document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const assetId = urlParams.get('Asset_ID');
 
-            if (!assetId) {
+            if (assetId) {
+                fetchDataFromGAS(assetId);
+            } else {
                 showError("ไม่พบรหัสครุภัณฑ์ใน URL กรุณาระบุ Asset_ID");
-                return;
             }
-
-            try {
-                // 1. ดึงข้อมูลกลางจาก IndexedDB ก่อนผ่าน AppCore.getGlobalAssets()
-                let allAssets = [];
-                if (typeof AppCore !== 'undefined' && typeof AppCore.getGlobalAssets === 'function') {
-                    allAssets = await AppCore.getGlobalAssets(false);
-                }
-
-                // ค้นหาครุภัณฑ์ที่ตรงกับ AssetID จากรายการทั้งหมด
-                let matchedAsset = null;
-                if (Array.isArray(allAssets) && allAssets.length > 0) {
-                    matchedAsset = allAssets.find(item => {
-                        const id1 = String(item.AssetID || '').trim().toLowerCase();
-                        const id2 = String(item.Asset_Detail && item.Asset_Detail.AssetID || '').trim().toLowerCase();
-                        const target = String(assetId).trim().toLowerCase();
-                        return id1 === target || id2 === target;
-                    });
-                }
-
-                if (matchedAsset) {
-                    // รองรับทั้งโครงสร้างแบบ Flat หรือซ้อนใน Asset_Detail
-                    const assetData = matchedAsset.Asset_Detail ? {
-                        info: matchedAsset.Asset_Detail,
-                        calculations: {},
-                        logs: {
-                            images: (matchedAsset.Asset_Detail.Images || []).map(imgId => ({ IMAGE_ID: imgId, IMAGE_URL: convertDriveUrl(imgId) })),
-                            move: [],
-                            ma: [],
-                            pm: [],
-                            inspection: matchedAsset.Asset_Detail["Physical Asset Inspection"] || [],
-                            status: matchedAsset.Asset_Detail["Management & Condition Usage Status"] || []
-                        }
-                    } : matchedAsset;
-
-                    renderDashboard(assetData);
-                } else {
-                    // Fallback: หากไม่พบใน IndexedDB ให้ลองดึงตรงจาก API (ผ่าน AppCore หรือ fetch ตรงตามรูปแบบเดิม)
-                    console.warn("⚠️ ไม่พบข้อมูลใน IndexedDB กำลังดึงข้อมูลจาก API สด...");
-                    await fetchDirectFromAPI(assetId);
-                }
-            } catch (err) {
-                console.error("Initialization Error:", err);
-                showError("เกิดข้อผิดพลาดในการโหลดข้อมูลครุภัณฑ์");
-            }
-
             startClock();
         });
-
-        async function fetchDirectFromAPI(assetId) {
-            try {
-                const GAS_WEB_APP_URL = AppCore.API_URL || "https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec";
-                const targetUrl = `${GAS_WEB_APP_URL}?action=getAsset&Asset_ID=${encodeURIComponent(assetId)}`;
-                const response = await fetch(targetUrl, { method: 'GET', redirect: 'follow' });
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                
-                const result = await response.json();
-                renderDashboard(result);
-            } catch (err) {
-                console.error("Fetch API Error:", err);
-                showError("ดึงข้อมูลไม่สำเร็จ: ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
-            }
-        }
 
         function closeWindow() {
             window.close();
@@ -528,15 +471,29 @@
             }, 300);
         }
 
+        async function fetchDataFromGAS(assetId) {
+            try {
+                const targetUrl = `${GAS_WEB_APP_URL}?action=getAsset&Asset_ID=${encodeURIComponent(assetId)}`;
+                const response = await fetch(targetUrl, { method: 'GET', redirect: 'follow' });
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                
+                const result = await response.json();
+                renderDashboard(result);
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                showError("ดึงข้อมูลไม่สำเร็จ: ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
+            }
+        }
+
         function renderDashboard(response) {
-            if (!response || response.status === 'error' || (!response.data && !response.info)) {
+            if (!response || response.status === 'error' || !response.data) {
                 showError(response ? response.message : "ไม่พบชุดรหัสครุภัณฑ์ดังกล่าวในระบบฐานข้อมูล");
                 return;
             }
 
-            const asset = response.data ? (response.data.info || response.data) : (response.info || response);
-            const calc = (response.data && response.data.calculations) || response.calculations || {};
-            const logs = (response.data && response.data.logs) || response.logs || { move: [], ma: [], pm: [], images: [], inspection: [], status: asset["Management & Condition Usage Status"] || [] };
+            const asset = response.data.info;
+            const calc = response.data.calculations || {};
+            const logs = response.data.logs || { move: [], ma: [], pm: [], images: [], inspection: [], status: [] };
 
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('mainDashboard').style.display = 'block';
@@ -553,8 +510,8 @@
                 return '-';
             };
 
-            // ตาราง Mapping สำหรับแปลงรหัสสถานะเป็นชื่อภาษาไทย (Fallback กรณีไม่มี Map จาก Master)
-            const defaultStatusMap = (typeof AppCore !== 'undefined' && AppCore.masters && AppCore.masters.STATUS_MAP) || {
+            // ตาราง Map รหัสสถานะเป็นภาษาไทย (สำรองกรณี Backend ส่งมาเป็นรหัส)
+            const statusMap = {
                 "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
                 "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
                 "MAS-007": "ตัดเป็นสูญหาย", "MAS-008": "สำรอง/คลัง", "MAS-009": "แผนทดแทนประจำปี",
@@ -563,42 +520,41 @@
                 "COS-007": "พร้อมใช้งาน/รอเบิกจ่าย", "COS-008": "รอตรวจสอบสภาพ"
             };
 
-            const getStatusText = (statusId) => defaultStatusMap[statusId] || statusId;
+            const getStatusText = (statusId) => statusMap[statusId] || statusId;
 
-            // 1. ดึงสถานะ MA และ CO ล่าสุดจาก Status_Log (หากมีรายการใน logs.status ให้เรียงเอาตัวล่าสุดตาม St_Log_DateTime)
+            // 1. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดจาก logs.status โดยเรียงตาม St_Log_DateTime ล่าสุด
             let latestMaStatus = getVal('MaStatus', 'MaStatus');
             let latestCoStatus = getVal('CoStatus', 'CoStatus');
 
-            const statusList = logs.status || asset["Management & Condition Usage Status"] || [];
+            const statusList = logs.status || [];
             if (Array.isArray(statusList) && statusList.length > 0) {
-                // สมมติฐาน: เรียงลำดับตามวันที่ล่าสุด หรือเอาตัวแรกสุด/ท้ายสุดตามโครงสร้าง
+                // เรียงลำดับจากใหม่ไปเก่าตาม St_Log_DateTime
                 const sortedStatus = [...statusList].sort((a, b) => {
-                    return new Date(b.St_Log_DateTime || b.stLogDateTime || 0) - new Date(a.St_Log_DateTime || a.stLogDateTime || 0);
+                    return new Date(b.stLogDateTime || b.St_Log_DateTime || 0) - new Date(a.stLogDateTime || a.St_Log_DateTime || 0);
                 });
                 const latestLog = sortedStatus[0];
                 if (latestLog) {
-                    const rMa = latestLog.MaStatus_ID || latestLog.maStatus || '';
-                    const rCo = latestLog.CosStatus_ID || latestLog.coStatus || '';
-                    if (rMa) latestMaStatus = latestLog.MaStatus_Name || getStatusText(rMa);
-                    if (rCo) latestCoStatus = latestLog.CosStatus_Name || getStatusText(rCo);
+                    const rMa = latestLog.maStatus || latestLog.MaStatus_ID || '';
+                    const rCo = latestLog.coStatus || latestLog.CosStatus_ID || '';
+                    if (rMa) latestMaStatus = latestLog.maStatusName || latestLog.MaStatus_Name || getStatusText(rMa);
+                    if (rCo) latestCoStatus = latestLog.coStatusName || latestLog.CosStatus_Name || getStatusText(rCo);
                 }
             }
 
             safeSetText('valAssetID', getVal('AssetID', 'AssetID')); 
-            safeSetText('valAssetNameGroup', getVal('Asset_Type_Group', 'ชื่อรายการครุภัณฑ์')); 
-            safeSetText('valAssetName', getVal('Asset_Name & Detail', 'Detail'));
+            safeSetText('valAssetNameGroup', getVal('ชื่อรายการครุภัณฑ์', 'Asset_Group')); 
+            safeSetText('valAssetName', getVal('รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์', 'Detail'));
             safeSetText('valCode', getVal('AssetID', 'AssetID'));
-            safeSetText('valSerial', getVal('Serial', 'Searail'));
+            safeSetText('valSerial', getVal('Searail', 'Serial'));
             safeSetText('valMaStatus', latestMaStatus); 
             safeSetText('valCoStatus', latestCoStatus); 
 
-            // แสดงผลรูปภาพ
             const photoFrame = document.getElementById('photoFrame');
-            const imagesArray = logs.images || asset.Images || [];
-            if (imagesArray.length > 0) {
-                const imgUrl = typeof imagesArray[0] === 'string' ? convertDriveUrl(imagesArray[0]) : (imagesArray[0].IMAGE_URL || convertDriveUrl(imagesArray[0].IMAGE_ID));
-                photoFrame.innerHTML = `<img src="${imgUrl}" alt="รูปครุภัณฑ์" class="w-full h-full object-cover" onclick="openLightbox('${imgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
-            } else if (asset['Ass_Img'] && asset['Ass_Img'] !== '-') {
+            if (logs.images && logs.images.length > 0 && logs.images[0].IMAGE_URL) {
+                const directImgUrl = logs.images[0].IMAGE_URL;
+                photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
+            } 
+            else if (asset['Ass_Img'] && asset['Ass_Img'] !== '-') {
                 const directImgUrl = convertDriveUrl(asset['Ass_Img']);
                 photoFrame.innerHTML = `<img src="${directImgUrl}" alt="รูปครุภัณฑ์" class="w-full h-full object-cover" onclick="openLightbox('${directImgUrl}', 'ภาพครุภัณฑ์หลัก')" style="cursor: pointer;" onerror="this.outerHTML='<i class=&quot;fa-solid fa-image text-4xl text-slate-300&quot;></i>'">`;
             } else {
@@ -609,19 +565,17 @@
             const currentUrl = window.location.href;
             qrFrame.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}" alt="Scan QR Code" class="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform" onclick="openLightbox('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(currentUrl)}', 'QR Code สำหรับเข้าถึงข้อมูลครุภัณฑ์นี้')" title="คลิกเพื่อขยาย QR Code">`;
 
-            safeSetText('valCategory', getVal('Asset_Type_Group', 'หมวดครุภัณฑ์'));
-            safeSetText('valSpec', getVal('Asset_Name & Detail', 'Detail'));
+            safeSetText('valCategory', getVal('หมวดครุภัณฑ์', 'Asset_Group'));
+            safeSetText('valSpec', getVal('รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์', 'Detail'));
 
-            // Inspection Logs
-            const inspectionRecords = logs.inspection || asset["Physical Asset Inspection"] || [];
-            if (inspectionRecords.length > 0) {
-                const latestInsp = inspectionRecords[0]; 
+            if (logs.inspection && logs.inspection.length > 0) {
+                const latestInsp = logs.inspection[0]; 
                 
-                safeSetText('valInspYear', latestInsp["ปีที่ตรวจสอบ"] || latestInsp.inspectionYear || '-');
-                safeSetText('valInspDate', latestInsp["วัน/เวลา ที่ตรวจสอบ"] || latestInsp.inspectionDate || '-');
-                safeSetText('valInspDept', latestInsp["หน่วยงาน/กลุ่มงาน/สถานที่"] || latestInsp.deptName || '-');
+                safeSetText('valInspYear', latestInsp.inspectionYear || '-');
+                safeSetText('valInspDate', latestInsp.inspectionDate || '-');
+                safeSetText('valInspDept', latestInsp.deptName || '-');
                 
-                const gpsVal = latestInsp["ตำแหน่ง GPS"] || latestInsp.gps || '';
+                const gpsVal = latestInsp.gps || (latestInsp.raw && latestInsp.raw['Asset_Gps']);
                 const gpsEl = document.getElementById('valInspGps');
                 if (gpsEl) {
                     if (gpsVal && gpsVal !== '-' && gpsVal.trim() !== '') {
@@ -641,11 +595,25 @@
                     }
                 }
 
-                const usageRecords = logs.usage || asset["ข้อมูลการใช้งาน"] || [];
-                const latestUsage = usageRecords[0] || {};
-                safeSetText('valUsageJob', latestUsage["การใช้งาน"] || '-');
-                safeSetText('valUsagePriority', latestUsage["กลุ่มผู้ใช้งาน"] || '-');
-                safeSetText('valUsageShift', latestUsage["ช่วงเวลาที่ใช้งาน"] || '-');
+                const shiftMap = { "1": "เช้า", "2": "บ่าย", "3": "ดึก" };
+                const priorityMap = {
+                    "PIO-001": "ตรวจรักษา (แพทย์)",
+                    "PIO-002": "ข้อมูลผู้ป่วย (พยาบาล)",
+                    "PIO-003": "บริการ/การเงิน/ห้องบัตร/ห้องยา/Lab",
+                    "PIO-004": "งานเอกสาร/ธุรการ",
+                    "PIO-005": "บริการทั่วไป/ซ่อมบำรุง/ช่างต่างๆ/โรงรถ"
+                };
+
+                let pVal = latestInsp.priorityName || latestInsp.priorityId || (latestInsp.raw && latestInsp.raw['PIORITY_ID']) || '-';
+                let sVal = latestInsp.shiftName || latestInsp.shiftId || (latestInsp.raw && latestInsp.raw['Shift_Work']) || '-';
+                let jVal = latestInsp.jobType || (latestInsp.raw && latestInsp.raw['Jobe_Type_ID']) || '-';
+
+                let mappedPriority = pVal !== '-' ? String(pVal).split(',').map(item => priorityMap[item.trim()] || item.trim()).join(', ') : '-';
+                let mappedShift = sVal !== '-' ? String(sVal).split(',').map(item => shiftMap[item.trim()] || item.trim()).join(', ') : '-';
+
+                safeSetText('valUsageJob', jVal);
+                safeSetText('valUsagePriority', mappedPriority);
+                safeSetText('valUsageShift', mappedShift);
             } else {
                 safeSetText('valInspYear', '-');
                 safeSetText('valInspDate', '-');
@@ -657,10 +625,10 @@
                 if (gpsEl) gpsEl.textContent = '-';
             }
 
-            safeSetText('valReceiveDate', getVal('วันที่รับเข้า', 'Date_In'));
+            safeSetText('valReceiveDate', `${formatDate(getVal('วันที่รับเข้า', 'Date_In'))} (ปี: ${getVal('ปีที่รับเข้า', 'Year_In')})`);
             safeSetText('valFund', asset['แหล่งเงินที่ใช้จัดซื้อ'] || '-');
             const finalPrice = getVal('ราคา', 'Pric');
-            safeSetText('valPrice', finalPrice !== '-' ? Number(String(finalPrice).replace(/[^0-9.]/g, '')).toLocaleString() + ' ฿' : '-');
+            safeSetText('valPrice', finalPrice !== '-' ? Number(finalPrice).toLocaleString() + ' ฿' : '-');
             safeSetText('valWarranty', asset['Varanty'] || '-'); 
 
             safeSetText('valTechIP', asset['IPAddress'] || '-');
@@ -727,18 +695,20 @@
             safeSetText('kpiMA', maCount + ' ครั้ง');
             safeSetText('valTotalRepairCost', 'มูลค่าซ่อมสะสม: ' + totalRepairCost.toLocaleString() + ' ฿');
 
-            // 2. แสดงผล Management & Condition Usage Status (แสดงรายการ Status_Log ทั้งหมดเป็นตาราง Timeline)
+            // 2. Render Management Status & Condition Usage (แสดงประวัติ Status_Log ทั้งหมดในรูปแบบตาราง Timeline)
             const timelineStatusManagement = document.getElementById('timelineStatusManagement');
             if (timelineStatusManagement) {
-                if (statusList && statusList.length > 0) {
-                    timelineStatusManagement.innerHTML = statusList.map(item => {
-                        const dateTimeStr = item.St_Log_DateTime || item.stLogDateTime || '-';
-                        const rawMa = item.MaStatus_ID || item.maStatus || '';
-                        const rawCo = item.CosStatus_ID || item.coStatus || '';
-                        const maStat = item.MaStatus_Name || getStatusText(rawMa) || rawMa || '-';
-                        const coStat = item.CosStatus_Name || getStatusText(rawCo) || rawCo || '-';
-                        const deptNameVal = item.DEPT_ID || item.deptName || '-';
-                        const gpsVal = item.GPS || item.gps || '-';
+                if (logs.status && logs.status.length > 0) {
+                    timelineStatusManagement.innerHTML = logs.status.map(item => {
+                        const dateTimeStr = item.stLogDateTime || item.St_Log_DateTime || '-';
+                        
+                        const rawMa = item.maStatus || item.MaStatus_ID || '';
+                        const rawCo = item.coStatus || item.CosStatus_ID || '';
+                        const maStat = item.maStatusName || item.MaStatus_Name || statusMap[rawMa] || rawMa || '-';
+                        const coStat = item.coStatusName || item.CosStatus_Name || statusMap[rawCo] || rawCo || '-';
+                        
+                        const gpsVal = item.gps || item.GPS || '-';
+                        const deptNameVal = item.deptName || '-';
 
                         let gpsHtml = '-';
                         if (gpsVal && gpsVal !== '-' && String(gpsVal).trim() !== '') {
@@ -763,12 +733,52 @@
                 }
             }
 
-            // Gallery
+            const timelineMovement = document.getElementById('timelineMovement');
+            if (timelineMovement) {
+                if (logs.move && logs.move.length > 0) {
+                    timelineMovement.innerHTML = logs.move.map(item => `
+                        <div class="timeline-item">
+                            <span class="badge mb-2 bg-slate-600">${formatDate(item.date || item['วันที่ย้าย'])}</span>
+                            <div class="font-semibold text-slate-700 mb-1 text-sm">จาก: ${item.fromLocation || item['จากหน่วยงาน'] || '-'} <br><span class="text-brand-600">ไปยัง: ${item.toLocation || item['ไปหน่วยงาน'] || '-'}</span></div>
+                            <div class="text-xs text-slate-500">ผู้ดำเนินการ: ${item.operator || item['ผู้บันทึก'] || '-'} ${item.note || item['หมายเหตุ'] ? `<br><span class="italic text-slate-400">(${item.note || item['หมายเหตุ']})</span>` : ''}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    timelineMovement.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติการย้ายสถานที่</p>';
+                }
+            }
+
+            const timelineMA = document.getElementById('timelineMA');
+            if (timelineMA) {
+                const pmRecords = logs.pm || [];
+                const combinedMA = [
+                    ...maRecords.map(r => ({ ...r, logType: 'ซ่อมบำรุง', color: 'bg-amber-500' })),
+                    ...pmRecords.map(r => ({ ...r, logType: 'PM', color: 'bg-emerald-500' }))
+                ];
+
+                if (combinedMA.length > 0) {
+                    timelineMA.innerHTML = combinedMA.map(item => `
+                        <div class="timeline-item">
+                            <span class="badge mb-2 ${item.color}">
+                                ${formatDate(item.date || item['วันที่ดำเนินการ'] || item['วันที่'])} [${item.logType}]
+                            </span>
+                            <div class="font-semibold text-slate-700 mb-1 text-sm line-clamp-2" title="${item.details || item['อาการที่แจ้ง'] || item['หมายเหตุ'] || '-'}">${item.details || item['อาการที่แจ้ง'] || item['หมายเหตุ'] || '-'}</div>
+                            <div class="text-xs text-slate-500">
+                                ผู้ดำเนินการ: ${item.technician || item['ผู้ดำเนินการ'] || '-'} <br>
+                                ค่าใช้จ่าย: <span class="font-medium text-slate-700">${(Number(item.cost || item['ค่าใช้จ่าย'] || item['ราคา'] || 0)).toLocaleString()} ฿</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    timelineMA.innerHTML = '<p class="text-sm text-slate-400 italic">ไม่มีประวัติซ่อมบำรุงหรือ PM</p>';
+                }
+            }
+
             const galleryContainer = document.getElementById('galleryContainer');
             if (galleryContainer) {
-                if (imagesArray.length > 0) {
-                    galleryContainer.innerHTML = imagesArray.map((item, index) => {
-                        const directUrl = typeof item === 'string' ? convertDriveUrl(item) : (item.IMAGE_URL || convertDriveUrl(item.IMAGE_ID));
+                if (logs.images && logs.images.length > 0) {
+                    galleryContainer.innerHTML = logs.images.map((item, index) => {
+                        const directUrl = item.IMAGE_URL || convertDriveUrl(item.IMAGE_ID);
                         return `
                             <div class="aspect-square rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-brand-400 shadow-sm transition-all hover:scale-105" onclick="openLightbox('${directUrl}', 'ภาพประวัติแนบเพิ่มเติมชิ้นที่ ${index + 1}')">
                                 <img src="${directUrl}" alt="Log Image" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=&quot;w-full h-full bg-slate-100 flex items-center justify-center text-slate-400&quot;><i class=&quot;fa-solid fa-image-broken&quot;></i></div>'">
@@ -790,14 +800,25 @@
 
         function convertDriveUrl(url) {
             if (!url) return '';
-            if (String(url).includes('drive.google.com')) {
-                const parts = String(url).split(/id=|\/d\//);
+            if (url.includes('drive.google.com')) {
+                const parts = url.split(/id=|\/d\//);
                 if (parts.length > 1) {
                     const id = parts[1].split(/[\/\?&]/)[0];
                     return `https://docs.google.com/uc?export=view&id=${id}`;
                 }
             }
             return url;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === '-') return '-';
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch (e) {
+                return dateStr;
+            }
         }
 
         function startClock() {
@@ -815,10 +836,8 @@
         }
 
         function showError(msg) {
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) loadingScreen.style.display = 'none';
-            const mainDashboard = document.getElementById('mainDashboard');
-            if (mainDashboard) mainDashboard.style.display = 'none';
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('mainDashboard').style.display = 'none';
             const errorScreen = document.getElementById('errorScreen');
             if (errorScreen) {
                 errorScreen.classList.remove('hidden');
