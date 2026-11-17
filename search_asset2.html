@@ -838,19 +838,19 @@
                 }
                 document.getElementById('modalAssetImg').src = imgUrl;
 
-                // ตรวจสอบและแมปสถานะ MaStatus_Name และ CosStatus_Name พร้อมป้องกันค่าว่าง "", "-"
+                // ตรวจสอบและแสดงสถานะ MaStatus_Name และ CosStatus_Name อย่างปลอดภัย
                 const statusContainer = document.getElementById('modalStatusBadges');
                 statusContainer.innerHTML = '';
                 
-                // ตรวจสอบ MaStatus_Name หรือ MaStatus
+                // ดึงค่าสถานะ MA (รองรับทั้งฟิลด์ใหม่ MaStatus_Name และฟิลด์เก่า MaStatus)
                 let maText = detail.MaStatus_Name || detail.MaStatus || "";
-                if (maText && maText !== "-" && maText.toString().trim() !== "") {
+                if (maText && maText !== "-" && String(maText).trim() !== "") {
                     statusContainer.innerHTML += `<span class="badge bg-primary rounded-pill px-3 py-2"><i class="fa-solid fa-wrench me-1"></i>สถานะ MA: ${maText}</span>`;
                 }
 
-                // ตรวจสอบ CosStatus_Name หรือ CoStatus
+                // ดึงค่าสถานะ CO (รองรับทั้งฟิลด์ใหม่ CosStatus_Name และฟิลด์เก่า CoStatus)
                 let coText = detail.CosStatus_Name || detail.CoStatus || "";
-                if (coText && coText !== "-" && coText.toString().trim() !== "") {
+                if (coText && coText !== "-" && String(coText).trim() !== "") {
                     statusContainer.innerHTML += `<span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check-circle me-1"></i>สถานะ CO: ${coText}</span>`;
                 }
 
