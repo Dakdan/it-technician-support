@@ -510,7 +510,7 @@
                 return '-';
             };
 
-            // 1. ตาราง Map รหัสสถานะเป็นภาษาไทย
+           // 1. ตาราง Map รหัสสถานะเป็นภาษาไทย
             const statusMap = {
                 "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
                 "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
@@ -522,7 +522,7 @@
 
             const getStatusText = (statusId) => statusMap[statusId] || statusId;
 
-            // 2. ค่าตั้งต้นจากข้อมูลหลัก (info)
+            // 2. ค่าตั้งต้นกรณีไม่มีข้อมูล
             let latestMaStatus = getVal('MaStatus', 'MaStatus') || '-';
             let latestCoStatus = getVal('CoStatus', 'CoStatus') || '-';
 
@@ -535,26 +535,22 @@
                     return timeB - timeA;
                 });
 
-                // วนหาค่าตัวแรกสุดที่มีข้อมูลจริง (ข้ามค่าว่างหรือขีด "-") เพื่อเอามาแสดงที่ส่วนหัว
-                for (let item of sortedStatus) {
-                    const rMa = item.maStatus || item.MaStatus_ID || item.MAStatus || '';
-                    const rCo = item.coStatus || item.CosStatus_ID || item.CoStatus || '';
+                // 4. หยิบ "แถวแรกสุด (รายการล่าสุด)" มาใช้เป็นชุดเดียวกันทันที
+                const topItem = sortedStatus[0];
+                if (topItem) {
+                    const rMa = topItem.maStatus || topItem.MaStatus_ID || topItem.MAStatus || '';
+                    const rCo = topItem.coStatus || topItem.CosStatus_ID || topItem.CoStatus || '';
 
-                    if (latestMaStatus === '-' && rMa && rMa !== '-') {
-                        latestMaStatus = item.maStatusName || item.MaStatus_Name || getStatusText(rMa);
+                    if (rMa && rMa !== '-') {
+                        latestMaStatus = topItem.maStatusName || topItem.MaStatus_Name || getStatusText(rMa);
                     }
-                    if (latestCoStatus === '-' && rCo && rCo !== '-') {
-                        latestCoStatus = item.coStatusName || item.CosStatus_Name || getStatusText(rCo);
-                    }
-
-                    // ถ้าเจอครบทั้งสองตัวแล้ว ให้หยุดวนลูปทันที
-                    if (latestMaStatus !== '-' && latestCoStatus !== '-') {
-                        break;
+                    if (rCo && rCo !== '-') {
+                        latestCoStatus = topItem.coStatusName || topItem.CosStatus_Name || getStatusText(rCo);
                     }
                 }
             }
 
-            // 4. แสดงผลข้อมูลทั้งหมดลงหน้าจอ
+            // 5. นำไปแสดงผลที่หน้าจอ
             safeSetText('valAssetID', getVal('AssetID', 'AssetID')); 
             safeSetText('valAssetNameGroup', getVal('ชื่อรายการครุภัณฑ์', 'Asset_Group')); 
             safeSetText('valAssetName', getVal('รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์', 'Detail'));
