@@ -510,8 +510,7 @@
                 return '-';
             };
 
-            // ตาราง Map รหัสสถานะเป็นภาษาไทย (สำรองกรณี Backend ส่งมาเป็นรหัส)
-            
+            // 1. ตาราง Map รหัสสถานะเป็นภาษาไทย
             const statusMap = {
                 "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
                 "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
@@ -523,75 +522,46 @@
 
             const getStatusText = (statusId) => statusMap[statusId] || statusId;
 
-            // 2. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดแบบปลอดภัย (ประกาศ statusList ครั้งเดียว)
-            let latestMaStatus = getVal('MaStatus', 'MaStatus');
-            let latestCoStatus = getVal('CoStatus', 'CoStatus');
+            // 2. ค่าตั้งต้นจากข้อมูลหลัก (info)
+            let latestMaStatus = getVal('MaStatus', 'MaStatus') || '-';
+            let latestCoStatus = getVal('CoStatus', 'CoStatus') || '-';
 
+            // 3. ดึงประวัติมาเรียงลำดับวันที่จากล่าสุดไปเก่าสุด
             const statusList = logs.status || [];
             if (Array.isArray(statusList) && statusList.length > 0) {
-                // เรียงลำดับจากใหม่ไปเก่าอย่างปลอดภัย ดักจับค่าว่างหรือขีดกลาง
                 const sortedStatus = [...statusList].sort((a, b) => {
-                    const dateAStr = a.stLogDateTime || a.St_Log_DateTime || '';
-                    const dateBStr = b.stLogDateTime || b.St_Log_DateTime || '';
-
-                    if (!dateAStr || dateAStr === '-') return 1;
-                    if (!dateBStr || dateBStr === '-') return -1;
-
-                    const timeA = new Date(dateAStr).getTime();
-                    const timeB = new Date(dateBStr).getTime();
-
-                    if (isNaN(timeA)) return 1;
-                    if (isNaN(timeB)) return -1;
-
+                    const timeA = new Date(a.stLogDateTime || a.St_Log_DateTime || 0).getTime();
+                    const timeB = new Date(b.stLogDateTime || b.St_Log_DateTime || 0).getTime();
                     return timeB - timeA;
                 });
 
-                // วนหาค่า MA Status ล่าสุดที่มีข้อมูลจริง
+                // วนหาค่าตัวแรกสุดที่มีข้อมูลจริง (ข้ามค่าว่างหรือขีด "-") เพื่อเอามาแสดงที่ส่วนหัว
                 for (let item of sortedStatus) {
                     const rMa = item.maStatus || item.MaStatus_ID || item.MAStatus || '';
-                    const maName = item.maStatusName || item.MaStatus_Name || getStatusText(rMa);
-                    if (rMa && rMa !== '-' && String(rMa).trim() !== '') {
-                        latestMaStatus = maName;
-                        break;
-                    }
-                }
-
-                // วนหาค่า CO Status ล่าสุดที่มีข้อมูลจริง
-                for (let item of sortedStatus) {
                     const rCo = item.coStatus || item.CosStatus_ID || item.CoStatus || '';
-                    const coName = item.coStatusName || item.CosStatus_Name || getStatusText(rCo);
-                    if (rCo && rCo !== '-' && String(rCo).trim() !== '') {
-                        latestCoStatus = coName;
+
+                    if (latestMaStatus === '-' && rMa && rMa !== '-') {
+                        latestMaStatus = item.maStatusName || item.MaStatus_Name || getStatusText(rMa);
+                    }
+                    if (latestCoStatus === '-' && rCo && rCo !== '-') {
+                        latestCoStatus = item.coStatusName || item.CosStatus_Name || getStatusText(rCo);
+                    }
+
+                    // ถ้าเจอครบทั้งสองตัวแล้ว ให้หยุดวนลูปทันที
+                    if (latestMaStatus !== '-' && latestCoStatus !== '-') {
                         break;
                     }
                 }
             }
 
-            safeSetText('valMaStatus', latestMaStatus); 
-            safeSetText('valCoStatus', latestCoStatus);
-
-            const statusList = logs.status || [];
-            if (Array.isArray(statusList) && statusList.length > 0) {
-                // เรียงลำดับจากใหม่ไปเก่าตาม St_Log_DateTime
-                const sortedStatus = [...statusList].sort((a, b) => {
-                    return new Date(b.stLogDateTime || b.St_Log_DateTime || 0) - new Date(a.stLogDateTime || a.St_Log_DateTime || 0);
-                });
-                const latestLog = sortedStatus[0];
-                if (latestLog) {
-                    const rMa = latestLog.maStatus || latestLog.MaStatus_ID || '';
-                    const rCo = latestLog.coStatus || latestLog.CosStatus_ID || '';
-                    if (rMa) latestMaStatus = latestLog.maStatusName || latestLog.MaStatus_Name || getStatusText(rMa);
-                    if (rCo) latestCoStatus = latestLog.coStatusName || latestLog.CosStatus_Name || getStatusText(rCo);
-                }
-            }
-
+            // 4. แสดงผลข้อมูลทั้งหมดลงหน้าจอ
             safeSetText('valAssetID', getVal('AssetID', 'AssetID')); 
             safeSetText('valAssetNameGroup', getVal('ชื่อรายการครุภัณฑ์', 'Asset_Group')); 
             safeSetText('valAssetName', getVal('รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์', 'Detail'));
             safeSetText('valCode', getVal('AssetID', 'AssetID'));
             safeSetText('valSerial', getVal('Searail', 'Serial'));
             safeSetText('valMaStatus', latestMaStatus); 
-            safeSetText('valCoStatus', latestCoStatus); 
+            safeSetText('valCoStatus', latestCoStatus);
 
             const photoFrame = document.getElementById('photoFrame');
             if (logs.images && logs.images.length > 0 && logs.images[0].IMAGE_URL) {
