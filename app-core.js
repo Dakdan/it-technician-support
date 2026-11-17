@@ -28,6 +28,13 @@ function openModalSafely(modalId, retryCount = 0) {
 const AppCore = {
   API_URL: 'https://script.google.com/macros/s/AKfycbxW9EpEUH8eHnPlVGphf6n7qU0ox-VGj33nwpDgJ9hByuPQpHW2-He9ErqO4F8XNWvFZA/exec',
 
+  // เก็บค่า Master Data ฝั่ง Client (สำหรับแปลงค่าแบบ Offline)
+  masters: {
+    STATUS_MAP: {},
+    PIORITY_MAP: {},
+    SHIFT_MAP: {}
+  },
+
   getGlobalAssets: async function (forceRefresh = false) {
     // 🟢 เช็กและเริ่มการทำงานของ IndexedDB อย่างปลอดภัย
     if (typeof idbApp !== 'undefined' && typeof idbApp.init === 'function') {
@@ -69,6 +76,13 @@ const AppCore = {
 
       if (result && (result.status === 'success' || result.success) && Array.isArray(result.data)) {
         console.log(`✅ [AppCore] ดึงข้อมูลสำเร็จ ทั้งหมด ${result.totalCount || result.data.length} รายการ`);
+        
+        // 📥 บันทึกค่า Masters (ถ้ามีส่งมาจาก code.gs)
+        if (result.masters) {
+          this.masters = result.masters;
+          console.log('📦 [AppCore] อัปเดต Master Data สำเร็จ');
+        }
+
         if (typeof idbApp !== 'undefined' && typeof idbApp.saveAssets === 'function') {
           await idbApp.saveAssets(result.data).catch(err => console.warn('บันทึก IDB ล้มเหลว:', err));
         }
@@ -187,10 +201,10 @@ function setupInstallButton() {
               Swal.fire({
                 title: 'วิธีติดตั้งบน iPhone / iPad',
                 html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                         1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
-                         2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
-                         3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
-                       </div>`,
+                       1. เปิดด้วยเบราว์เซอร์ <b>Safari</b><br>
+                       2. กดปุ่ม <b>แชร์ (Share)</b> ⎋ ด้านล่าง<br>
+                       3. เลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b>
+                      </div>`,
                 icon: 'info',
                 confirmButtonColor: '#d63384'
               });
@@ -214,9 +228,9 @@ function setupInstallButton() {
               Swal.fire({
                 title: 'วิธีติดตั้งบน Android',
                 html: `<div style="text-align:left; font-size:0.95rem; line-height:1.7;">
-                         1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
-                         2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
-                       </div>`,
+                       1. กดปุ่ม <b>เมนู (จุด 3 จุด ⋮)</b> มุมขวาบนของ Chrome<br>
+                       2. เลือก <b>"ติดตั้งแอป" (Install app)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
+                      </div>`,
                 icon: 'info',
                 confirmButtonColor: '#d63384'
               });
