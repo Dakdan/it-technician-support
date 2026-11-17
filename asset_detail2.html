@@ -511,6 +511,7 @@
             };
 
             // ตาราง Map รหัสสถานะเป็นภาษาไทย (สำรองกรณี Backend ส่งมาเป็นรหัส)
+            // ตาราง Map รหัสสถานะเป็นภาษาไทย
             const statusMap = {
                 "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
                 "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
@@ -522,9 +523,40 @@
 
             const getStatusText = (statusId) => statusMap[statusId] || statusId;
 
-            // 1. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดจาก logs.status โดยเรียงตาม St_Log_DateTime ล่าสุด
+            // 1. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดจาก logs.status แบบค้นหาแถวที่มีข้อมูลจริง
             let latestMaStatus = getVal('MaStatus', 'MaStatus');
             let latestCoStatus = getVal('CoStatus', 'CoStatus');
+
+            const statusList = logs.status || [];
+            if (Array.isArray(statusList) && statusList.length > 0) {
+                // เรียงลำดับจากใหม่ไปเก่าตามวันเวลา
+                const sortedStatus = [...statusList].sort((a, b) => {
+                    return new Date(b.stLogDateTime || b.St_Log_DateTime || 0) - new Date(a.stLogDateTime || a.St_Log_DateTime || 0);
+                });
+
+                // วนหาค่า MA Status ล่าสุดที่มีข้อมูล
+                for (let item of sortedStatus) {
+                    const rMa = item.maStatus || item.MaStatus_ID || item.MAStatus || '';
+                    const maName = item.maStatusName || item.MaStatus_Name || getStatusText(rMa);
+                    if (rMa && rMa !== '-' && String(rMa).trim() !== '') {
+                        latestMaStatus = maName;
+                        break;
+                    }
+                }
+
+                // วนหาค่า CO Status ล่าสุดที่มีข้อมูล
+                for (let item of sortedStatus) {
+                    const rCo = item.coStatus || item.CosStatus_ID || item.CoStatus || '';
+                    const coName = item.coStatusName || item.CosStatus_Name || getStatusText(rCo);
+                    if (rCo && rCo !== '-' && String(rCo).trim() !== '') {
+                        latestCoStatus = coName;
+                        break;
+                    }
+                }
+            }
+
+            safeSetText('valMaStatus', latestMaStatus); 
+            safeSetText('valCoStatus', latestCoStatus);
 
             const statusList = logs.status || [];
             if (Array.isArray(statusList) && statusList.length > 0) {
