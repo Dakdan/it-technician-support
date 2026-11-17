@@ -511,7 +511,7 @@
             };
 
             // ตาราง Map รหัสสถานะเป็นภาษาไทย (สำรองกรณี Backend ส่งมาเป็นรหัส)
-            // 1. ตาราง Map รหัสสถานะเป็นภาษาไทย
+            
             const statusMap = {
                 "MAS-001": "อยู่ระหว่างจัดซื้อ", "MAS-002": "รับเข้าคลังแล้ว", "MAS-003": "เบิกจ่ายแล้ว",
                 "MAS-004": "รอส่งคืนพัสดุ", "MAS-005": "จำหน่ายสำเร็จ", "MAS-006": "ส่งคืนพัสดุ",
@@ -523,13 +523,13 @@
 
             const getStatusText = (statusId) => statusMap[statusId] || statusId;
 
-            // 2. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดแบบปลอดภัย (เผื่อแถวพอยต์เตอร์ล่าสุดไม่มีข้อมูล MA)
+            // 2. ดึงสถานะใช้งาน (MA) และสถานะครอบครอง (CO) ล่าสุดแบบปลอดภัย (ประกาศ statusList ครั้งเดียว)
             let latestMaStatus = getVal('MaStatus', 'MaStatus');
             let latestCoStatus = getVal('CoStatus', 'CoStatus');
 
             const statusList = logs.status || [];
             if (Array.isArray(statusList) && statusList.length > 0) {
-                // เรียงลำดับจากใหม่ไปเก่าตามวันที่และเวลาอย่างปลอดภัย (ดักจับค่าว่างหรือขีดกลาง)
+                // เรียงลำดับจากใหม่ไปเก่าอย่างปลอดภัย ดักจับค่าว่างหรือขีดกลาง
                 const sortedStatus = [...statusList].sort((a, b) => {
                     const dateAStr = a.stLogDateTime || a.St_Log_DateTime || '';
                     const dateBStr = b.stLogDateTime || b.St_Log_DateTime || '';
