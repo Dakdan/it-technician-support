@@ -414,7 +414,7 @@
         </div>
     </div>
 
-    <!-- Modal: Asset Detail -->
+   <!-- Modal: Asset Detail -->
     <div class="modal fade" id="assetDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
@@ -425,7 +425,7 @@
                 <div class="modal-body p-4">
                     <!-- Image with click to view full size -->
                     <div class="text-center mb-3">
-                        <img id="modalAssetImg" src="https://placehold.co/400x300/e2e8f0/475569?text=No+Image" alt="Asset Image" class="img-fluid rounded-3 shadow-sm" style="max-height: 250px; object-fit: contain; cursor: pointer;" title="คลิกเพื่อขยายรูปภาพ" onclick="openImageViewer()">
+                        <img id="modalAssetImg" src="https://placehold.co/400x300/e2e8f0/475569?text=No+Image" alt="Asset Image" class="img-fluid rounded-3 shadow-sm border" style="max-height: 250px; object-fit: contain; cursor: pointer;" title="คลิกเพื่อขยายรูปภาพ" onclick="openImageViewer()">
                         <div class="small text-muted mt-1" style="font-size: 0.8rem;"><i class="fa-solid fa-magnifying-glass-plus me-1"></i>คลิกที่รูปเพื่อขยายใหญ่</div>
                     </div>
                     
@@ -434,44 +434,89 @@
                     
                     <!-- ส่วนที่ 1: ข้อมูลพื้นฐาน -->
                     <div class="modal-section-title"><i class="fa-solid fa-box"></i> ข้อมูลพื้นฐาน</div>
-                    <div class="card border-0 bg-light rounded-3 p-3 mb-3">
-                        <div class="row g-2 text-start">
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻รหัสครุภัณฑ์(Asset ID):</span> <div class="fw-bold text-pink-dark" id="modalFieldAssetID">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻Serial Number:</span> <div class="fw-bold text-dark" id="modalFieldSerial">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻ประเภท/กลุ่ม:</span> <div class="fw-bold text-dark" id="modalFieldType">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻อายุการใช้งาน:</span> <div class="fw-bold text-dark" id="modalFieldAge">-</div></div>
-                            <div class="col-12"><span class="text-muted small">🔻ชื่อรายการ/รายละเอียด:</span> <div class="fw-bold text-dark" id="modalFieldName">-</div></div>
-                            <div class="col-6"><span class="text-muted small">🔻แหล่งข้อมูล (Source):</span> <div class="fw-bold text-dark" id="modalFieldSource">-</div></div>
-                            <div class="col-3"><span class="text-muted small">🔻NO:</span> <div class="fw-bold text-dark" id="modalFieldNO">-</div></div>
-                            <div class="col-3"><span class="text-muted small">🔻NOID:</span> <div class="fw-bold text-dark" id="modalFieldNOID">-</div></div>
+                    <div class="card border-0 bg-light rounded-3 p-3 mb-3 shadow-sm">
+                        <div class="row g-3 text-start">
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻รหัสครุภัณฑ์ (Asset ID):</span>
+                                <div class="fw-bold text-pink-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldAssetID">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻Serial Number:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldSerial">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻ประเภท/กลุ่ม:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldType">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻อายุการใช้งาน:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldAge">-</div>
+                            </div>
+                            <div class="col-12">
+                                <span class="text-muted small d-block mb-1">🔻ชื่อรายการ/รายละเอียด:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldName">-</div>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted small d-block mb-1">🔻แหล่งข้อมูล (Source):</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldSource">-</div>
+                            </div>
+                            <div class="col-3">
+                                <span class="text-muted small d-block mb-1">🔻NO:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldNO">-</div>
+                            </div>
+                            <div class="col-3">
+                                <span class="text-muted small d-block mb-1">🔻NOID:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldNOID">-</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ส่วนที่ 2: ข้อมูลการตรวจสอบประจำปี -->
                     <div class="modal-section-title"><i class="fa-solid fa-clipboard-check"></i> ข้อมูลการตรวจสอบ (Physical Asset Inspection)</div>
-                    <div class="card border-0 bg-light rounded-3 p-3 mb-3">
-                        <div class="row g-2 text-start">
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻ปีที่ตรวจสอบ:</span> <div class="fw-bold text-dark" id="modalFieldInspectYear">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻วัน/เวลา ที่ตรวจสอบ:</span> <div class="fw-bold text-dark" id="modalFieldInspectDate">-</div></div>
-                            <div class="col-12"><span class="text-muted small">🔻หน่วยงาน/กลุ่มงาน/สถานที่:</span> <div class="fw-bold text-dark" id="modalFieldInspectDept">-</div></div>
+                    <div class="card border-0 bg-light rounded-3 p-3 mb-3 shadow-sm">
+                        <div class="row g-3 text-start">
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻ปีที่ตรวจสอบ:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldInspectYear">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻วัน/เวลา ที่ตรวจสอบ:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldInspectDate">-</div>
+                            </div>
+                            <div class="col-12">
+                                <span class="text-muted small d-block mb-1">🔻หน่วยงาน/กลุ่มงาน/สถานที่:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldInspectDept">-</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ส่วนที่ 3: ข้อมูลการใช้งาน -->
                     <div class="modal-section-title"><i class="fa-solid fa-users-gear"></i> ข้อมูลการใช้งาน</div>
-                    <div class="card border-0 bg-light rounded-3 p-3 mb-3">
-                        <div class="row g-2 text-start">
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻ระบบงาน:</span> <div class="fw-bold text-dark" id="modalFieldUsage">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻กลุ่มผู้ใช้งาน:</span> <div class="fw-bold text-dark" id="modalFieldPriority">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻ช่วงเวลาที่ใช้งาน:</span> <div class="fw-bold text-dark" id="modalFieldShift">-</div></div>
-                            <div class="col-12 col-md-6"><span class="text-muted small">🔻NOTE:</span> <div class="fw-bold text-dark" id="modalFieldNote2">-</div></div>
+                    <div class="card border-0 bg-light rounded-3 p-3 mb-3 shadow-sm">
+                        <div class="row g-3 text-start">
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻ระบบงาน:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldUsage">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻กลุ่มผู้ใช้งาน:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldPriority">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻ช่วงเวลาที่ใช้งาน:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldShift">-</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted small d-block mb-1">🔻NOTE:</span>
+                                <div class="fw-bold text-dark p-2 bg-white rounded-2 border shadow-sm" id="modalFieldNote2">-</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- GPS Google Maps Embed -->
                     <div id="modalGpsContainer" class="d-none mt-3">
                         <div class="modal-section-title"><i class="fa-solid fa-location-dot"></i> ตำแหน่ง GPS (ล่าสุด)</div>
-                        <div id="modalGpsMap" class="rounded-3 overflow-hidden shadow-sm" style="height: 250px; width: 100%;"></div>
+                        <div id="modalGpsMap" class="rounded-3 overflow-hidden shadow-sm border" style="height: 250px; width: 100%;"></div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 justify-content-center gap-2 bg-light flex-wrap">
