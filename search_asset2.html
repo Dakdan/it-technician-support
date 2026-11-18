@@ -371,6 +371,42 @@
             .org-title { font-size: 1.1rem; }
             .search-container { padding: 10px 15px; }
         }
+
+        /* สไตล์สำหรับการจัดวางและตกแต่ง Footer ให้มีกรอบและพื้นหลัง */
+        .app-footer-box {
+            width: 100%;
+            padding: 10px 15px;
+            margin-top: 2rem;
+            box-sizing: border-box;
+        }
+    
+        .footer-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f5 100%); /* พื้นหลังโทนสีชมพูอ่อนละมุน เข้ากับธีม */
+            border: 1px solid rgba(255, 133, 162, 0.3); /* ขอบสีชมพูอ่อนๆ แบบนูน */
+            border-radius: 14px; /* มุมโค้งมน */
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.08); /* เงาให้ดูลอยนูนขึ้นมา */
+        }
+    
+        .footer-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.6;
+            margin: 0;
+        }
+    
+        /* หากต้องการให้ Footer ตรึงติดอยู่ล่างสุดของหน้าจอเสมอ (ไม่ให้ลอยตามเนื้อหาถ้าน้อยเกินไป) */
+        @media screen and (min-height: 600px) {
+            .app-footer-box {
+                position: relative;
+                bottom: 0;
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -641,12 +677,14 @@
             </div>
         </div>
     </div>
- <footer class="mt-4 sm:mt-8 text-center p-4 sm:p-6 no-print border-t border-slate-100 bg-slate-50/50">
-    <p class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-loose">
-        &copy;พัฒนาโดย ทีม 👷 ช่างไอที กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์<br>
-        โรงพยาบาลอุดรธานี • IT MANEGMENT & SUPPORT SYSTEMS
-    </p>
-</footer>
+    <footer class="app-footer-box no-print">
+        <div class="footer-card">
+            <p class="footer-text">
+                &copy; พัฒนาโดย ทีม 👷 ช่างไอที กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์<br>
+                <strong>โรงพยาบาลอุดรธานี</strong> • IT MANAGEMENT & SUPPORT SYSTEMS
+            </p>
+        </div>
+    </footer>
     <!-- JavaScript Modules -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="indexeddb.js"></script>
