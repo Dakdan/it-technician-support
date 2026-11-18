@@ -947,10 +947,10 @@
                 // สร้างป้ายสถานะภายนอก (ถ้ามีค่าและไม่ใช่ -)
                 let statusBadgesHtml = "";
                 if (maText && maText !== "-" && String(maText).trim() !== "") {
-                    statusBadgesHtml += `<span class="badge badge-ma rounded-pill"><i class="fa-solid fa-wrench me-1"></i>MA: ${maText}</span>`;
+                    statusBadgesHtml += `<span class="badge badge-ma rounded-pill"><i class="fa-solid fa-check-circle me-1"></i>MA: ${maText}</span>`;
                 }
                 if (coText && coText !== "-" && String(coText).trim() !== "") {
-                    statusBadgesHtml += `<span class="badge badge-co rounded-pill"><i class="fa-solid fa-check-circle me-1"></i>CO: ${coText}</span>`;
+                    statusBadgesHtml += `<span class="badge badge-co rounded-pill"><i class="fa-solid fa-wrench me-1"></i>CO: ${coText}</span>`;
                 }
 
                 card.innerHTML = `
