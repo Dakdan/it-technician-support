@@ -720,8 +720,34 @@
             const strKeyword = String(keyword).trim();
             if (!strKeyword) return strText;
 
-            const reg = new RegExp(`(${strKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            return strText.replace(reg, '<span class="highlight">$1</span>');
+            // สร้าง RegExp แบบ global (gi) เพื่อหาทุกตำแหน่งที่ตรงกัน
+            const reg = new RegExp(strKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            
+            let matches = [];
+            let match;
+            
+            // เก็บตำแหน่งเริ่มต้นและสิ้นสุดของทุกคำที่เจอ
+            while ((match = reg.exec(strText)) !== null) {
+                matches.push({
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    text: match[0]
+                });
+            }
+
+            if (matches.length === 0) return strText;
+
+            // เรียงลำดับตำแหน่งจาก ขวา ไป ซ้าย (Index มากไปน้อย) เพื่อทำการแทนที่จากท้ายมาหัว
+            // ป้องกันไม่ให้ index ของข้อความขยับเมื่อทำการแปลง
+            matches.sort((a, b) => b.start - a.start);
+
+            let resultText = strText;
+            for (let m of matches) {
+                let highlighted = `<span class="highlight">${resultText.substring(m.start, m.end)}</span>`;
+                resultText = resultText.substring(0, m.start) + highlighted + resultText.substring(m.end);
+            }
+
+            return resultText;
         }
 
         function renderResults(data, keyword) {
