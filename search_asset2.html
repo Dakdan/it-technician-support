@@ -857,50 +857,57 @@
         }
 
         function executeLocalSearch(keyword) {
-            const qStr = String(keyword).toLowerCase().trim();
+            const qStr = String(keyword || "").toLowerCase().replace(/[^a-zA-Zก-ฮ0-9]/g, "");
             resultsContainer.innerHTML = '';
             emptyState.classList.add('d-none');
-
+        
             if (!qStr) return;
-
+        
             let results = [];
-            
+        
             allAssetsData.forEach(item => {
                 let similarity = getSimilarityScoreLocal(item.AssetID, item.Serial, qStr);
                 if (similarity > 0) {
                     results.push({ ...item, score: similarity });
                 }
             });
-
+        
             results.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
                 return String(a.AssetID || "").localeCompare(String(b.AssetID || ""));
             });
-
+        
             if (results.length > 0) {
                 renderResults(results, keyword);
             } else {
                 showEmptyState("ไม่พบข้อมูลที่ตรงกับการค้นหา", "โปรดตรวจสอบสะกดตัวอักษร, รหัสครุภัณฑ์ หรือ Serial ของคุณอีกครั้ง");
             }
         }
-
+        
         function getSimilarityScoreLocal(assetID, serial, query) {
-            const aID = String(assetID || "").toLowerCase().replace(/-/g, '');
-            const ser = String(serial || "").toLowerCase().replace(/-/g, '');
-            const cleanQuery = String(query).toLowerCase().replace(/-/g, '');
-            
+            const cleanAlnum = (val) => String(val || "").toLowerCase().replace(/[^a-zA-Zก-ฮ0-9]/g, "");
+            const aID = cleanAlnum(assetID);
+            const ser = cleanAlnum(serial);
+            const cleanQuery = cleanAlnum(query);
+        
+            if (!cleanQuery) return 0;
+        
             let assetScore = 0;
-            if (aID === cleanQuery) assetScore = 800; 
-            else if (aID.endsWith(cleanQuery)) assetScore = 700; 
-            else if (aID.startsWith(cleanQuery)) assetScore = 600; 
-            else if (aID.includes(cleanQuery)) assetScore = 500; 
-            
+            if (aID) {
+                if (aID === cleanQuery) assetScore = 800;
+                else if (aID.endsWith(cleanQuery)) assetScore = 700;
+                else if (aID.startsWith(cleanQuery)) assetScore = 600;
+                else if (aID.includes(cleanQuery)) assetScore = 500;
+            }
+        
             let serialScore = 0;
-            if (ser === cleanQuery) serialScore = 400; 
-            else if (ser.endsWith(cleanQuery)) serialScore = 300; 
-            else if (ser.startsWith(cleanQuery)) serialScore = 200; 
-            else if (ser.includes(cleanQuery)) serialScore = 100; 
-
+            if (ser) {
+                if (ser === cleanQuery) serialScore = 400;
+                else if (ser.endsWith(cleanQuery)) serialScore = 300;
+                else if (ser.startsWith(cleanQuery)) serialScore = 200;
+                else if (ser.includes(cleanQuery)) serialScore = 100;
+            }
+        
             return Math.max(assetScore, serialScore);
         }
 
