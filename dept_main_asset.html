@@ -1666,12 +1666,19 @@
         }
     }
 
-     function closeWindow() {
-            window.close();
-            setTimeout(() => {
-                showToast('หากแท็บไม่ปิดอัตโนมัติ คุณสามารถปิดแท็บนี้ได้เลย');
-            }, 300);
-     }
+    function closeWindow() {
+      window.close();
+    
+      setTimeout(() => {
+        if (window.closed) return;
+    
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = 'main_menu.html';
+        }
+      }, 300);
+    }
 
     function clearDashboardFilters() {
         const bSelect = document.getElementById('dashBuilding');
