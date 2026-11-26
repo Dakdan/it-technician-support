@@ -467,6 +467,7 @@
     </div>
 
     <!-- Modal: QR Scanner -->
+    <!-- Modal: QR Scanner -->
     <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg">
@@ -477,6 +478,12 @@
                 <div class="modal-body text-center p-3">
                     <p class="small text-muted mb-2">หันกล้องตรงมาที่รหัสแผ่นสติกเกอร์เพื่อค้นหาอัตโนมัติ</p>
                     <div id="reader"></div>
+                    <div class="mt-3 text-center">
+                        <input type="file" id="qrImageInput" accept="image/*" class="d-none" onchange="onScanImageFileChange(event)">
+                        <button type="button" id="btnScanImageFile" class="btn btn-outline-primary btn-sm" onclick="triggerScanImageFile()">
+                            <i class="fa-solid fa-image me-1"></i>เลือกรูปภาพเพื่อสแกน
+                        </button>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 justify-content-center">
                     <button type="button" class="btn btn-secondary rounded-pill px-4" onclick="closeScannerModal()">ยกเลิกกล้อง</button>
@@ -1197,7 +1204,7 @@
             if (scannerModalInstance) scannerModalInstance.show();
             html5QrcodeScanner = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
+        
             html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
             .catch(err => {
                 console.error("Camera Start Error:", err);
@@ -1205,8 +1212,54 @@
                 showSystemModal("ไม่สามารถเปิดกล้องได้", "กรุณาอนุญาตใช้งานสิทธิ์กล้องถ่ายรูปในบราวเซอร์หรือโทรศัพท์มือถือของคุณ", "fa-solid fa-camera-rotate text-danger");
             });
         }
-
+        
+        function triggerScanImageFile() {
+            const fileInput = document.getElementById('qrImageInput');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.click();
+            }
+        }
+        
+        function onScanImageFileChange(event) {
+            const file = event && event.target && event.target.files ? event.target.files[0] : null;
+            if (!file) return;
+        
+            const scannerInstance = html5QrcodeScanner || new Html5Qrcode("reader");
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = scannerInstance;
+            }
+        
+            const runFileScan = () => {
+                scannerInstance.scanFile(file, true)
+                    .then(decodedText => {
+                        onScanSuccess(decodedText);
+                    })
+                    .catch(err => {
+                        console.error("Image Scan Error:", err);
+                        showSystemModal("สแกนรูปภาพไม่สำเร็จ", "ไม่พบ QR Code หรือ Barcode ที่ชัดเจนในรูปภาพที่เลือก กรุณาลองรูปอื่นใหม่อีกครั้ง", "fa-solid fa-image text-warning");
+                    });
+            };
+        
+            if (scannerInstance.isScanning) {
+                scannerInstance.stop()
+                    .then(() => {
+                        scannerInstance.clear();
+                        runFileScan();
+                    })
+                    .catch(err => {
+                        console.error("Stop Camera Before Image Scan Error:", err);
+                        runFileScan();
+                    });
+            } else {
+                runFileScan();
+            }
+        }
+        
         function closeScannerModal() {
+            const fileInput = document.getElementById('qrImageInput');
+            if (fileInput) fileInput.value = '';
+        
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
                     html5QrcodeScanner.clear();
@@ -1215,30 +1268,30 @@
             }
             if (scannerModalInstance) scannerModalInstance.hide();
         }
-
+        
         function onScanSuccess(decodedText) {
             if ("vibrate" in navigator) navigator.vibrate(200);
             closeScannerModal();
-            
+        
             let input = String(decodedText).trim();
             if (input.includes("IcmAssetDetail/")) {
                 input = input.split("IcmAssetDetail/")[1].split("/")[0];
             } else {
                 input = input.replace(/[a-zA-Zก-ฮ:/]/g, '').trim();
             }
-
+        
             if (!input) {
                 showSystemModal("ข้อผิดพลาด", "ไม่พบรหัสที่ถูกต้องจากภาพที่สแกน โปรดลองใหม่อีกครั้ง", "fa-solid fa-triangle-exclamation text-warning");
                 return;
             }
-
+        
             searchInput.value = input;
             clearBtn.style.display = 'block';
-
+        
             if (allAssetsData.length > 0) {
                 executeLocalSearch(input);
             } else {
-                executeOnlineSearch(input); 
+                executeOnlineSearch(input);
             }
         }
 
