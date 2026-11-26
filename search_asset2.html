@@ -956,26 +956,27 @@
 
        function renderResults(data, keyword) {
             resultsContainer.innerHTML = '';
-        
+            
             const totalFound = data.length;
-            const displayData = data.slice(0, 30);
-        
+            const displayData = data.slice(0, 30); 
+            
             let countText = `พบรายการที่ตรงกันทั้งหมด ${totalFound} รายการ`;
             if (totalFound > 30) countText += ` <span class="text-danger">(แสดง 30 รายการแรก)</span>`;
             resultCountLabel.innerHTML = countText;
-        
+
             displayData.forEach(item => {
                 const detail = item.Asset_Detail || {};
                 const assetId = item.AssetID || detail.AssetID || "";
                 const serial = item.Serial || detail.Serial || "ไม่มี Serial";
-                const assetType = item.Asset_Type || detail.Asset_Type || "ไม่ระบุประเภท";
-                const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุกลุ่ม";
-                const age = detail["อายุ"] || "ไม่ระบุอายุ";
+                const assetType = item.Asset_Type || detail.Asset_Type || "";
+                const group = item.Asset_Type_Group || detail.Asset_Type_Group || "ไม่ระบุประเภท";
+                const age = detail["อายุ"] || "ไม่ระบุอายุ"; 
                 const source = detail["Source"] || "";
-        
-                const maText = detail.MaStatus || detail.MaStatus_Name || "";
-                const coText = detail.CoStatus || detail.CosStatus_Name || "";
-        
+                
+                // ดึงค่าสถานะ MA และ CO สำหรับแสดงผลภายนอก (ป้องกันค่าว่างและขีด -)
+                const maText = detail.MaStatus_Name || detail.MaStatus || "";
+                const coText = detail.CosStatus_Name || detail.CoStatus || "";
+
                 let imgUrl = "https://placehold.co/100x100/e2e8f0/475569?text=No+Img";
                 if (detail.Images && detail.Images.length > 0) {
                     const firstImgId = String(detail.Images[0]).trim();
@@ -983,19 +984,20 @@
                         imgUrl = "https://lh3.googleusercontent.com/d/" + firstImgId;
                     }
                 }
-        
+
                 const card = document.createElement('div');
                 card.className = 'asset-card';
                 card.onclick = () => openAssetDetailModal(assetId);
-        
+
                 const displayId = highlightText(assetId, keyword);
                 const displaySerial = highlightText(serial, keyword);
-        
+
                 let sourceBadge = "";
-                if (source) {
+                if(source) {
                     sourceBadge = `<span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${source}</span>`;
                 }
-        
+
+                // สร้างป้ายสถานะภายนอก (ถ้ามีค่าและไม่ใช่ -)
                 let statusBadgesHtml = "";
                 if (maText && maText !== "-" && String(maText).trim() !== "") {
                     statusBadgesHtml += `<span class="badge badge-ma rounded-pill"><i class="fa-solid fa-check-circle me-1"></i>MA: ${maText}</span>`;
@@ -1003,18 +1005,21 @@
                 if (coText && coText !== "-" && String(coText).trim() !== "") {
                     statusBadgesHtml += `<span class="badge badge-co rounded-pill"><i class="fa-solid fa-wrench me-1"></i>CO: ${coText}</span>`;
                 }
-        
+
+                const assetTypeBadge = (assetType && assetType !== "-" && String(assetType).trim() !== "")
+                    ? `<span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${assetType}</span>`
+                    : '';
+
+                const topBadgesHtml = [assetTypeBadge, statusBadgesHtml].filter(Boolean).join('');
+
                 card.innerHTML = `
                     <img src="${imgUrl}" alt="${assetId}" class="asset-img" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/475569?text=IT'">
                     <div class="asset-details">
                         <div class="asset-id">${displayId}</div>
                         <div class="asset-serial"><i class="fa-solid fa-barcode me-1 text-secondary"></i> SN: ${displaySerial}</div>
+                        ${topBadgesHtml ? `<div class="asset-badges mt-1">${topBadgesHtml}</div>` : ''}
                         <div class="asset-badges mt-1">
-                            <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${assetType}</span>
-                        </div>
-                        ${statusBadgesHtml ? `<div class="asset-badges mt-1">${statusBadgesHtml}</div>` : ''}
-                        <div class="asset-badges mt-1">
-                            <span class="badge badge-group rounded-pill"><i class="fa-solid fa-layer-group me-1"></i>${group}</span>
+                            <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${group}</span>
                             <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${age} ปี</span>
                             ${sourceBadge}
                         </div>
